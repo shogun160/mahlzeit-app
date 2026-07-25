@@ -105,3 +105,11 @@
   display: block;
   object-fit: contain;
 }
+
+/* icon-auslosen.png hat ~11% mehr Transparent-Padding als die anderen
+   Action-Icons (Motiv 179x196 vs 210x198 auf 220x220 Canvas) — deshalb
+   selektiv größer rendern, damit das Motiv optisch gleich groß wirkt. */
+.action-btn img[src*="icon-auslosen"] {
+  width: 22px;
+  height: 22px;
+}
