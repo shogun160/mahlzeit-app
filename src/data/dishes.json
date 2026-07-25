@@ -1,0 +1,2457 @@
+{
+  "meta": {
+    "lachs_sockeye": [
+      "Wildlachs (Sockeye), Filet",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "lachs_keta": [
+      "Wildlachs (Keta), Filet",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "kabeljau": [
+      "Kabeljau (Wildfang), Filet",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "garnelen": [
+      "Garnelen, roh, geschält",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "haehnchenbrust": [
+      "Hähnchenbrust",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "putenhack": [
+      "Putenhack",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "rinderfilet": [
+      "Rinderfilet",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "rind_sirloin": [
+      "Rind (Sirloin/Flanksteak)",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "entenbrust": [
+      "Entenbrust, ohne Haut",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "schweinefilet": [
+      "Schweinefilet",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "lammkeule": [
+      "Lammkeule, mager",
+      "frisch",
+      "g",
+      null,
+      null
+    ],
+    "ei": [
+      "Eier",
+      "frisch",
+      "ei",
+      53,
+      null
+    ],
+    "kartoffeln": [
+      "Kartoffeln",
+      "frisch",
+      "stueck",
+      150,
+      null
+    ],
+    "suesskartoffel": [
+      "Süßkartoffel",
+      "frisch",
+      "stueck",
+      250,
+      null
+    ],
+    "blumenkohl": [
+      "Blumenkohl",
+      "frisch",
+      "stueck",
+      700,
+      null
+    ],
+    "zucchini": [
+      "Zucchini",
+      "frisch",
+      "stueck",
+      200,
+      null
+    ],
+    "fenchel": [
+      "Fenchel",
+      "frisch",
+      "stueck",
+      300,
+      null
+    ],
+    "pak_choi": [
+      "Pak Choi / Bok Choy",
+      "frisch",
+      "stueck",
+      200,
+      null
+    ],
+    "spinat": [
+      "Baby-Spinat",
+      "frisch",
+      "g",
+      null,
+      "Beutel à 100 g"
+    ],
+    "paprika": [
+      "Paprika",
+      "frisch",
+      "stueck",
+      150,
+      null
+    ],
+    "zwiebel": [
+      "Zwiebel",
+      "frisch",
+      "stueck",
+      100,
+      null
+    ],
+    "knoblauch": [
+      "Knoblauch",
+      "frisch",
+      "zehe",
+      3,
+      null
+    ],
+    "ingwer": [
+      "Ingwer",
+      "frisch",
+      "g",
+      null,
+      "1 kleines Stück deckt den Bedarf mehrerer Gerichte"
+    ],
+    "gurke": [
+      "Salatgurke",
+      "frisch",
+      "stueck",
+      300,
+      null
+    ],
+    "karotte": [
+      "Karotte",
+      "frisch",
+      "stueck",
+      70,
+      null
+    ],
+    "orange": [
+      "Orange (für Saft)",
+      "frisch",
+      "stueck",
+      70,
+      null
+    ],
+    "zitrone": [
+      "Zitrone (für Saft)",
+      "frisch",
+      "stueck",
+      40,
+      null
+    ],
+    "limette": [
+      "Limette (für Saft)",
+      "frisch",
+      "stueck",
+      25,
+      null
+    ],
+    "skyr": [
+      "Skyr, natur",
+      "frisch",
+      "g",
+      null,
+      "Becher à 500 g"
+    ],
+    "joghurt_griech": [
+      "Griechischer Joghurt 2%",
+      "frisch",
+      "g",
+      null,
+      "Becher à 500 g"
+    ],
+    "feta": [
+      "Feta",
+      "frisch",
+      "g",
+      null,
+      "Packung à 200 g"
+    ],
+    "avocado": [
+      "Avocado",
+      "frisch",
+      "stueck",
+      150,
+      null
+    ],
+    "fruehlingszwiebel": [
+      "Frühlingszwiebel",
+      "frisch",
+      "bund",
+      80,
+      null
+    ],
+    "petersilie": [
+      "Petersilie",
+      "frisch",
+      "bund",
+      30,
+      null
+    ],
+    "kimchi": [
+      "Kimchi (Gurken-Kimchi, fertig)",
+      "frisch",
+      "g",
+      null,
+      "Glas à 300 g"
+    ],
+    "edamame": [
+      "Edamame, geschält (TK)",
+      "frisch",
+      "g",
+      null,
+      "TK-Packung à 400 g"
+    ],
+    "erbsen_tk": [
+      "Erbsen (TK)",
+      "frisch",
+      "g",
+      null,
+      "TK-Packung à 400 g"
+    ],
+    "linsen_rot": [
+      "Rote Linsen, roh",
+      "trocken",
+      "g",
+      null,
+      null
+    ],
+    "reis_basmati": [
+      "Reis, Basmati",
+      "trocken",
+      "g",
+      null,
+      null
+    ],
+    "reis_schwarz": [
+      "Reis, schwarz",
+      "trocken",
+      "g",
+      null,
+      null
+    ],
+    "reis_jasmin": [
+      "Reis, Jasmin",
+      "trocken",
+      "g",
+      null,
+      null
+    ],
+    "reis_rundkorn": [
+      "Reis, Rundkorn/Bomba",
+      "trocken",
+      "g",
+      null,
+      null
+    ],
+    "vollkornpasta": [
+      "Vollkornpasta",
+      "trocken",
+      "g",
+      null,
+      null
+    ],
+    "couscous": [
+      "Couscous",
+      "trocken",
+      "g",
+      null,
+      null
+    ],
+    "bohnen_weiss": [
+      "Weiße Bohnen (Dose)",
+      "trocken",
+      "g",
+      null,
+      "Dose à 400 g (Abtropfgewicht ~240 g)"
+    ],
+    "bohnen_schwarz": [
+      "Schwarze Bohnen (Dose)",
+      "trocken",
+      "g",
+      null,
+      "Dose à 400 g (Abtropfgewicht ~240 g)"
+    ],
+    "mais_dose": [
+      "Mais (Dose)",
+      "trocken",
+      "g",
+      null,
+      "Dose à 425 g (Abtropfgewicht ~285 g)"
+    ],
+    "tomaten_passiert": [
+      "Tomaten, passiert",
+      "trocken",
+      "g",
+      null,
+      "Packung à 400 g"
+    ],
+    "tomatenmark": [
+      "Tomatenmark",
+      "trocken",
+      "g",
+      null,
+      "Tube à 200 g"
+    ],
+    "miso": [
+      "Miso-Paste",
+      "trocken",
+      "g",
+      null,
+      "Glas/Packung à 250 g"
+    ],
+    "currypaste_thai": [
+      "Thai-Currypaste",
+      "trocken",
+      "g",
+      null,
+      "Glas à 200 g"
+    ],
+    "aprikosen_getrocknet": [
+      "Aprikosen, getrocknet",
+      "trocken",
+      "g",
+      null,
+      "Packung à 200 g"
+    ],
+    "mandeln": [
+      "Mandeln",
+      "trocken",
+      "g",
+      null,
+      "aus Vorratspackung"
+    ],
+    "erdnuesse": [
+      "Erdnüsse, geröstet, ungesalzen",
+      "trocken",
+      "g",
+      null,
+      "aus Vorratspackung"
+    ],
+    "tortilla_mais": [
+      "Tortilla, Mais",
+      "trocken",
+      "stueck",
+      30,
+      null
+    ],
+    "gewuerz_tikka": [
+      "Tikka-Gewürzmischung",
+      "gewuerze",
+      "vorrat",
+      null,
+      null
+    ],
+    "gewuerz_raselhanout": [
+      "Ras-el-Hanout",
+      "gewuerze",
+      "vorrat",
+      null,
+      null
+    ],
+    "gewuerz_roganjosh": [
+      "Rogan-Josh-Gewürzmischung",
+      "gewuerze",
+      "vorrat",
+      null,
+      null
+    ],
+    "sesam": [
+      "Sesam, Samen",
+      "gewuerze",
+      "vorrat",
+      null,
+      null
+    ],
+    "olivenoel": [
+      "Olivenöl",
+      "oel",
+      "vorrat",
+      null,
+      null
+    ],
+    "sesamoel": [
+      "Sesamöl",
+      "oel",
+      "vorrat",
+      null,
+      null
+    ],
+    "sojasauce": [
+      "Sojasauce",
+      "sonstig",
+      "vorrat",
+      null,
+      null
+    ],
+    "honig": [
+      "Honig",
+      "sonstig",
+      "vorrat",
+      null,
+      null
+    ]
+  },
+  "dishes": [
+    {
+      "id": 1,
+      "name": "Wildlachs-Bowl",
+      "cuisine": "Asiatisch-Fusion",
+      "cooktime": 35,
+      "kcal": 922,
+      "p": 74,
+      "kh": 78,
+      "f": 36,
+      "ingredients": [
+        {
+          "key": "lachs_sockeye",
+          "label": "Wildlachs (Sockeye), Filet",
+          "grams": 220,
+          "kcal": 343.2,
+          "p": 49.5,
+          "kh": 0.0,
+          "f": 15.2,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "reis_schwarz",
+          "label": "Reis, schwarz",
+          "grams": 80,
+          "kcal": 282.4,
+          "p": 6.6,
+          "kh": 59.2,
+          "f": 2.6,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "edamame",
+          "label": "Edamame, geschält (TK)",
+          "grams": 120,
+          "kcal": 146.4,
+          "p": 14.3,
+          "kh": 10.7,
+          "f": 6.2,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "TK-Packung à 400 g"
+        },
+        {
+          "key": "karotte",
+          "label": "Karotte",
+          "grams": 40,
+          "kcal": 16.4,
+          "p": 0.4,
+          "kh": 3.8,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 70,
+          "note": null
+        },
+        {
+          "key": "gurke",
+          "label": "Salatgurke",
+          "grams": 50,
+          "kcal": 6.0,
+          "p": 0.3,
+          "kh": 1.1,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 300,
+          "note": null
+        },
+        {
+          "key": "sesamoel",
+          "label": "Sesamöl",
+          "grams": 8,
+          "kcal": 70.7,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 8.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "sojasauce",
+          "label": "Sojasauce",
+          "grams": 15,
+          "kcal": 7.9,
+          "p": 1.2,
+          "kh": 0.7,
+          "f": 0.0,
+          "cat": "sonstig",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "sesam",
+          "label": "Sesam, Samen",
+          "grams": 8,
+          "kcal": 45.8,
+          "p": 1.4,
+          "kh": 1.9,
+          "f": 4.0,
+          "cat": "gewuerze",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "label": "Frühlingszwiebel",
+          "grams": 10,
+          "kcal": 3.2,
+          "p": 0.2,
+          "kh": 0.7,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "bund",
+          "size": 80,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Reis nach Packungsanweisung kochen.",
+        "Edamame 3 Min. in kochendem Wasser garen, abschrecken.",
+        "Karotte julienne schneiden, Gurke in Scheiben.",
+        "Lachs salzen/pfeffern, in wenig Öl 3–4 Min. pro Seite braten.",
+        "Sojasauce + Sesamöl zu Dressing verrühren.",
+        "Reis in Bowl anrichten, Lachs, Edamame, Karotte, Gurke verteilen, Dressing darüber, mit Sesam und Frühlingszwiebel bestreuen."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Hähnchen-Skyr-Tikka",
+      "cuisine": "Indisch",
+      "cooktime": 40,
+      "kcal": 862,
+      "p": 84,
+      "kh": 77,
+      "f": 24,
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "label": "Hähnchenbrust",
+          "grams": 240,
+          "kcal": 288.0,
+          "p": 54.0,
+          "kh": 0.0,
+          "f": 6.2,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "skyr",
+          "label": "Skyr, natur",
+          "grams": 150,
+          "kcal": 94.5,
+          "p": 16.5,
+          "kh": 6.0,
+          "f": 0.3,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "reis_basmati",
+          "label": "Reis, Basmati",
+          "grams": 60,
+          "kcal": 213.6,
+          "p": 4.3,
+          "kh": 46.2,
+          "f": 0.4,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "blumenkohl",
+          "label": "Blumenkohl",
+          "grams": 250,
+          "kcal": 62.5,
+          "p": 5.0,
+          "kh": 12.5,
+          "f": 0.8,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 700,
+          "note": null
+        },
+        {
+          "key": "spinat",
+          "label": "Baby-Spinat",
+          "grams": 80,
+          "kcal": 18.4,
+          "p": 2.3,
+          "kh": 2.9,
+          "f": 0.3,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Beutel à 100 g"
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 40,
+          "kcal": 16.0,
+          "p": 0.4,
+          "kh": 3.7,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "knoblauch",
+          "label": "Knoblauch",
+          "grams": 6,
+          "kcal": 8.9,
+          "p": 0.4,
+          "kh": 2.0,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "zehe",
+          "size": 3,
+          "note": null
+        },
+        {
+          "key": "ingwer",
+          "label": "Ingwer",
+          "grams": 5,
+          "kcal": 4.0,
+          "p": 0.1,
+          "kh": 0.9,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "1 kleines Stück deckt den Bedarf mehrerer Gerichte"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 15,
+          "kcal": 132.6,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 15.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "gewuerz_tikka",
+          "label": "Tikka-Gewürzmischung",
+          "grams": 8,
+          "kcal": 24.0,
+          "p": 0.8,
+          "kh": 3.2,
+          "f": 0.8,
+          "cat": "gewuerze",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Hähnchen würfeln, mit Gewürzmischung, Knoblauch, Ingwer, halbem Skyr marinieren (mind. 20 Min.).",
+        "Blumenkohl im Blitzhacker zu „Reis\" verarbeiten.",
+        "Basmatireis kochen.",
+        "Hähnchen in Öl anbraten, restlichen Skyr + Spritzer Wasser zugeben, 8–10 Min. köcheln.",
+        "Blumenkohlreis kurz andünsten, Spinat unterheben bis zusammengefallen.",
+        "Anrichten."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Garnelen-Zucchini-Pasta",
+      "cuisine": "Italienisch-mediterran",
+      "cooktime": 20,
+      "kcal": 823,
+      "p": 76,
+      "kh": 49,
+      "f": 37,
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "label": "Garnelen, roh, geschält",
+          "grams": 280,
+          "kcal": 238.0,
+          "p": 56.0,
+          "kh": 0.6,
+          "f": 1.4,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "zucchini",
+          "label": "Zucchini",
+          "grams": 300,
+          "kcal": 51.0,
+          "p": 3.6,
+          "kh": 9.3,
+          "f": 0.9,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 200,
+          "note": null
+        },
+        {
+          "key": "vollkornpasta",
+          "label": "Vollkornpasta",
+          "grams": 50,
+          "kcal": 174.0,
+          "p": 6.5,
+          "kh": 32.0,
+          "f": 1.2,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 18,
+          "kcal": 159.1,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 18.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "knoblauch",
+          "label": "Knoblauch",
+          "grams": 6,
+          "kcal": 8.9,
+          "p": 0.4,
+          "kh": 2.0,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "zehe",
+          "size": 3,
+          "note": null
+        },
+        {
+          "key": "zitrone",
+          "label": "Zitrone (für Saft)",
+          "grams": 10,
+          "kcal": 2.2,
+          "p": 0.0,
+          "kh": 0.7,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 40,
+          "note": null
+        },
+        {
+          "key": "feta",
+          "label": "Feta",
+          "grams": 45,
+          "kcal": 118.8,
+          "p": 6.4,
+          "kh": 1.8,
+          "f": 9.6,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Packung à 200 g"
+        },
+        {
+          "key": "mandeln",
+          "label": "Mandeln",
+          "grams": 12,
+          "kcal": 69.5,
+          "p": 2.5,
+          "kh": 2.6,
+          "f": 6.0,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "aus Vorratspackung"
+        },
+        {
+          "key": "petersilie",
+          "label": "Petersilie",
+          "grams": 5,
+          "kcal": 1.8,
+          "p": 0.2,
+          "kh": 0.3,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "bund",
+          "size": 30,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Pasta nach Packungsanweisung kochen.",
+        "Zucchini mit Spiralschneider zu Nudeln verarbeiten.",
+        "Chili (mit Kernen, nach Geschmack) und Knoblauch in Olivenöl andünsten, Garnelen 2–3 Min. pro Seite braten.",
+        "Zucchininudeln kurz mitschwenken.",
+        "Pasta unterheben, mit Zitronensaft, gehackten Mandeln, Feta und Petersilie servieren."
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Rinderfilet Bohnensalat Chimichurri",
+      "cuisine": "Argentinisch",
+      "cooktime": 35,
+      "kcal": 880,
+      "p": 68,
+      "kh": 62,
+      "f": 42,
+      "ingredients": [
+        {
+          "key": "rinderfilet",
+          "label": "Rinderfilet",
+          "grams": 240,
+          "kcal": 343.2,
+          "p": 50.4,
+          "kh": 0.0,
+          "f": 14.4,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "bohnen_schwarz",
+          "label": "Schwarze Bohnen (Dose)",
+          "grams": 200,
+          "kcal": 182.0,
+          "p": 12.6,
+          "kh": 33.2,
+          "f": 1.0,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Dose à 400 g (Abtropfgewicht ~240 g)"
+        },
+        {
+          "key": "mais_dose",
+          "label": "Mais (Dose)",
+          "grams": 100,
+          "kcal": 86.0,
+          "p": 3.2,
+          "kh": 19.0,
+          "f": 1.2,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Dose à 425 g (Abtropfgewicht ~285 g)"
+        },
+        {
+          "key": "paprika",
+          "label": "Paprika",
+          "grams": 80,
+          "kcal": 24.8,
+          "p": 0.8,
+          "kh": 4.8,
+          "f": 0.2,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 150,
+          "note": null
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 40,
+          "kcal": 16.0,
+          "p": 0.4,
+          "kh": 3.7,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 25,
+          "kcal": 221.0,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 25.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "petersilie",
+          "label": "Petersilie",
+          "grams": 15,
+          "kcal": 5.4,
+          "p": 0.4,
+          "kh": 0.9,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "bund",
+          "size": 30,
+          "note": null
+        },
+        {
+          "key": "zitrone",
+          "label": "Zitrone (für Saft)",
+          "grams": 8,
+          "kcal": 1.8,
+          "p": 0.0,
+          "kh": 0.6,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 40,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Filet salzen/pfeffern, in Olivenöl scharf anbraten (3–4 Min./Seite, medium), ruhen lassen.",
+        "Chimichurri: Petersilie fein hacken, mit Olivenöl, Zitronensaft, etwas Knoblauch verrühren.",
+        "Bohnen und Mais abtropfen, mit gewürfelter Paprika und Zwiebel mischen.",
+        "Filet in Scheiben, auf Salat anrichten, Chimichurri darüber."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Putenhackbällchen Tomatensauce Couscous",
+      "cuisine": "Griechisch",
+      "cooktime": 40,
+      "kcal": 894,
+      "p": 73,
+      "kh": 84,
+      "f": 27,
+      "ingredients": [
+        {
+          "key": "putenhack",
+          "label": "Putenhack",
+          "grams": 220,
+          "kcal": 228.8,
+          "p": 52.8,
+          "kh": 0.0,
+          "f": 1.5,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "couscous",
+          "label": "Couscous",
+          "grams": 90,
+          "kcal": 338.4,
+          "p": 11.5,
+          "kh": 65.2,
+          "f": 0.5,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "tomaten_passiert",
+          "label": "Tomaten, passiert",
+          "grams": 200,
+          "kcal": 64.0,
+          "p": 3.2,
+          "kh": 11.8,
+          "f": 0.6,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 40,
+          "kcal": 16.0,
+          "p": 0.4,
+          "kh": 3.7,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "knoblauch",
+          "label": "Knoblauch",
+          "grams": 6,
+          "kcal": 8.9,
+          "p": 0.4,
+          "kh": 2.0,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "zehe",
+          "size": 3,
+          "note": null
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 18,
+          "kcal": 159.1,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 18.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "feta",
+          "label": "Feta",
+          "grams": 30,
+          "kcal": 79.2,
+          "p": 4.3,
+          "kh": 1.2,
+          "f": 6.4,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Packung à 200 g"
+        }
+      ],
+      "steps": [
+        "Putenhack mit Salz/Pfeffer/Oregano zu Bällchen formen.",
+        "In Olivenöl rundum anbraten.",
+        "Zwiebel/Knoblauch dazu, kurz mitdünsten, passierte Tomaten zugeben, 15 Min. köcheln.",
+        "Couscous mit heißem Wasser übergießen, quellen lassen.",
+        "Anrichten, Feta darüberbröckeln."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Wildlachs Fenchel Weiße Bohnen",
+      "cuisine": "Sizilianisch",
+      "cooktime": 25,
+      "kcal": 815,
+      "p": 71,
+      "kh": 51,
+      "f": 38,
+      "ingredients": [
+        {
+          "key": "lachs_sockeye",
+          "label": "Wildlachs (Sockeye), Filet",
+          "grams": 240,
+          "kcal": 374.4,
+          "p": 54.0,
+          "kh": 0.0,
+          "f": 16.6,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "fenchel",
+          "label": "Fenchel",
+          "grams": 200,
+          "kcal": 62.0,
+          "p": 2.4,
+          "kh": 14.6,
+          "f": 0.4,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 300,
+          "note": null
+        },
+        {
+          "key": "bohnen_weiss",
+          "label": "Weiße Bohnen (Dose)",
+          "grams": 220,
+          "kcal": 198.0,
+          "p": 14.5,
+          "kh": 35.2,
+          "f": 0.7,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Dose à 400 g (Abtropfgewicht ~240 g)"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 20,
+          "kcal": 176.8,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 20.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "zitrone",
+          "label": "Zitrone (für Saft)",
+          "grams": 8,
+          "kcal": 1.8,
+          "p": 0.0,
+          "kh": 0.6,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 40,
+          "note": null
+        },
+        {
+          "key": "petersilie",
+          "label": "Petersilie",
+          "grams": 5,
+          "kcal": 1.8,
+          "p": 0.2,
+          "kh": 0.3,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "bund",
+          "size": 30,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Fenchel in Spalten schneiden, in Olivenöl 10–12 Min. karamellisieren lassen.",
+        "Weiße Bohnen zugeben, kurz erwärmen.",
+        "Lachs würzen, separat 3–4 Min. pro Seite braten.",
+        "Mit Zitronensaft und Petersilie servieren."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Bulgogi-Rind",
+      "cuisine": "Koreanisch",
+      "cooktime": 40,
+      "kcal": 866,
+      "p": 68,
+      "kh": 78,
+      "f": 29,
+      "ingredients": [
+        {
+          "key": "rind_sirloin",
+          "label": "Rind (Sirloin/Flanksteak)",
+          "grams": 270,
+          "kcal": 369.9,
+          "p": 56.7,
+          "kh": 0.0,
+          "f": 14.6,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "reis_jasmin",
+          "label": "Reis, Jasmin",
+          "grams": 90,
+          "kcal": 320.4,
+          "p": 6.3,
+          "kh": 69.3,
+          "f": 0.5,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "gurke",
+          "label": "Salatgurke",
+          "grams": 100,
+          "kcal": 12.0,
+          "p": 0.7,
+          "kh": 2.2,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 300,
+          "note": null
+        },
+        {
+          "key": "kimchi",
+          "label": "Kimchi (Gurken-Kimchi, fertig)",
+          "grams": 60,
+          "kcal": 13.8,
+          "p": 0.9,
+          "kh": 2.4,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Glas à 300 g"
+        },
+        {
+          "key": "sesamoel",
+          "label": "Sesamöl",
+          "grams": 10,
+          "kcal": 88.4,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 10.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "sojasauce",
+          "label": "Sojasauce",
+          "grams": 15,
+          "kcal": 7.9,
+          "p": 1.2,
+          "kh": 0.7,
+          "f": 0.0,
+          "cat": "sonstig",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "knoblauch",
+          "label": "Knoblauch",
+          "grams": 5,
+          "kcal": 7.5,
+          "p": 0.3,
+          "kh": 1.7,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "zehe",
+          "size": 3,
+          "note": null
+        },
+        {
+          "key": "sesam",
+          "label": "Sesam, Samen",
+          "grams": 8,
+          "kcal": 45.8,
+          "p": 1.4,
+          "kh": 1.9,
+          "f": 4.0,
+          "cat": "gewuerze",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Rind in dünne Scheiben schneiden, mit Sojasauce/Sesamöl/Knoblauch 15–20 Min. marinieren.",
+        "Reis kochen.",
+        "Fleisch in heißer Pfanne 2–3 Min. braten.",
+        "Gurke in Scheiben, mit Kimchi, Sesam und Reis servieren."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Hähnchen-Tajine",
+      "cuisine": "Marokkanisch",
+      "cooktime": 70,
+      "kcal": 930,
+      "p": 72,
+      "kh": 87,
+      "f": 30,
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "label": "Hähnchenbrust",
+          "grams": 250,
+          "kcal": 300.0,
+          "p": 56.2,
+          "kh": 0.0,
+          "f": 6.5,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "couscous",
+          "label": "Couscous",
+          "grams": 80,
+          "kcal": 300.8,
+          "p": 10.2,
+          "kh": 57.9,
+          "f": 0.5,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "aprikosen_getrocknet",
+          "label": "Aprikosen, getrocknet",
+          "grams": 30,
+          "kcal": 72.3,
+          "p": 1.0,
+          "kh": 18.8,
+          "f": 0.1,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Packung à 200 g"
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 50,
+          "kcal": 20.0,
+          "p": 0.6,
+          "kh": 4.7,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "mandeln",
+          "label": "Mandeln",
+          "grams": 15,
+          "kcal": 86.8,
+          "p": 3.2,
+          "kh": 3.2,
+          "f": 7.5,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "aus Vorratspackung"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 15,
+          "kcal": 132.6,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 15.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "gewuerz_raselhanout",
+          "label": "Ras-el-Hanout",
+          "grams": 6,
+          "kcal": 18.0,
+          "p": 0.6,
+          "kh": 2.4,
+          "f": 0.6,
+          "cat": "gewuerze",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Hähnchen würfeln, mit Ras-el-Hanout würzen.",
+        "Zwiebel in Olivenöl andünsten, Hähnchen zugeben, anbraten.",
+        "Aprikosen + etwas Wasser/Brühe zugeben, 15–20 Min. köcheln.",
+        "Couscous mit heißer Flüssigkeit übergießen, quellen lassen.",
+        "Mandeln kurz rösten, darüberstreuen."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Garnelen-Fajitas Guacamole",
+      "cuisine": "Mexikanisch",
+      "cooktime": 25,
+      "kcal": 784,
+      "p": 69,
+      "kh": 56,
+      "f": 35,
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "label": "Garnelen, roh, geschält",
+          "grams": 300,
+          "kcal": 255.0,
+          "p": 60.0,
+          "kh": 0.6,
+          "f": 1.5,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "paprika",
+          "label": "Paprika",
+          "grams": 200,
+          "kcal": 62.0,
+          "p": 2.0,
+          "kh": 12.0,
+          "f": 0.6,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 150,
+          "note": null
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 50,
+          "kcal": 20.0,
+          "p": 0.6,
+          "kh": 4.7,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "avocado",
+          "label": "Avocado",
+          "grams": 130,
+          "kcal": 208.0,
+          "p": 2.6,
+          "kh": 11.1,
+          "f": 19.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 150,
+          "note": null
+        },
+        {
+          "key": "tortilla_mais",
+          "label": "Tortilla, Mais",
+          "grams": 60,
+          "kcal": 130.8,
+          "p": 3.4,
+          "kh": 27.1,
+          "f": 1.4,
+          "cat": "trocken",
+          "unit": "stueck",
+          "size": 30,
+          "note": null
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 12,
+          "kcal": 106.1,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 12.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "limette",
+          "label": "Limette (für Saft)",
+          "grams": 10,
+          "kcal": 2.5,
+          "p": 0.0,
+          "kh": 0.8,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 25,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Paprika/Zwiebel in Streifen, in Olivenöl scharf anbraten.",
+        "Garnelen würzen (Paprikapulver, Kreuzkümmel, Limette), zugeben, 3–4 Min. braten.",
+        "Avocado zerdrücken, mit Limettensaft und Petersilie (statt Koriander) zu Guacamole verarbeiten.",
+        "Tortillas erwärmen, alles darin anrichten."
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Kabeljau Kartoffelstampf Skyr",
+      "cuisine": "Skandinavisch",
+      "cooktime": 40,
+      "kcal": 804,
+      "p": 73,
+      "kh": 74,
+      "f": 23,
+      "ingredients": [
+        {
+          "key": "kabeljau",
+          "label": "Kabeljau (Wildfang), Filet",
+          "grams": 280,
+          "kcal": 229.6,
+          "p": 49.8,
+          "kh": 0.0,
+          "f": 2.0,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "kartoffeln",
+          "label": "Kartoffeln",
+          "grams": 400,
+          "kcal": 308.0,
+          "p": 8.0,
+          "kh": 68.0,
+          "f": 0.4,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 150,
+          "note": null
+        },
+        {
+          "key": "skyr",
+          "label": "Skyr, natur",
+          "grams": 140,
+          "kcal": 88.2,
+          "p": 15.4,
+          "kh": 5.6,
+          "f": 0.3,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 20,
+          "kcal": 176.8,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 20.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "petersilie",
+          "label": "Petersilie",
+          "grams": 5,
+          "kcal": 1.8,
+          "p": 0.2,
+          "kh": 0.3,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "bund",
+          "size": 30,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Kartoffeln schälen, kochen, mit Skyr und etwas Kochwasser zu cremigem Stampf verarbeiten.",
+        "Kabeljau mit Petersilie/Olivenöl bestreichen, bei 180 °C ca. 12–15 Min. im Ofen garen.",
+        "Mit restlichem Skyr als Sauce servieren."
+      ]
+    },
+    {
+      "id": 11,
+      "name": "Entenbrust Sesam-Orange",
+      "cuisine": "Asiatisch-French",
+      "cooktime": 40,
+      "kcal": 838,
+      "p": 70,
+      "kh": 80,
+      "f": 26,
+      "ingredients": [
+        {
+          "key": "entenbrust",
+          "label": "Entenbrust, ohne Haut",
+          "grams": 300,
+          "kcal": 369.0,
+          "p": 58.8,
+          "kh": 0.0,
+          "f": 13.5,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "reis_jasmin",
+          "label": "Reis, Jasmin",
+          "grams": 80,
+          "kcal": 284.8,
+          "p": 5.6,
+          "kh": 61.6,
+          "f": 0.5,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "pak_choi",
+          "label": "Pak Choi / Bok Choy",
+          "grams": 200,
+          "kcal": 26.0,
+          "p": 3.0,
+          "kh": 4.4,
+          "f": 0.4,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 200,
+          "note": null
+        },
+        {
+          "key": "orange",
+          "label": "Orange (für Saft)",
+          "grams": 50,
+          "kcal": 22.5,
+          "p": 0.3,
+          "kh": 5.2,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 70,
+          "note": null
+        },
+        {
+          "key": "sojasauce",
+          "label": "Sojasauce",
+          "grams": 12,
+          "kcal": 6.4,
+          "p": 1.0,
+          "kh": 0.6,
+          "f": 0.0,
+          "cat": "sonstig",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "honig",
+          "label": "Honig",
+          "grams": 8,
+          "kcal": 24.3,
+          "p": 0.0,
+          "kh": 6.6,
+          "f": 0.0,
+          "cat": "sonstig",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "sesamoel",
+          "label": "Sesamöl",
+          "grams": 8,
+          "kcal": 70.7,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 8.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "sesam",
+          "label": "Sesam, Samen",
+          "grams": 6,
+          "kcal": 34.4,
+          "p": 1.1,
+          "kh": 1.4,
+          "f": 3.0,
+          "cat": "gewuerze",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Entenbrust ohne Haut scharf anbraten (3–4 Min./Seite).",
+        "Reis kochen.",
+        "Orangensaft, Sojasauce, Honig, Sesamöl zu Glasur einkochen.",
+        "Pak Choi kurz andünsten.",
+        "Ente in Scheiben, mit Glasur bestreichen, Sesam darüber, mit Reis und Pak Choi servieren."
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Schweine-Zigeunerspieße",
+      "cuisine": "Deutsch-Balkan",
+      "cooktime": 45,
+      "kcal": 865,
+      "p": 72,
+      "kh": 81,
+      "f": 28,
+      "ingredients": [
+        {
+          "key": "schweinefilet",
+          "label": "Schweinefilet",
+          "grams": 300,
+          "kcal": 318.0,
+          "p": 61.5,
+          "kh": 0.0,
+          "f": 7.5,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "kartoffeln",
+          "label": "Kartoffeln",
+          "grams": 380,
+          "kcal": 292.6,
+          "p": 7.6,
+          "kh": 64.6,
+          "f": 0.4,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 150,
+          "note": null
+        },
+        {
+          "key": "paprika",
+          "label": "Paprika",
+          "grams": 120,
+          "kcal": 37.2,
+          "p": 1.2,
+          "kh": 7.2,
+          "f": 0.4,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 150,
+          "note": null
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 60,
+          "kcal": 24.0,
+          "p": 0.7,
+          "kh": 5.6,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "tomatenmark",
+          "label": "Tomatenmark",
+          "grams": 20,
+          "kcal": 16.4,
+          "p": 0.9,
+          "kh": 3.8,
+          "f": 0.1,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Tube à 200 g"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 20,
+          "kcal": 176.8,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 20.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Schweinefilet würfeln, mit Paprika/Zwiebel abwechselnd auf Spieße stecken.",
+        "In Pfanne oder auf Grill rundum braten (10–12 Min.).",
+        "Sauce: übrige Paprika/Zwiebel klein schneiden, mit Tomatenmark und etwas Wasser 10 Min. köcheln, mit Paprikapulver edelsüß würzen.",
+        "Kartoffeln kochen.",
+        "Spieße mit Sauce und Kartoffeln servieren."
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Thai-Curry Garnelen Süßkartoffel",
+      "cuisine": "Thailändisch",
+      "cooktime": 35,
+      "kcal": 882,
+      "p": 77,
+      "kh": 102,
+      "f": 19,
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "label": "Garnelen, roh, geschält",
+          "grams": 260,
+          "kcal": 221.0,
+          "p": 52.0,
+          "kh": 0.5,
+          "f": 1.3,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "suesskartoffel",
+          "label": "Süßkartoffel",
+          "grams": 220,
+          "kcal": 189.2,
+          "p": 3.5,
+          "kh": 44.0,
+          "f": 0.2,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 250,
+          "note": null
+        },
+        {
+          "key": "skyr",
+          "label": "Skyr, natur",
+          "grams": 120,
+          "kcal": 75.6,
+          "p": 13.2,
+          "kh": 4.8,
+          "f": 0.2,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "currypaste_thai",
+          "label": "Thai-Currypaste",
+          "grams": 25,
+          "kcal": 30.0,
+          "p": 0.5,
+          "kh": 3.8,
+          "f": 1.2,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Glas à 200 g"
+        },
+        {
+          "key": "erdnuesse",
+          "label": "Erdnüsse, geröstet, ungesalzen",
+          "grams": 15,
+          "kcal": 87.8,
+          "p": 3.6,
+          "kh": 3.2,
+          "f": 7.5,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "aus Vorratspackung"
+        },
+        {
+          "key": "reis_jasmin",
+          "label": "Reis, Jasmin",
+          "grams": 55,
+          "kcal": 195.8,
+          "p": 3.9,
+          "kh": 42.4,
+          "f": 0.3,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 30,
+          "kcal": 12.0,
+          "p": 0.3,
+          "kh": 2.8,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 8,
+          "kcal": 70.7,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 8.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Zwiebel in Olivenöl andünsten, Currypaste kurz mitrösten.",
+        "Süßkartoffel würfeln, zugeben, mit etwas Wasser/Brühe 10 Min. köcheln.",
+        "Garnelen zugeben, 3–4 Min. garen.",
+        "Hitze reduzieren, Skyr einrühren (nicht kochen), Erdnüsse grob hacken.",
+        "Reis kochen, Curry darauf anrichten. Chili (falls verwendet: immer mit Kernen) nach Geschmack zugeben."
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Hähnchen-Garnelen-Paella",
+      "cuisine": "Spanisch",
+      "cooktime": 60,
+      "kcal": 901,
+      "p": 72,
+      "kh": 97,
+      "f": 24,
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "label": "Hähnchenbrust",
+          "grams": 150,
+          "kcal": 180.0,
+          "p": 33.8,
+          "kh": 0.0,
+          "f": 3.9,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "garnelen",
+          "label": "Garnelen, roh, geschält",
+          "grams": 130,
+          "kcal": 110.5,
+          "p": 26.0,
+          "kh": 0.3,
+          "f": 0.7,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "reis_rundkorn",
+          "label": "Reis, Rundkorn/Bomba",
+          "grams": 100,
+          "kcal": 349.0,
+          "p": 6.7,
+          "kh": 77.5,
+          "f": 0.6,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "erbsen_tk",
+          "label": "Erbsen (TK)",
+          "grams": 60,
+          "kcal": 48.6,
+          "p": 3.2,
+          "kh": 8.7,
+          "f": 0.2,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "TK-Packung à 400 g"
+        },
+        {
+          "key": "paprika",
+          "label": "Paprika",
+          "grams": 60,
+          "kcal": 18.6,
+          "p": 0.6,
+          "kh": 3.6,
+          "f": 0.2,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 150,
+          "note": null
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 40,
+          "kcal": 16.0,
+          "p": 0.4,
+          "kh": 3.7,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "tomaten_passiert",
+          "label": "Tomaten, passiert",
+          "grams": 60,
+          "kcal": 19.2,
+          "p": 1.0,
+          "kh": 3.5,
+          "f": 0.2,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 18,
+          "kcal": 159.1,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 18.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Zwiebel/Paprika in Olivenöl andünsten.",
+        "Reis zugeben, kurz mitrösten.",
+        "Passierte Tomaten und heiße Brühe nach und nach zugeben, ca. 18–20 Min. köcheln.",
+        "Hähnchen und Erbsen nach halber Garzeit zugeben.",
+        "Garnelen in den letzten 3–4 Min. zugeben, bis gar."
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Rote-Linsen-Dal Spiegeleier Skyr",
+      "cuisine": "Indisch-vegetarisch",
+      "cooktime": 25,
+      "kcal": 977,
+      "p": 70,
+      "kh": 96,
+      "f": 34,
+      "ingredients": [
+        {
+          "key": "linsen_rot",
+          "label": "Rote Linsen, roh",
+          "grams": 120,
+          "kcal": 422.4,
+          "p": 29.2,
+          "kh": 72.1,
+          "f": 1.3,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 50,
+          "kcal": 20.0,
+          "p": 0.6,
+          "kh": 4.7,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "tomaten_passiert",
+          "label": "Tomaten, passiert",
+          "grams": 150,
+          "kcal": 48.0,
+          "p": 2.4,
+          "kh": 8.9,
+          "f": 0.4,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "knoblauch",
+          "label": "Knoblauch",
+          "grams": 6,
+          "kcal": 8.9,
+          "p": 0.4,
+          "kh": 2.0,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "zehe",
+          "size": 3,
+          "note": null
+        },
+        {
+          "key": "ingwer",
+          "label": "Ingwer",
+          "grams": 5,
+          "kcal": 4.0,
+          "p": 0.1,
+          "kh": 0.9,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "1 kleines Stück deckt den Bedarf mehrerer Gerichte"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 12,
+          "kcal": 106.1,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 12.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "ei",
+          "label": "Eier",
+          "grams": 212,
+          "kcal": 303.2,
+          "p": 26.7,
+          "kh": 1.5,
+          "f": 20.1,
+          "cat": "frisch",
+          "unit": "ei",
+          "size": 53,
+          "note": null
+        },
+        {
+          "key": "skyr",
+          "label": "Skyr, natur",
+          "grams": 80,
+          "kcal": 50.4,
+          "p": 8.8,
+          "kh": 3.2,
+          "f": 0.2,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "spinat",
+          "label": "Baby-Spinat",
+          "grams": 60,
+          "kcal": 13.8,
+          "p": 1.7,
+          "kh": 2.2,
+          "f": 0.2,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Beutel à 100 g"
+        }
+      ],
+      "steps": [
+        "Zwiebel/Knoblauch/Ingwer in Olivenöl andünsten.",
+        "Linsen und passierte Tomaten zugeben, mit Wasser auffüllen, 20–25 Min. köcheln bis weich.",
+        "Spinat kurz vor Ende unterrühren.",
+        "Eier separat als Spiegeleier braten.",
+        "Dal mit Spiegeleiern und einem Klecks Skyr servieren."
+      ]
+    },
+    {
+      "id": 16,
+      "name": "Wildlachs Miso Bok Choy",
+      "cuisine": "Japanisch",
+      "cooktime": 30,
+      "kcal": 887,
+      "p": 72,
+      "kh": 96,
+      "f": 24,
+      "ingredients": [
+        {
+          "key": "lachs_keta",
+          "label": "Wildlachs (Keta), Filet",
+          "grams": 270,
+          "kcal": 353.7,
+          "p": 59.4,
+          "kh": 0.0,
+          "f": 13.0,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "reis_jasmin",
+          "label": "Reis, Jasmin",
+          "grams": 100,
+          "kcal": 356.0,
+          "p": 7.0,
+          "kh": 77.0,
+          "f": 0.6,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "pak_choi",
+          "label": "Pak Choi / Bok Choy",
+          "grams": 200,
+          "kcal": 26.0,
+          "p": 3.0,
+          "kh": 4.4,
+          "f": 0.4,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 200,
+          "note": null
+        },
+        {
+          "key": "miso",
+          "label": "Miso-Paste",
+          "grams": 25,
+          "kcal": 49.8,
+          "p": 3.0,
+          "kh": 6.5,
+          "f": 1.5,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Glas/Packung à 250 g"
+        },
+        {
+          "key": "sesamoel",
+          "label": "Sesamöl",
+          "grams": 8,
+          "kcal": 70.7,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 8.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "honig",
+          "label": "Honig",
+          "grams": 10,
+          "kcal": 30.4,
+          "p": 0.0,
+          "kh": 8.2,
+          "f": 0.0,
+          "cat": "sonstig",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Miso-Paste mit Honig und Sesamöl verrühren, Lachs damit bestreichen, 10 Min. ziehen lassen.",
+        "Bei 200 °C ca. 10–12 Min. im Ofen garen (oder in der Pfanne).",
+        "Reis kochen.",
+        "Pak Choi kurz andünsten/dämpfen.",
+        "Anrichten."
+      ]
+    },
+    {
+      "id": 17,
+      "name": "Rind Rogan Josh",
+      "cuisine": "Nordindisch",
+      "cooktime": 45,
+      "kcal": 912,
+      "p": 64,
+      "kh": 89,
+      "f": 32,
+      "ingredients": [
+        {
+          "key": "rindergulasch",
+          "label": "Rindergulasch",
+          "grams": 250,
+          "kcal": 290.0,
+          "p": 42.5,
+          "kh": 0.3,
+          "f": 12.5,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "reis_basmati",
+          "label": "Reis, Basmati",
+          "grams": 85,
+          "kcal": 302.6,
+          "p": 6.0,
+          "kh": 65.5,
+          "f": 0.6,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "joghurt_griech",
+          "label": "Griechischer Joghurt 2%",
+          "grams": 120,
+          "kcal": 87.6,
+          "p": 12.0,
+          "kh": 4.3,
+          "f": 2.4,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "tomaten_passiert",
+          "label": "Tomaten, passiert",
+          "grams": 120,
+          "kcal": 38.4,
+          "p": 1.9,
+          "kh": 7.1,
+          "f": 0.4,
+          "cat": "trocken",
+          "unit": "g",
+          "size": null,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "zwiebel",
+          "label": "Zwiebel",
+          "grams": 60,
+          "kcal": 24.0,
+          "p": 0.7,
+          "kh": 5.6,
+          "f": 0.1,
+          "cat": "frisch",
+          "unit": "stueck",
+          "size": 100,
+          "note": null
+        },
+        {
+          "key": "knoblauch",
+          "label": "Knoblauch",
+          "grams": 6,
+          "kcal": 8.9,
+          "p": 0.4,
+          "kh": 2.0,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "zehe",
+          "size": 3,
+          "note": null
+        },
+        {
+          "key": "ingwer",
+          "label": "Ingwer",
+          "grams": 5,
+          "kcal": 4.0,
+          "p": 0.1,
+          "kh": 0.9,
+          "f": 0.0,
+          "cat": "frisch",
+          "unit": "g",
+          "size": null,
+          "note": "1 kleines Stück deckt den Bedarf mehrerer Gerichte"
+        },
+        {
+          "key": "olivenoel",
+          "label": "Olivenöl",
+          "grams": 15,
+          "kcal": 132.6,
+          "p": 0.0,
+          "kh": 0.0,
+          "f": 15.0,
+          "cat": "oel",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        },
+        {
+          "key": "gewuerz_roganjosh",
+          "label": "Rogan-Josh-Gewürzmischung",
+          "grams": 8,
+          "kcal": 24.0,
+          "p": 0.8,
+          "kh": 3.2,
+          "f": 0.8,
+          "cat": "gewuerze",
+          "unit": "vorrat",
+          "size": null,
+          "note": null
+        }
+      ],
+      "steps": [
+        "Rinderwürfel in Olivenöl scharf anbraten.",
+        "Zwiebel, Knoblauch, Ingwer zugeben, andünsten.",
+        "Gewürzmischung kurz mitrösten, passierte Tomaten zugeben.",
+        "Mit Wasser/Brühe auffüllen, 35–40 Min. köcheln bis Rind zart.",
+        "Joghurt kurz vor Ende unterrühren (nicht kochen).",
+        "Mit Basmatireis servieren."
+      ]
+    }
+  ]
+}
