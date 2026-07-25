@@ -1,11 +1,21 @@
-// Kategorie-Reihenfolge in der Einkaufsliste (typisches Supermarkt-Layout:
-// Frisch außen, Trocken/Gewürze innen, Öl & Sonstiges am Ende).
-export const CAT_ORDER = ['frisch', 'trocken', 'gewuerze', 'oel', 'sonstig'];
+// Kategorie-Reihenfolge in der Einkaufsliste — folgt dem typischen Einkaufsweg:
+// Obst/Gemüse zuerst, danach Kühlung, dann Fleisch/Fisch (kühlkette-sensitiv,
+// spät greifen), danach Trocken/Konserven, am Ende Gewürze/Öl/Sonstiges.
+export const CAT_ORDER = [
+  'fleisch_fisch',
+  'frisch',
+  'kuehlung',
+  'trocken',
+  'gewuerze',
+  'oel',
+  'sonstig',
+];
 
-// Deutsche Anzeige-Labels. Bewusst kurz gehalten (Rebuild-UI ist knapper als main).
 export const CAT_LABELS = {
-  frisch: 'Frische',
-  trocken: 'Trocken',
+  frisch: 'Obst & Gemüse',
+  kuehlung: 'Kühlung',
+  fleisch_fisch: 'Fleisch & Fisch',
+  trocken: 'Trocken / Konserven',
   gewuerze: 'Gewürze',
   oel: 'Öl / Fett',
   sonstig: 'Sonstiges',

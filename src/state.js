@@ -24,6 +24,7 @@ export const VIEWS = ['dashboard', 'shopping'];
 //   checkedShopping  Set<string>                 // abgehakte Zutaten-Keys (Session 5)
 //   dishBag          { [day: string]: number[] } // pro Karte: Shuffle-Bag-Queue, wird beim Ziehen konsumiert
 //   view             'dashboard' | 'shopping'    // aktive Screen-Ansicht (Session 5)
+//   collapsedCategories Set<string>              // eingeklappte Einkaufslisten-Kategorien
 export const state = {
   assignment: {},
   selected: {},
@@ -32,6 +33,7 @@ export const state = {
   checkedShopping: new Set(),
   dishBag: {},
   view: 'dashboard',
+  collapsedCategories: new Set(),
 };
 
 // Initialisiert selected/portions passend zu einem frischen Assignment.

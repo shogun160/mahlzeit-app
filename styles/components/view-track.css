@@ -42,9 +42,13 @@
 }
 
 /* Shopping-View hat oben KEIN padding — die sticky Progress-Zeile klebt bündig
-   am Header. Dashboard behält das normale padding-top. */
+   am Header. Dashboard behält das normale padding-top.
+   Außerdem gap: 0, damit der Abstand zwischen Progress-Bar und erster Kategorie
+   im natürlichen Layout identisch ist zum Sticky-Fall (da klebt der Header
+   direkt an progress-height). */
 .view--shopping {
   padding-top: 0;
+  gap: 0;
 }
 
 /* Direct-Kinder von .view dürfen NICHT shrinken. Grund: .view ist ein flex-column

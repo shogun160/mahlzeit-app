@@ -10,6 +10,7 @@ export function formatGrams(baseGrams, portions) {
 // (portions-skaliert und über alle ausgewählten Tage aufsummiert), außer bei unit='vorrat'.
 // Aufrundung so, dass der User im Laden praktikable Mengen kauft (10 g, ganze Stück etc.).
 export function formatQuantity(item) {
+  if (item.isLeftover) return 'Nicht mehr im Plan';
   if (item.unit === 'vorrat') return 'Vorrat prüfen';
   if (item.unit === 'g') {
     const g = Math.ceil(item.sum / 10) * 10;

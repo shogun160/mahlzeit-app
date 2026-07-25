@@ -11,10 +11,9 @@
   z-index: 5;
   margin-inline: -16px;
   padding: 14px 16px;
-  background: color-mix(in srgb, var(--md-sys-color-surface) 82%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  margin-bottom: 4px;
+  /* Opak, damit vorherige Kategorie-Header beim Wegscrollen sauber verdeckt
+     werden — frosted-glass würde sie durchschimmern lassen. */
+  background: var(--md-sys-color-surface);
   /* Text soll nicht selektiert werden, vertikales Scroll-Gesture soll durchrutschen. */
   user-select: none;
   -webkit-user-select: none;
@@ -51,34 +50,114 @@
   transition: width 250ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-/* Kategorie-Gruppen */
+/* Kategorie-Gruppen: FLACHER Container. Header und Listen liegen als Geschwister
+   direkt hier drin — nur so bleibt jeder Header sticky, wenn er weit nach oben
+   scrollt, und alle sichtbaren Header können sich unter der Progress-Bar stapeln.
+   Wären Header + Liste in eigenen <section>-Wrappern, würde jeder sticky-Header
+   verschwinden, sobald seine section oben rausscrollt. */
 .shop-groups {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+}
+
+/* Der Abstand zwischen den Kategorien liegt bewusst auf der ul (nicht auf dem
+   Header). So sind zwei aufeinanderfolgende Header-Zeilen — wenn die ul dazwischen
+   eingeklappt ist — genauso dicht aneinander wie im sticky-Stapel. */
+
+/* Kategorie-Header ist ein voll klickbarer Button (Chevron + Titel + Count).
+   Klick togglet den Collapse-State der Kategorie und scrollt bei Expand dort hin.
+   Sticky unter der Progress-Bar: bleibt beim Scrollen sichtbar, wird von der
+   nächsten Kategorie weggeschoben (carousel-artig). Frosted-Glass-Look, damit
+   Content dahinter beim Scrollen leicht durchscheint. */
+.shop-group__header {
+  position: sticky;
+  /* Gestaffelt: jede sichtbare Kategorie klebt unter der vorigen. --stack-idx
+     wird pro shop-group inline gesetzt (0 = erste sichtbare Kategorie). */
+  top: calc(var(--shop-progress-height, 64px) + var(--stack-idx, 0) * var(--shop-group-header-height));
+  z-index: 4;
+  /* Volle Viewport-Breite: 100 % des Containers + je 16 px pro Seite, damit die
+     negativen Margins nicht nur verschieben, sondern das Element auch verbreitern.
+     Sonst blitzen darunterliegende Karten am rechten Rand durch. */
+  width: calc(100% + 32px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 8px 16px;
+  /* Opak, damit gestapelte Header saubere Kanten haben und der Content dahinter
+     nicht durchschimmert. */
+  background: var(--md-sys-color-surface);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  min-height: var(--shop-group-header-height);
+  scroll-margin-top: calc(var(--shop-progress-height, 64px) + var(--stack-idx, 0) * var(--shop-group-header-height));
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Höhe des Kategorie-Headers als Token — Basis für sticky-Stapel-Offset. Muss
+   zur tatsächlichen Header-Höhe passen (min-height + padding-inklusive). */
+.view--shopping {
+  --shop-group-header-height: 48px;
+}
+
+.shop-group__chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform 200ms ease;
+}
+
+.shop-group__chevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+.shop-group__header--collapsed .shop-group__chevron {
+  transform: rotate(-90deg);
 }
 
 .shop-group__title {
+  flex: 1 1 auto;
+  min-width: 0;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--md-sys-color-primary);
-  margin: 0 0 8px 2px;
 }
 
 .shop-group__count {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
   color: var(--md-sys-color-on-surface-variant);
-  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .shop-list {
   list-style: none;
-  margin: 0;
-  padding: 0;
+  margin: 0 0 22px;
+  padding: 6px 0 0;
   display: flex;
   flex-direction: column;
   gap: 6px;
+  /* Beim Klick auf einen Kategorie-Header scrollen wir zur ul (nicht zum Header
+     selbst, der ist sticky und rührt sich optisch nicht). scroll-margin-top sorgt
+     dafür, dass die ul unter dem eigenen sticky-Header + Progress-Bar landet. */
+  scroll-margin-top: calc(var(--shop-progress-height, 64px) + (var(--stack-idx, 0) + 1) * var(--shop-group-header-height));
+}
+
+/* Eingeklappte Kategorie: Liste ausblenden. Doppelte Klasse → höhere Spezifität
+   als .shop-list mit display:flex (steht in dieser Datei später als Regel). */
+.shop-list.shop-list--collapsed {
+  display: none;
 }
 
 /* Eine Zutaten-Zeile: großes Touch-Target, Check-Zone links, Body rechts. */
