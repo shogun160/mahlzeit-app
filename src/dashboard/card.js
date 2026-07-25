@@ -6,7 +6,12 @@ import { PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 //     dish: { id, name, cuisine, cooktime, ... },
 //     portions: number,
 //     isSelected: boolean,
-//     handlers: { onPortionChange(delta), onReroll(), onToggleSelected() } }
+//     handlers: {
+//       onPortionChange(delta),
+//       onReroll(),
+//       onToggleSelected(),
+//       onOpenDetail(tab)              // tab: 'zutaten' | 'rezept'
+//     } }
 export function createDayCard({ day, dish, portions, isSelected, handlers }) {
   const article = document.createElement('article');
   article.className = 'day-card' + (isSelected ? ' day-card--selected' : '');
@@ -17,7 +22,7 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
   const selectionLabel = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
 
   article.innerHTML = `
-    <img class="day-card__image" src="${imageSrc}" alt="${dish.name}" loading="lazy" />
+    <img class="day-card__image" src="${imageSrc}" alt="${dish.name}" loading="lazy" data-action="open-recipe" />
     <div class="day-card__body">
       <div class="stepper stepper--compact" role="group" aria-label="Portionen für ${day}">
         <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -32,6 +37,10 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
       <div class="day-card__meta">~${dish.cooktime} Min. · ${dish.cuisine}</div>
       <h2 class="day-card__title">${dish.name}</h2>
       <div class="day-card__actions">
+        <button class="action-btn" data-action="open-ingredients" aria-label="Zutaten für ${day} anzeigen">
+          <img src="/icons/icon-rezept-zutaten.png" alt="" />
+          <span>Zutaten</span>
+        </button>
         <button class="action-btn" data-action="reroll" aria-label="Neues Gericht für ${day} auslosen">
           <img src="/icons/icon-auslosen.png" alt="" />
           <span>Wechseln</span>
@@ -48,6 +57,16 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
   article.querySelector('[data-action="portion-plus"]').addEventListener('click', () => handlers.onPortionChange(1));
   article.querySelector('[data-action="reroll"]').addEventListener('click', () => handlers.onReroll());
   article.querySelector('[data-action="toggle-selected"]').addEventListener('click', () => handlers.onToggleSelected());
+  article.querySelector('[data-action="open-ingredients"]').addEventListener('click', () => handlers.onOpenDetail('zutaten'));
+  article.querySelector('[data-action="open-recipe"]').addEventListener('click', () => handlers.onOpenDetail('rezept'));
+
+  // Content-Bereich (Body außerhalb Stepper und Actions) öffnet ebenfalls den Rezept-Tab.
+  // Kein separater Wrapper — Klick-Filter via closest().
+  const body = article.querySelector('.day-card__body');
+  body.addEventListener('click', (ev) => {
+    if (ev.target.closest('.stepper, .day-card__actions')) return;
+    handlers.onOpenDetail('rezept');
+  });
 
   return article;
 }
