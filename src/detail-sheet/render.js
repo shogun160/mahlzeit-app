@@ -1,6 +1,7 @@
 import { state, PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { changePortion } from '../dashboard/portions.js';
+import { toggleChecked } from '../shopping-list/check.js';
 import { renderIngredients } from './ingredients.js';
 import { renderRecipe } from './recipe.js';
 
@@ -125,8 +126,24 @@ function attachHandlers() {
   rootEl.querySelectorAll('.sheet-tabs__btn').forEach((btn) => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
+  attachIngredientCheckHandlers();
   attachSwipe();
   attachCloseSwipe();
+}
+
+// Klick auf eine Zutaten-Zeile togglet den Check-Zustand in state.checkedShopping
+// (geteilt mit der Einkaufsliste). Wir aktualisieren die Klasse nur lokal, damit
+// keine Reflow-Kaskade läuft — Cards + Einkaufsliste ziehen via onExternalChange nach.
+function attachIngredientCheckHandlers() {
+  const items = rootEl.querySelectorAll('.ingredient[data-key]');
+  items.forEach((el) => {
+    el.addEventListener('click', () => {
+      const key = el.dataset.key;
+      toggleChecked(key);
+      el.classList.toggle('ingredient--checked');
+      onExternalChange();
+    });
+  });
 }
 
 // Runter-Swipe im Sheet schließt es. Bereich: gesamter Sheet, außer interaktive
@@ -220,6 +237,8 @@ function handleSheetPortion(delta) {
   // Ingredients-Panel neu rendern; Rezept-Panel ist portionsunabhängig, unverändert lassen.
   const ingredientsPanel = rootEl.querySelector('.sheet-tabs__panel[data-tab="zutaten"]');
   ingredientsPanel.innerHTML = renderIngredients(dish, portions);
+  // Nach dem Re-render die Check-Handler neu binden.
+  attachIngredientCheckHandlers();
   // Stepper-Anzeige aktualisieren
   rootEl.querySelector('.stepper__value').textContent = portions;
   rootEl.querySelector('[data-action="sheet-portion-minus"]').disabled = portions <= PORTIONS_MIN;

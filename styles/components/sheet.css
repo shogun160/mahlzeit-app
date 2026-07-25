@@ -219,15 +219,40 @@
 
 .ingredient {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 16px;
+  align-items: center;
+  gap: 12px;
   padding: 10px 4px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.ingredient:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 4%, transparent);
 }
 
 .ingredient:last-child {
   border-bottom: none;
+}
+
+/* Check-Kreis vor der Zutat — identische Optik zu shop-item__check in der
+   Einkaufsliste, damit "Zutaten abhaken" überall gleich aussieht. */
+.ingredient__check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.ingredient__check svg {
+  width: 14px;
+  height: 14px;
 }
 
 .ingredient__label {
@@ -235,6 +260,7 @@
   min-width: 0;
   color: var(--md-sys-color-on-surface);
   font-size: 0.9375rem;
+  transition: color 180ms ease, text-decoration-color 180ms ease;
 }
 
 .ingredient__qty {
@@ -243,9 +269,76 @@
   font-size: 0.9375rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  transition: color 180ms ease;
 }
 
-/* Rezept-Schritte: <ol> mit CSS-Counter für runde Nummern-Badges. */
+/* Abgehakte Zutat: primary-gefüllter Check-Kreis + durchgestrichener Text. */
+.ingredient--checked .ingredient__check {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.ingredient--checked .ingredient__label {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 60%, transparent);
+}
+
+.ingredient--checked .ingredient__qty {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 70%, transparent);
+  text-decoration: line-through;
+}
+
+/* Sum-Row unter der Zutaten-Liste: Gesamt-kcal prominent, darunter g-Werte
+   und %-Anteile der Makros in einer Zeile. Divider in primary-tint hebt den
+   Bereich vom Listen-Ende ab, ohne die Liste selbst noch mit Zeilen zu füllen. */
+.ingredient-sum {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px solid var(--md-sys-color-primary-tint);
+}
+
+.ingredient-sum__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.ingredient-sum__label {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.ingredient-sum__kcal {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ingredient-sum__macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.ingredient-sum__macros > span {
+  white-space: nowrap;
+}
+
+.ingredient-sum__sep {
+  color: var(--md-sys-color-outline-variant);
+}
+
+/* Rezept-Schritte: <ol> mit CSS-Counter für runde Nummern-Badges.
+   Divider zwischen den Schritten (analog Zutaten-Liste) — statt gap. */
 .recipe-list {
   list-style: none;
   counter-reset: recipe-step;
@@ -253,7 +346,6 @@
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 14px;
 }
 
 .recipe-step {
@@ -264,6 +356,17 @@
   color: var(--md-sys-color-on-surface);
   font-size: 0.9375rem;
   line-height: 1.5;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  /* Min-Höhe = 2 Textzeilen (2 × 1.5em Line-Height) + vertikales padding.
+     Damit haben kurze Einzeiler die gleiche Bauhöhe wie mehrzeilige Schritte —
+     die Nummern-Kreise stehen im gleichmäßigen Rhythmus, kein Zeilen-Zick-Zack.
+     align-items: center zentriert den Einzeiler-Text vertikal im Bereich. */
+  min-height: calc(2 * 1.5em + 20px);
+}
+
+.recipe-step:last-child {
+  border-bottom: none;
 }
 
 .recipe-step::before {
@@ -272,8 +375,9 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--md-sys-color-primary-tint);
-  color: var(--md-sys-color-on-primary-container);
+  /* Farbig wie ein abgehakter Zutaten-Check-Kreis: primary voll, Zahl in on-primary. */
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   font-weight: 700;
   font-size: 0.875rem;
   display: inline-flex;
