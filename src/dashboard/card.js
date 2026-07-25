@@ -40,7 +40,7 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
           <img src="/icons/icon-auslosen.png" alt="" />
           <span>Wechseln</span>
         </button>
-        <button class="action-btn" data-action="toggle-selected" aria-label="${selectionLabel}">
+        <button class="action-btn ${isSelected ? 'action-btn--active' : ''}" data-action="toggle-selected" aria-label="${selectionLabel}">
           <img src="/icons/${selectionIcon}.png" alt="" />
           <span>Liste</span>
         </button>
