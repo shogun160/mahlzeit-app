@@ -21,8 +21,12 @@
    (Wechseln + Liste + Portion-Pille). */
 .day-card--selected .action-btn,
 .day-card--selected .stepper--compact {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-surface-container-lowest));
+  background: var(--md-sys-color-primary-tint);
   color: var(--md-sys-color-on-primary-container);
+}
+
+.day-card__image-wrap {
+  position: relative;
 }
 
 .day-card__image {
@@ -33,15 +37,98 @@
   background: var(--md-sys-color-surface-container-low);
 }
 
-.day-card__body {
-  padding: 16px;
+/* Portion-Stepper als Overlay oben rechts auf dem Bild.
+   Frosted-Glass Look wie die Makro-Pills, damit er auch über bunte Motive lesbar ist.
+   Selected-Tint der Card gilt weiterhin über den .day-card--selected Selektor unten. */
+.day-card__portion-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  pointer-events: none;
 }
 
-/* Portion-Pille schwebt rechts oben, der Text (Tag + Titel + Meta) fließt
-   links davon und ab Zeile 2 unter die Pille durch. */
-.day-card__body .stepper--compact {
-  float: right;
-  margin: 0 0 4px 12px;
+.day-card__portion-overlay .stepper--pill {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-primary-container);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Makro-Pills rechtsbündig unten auf dem Bild — Card-Höhe bleibt unverändert.
+   Wrappen in 2 Zeilen auf schmalen Cards (mobile portrait). */
+.day-card__makros {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: calc(100% - 20px);
+  /* Klicks durchreichen — der User soll das Bild antippen können auch wenn
+     zwischen den Pills der leere Bereich getroffen wird. Pills selbst opt-in. */
+  pointer-events: none;
+}
+
+.makro-pill {
+  pointer-events: auto;
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Feste Breiten pro Makro-Typ, gerade so groß dass die Maximalwerte
+   reinpassen. Referenz-Fälle bei 6 Portionen:
+   - kcal:  977 * 6 = 5862 → "5862 kcal"
+   - P:     84 * 6  = 504  → "504 g P"
+   - KH:    102 * 6 = 612  → "612 g KH"   (Thai-Curry ist hier der breiteste Fall)
+   - F:     42 * 6  = 252  → "252 g F"
+   Damit springen die Pills bei Portion-Wechsel nicht mehr in der Breite. */
+.makro-pill--kcal { min-width: 88px; }
+.makro-pill--p    { min-width: 64px; }
+.makro-pill--kh   { min-width: 76px; }
+.makro-pill--f    { min-width: 64px; }
+
+.makro-pill .unit {
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-left: 2px;
+}
+
+/* kcal-Pill hebt sich in primary-Farbe ab — hauptwert der Makros. */
+.makro-pill--kcal {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+  font-size: 0.8125rem;
+}
+
+.makro-pill--kcal .unit {
+  color: color-mix(in srgb, var(--md-sys-color-on-primary) 75%, transparent);
+}
+
+.day-card__body {
+  padding: 12px 16px 14px;
+}
+
+/* Wochentag links, Meta (Zeit + Cuisine) rechts — beide in einer Zeile,
+   spart eine Body-Zeile Höhe. */
+.day-card__header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 2px;
 }
 
 .day-card__day {
@@ -50,13 +137,17 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--md-sys-color-primary);
-  margin-bottom: 4px;
+  flex-shrink: 0;
 }
 
 .day-card__meta {
   font-size: 0.875rem;
   color: var(--md-sys-color-on-surface-variant);
-  margin-bottom: 4px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .day-card__title {
@@ -64,19 +155,19 @@
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
   line-height: 1.3;
-  /* Reserviert 2 Zeilen, damit alle Cards gleich hoch bleiben. */
-  min-height: 2.6em;
-  /* Titel beginnt IMMER unter der Portion-Pille (volle Breite ab Zeile 1). */
-  clear: right;
+  /* Einzeilig — spart Karten-Höhe. Zu lange Titel werden mit Ellipsis gekürzt;
+     die dishes.json-Namen sind so gepflegt, dass sie in der Regel in eine Zeile passen. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .day-card__actions {
   display: flex;
   gap: 8px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
-  padding-top: 12px;
-  margin-top: 12px;
-  clear: both;
+  padding-top: 10px;
+  margin-top: 10px;
 }
 
 .action-btn {
@@ -102,12 +193,12 @@
 }
 
 .action-btn--active {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-surface-container-lowest));
+  background: var(--md-sys-color-primary-tint);
   color: var(--md-sys-color-on-primary-container);
 }
 
 .action-btn--active:hover {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 35%, var(--md-sys-color-surface-container-lowest));
+  background: var(--md-sys-color-primary-tint-hover);
 }
 
 .action-btn:active {
@@ -119,6 +210,40 @@
   height: 20px;
   display: block;
   object-fit: contain;
+}
+
+/* Icon-Wrap für den Zutaten-Button — hält das Icon + einen kleinen Zahl-Badge
+   oben rechts (Anzahl Zutaten). Wrap ist relativ positioniert, Badge absolut. */
+.action-btn__icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-btn__badge {
+  position: absolute;
+  top: -6px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--md-sys-color-surface-container-lowest);
+}
+
+/* In einer selektierten Card ist der Card-Background primary-tint — der Badge-
+   Ring soll auf demselben Ton sitzen, damit er sauber "aussticht". */
+.day-card--selected .action-btn__badge {
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary-tint);
 }
 
 /* icon-auslosen.png hat ~11% mehr Transparent-Padding als die anderen

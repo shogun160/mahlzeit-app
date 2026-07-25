@@ -5,6 +5,12 @@
   --md-sys-color-primary-container: #CCFBF1;
   --md-sys-color-on-primary-container: #115E59;
 
+  /* Primary Tint — die "aktive/selected"-Farbe. Genutzt für Card-Buttons wenn ein
+     Gericht auf der Einkaufsliste ist, für aktive Reset-/Nav-Buttons, für Rezept-
+     Nummern-Kreise usw. Wenn hier geändert wird, ziehen alle aktiv-Zustände nach. */
+  --md-sys-color-primary-tint: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-surface-container-lowest));
+  --md-sys-color-primary-tint-hover: color-mix(in srgb, var(--md-sys-color-primary) 35%, var(--md-sys-color-surface-container-lowest));
+
   /* Surface (matcht Statusbar-Farbe der App) */
   --md-sys-color-surface: #F7F8F7;
   --md-sys-color-surface-container-low: #F2F4F3;
