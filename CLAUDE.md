@@ -6,6 +6,22 @@ Meal-Planner für die Woche: verteilt Gerichte auf 7 Tage, zeigt Rezepte/Zutaten
 
 **Aktueller Status:** Rebuild geplant. Details siehe [`docs/redesign/2026-07-25-rebuild-design.md`](docs/redesign/2026-07-25-rebuild-design.md). Umsetzung auf Branch `redesign`, `main` bleibt bis zum Merge auf dem aktuellen (funktionierenden) Stand.
 
+## Nutzer
+
+- Solo-Entwickler, kein professioneller Web-Dev
+- Hobby-Projekt, keine kommerziellen Zeitdruck-Deadlines
+- Web-Grundlagen (HTML/CSS/JS) sicher, aber wenig Erfahrung mit modernen Frameworks (Vue/React/etc.), Build-Tools (Vite/Webpack) und dem npm-Ökosystem
+- Bevorzugt Erklärungen mit "Warum" statt nur "Was", vor allem bei neuen Konzepten
+- Kommunikation auf Deutsch
+
+## Kollaboration
+
+- **Kurze, direkte Antworten.** Keine Zusammenfassungen dessen was gerade gemacht wurde — der Diff zeigt es
+- **Bei mehreren Optionen:** klare Empfehlung + Trade-off in 2-3 Sätzen. Kein ausführlicher Vergleich, außer explizit angefragt
+- **Vor destruktiven Aktionen** (git force-push, `rm -rf`, DB-Änderungen, `npm install` von großen Paketen): explizit Zustimmung holen
+- **Neue technische Konzepte kurz einordnen** bevor Code kommt — z. B. "Vite ist ein Build-Tool, macht X, ersetzt Y". Nicht voraussetzen, dass alle Dev-Tools bekannt sind
+- **Bei Unsicherheit lieber nachfragen** als raten — vor allem bei Architektur-Entscheidungen und Guardrails
+
 ## Landkarte
 
 ### Aktueller Code (`main`)
