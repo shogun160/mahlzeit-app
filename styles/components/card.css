@@ -45,20 +45,21 @@
   margin-bottom: 4px;
 }
 
+.day-card__meta {
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 4px;
+  /* Cleart die Portion-Pille, damit die Meta-Zeile darunter beginnt. */
+  clear: right;
+}
+
 .day-card__title {
   font-size: 1.125rem;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
-  margin-bottom: 6px;
   line-height: 1.3;
-  /* Titel beginnt IMMER unter der Portion-Pille, damit auch Zeile 1
-     die volle Card-Breite nutzt. */
-  clear: right;
-}
-
-.day-card__meta {
-  font-size: 0.875rem;
-  color: var(--md-sys-color-on-surface-variant);
+  /* Reserviert 2 Zeilen, damit alle Cards gleich hoch bleiben. */
+  min-height: 2.6em;
 }
 
 .day-card__actions {

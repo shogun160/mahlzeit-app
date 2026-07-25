@@ -29,8 +29,8 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
         <button class="stepper__btn" data-action="portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
       </div>
       <div class="day-card__day">${day}</div>
-      <h2 class="day-card__title">${dish.name}</h2>
       <div class="day-card__meta">~${dish.cooktime} Min. · ${dish.cuisine}</div>
+      <h2 class="day-card__title">${dish.name}</h2>
       <div class="day-card__actions">
         <button class="action-btn" data-action="reroll" aria-label="Neues Gericht für ${day} auslosen">
           <img src="/icons/icon-auslosen.png" alt="" />
