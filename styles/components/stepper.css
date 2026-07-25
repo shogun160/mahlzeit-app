@@ -68,3 +68,27 @@
   height: 28px;
   font-size: 1rem;
 }
+
+/* Pill-Variante — noch kleiner, für Overlays auf dem Card-Bild und den
+   Global-Stepper im Header. Höhe matcht die Makro-Pills (26 px). */
+.stepper--pill {
+  padding: 2px 4px;
+  gap: 1px;
+}
+
+.stepper--pill .stepper__icon {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
+.stepper--pill .stepper__btn {
+  height: 22px;
+  min-width: 22px;
+  font-size: 0.9375rem;
+}
+
+.stepper--pill .stepper__value {
+  font-size: 0.8125rem;
+  min-width: 16px;
+}
