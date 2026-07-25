@@ -1,6 +1,9 @@
 import { createDayCard } from './card.js';
 import { state, DAYS, initState } from '../state.js';
 import { dishesById, allDishIds, shuffled } from '../data/dishes.js';
+import { rerollDay } from './reroll.js';
+import { changePortion } from './portions.js';
+import { toggleSelected } from './selection.js';
 
 function pickInitialAssignment() {
   const picks = shuffled(allDishIds).slice(0, DAYS.length);
@@ -11,9 +14,8 @@ function pickInitialAssignment() {
   return assignment;
 }
 
-export function renderDashboard(root) {
+export function renderDashboard(root, onChange) {
   // Erst-Initialisierung: falls noch kein Assignment vorliegt, würfeln.
-  // (Sobald Persistenz in Session 6 kommt, wird ein geladenes Assignment vorrangig sein.)
   if (Object.keys(state.assignment).length === 0) {
     initState(pickInitialAssignment());
   }
@@ -21,6 +23,26 @@ export function renderDashboard(root) {
   root.innerHTML = '';
   for (const day of DAYS) {
     const dish = dishesById.get(state.assignment[day]);
-    root.appendChild(createDayCard({ day, dish }));
+    const card = createDayCard({
+      day,
+      dish,
+      portions: state.portions[day],
+      isSelected: state.selected[day],
+      handlers: {
+        onPortionChange: (delta) => {
+          changePortion(day, delta);
+          onChange();
+        },
+        onReroll: () => {
+          rerollDay(day);
+          onChange();
+        },
+        onToggleSelected: () => {
+          toggleSelected(day);
+          onChange();
+        },
+      },
+    });
+    root.appendChild(card);
   }
 }
