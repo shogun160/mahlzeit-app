@@ -58,3 +58,11 @@
   display: block;
   object-fit: contain;
 }
+
+/* Inline-SVG-Kind in .icon-btn analog zum <img>-Kind stylen (Reset-Icon in Shopping-View). */
+.icon-btn svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  color: var(--md-sys-color-on-surface);
+}
