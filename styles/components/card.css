@@ -165,8 +165,9 @@
 .day-card__actions {
   display: flex;
   gap: 8px;
-  border-top: 1px solid var(--md-sys-color-outline-variant);
-  padding-top: 10px;
+  /* Kompakter Abstand zum Titel — vergleichbar zum Body-padding-bottom, damit
+     die Buttons symmetrisch zwischen Titel und Karten-Boden sitzen. Divider
+     bewusst weg (M3-Cards vermeiden interne Trennlinien). */
   margin-top: 10px;
 }
 

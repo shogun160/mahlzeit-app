@@ -7,9 +7,9 @@ import { PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 //     portions: number,
 //     isSelected: boolean,
 //     openIngredientsCount: number,   // Zutaten dieses Gerichts nicht in checkedShopping.
-//                                     // Badge wandert je nach isSelected:
-//                                     // - !isSelected → am Zutaten-Icon ("so viele Zutaten fehlen")
-//                                     // - isSelected  → am Liste-Icon ("so viele Zutaten offen auf der Liste")
+//                                     // Badge sitzt IMMER am Zutaten-Icon — er signalisiert
+//                                     // die Zutaten-Menge des Gerichts, unabhängig davon,
+//                                     // ob das Gericht schon auf der Einkaufsliste ist.
 //     handlers: {
 //       onPortionChange(delta),
 //       onReroll(),
@@ -62,7 +62,7 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
         <button class="action-btn" data-action="open-ingredients" aria-label="Zutaten für ${day} anzeigen (${openIngredientsCount} offen)">
           <span class="action-btn__icon-wrap">
             <img src="/icons/icon-rezept-zutaten.png" alt="" />
-            ${!isSelected && openIngredientsCount > 0 ? `<span class="action-btn__badge">${openIngredientsCount}</span>` : ''}
+            ${openIngredientsCount > 0 ? `<span class="action-btn__badge">${openIngredientsCount}</span>` : ''}
           </span>
           <span>Zutaten</span>
         </button>
@@ -71,10 +71,7 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
           <span>Wechseln</span>
         </button>
         <button class="action-btn ${isSelected ? 'action-btn--active' : ''}" data-action="toggle-selected" aria-label="${selectionLabel}">
-          <span class="action-btn__icon-wrap">
-            <img src="/icons/${selectionIcon}.png" alt="" />
-            ${isSelected && openIngredientsCount > 0 ? `<span class="action-btn__badge">${openIngredientsCount}</span>` : ''}
-          </span>
+          <img src="/icons/${selectionIcon}.png" alt="" />
           <span>Liste</span>
         </button>
       </div>
