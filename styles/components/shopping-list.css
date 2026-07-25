@@ -1,12 +1,24 @@
 /* Sticky Progress oben in der Shopping-View. Deckt beim Scrollen die darunter
-   liegenden Kategorien-Header ab (die haben deutlich niedrigeren z-index). */
+   liegenden Kategorien-Header ab (die haben deutlich niedrigeren z-index).
+   - margin-inline: -16px kompensiert das .view padding-left/right, damit die
+     Frosted-Fläche über die volle Bildschirmbreite geht.
+   - Semi-transparenter Background + backdrop-filter: Content darunter schimmert
+     leicht durch beim Scrollen (frosted-glass Look).
+   - view--shopping hat padding-top: 0, damit der Progress bündig am Header klebt. */
 .shop-progress {
   position: sticky;
   top: 0;
   z-index: 5;
-  background: var(--md-sys-color-surface);
-  padding: 12px 0 14px;
+  margin-inline: -16px;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--md-sys-color-surface) 82%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   margin-bottom: 4px;
+  /* Text soll nicht selektiert werden, vertikales Scroll-Gesture soll durchrutschen. */
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
 }
 
 .shop-progress__label {

@@ -40,3 +40,18 @@
   max-width: 600px;
   margin-inline: auto;
 }
+
+/* Shopping-View hat oben KEIN padding — die sticky Progress-Zeile klebt bündig
+   am Header. Dashboard behält das normale padding-top. */
+.view--shopping {
+  padding-top: 0;
+}
+
+/* Direct-Kinder von .view dürfen NICHT shrinken. Grund: .view ist ein flex-column
+   Container mit fester Höhe (100% des view-tracks) und overflow-y: auto. Ohne diesen
+   Reset würden die Kinder (Cards, Shopping-Groups) auf min-content zusammengedrückt
+   — bei Cards sichtbar als "nur Bild, kein Body". flex-shrink: 0 lässt sie ihre
+   natürliche Höhe behalten; overflow-y: auto auf .view sorgt fürs Scrollen. */
+.view > * {
+  flex-shrink: 0;
+}
