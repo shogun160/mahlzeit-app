@@ -11,10 +11,17 @@
   <link rel="stylesheet" href="/styles/components/stepper.css" />
   <link rel="stylesheet" href="/styles/components/card.css" />
   <link rel="stylesheet" href="/styles/components/sheet.css" />
+  <link rel="stylesheet" href="/styles/components/view-track.css" />
+  <link rel="stylesheet" href="/styles/components/shopping-list.css" />
 </head>
 <body>
   <header id="app-header" class="app-header"></header>
-  <main id="app"></main>
+  <main id="app">
+    <div id="view-track" class="view-track" data-view="dashboard">
+      <section id="view-dashboard" class="view view--dashboard"></section>
+      <section id="view-shopping" class="view view--shopping"></section>
+    </div>
+  </main>
   <div id="detail-sheet-root"></div>
   <script type="module" src="/src/main.js"></script>
 </body>
