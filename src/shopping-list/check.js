@@ -11,6 +11,10 @@ export function toggleChecked(key) {
 }
 
 // Setzt alle Häkchen zurück. Wird vom Reset-Button im Shopping-Header genutzt.
+// Beim Reset auch die eingeklappten Kategorien wieder öffnen — sonst würden
+// Kategorien, die durch Auto-Collapse zugeklappt wurden, dauerhaft eingeklappt
+// bleiben, obwohl alle ihre Zutaten wieder offen sind.
 export function resetChecked() {
   state.checkedShopping.clear();
+  state.collapsedCategories.clear();
 }
