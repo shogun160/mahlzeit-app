@@ -128,3 +128,26 @@
   width: 22px;
   height: 22px;
 }
+
+/* Bild und Content-Bereich öffnen das Detail-Sheet (Rezept-Tab).
+   Nur der Cursor signalisiert die Interaktion — keine Farb- oder Overlay-Änderung,
+   damit die Card nicht wie ein einzelner riesiger Button wirkt. */
+.day-card__image {
+  cursor: pointer;
+}
+
+.day-card__body {
+  cursor: pointer;
+}
+
+/* Interaktive Kinder ignorieren den Body-Cursor und zeigen ihren eigenen. */
+.day-card__body .stepper,
+.day-card__body .stepper__btn,
+.day-card__body .action-btn {
+  cursor: default;
+}
+
+.day-card__body .stepper__btn:not(:disabled),
+.day-card__body .action-btn {
+  cursor: pointer;
+}
