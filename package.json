@@ -1,19 +1,23 @@
 {
-  "name": "www",
+  "name": "mahlzeit-app",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
     "@capacitor/android": "^8.4.2",
     "@capacitor/cli": "^8.4.2",
     "@capacitor/core": "^8.4.2",
     "@capawesome/capacitor-android-edge-to-edge-support": "^8.0.8"
+  },
+  "devDependencies": {
+    "vite": "^8.1.5"
   }
 }
