@@ -5,6 +5,11 @@ android {
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.mahlzeit.myapp"
+        // Suffix macht die installierte App-ID zu "com.mahlzeit.myapp.dev",
+        // ohne den Java-Package/Namespace anzufassen. Damit läuft die
+        // Rebuild-App parallel zur alten "com.mahlzeit.myapp" auf dem Gerät.
+        // Vor dem Merge auf `main`: diese Zeile entfernen.
+        applicationIdSuffix ".dev"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
