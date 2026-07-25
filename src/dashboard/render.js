@@ -24,11 +24,18 @@ export function renderDashboard(root, onChange, onOpenDetail) {
   for (const day of DAYS) {
     const dishId = state.assignment[day];
     const dish = dishesById.get(dishId);
+    // Anzahl offener (nicht abgehakter) Zutaten dieses Gerichts.
+    // Wandert im Card-Layout zwischen Zutaten-Icon (nicht selected) und Liste-Icon
+    // (selected) — Semantik: "so viele Zutaten stehen noch offen".
+    const openIngredientsCount = dish.ingredients.filter(
+      (ing) => !state.checkedShopping.has(ing.key),
+    ).length;
     const card = createDayCard({
       day,
       dish,
       portions: state.portions[day],
       isSelected: state.selected[day],
+      openIngredientsCount,
       handlers: {
         onPortionChange: (delta) => {
           changePortion(day, delta);

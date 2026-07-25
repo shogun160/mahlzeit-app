@@ -6,13 +6,17 @@ import { PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 //     dish: { id, name, cuisine, cooktime, ... },
 //     portions: number,
 //     isSelected: boolean,
+//     openIngredientsCount: number,   // Zutaten dieses Gerichts nicht in checkedShopping.
+//                                     // Badge wandert je nach isSelected:
+//                                     // - !isSelected → am Zutaten-Icon ("so viele Zutaten fehlen")
+//                                     // - isSelected  → am Liste-Icon ("so viele Zutaten offen auf der Liste")
 //     handlers: {
 //       onPortionChange(delta),
 //       onReroll(),
 //       onToggleSelected(),
 //       onOpenDetail(tab)              // tab: 'zutaten' | 'rezept'
 //     } }
-export function createDayCard({ day, dish, portions, isSelected, handlers }) {
+export function createDayCard({ day, dish, portions, isSelected, openIngredientsCount, handlers }) {
   const article = document.createElement('article');
   article.className = 'day-card' + (isSelected ? ' day-card--selected' : '');
   const imageSrc = `/dishes/dish-${dish.id}.jpg`;
@@ -21,24 +25,45 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
   const selectionIcon = isSelected ? 'icon-einkaufsliste-aktiv' : 'icon-einkaufsliste-inaktiv';
   const selectionLabel = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
 
+  // Makros werden mit den Portionen skaliert und ganzzahlig gerundet.
+  const kcal = Math.round(dish.kcal * portions);
+  const protein = Math.round(dish.p * portions);
+  const carbs = Math.round(dish.kh * portions);
+  const fat = Math.round(dish.f * portions);
+
   article.innerHTML = `
-    <img class="day-card__image" src="${imageSrc}" alt="${dish.name}" loading="lazy" data-action="open-recipe" />
-    <div class="day-card__body">
-      <div class="stepper stepper--compact" role="group" aria-label="Portionen für ${day}">
-        <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <button class="stepper__btn" data-action="portion-minus" aria-label="Weniger Personen für ${day}" ${minusDisabled ? 'disabled' : ''}>−</button>
-        <span class="stepper__value">${portions}</span>
-        <button class="stepper__btn" data-action="portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
+    <div class="day-card__image-wrap">
+      <img class="day-card__image" src="${imageSrc}" alt="${dish.name}" loading="lazy" data-action="open-recipe" />
+      <div class="day-card__portion-overlay">
+        <div class="stepper stepper--pill" role="group" aria-label="Portionen für ${day}">
+          <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <button class="stepper__btn" data-action="portion-minus" aria-label="Weniger Personen für ${day}" ${minusDisabled ? 'disabled' : ''}>−</button>
+          <span class="stepper__value">${portions}</span>
+          <button class="stepper__btn" data-action="portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
+        </div>
       </div>
-      <div class="day-card__day">${day}</div>
-      <div class="day-card__meta">~${dish.cooktime} Min. · ${dish.cuisine}</div>
+      <div class="day-card__makros" aria-hidden="true">
+        <span class="makro-pill makro-pill--kcal">${kcal}<span class="unit"> kcal</span></span>
+        <span class="makro-pill makro-pill--p">${protein}<span class="unit"> g P</span></span>
+        <span class="makro-pill makro-pill--kh">${carbs}<span class="unit"> g KH</span></span>
+        <span class="makro-pill makro-pill--f">${fat}<span class="unit"> g F</span></span>
+      </div>
+    </div>
+    <div class="day-card__body">
+      <div class="day-card__header-row">
+        <div class="day-card__day">${day}</div>
+        <div class="day-card__meta">~${dish.cooktime} Min. · ${dish.cuisine}</div>
+      </div>
       <h2 class="day-card__title">${dish.name}</h2>
       <div class="day-card__actions">
-        <button class="action-btn" data-action="open-ingredients" aria-label="Zutaten für ${day} anzeigen">
-          <img src="/icons/icon-rezept-zutaten.png" alt="" />
+        <button class="action-btn" data-action="open-ingredients" aria-label="Zutaten für ${day} anzeigen (${openIngredientsCount} offen)">
+          <span class="action-btn__icon-wrap">
+            <img src="/icons/icon-rezept-zutaten.png" alt="" />
+            ${!isSelected && openIngredientsCount > 0 ? `<span class="action-btn__badge">${openIngredientsCount}</span>` : ''}
+          </span>
           <span>Zutaten</span>
         </button>
         <button class="action-btn" data-action="reroll" aria-label="Neues Gericht für ${day} auslosen">
@@ -46,7 +71,10 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
           <span>Wechseln</span>
         </button>
         <button class="action-btn ${isSelected ? 'action-btn--active' : ''}" data-action="toggle-selected" aria-label="${selectionLabel}">
-          <img src="/icons/${selectionIcon}.png" alt="" />
+          <span class="action-btn__icon-wrap">
+            <img src="/icons/${selectionIcon}.png" alt="" />
+            ${isSelected && openIngredientsCount > 0 ? `<span class="action-btn__badge">${openIngredientsCount}</span>` : ''}
+          </span>
           <span>Liste</span>
         </button>
       </div>
