@@ -3,8 +3,6 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  max-width: 600px;
-  margin: 0 auto;
   padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
   background: var(--md-sys-color-surface);
@@ -16,10 +14,11 @@
 .app-header__logo-wrap {
   display: flex;
   align-items: center;
+  min-height: var(--touch-target-min);
 }
 
 .app-header__logo {
-  height: 36px;
+  height: 44px;
   width: auto;
   display: block;
 }
@@ -28,6 +27,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-height: var(--touch-target-min);
 }
 
 .icon-btn {
@@ -59,10 +59,28 @@
   object-fit: contain;
 }
 
-/* Inline-SVG-Kind in .icon-btn analog zum <img>-Kind stylen (Reset-Icon in Shopping-View). */
+/* Inline-SVG-Kind in .icon-btn analog zum <img>-Kind stylen (Reset-Icon in Shopping-View).
+   Farbe = primary Teal, konsistent mit den PNG-Icons (Reroll, Zutaten, Liste-Aktiv). */
 .icon-btn svg {
   width: 24px;
   height: 24px;
   display: block;
-  color: var(--md-sys-color-on-surface);
+  flex-shrink: 0;
+  color: var(--md-sys-color-primary);
+}
+
+/* Aktiv-Variante: gleiche Tint wie action-btn--active auf einer selektierten Card
+   (30 % primary Mix). Wird auf den Reset-Button in der Shopping-Header gelegt,
+   damit "hier gibt es Häkchen zum Zurücksetzen" visuell hervortritt. */
+.icon-btn--active {
+  background: var(--md-sys-color-primary-tint);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.icon-btn--active svg {
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.icon-btn--active:hover {
+  background: var(--md-sys-color-primary-tint-hover);
 }
