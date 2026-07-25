@@ -1,0 +1,76 @@
+/* Selection-Toolbar über der ersten Dashboard-Card. Flat, ohne Card-Rahmen —
+   sitzt im Content-Flow und scrollt mit. M3-Bulk-Selection-Pattern. */
+.selection-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: 8px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  color: var(--md-sys-color-on-surface);
+  transition: background 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.selection-toolbar:hover {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.selection-toolbar:active {
+  transform: scale(0.99);
+}
+
+/* Master-Indicator: 20x20 runder Kreis. Alle drei Zustände (empty / mixed / full)
+   werden durch das SVG gezeichnet — kein CSS-Border/-Background mehr nötig.
+   currentColor steuert die Farbe: dezent grau bei empty, primary bei mixed/full. */
+.selection-toolbar__checkbox {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 160ms ease;
+}
+
+.selection-toolbar__checkbox svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.selection-toolbar__checkbox--empty {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.selection-toolbar__checkbox--mixed,
+.selection-toolbar__checkbox--full {
+  color: var(--md-sys-color-primary);
+}
+
+/* Textlabel Mitte: flex-grow, damit die Action rechts andockt. */
+.selection-toolbar__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Action-Label rechts: Text-Button-Look in primary, konsistent mit anderen
+   textuellen Actions (kein extra <button> — die ganze Toolbar ist EIN Button). */
+.selection-toolbar__action {
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  letter-spacing: 0.01em;
+}

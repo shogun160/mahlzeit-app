@@ -27,7 +27,10 @@
   -webkit-overflow-scrolling: touch;
   box-sizing: border-box;
   padding: 8px 16px;
-  padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+  /* + var(--bottom-nav-height): die Nav ist fixed und liegt visuell über dem
+     letzten Content — ohne Padding würde die letzte Karte / das letzte Item
+     dahinter verschwinden. */
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px);
   display: flex;
   flex-direction: column;
   gap: 16px;

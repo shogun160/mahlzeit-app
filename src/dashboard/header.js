@@ -1,8 +1,12 @@
 import { state, PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 
 // Rendert den Header. Layout hängt an `view`:
-// - dashboard: Logo + Global-Stepper + Reroll-All (Session 3-4-Verhalten)
+// - dashboard: Logo + Reroll-All + Global-Stepper
 // - shopping: Logo + Reset-Button (nur wenn checkedShopping nicht leer)
+// Die Toggle-All-Bulk-Action lebt bewusst NICHT im Header, sondern in der
+// Selection-Toolbar über der ersten Card (siehe selection-toolbar.js). Grund:
+// im Header ist sie visuell eine dritte Action neben Reroll+Stepper und teilt
+// keinen State-Kontext mit diesen — sie gehört semantisch zu den Cards.
 export function renderHeader(root, { view, onGlobalPortionChange, onRerollAll, onResetChecked }) {
   if (view === 'shopping') {
     renderShoppingHeader(root, { onResetChecked });

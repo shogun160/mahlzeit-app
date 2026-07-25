@@ -247,6 +247,20 @@
   text-decoration: line-through;
 }
 
+/* Done-Banner: erscheint zwischen Progress und Groups, wenn alle Zutaten abgehakt
+   sind. Positiv-Framing, primary-tinted, ohne sticky-Verhalten — reiht sich einfach
+   in den Fluss ein und ist beim 100%-Fortschritt genau da, wo der User gerade tippt. */
+.shop-done-banner {
+  margin: 12px 0 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--md-sys-color-primary-tint);
+  color: var(--md-sys-color-primary);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: center;
+}
+
 /* Empty-State */
 .shop-empty {
   padding: 64px 24px 40px;

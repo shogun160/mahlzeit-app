@@ -35,8 +35,16 @@ export function renderShoppingList(root, { onChange }) {
     return html;
   }).join('');
 
+  // "Alles besorgt"-Banner, wenn nichts mehr offen ist. Leftover-Items (bereits
+  // abgehakt, Gericht nicht mehr im Plan) sind in items enthalten und zählen
+  // als "abgehakt" — das Banner erscheint also auch, wenn nur noch Leftover-Reste
+  // in der Liste stehen. Bewusst so: der User hat sein Einkaufsziel erreicht.
+  const openCount = items.filter((i) => !state.checkedShopping.has(i.key)).length;
+  const doneBannerHtml = openCount === 0 ? renderDoneBanner() : '';
+
   root.innerHTML = `
     ${renderProgress(items)}
+    ${doneBannerHtml}
     <div class="shop-groups">${groupsHtml}</div>
   `;
 
@@ -186,7 +194,9 @@ function playFlip(root, oldRects) {
 
 function renderGroup(cat, groupItems, stackIdx) {
   const total = groupItems.length;
-  const doneCount = groupItems.filter((i) => state.checkedShopping.has(i.key)).length;
+  // Zählung konsistent zur Progress-Bar oben: "N offen von M gesamt".
+  // Zeigt auf einen Blick, wieviel noch zu erledigen ist.
+  const openCount = groupItems.filter((i) => !state.checkedShopping.has(i.key)).length;
   const collapsed = isCollapsed(cat);
   const sorted = sortItems(groupItems);
   const rows = sorted.map(renderRow).join('');
@@ -208,7 +218,7 @@ function renderGroup(cat, groupItems, stackIdx) {
         </svg>
       </span>
       <span class="shop-group__title">${CAT_LABELS[cat]}</span>
-      <span class="shop-group__count" aria-label="${doneCount} von ${total} gekauft">${doneCount}/${total}</span>
+      <span class="shop-group__count" aria-label="${openCount} von ${total} offen">${openCount}/${total}</span>
     </button>
     <ul class="shop-list ${collapsed ? 'shop-list--collapsed' : ''}" data-cat="${cat}" style="--stack-idx: ${stackIdx};">${rows}</ul>
   `;
@@ -243,6 +253,14 @@ function renderRow(item) {
         <span class="shop-item__qty">${formatQuantity(item)}</span>
       </span>
     </li>
+  `;
+}
+
+function renderDoneBanner() {
+  return `
+    <div class="shop-done-banner" role="status">
+      Sauber, alles besorgt – Mahlzeit!
+    </div>
   `;
 }
 

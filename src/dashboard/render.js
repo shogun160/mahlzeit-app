@@ -4,6 +4,7 @@ import { dishesById, allDishIds, shuffled } from '../data/dishes.js';
 import { rerollDay } from './reroll.js';
 import { changePortion } from './portions.js';
 import { toggleSelected } from './selection.js';
+import { renderSelectionToolbar } from './selection-toolbar.js';
 
 function pickInitialAssignment() {
   const picks = shuffled(allDishIds).slice(0, DAYS.length);
@@ -21,6 +22,13 @@ export function renderDashboard(root, onChange, onOpenDetail) {
   }
 
   root.innerHTML = '';
+
+  // Selection-Toolbar über der ersten Card. Sitzt im Content-Flow und scrollt
+  // mit — kein sticky, kein permanenter Platzverlust bei tiefem Scroll.
+  const toolbarRoot = document.createElement('div');
+  root.appendChild(toolbarRoot);
+  renderSelectionToolbar(toolbarRoot, { onChange });
+
   for (const day of DAYS) {
     const dishId = state.assignment[day];
     const dish = dishesById.get(dishId);

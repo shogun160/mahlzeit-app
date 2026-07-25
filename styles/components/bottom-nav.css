@@ -1,0 +1,105 @@
+/* Bottom-Nav: fixed am unteren Rand, immer sichtbar über der aktiven View.
+   Höhe = --bottom-nav-height (siehe tokens.css) + safe-area-inset-bottom als
+   inneres padding, damit die Tabs nicht auf der Gestensteuerungs-Leiste kleben.
+   z-index 50: über der sticky Progress-Bar (5) und dem app-header (10), aber
+   unter dem Detail-Sheet (100), damit das Sheet die Bottom-Nav sauber überdeckt. */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  background: var(--md-sys-color-surface);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  /* Dezente Aufhebung nach oben — hebt die Nav vom scrollenden Content ab, ohne
+     Material-3-Guidelines zu verletzen (M3 nutzt für die NavBar zwar keinen
+     Shadow, aber unser Surface ist sehr hell und ein 1 px Border verschwindet
+     fast — ein schwacher Schatten kompensiert das). */
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.04);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bottom-nav__tab {
+  flex: 1 1 0;
+  min-height: var(--bottom-nav-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav__tab:active {
+  transform: scale(0.97);
+}
+
+/* Icon sitzt in einer Pill (analog zu Material 3 NavigationBar). Aktiver Tab
+   bekommt die primary-tint als Pill-Hintergrund — konsistent mit den anderen
+   Aktiv-Zuständen im Rebuild (siehe Session-5-Tokens). */
+.bottom-nav__icon-wrap {
+  position: relative;
+  width: 56px;
+  height: 28px;
+  border-radius: var(--radius-pill);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 160ms ease;
+}
+
+.bottom-nav__icon {
+  width: 22px;
+  height: 22px;
+  display: block;
+  object-fit: contain;
+}
+
+.bottom-nav__label {
+  font-size: 0.6875rem; /* 11 px */
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1;
+}
+
+/* Aktiver Tab: Icon-Pill füllt sich mit primary-tint, Label wird primary + bold. */
+.bottom-nav__tab--active .bottom-nav__icon-wrap {
+  background: var(--md-sys-color-primary-tint);
+}
+
+.bottom-nav__tab--active .bottom-nav__label {
+  color: var(--md-sys-color-primary);
+  font-weight: 700;
+}
+
+/* Badge oben-rechts über dem Icon: kleine Pill mit Anzahl offener Zutaten.
+   Nur gerendert wenn > 0 (siehe bottom.js), also hier keine Zero-State-Regel nötig. */
+.bottom-nav__badge {
+  position: absolute;
+  top: -4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  /* Weiße Umrandung, damit die Badge auch bei aktivem Tab (primary-tint-Hintergrund)
+     sauber vom Icon abgesetzt bleibt. */
+  box-shadow: 0 0 0 2px var(--md-sys-color-surface);
+}
