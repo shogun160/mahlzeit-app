@@ -51,6 +51,9 @@
   color: var(--md-sys-color-on-surface);
   margin-bottom: 6px;
   line-height: 1.3;
+  /* Titel beginnt IMMER unter der Portion-Pille, damit auch Zeile 1
+     die volle Card-Breite nutzt. */
+  clear: right;
 }
 
 .day-card__meta {
