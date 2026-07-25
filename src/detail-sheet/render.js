@@ -41,6 +41,10 @@ export function closeDetailSheet() {
   const overlay = rootEl.querySelector('.sheet-overlay');
   if (overlay) overlay.classList.remove('is-open');
   document.removeEventListener('keydown', handleEscape);
+  if (typeof rootEl.__closeSwipeCleanup === 'function') {
+    rootEl.__closeSwipeCleanup();
+    rootEl.__closeSwipeCleanup = null;
+  }
   setTimeout(() => {
     // Nur wirklich verstecken, wenn nicht in der Zwischenzeit wieder geöffnet.
     if (rootEl && !rootEl.querySelector('.sheet-overlay.is-open')) {
@@ -122,6 +126,54 @@ function attachHandlers() {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
   attachSwipe();
+  attachCloseSwipe();
+}
+
+// Runter-Swipe im Sheet schließt es. Bereich: gesamter Sheet, außer interaktive
+// Kinder (Buttons, Stepper). Wenn im Panel gestartet und das Panel bereits scrollt
+// (scrollTop > 0), wird der Swipe ignoriert — der User will scrollen, nicht schließen.
+// Bei Panel-Scroll-Gesture aus scrollTop=0 sendet der Browser pointercancel —
+// dann brechen wir das Close-Tracking ab und native scroll übernimmt.
+// Runter-Swipe auf Handle oder Header schließt das Sheet.
+// setPointerCapture bindet den Pointer ans Zone-Element — der Browser kann dann
+// keine Scroll-Geste erkennen und sendet kein pointercancel. Alle Follow-Events
+// (pointermove/pointerup) landen garantiert auf der Zone.
+// Runter-Swipe von überall im Sheet (außer Buttons, Stepper, scrollbare Panels)
+// schließt das Sheet. setPointerCapture auf das Sheet-Element bindet alle Follow-
+// Events dorthin — pointerup landet garantiert an, auch wenn Zeiger rauswandert,
+// und der Browser sendet kein pointercancel weil er die Geste nicht als Scroll
+// interpretieren kann (Sheet selbst ist kein scroll-container).
+// Runter-Swipe auf Handle oder Header schließt das Sheet — iOS/Material-Konvention.
+// Panels haben eigenes Scroll (touch-action: pan-y) → dort kein Close-Swipe.
+// setPointerCapture bindet den Pointer ans Sheet, damit auch bei Draging über die
+// Zone hinaus alle Events ankommen.
+function attachCloseSwipe() {
+  const sheet = rootEl.querySelector('.sheet');
+  if (!sheet) return;
+  const state = { startX: 0, startY: 0, tracking: false };
+
+  sheet.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    if (ev.target.closest('button, .stepper')) return;
+    if (ev.target.closest('.sheet-tabs__panel')) return;
+    state.startX = ev.clientX;
+    state.startY = ev.clientY;
+    state.tracking = true;
+    try { sheet.setPointerCapture(ev.pointerId); } catch (e) {}
+  });
+
+  sheet.addEventListener('pointerup', (ev) => {
+    if (!state.tracking) return;
+    state.tracking = false;
+    try { sheet.releasePointerCapture(ev.pointerId); } catch (e) {}
+    const dx = ev.clientX - state.startX;
+    const dy = ev.clientY - state.startY;
+    if (dy <= SWIPE_THRESHOLD_PX) return;
+    if (dy <= Math.abs(dx) * SWIPE_DIRECTIONAL_RATIO) return;
+    closeDetailSheet();
+  });
+
+  sheet.addEventListener('pointercancel', () => { state.tracking = false; });
 }
 
 function attachSwipe() {
