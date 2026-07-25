@@ -1,9 +1,13 @@
 import { state, PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { changePortion } from '../dashboard/portions.js';
+import { toggleSelected } from '../dashboard/selection.js';
 import { toggleChecked } from '../shopping-list/check.js';
 import { renderIngredients } from './ingredients.js';
 import { renderRecipe } from './recipe.js';
+
+// Material Symbol shopping_bag (outlined) — für den Toggle-Button im Sheet.
+const ICON_LIST = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
 
 const TAB_ORDER = ['zutaten', 'rezept'];
 const TAB_LABELS = { zutaten: 'Zutaten', rezept: 'Rezept' };
@@ -68,7 +72,9 @@ function renderShell() {
   const portions = state.portions[day];
   const minusDisabled = portions <= PORTIONS_MIN;
   const plusDisabled = portions >= PORTIONS_MAX;
+  const isSelected = !!state.selected[day];
   const trackOffset = TAB_ORDER.indexOf(tab) * 50;
+  const listToggleLabel = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
 
   rootEl.innerHTML = `
     <div class="sheet-overlay" data-role="backdrop">
@@ -97,7 +103,10 @@ function renderShell() {
             <div class="sheet-tabs__panel" role="tabpanel" data-tab="rezept">${renderRecipe(dish)}</div>
           </div>
         </div>
-        <div class="sheet-portion-row">
+        <div class="sheet-portion-row ${isSelected ? 'sheet-portion-row--active' : ''}">
+          <button class="sheet-list-toggle" data-action="toggle-list" aria-pressed="${isSelected}" aria-label="${listToggleLabel}">
+            ${ICON_LIST}
+          </button>
           <div class="stepper stepper--compact stepper--floating" role="group" aria-label="Portionen für ${day}">
             <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -123,6 +132,7 @@ function attachHandlers() {
   rootEl.querySelector('[data-action="close"]').addEventListener('click', closeDetailSheet);
   rootEl.querySelector('[data-action="sheet-portion-minus"]').addEventListener('click', () => handleSheetPortion(-1));
   rootEl.querySelector('[data-action="sheet-portion-plus"]').addEventListener('click', () => handleSheetPortion(1));
+  rootEl.querySelector('[data-action="toggle-list"]').addEventListener('click', () => handleToggleList());
   rootEl.querySelectorAll('.sheet-tabs__btn').forEach((btn) => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
@@ -227,6 +237,23 @@ function switchTab(nextTab) {
     btn.classList.toggle('sheet-tabs__btn--active', isActive);
     btn.setAttribute('aria-selected', isActive ? 'true' : 'false');
   });
+}
+
+// Togglet die Card-Selection (state.selected[day]) direkt aus dem Sheet.
+// Aktualisiert nur die Klasse + aria-Attribut lokal — kein full re-render
+// des Sheets. Cards und Einkaufsliste ziehen via onExternalChange nach.
+function handleToggleList() {
+  if (!currentContext) return;
+  toggleSelected(currentContext.day);
+  const isSelected = !!state.selected[currentContext.day];
+  const row = rootEl.querySelector('.sheet-portion-row');
+  const btn = rootEl.querySelector('[data-action="toggle-list"]');
+  if (row) row.classList.toggle('sheet-portion-row--active', isSelected);
+  if (btn) {
+    btn.setAttribute('aria-pressed', isSelected);
+    btn.setAttribute('aria-label', isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen');
+  }
+  onExternalChange();
 }
 
 function handleSheetPortion(delta) {
