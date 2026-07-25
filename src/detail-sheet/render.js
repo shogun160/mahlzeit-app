@@ -75,15 +75,6 @@ function renderShell() {
             <h2 class="sheet-header__title" id="sheet-title">${dish.name}</h2>
           </div>
           <div class="sheet-header__actions">
-            <div class="stepper stepper--compact" role="group" aria-label="Portionen für ${day}">
-              <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <button class="stepper__btn" data-action="sheet-portion-minus" aria-label="Weniger Personen für ${day}" ${minusDisabled ? 'disabled' : ''}>−</button>
-              <span class="stepper__value">${portions}</span>
-              <button class="stepper__btn" data-action="sheet-portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
-            </div>
             <button class="sheet-close" data-action="close" aria-label="Schließen">✕</button>
           </div>
         </div>
@@ -99,6 +90,17 @@ function renderShell() {
           <div class="sheet-tabs__track" style="transform: translateX(-${trackOffset}%);">
             <div class="sheet-tabs__panel" role="tabpanel" data-tab="zutaten">${renderIngredients(dish, portions)}</div>
             <div class="sheet-tabs__panel" role="tabpanel" data-tab="rezept">${renderRecipe(dish)}</div>
+          </div>
+        </div>
+        <div class="sheet-portion-row">
+          <div class="stepper stepper--compact stepper--floating" role="group" aria-label="Portionen für ${day}">
+            <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <button class="stepper__btn" data-action="sheet-portion-minus" aria-label="Weniger Personen für ${day}" ${minusDisabled ? 'disabled' : ''}>−</button>
+            <span class="stepper__value">${portions}</span>
+            <button class="stepper__btn" data-action="sheet-portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
           </div>
         </div>
       </div>

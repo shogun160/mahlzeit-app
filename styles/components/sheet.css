@@ -18,8 +18,10 @@
 }
 
 /* Der Sheet selbst: 85vh, sitzt initial unten außerhalb (translateY 100%),
-   schiebt sich beim Öffnen hoch. Max-Breite matcht das Card-Layout. */
+   schiebt sich beim Öffnen hoch. Max-Breite matcht das Card-Layout.
+   position:relative ist Anker für die floating Portion-Pille. */
 .sheet {
+  position: relative;
   width: 100%;
   max-width: 640px;
   height: 85vh;
@@ -162,8 +164,27 @@
   flex: 0 0 50%;
   overflow-y: auto;
   padding: 16px 20px;
-  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  /* Extra Bottom-Padding, damit die letzten Zeilen nicht unter der floating
+     Portion-Pille (unten rechts, ~40 px hoch) verschwinden. */
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
   box-sizing: border-box;
+}
+
+/* Floating Portion-Pille: sitzt unten rechts über dem Content, bleibt beim
+   Scrollen stehen. Shadow gibt visuelle Elevation, damit sie klar über
+   Zutaten/Rezept-Zeilen "schwebt". */
+.sheet-portion-row {
+  position: absolute;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  right: 16px;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.sheet-portion-row .stepper--floating {
+  pointer-events: auto;
+  background: var(--md-sys-color-surface-container-lowest);
+  box-shadow: var(--md-elevation-2), 0 0 0 1px var(--md-sys-color-outline-variant);
 }
 
 /* Zutaten-Liste */
