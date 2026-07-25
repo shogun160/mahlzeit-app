@@ -71,7 +71,7 @@ Feature-Parität siehe alte App auf `main`, konkret:
 
 5. **Progress-Bar** oben: "X von Y erledigt" plus visueller Progress-Track. Reset-Button (alle abhaken zurücksetzen) optional.
 
-6. **Screen-Wechsel**: Session 5 hat noch kein Bottom-Nav (kommt Session 6). Provisorischer Umschalter — Empfehlung: ein Icon-Button in der `app-header__actions`, der einen Shopping-Screen als eigenes Root anzeigt und `main#app` versteckt (oder umgekehrt). Sheet-Component ist NICHT die richtige Antwort — die Einkaufsliste ist ein voller Screen, kein Modal.
+6. **Screen-Wechsel via Swipe-Geste** (mit dem User vor Session-Start geklärt, siehe Sektion "Design-Entscheidungen für Session 5" unten). Horizontales Wischen wechselt zwischen Dashboard und Einkaufsliste. Kein Header-Toggle, kein URL-Hash. Session 6 addiert dann die Bottom-Nav ontop, der Swipe-Code bleibt bestehen.
 
 **Modul-Vorschlag** (analog zu Session 4):
 
@@ -82,12 +82,18 @@ src/
     categories.js     ← Category-Labels, Gruppierungs-Helfer
     progress.js       ← "X von Y erledigt" + Progress-Track
     check.js          ← toggleChecked(key), State-Mutation
+  nav/
+    swipe.js          ← horizontaler Screen-Swipe (Dashboard ↔ Shopping),
+                        ← State-Slot state.view + View-Slide-Animation
   util/
     format.js         ← formatQuantity(item) hinzufügen (neben formatGrams)
 styles/
   components/
     shopping-list.css ← NEU
+    view-track.css    ← NEU (Container mit 200% Breite, translateX für View-Slide)
 ```
+
+`src/nav/swipe.js` ist bewusst schon in Session 5 vorgesehen (nicht erst Session 6). Session 6 addiert Bottom-Nav als **zusätzlichen** Trigger für denselben View-Wechsel — kein Wegwerf-Code.
 
 ## Referenz-Semantik in `main`
 
@@ -117,11 +123,27 @@ Insbesondere:
 - **Subagent-Worktree-Dispatch schlägt fehl:** Der Sandbox verweigert `Agent`-Aufrufe. Sessions 1–4 wurden in Direktausführung in der Haupt-Session gefahren — genauso weitermachen.
 - **`curl` im Bash-Sandbox braucht absoluten Pfad** (`/usr/bin/curl`) innerhalb von for-Loops / Command-Substitutions. `which curl` funktioniert normal.
 
+## Design-Entscheidungen für Session 5 (vor Session-Start mit User geklärt)
+
+Diese drei UX-Fragen wurden nach dem Session-4-Abschluss noch direkt mit dem User geklärt — die Session-5-Umsetzung soll sie ohne weitere Rückfrage übernehmen.
+
+1. **Screen-Wechsel Dashboard ↔ Einkaufsliste: horizontale Swipe-Geste.**
+   Kein Header-Toggle-Button, kein URL-Hash. Zwei Screens sitzen in einem `.view-track`-Container (Analog zum Sheet-Tabs-Track: `display:flex; width:200%`, zwei Kinder je `flex:0 0 50%`, `transform: translateX(0|-50%)` mit 250 ms cubic-bezier Transition). Swipe-Handler auf dem Track oder Body: Threshold 55 px, Richtungs-Ratio 1.4 (analog zum Sheet-Swipe in `src/detail-sheet/render.js`).
+   State-Slot: `state.view = 'dashboard' | 'shopping'`, Default `'dashboard'`. `refresh()` in `main.js` liest den Slot und setzt Track-Offset entsprechend.
+   Session 6 addiert dann Bottom-Nav-Tabs, die auf dasselbe `state.view` schreiben — Swipe-Code bleibt unverändert.
+   **Header-Rendering kontextabhängig:** auf Dashboard-View wie bisher (Global-Stepper + Reroll-All), auf Shopping-View nur Logo + optional ein Reset-Button für abgehakte Zutaten (letzterer nach eigenem Ermessen).
+
+2. **Check-Interaktion: abgehakte Zutaten bleiben in der Liste, durchgestrichen und gedimmt.**
+   Keine Reorder ans Ende, kein Ausblenden. Grund: User verliert bei versehentlichem Klick nicht die Orientierung, sieht was schon erledigt ist. Klick-Zone: die ganze Zeile (Label + Menge + Check-Circle), großzügiges Touch-Target.
+
+3. **Progress-Bar: sticky oben** (unter dem Header, über der Kategorien-Liste).
+   Bleibt beim Scrollen sichtbar — Fortschritts-Feedback beim Abhaken ist genau dann wertvoll wenn man tief in der Liste ist. Anzeige "X von Y erledigt" + visueller Track (Fill-Bar in primary-Farbe).
+
 ## Empfohlener Skill-Flow
 
-1. `writing-plans` invoken, Session-5-Plan schreiben (analog zu Session-4-Plan, ablegen unter `docs/redesign/2026-07-25-session-5-plan.md`)
-2. Plan vom User approven lassen — insbesondere Design-Fragen zum **Shopping-Screen-Toggle** (Header-Icon-Button? Sheet? Volltausch von `<main>`?) und zur **Check-Interaktion** (durchgestrichen bleiben-oder-ausblenden, Reset-Button ja/nein).
-3. `executing-plans` direkt in Haupt-Session. Nach jeder größeren Interaktion (Screen-Toggle, Check-Interaktion, Kategorie-Rendering) HTTP-Smoke-Test + visueller Checkpoint mit User (Screenshot).
+1. `writing-plans` invoken, Session-5-Plan schreiben (analog zu Session-4-Plan, ablegen unter `docs/redesign/2026-07-25-session-5-plan.md`). Die drei Design-Entscheidungen oben sind schon geklärt — kein Grillen dazu, direkt in den Plan gießen.
+2. Ggf. verbleibende Detail-Fragen mit User klären (Reset-Check-Button ja/nein, Category-Reihenfolge, Progress-Bar-Style).
+3. `executing-plans` direkt in Haupt-Session. Nach jeder größeren Interaktion (Screen-Swipe, Check-Interaktion, Kategorie-Rendering) HTTP-Smoke-Test + visueller Checkpoint mit User (Screenshot).
 
 ## Nach-Session-4-Feinschliff (kleine UI-Iterationen mit dem User)
 
