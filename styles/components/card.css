@@ -96,12 +96,12 @@
 }
 
 .action-btn--active {
-  background: var(--md-sys-color-primary-container);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-surface-container-lowest));
   color: var(--md-sys-color-on-primary-container);
 }
 
 .action-btn--active:hover {
-  background: var(--md-sys-color-primary-container);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 35%, var(--md-sys-color-surface-container-lowest));
 }
 
 .action-btn:active {
