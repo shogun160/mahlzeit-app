@@ -27,21 +27,13 @@
 
 .day-card__body {
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
 }
 
-.day-card__meta-row {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.day-card__meta-text {
-  flex: 1 1 auto;
-  min-width: 0;
+/* Portion-Pille schwebt rechts oben, der Text (Tag + Titel + Meta) fließt
+   links davon und ab Zeile 2 unter die Pille durch. */
+.day-card__body .stepper--compact {
+  float: right;
+  margin: 0 0 4px 12px;
 }
 
 .day-card__day {
@@ -59,8 +51,6 @@
   color: var(--md-sys-color-on-surface);
   margin-bottom: 6px;
   line-height: 1.3;
-  /* Reserviert immer Platz für 2 Zeilen, damit Cards gleich hoch sind */
-  min-height: 2.6em;
 }
 
 .day-card__meta {
@@ -73,6 +63,8 @@
   gap: 8px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
   padding-top: 12px;
+  margin-top: 12px;
+  clear: both;
 }
 
 .action-btn {

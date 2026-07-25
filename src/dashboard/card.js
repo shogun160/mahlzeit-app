@@ -19,22 +19,18 @@ export function createDayCard({ day, dish, portions, isSelected, handlers }) {
   article.innerHTML = `
     <img class="day-card__image" src="${imageSrc}" alt="${dish.name}" loading="lazy" />
     <div class="day-card__body">
-      <div class="day-card__meta-row">
-        <div class="day-card__meta-text">
-          <div class="day-card__day">${day}</div>
-          <h2 class="day-card__title">${dish.name}</h2>
-          <div class="day-card__meta">~${dish.cooktime} Min. · ${dish.cuisine}</div>
-        </div>
-        <div class="stepper stepper--compact" role="group" aria-label="Portionen für ${day}">
-          <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <button class="stepper__btn" data-action="portion-minus" aria-label="Weniger Personen für ${day}" ${minusDisabled ? 'disabled' : ''}>−</button>
-          <span class="stepper__value">${portions}</span>
-          <button class="stepper__btn" data-action="portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
-        </div>
+      <div class="stepper stepper--compact" role="group" aria-label="Portionen für ${day}">
+        <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <button class="stepper__btn" data-action="portion-minus" aria-label="Weniger Personen für ${day}" ${minusDisabled ? 'disabled' : ''}>−</button>
+        <span class="stepper__value">${portions}</span>
+        <button class="stepper__btn" data-action="portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
       </div>
+      <div class="day-card__day">${day}</div>
+      <h2 class="day-card__title">${dish.name}</h2>
+      <div class="day-card__meta">~${dish.cooktime} Min. · ${dish.cuisine}</div>
       <div class="day-card__actions">
         <button class="action-btn" data-action="reroll" aria-label="Neues Gericht für ${day} auslosen">
           <img src="/icons/icon-auslosen.png" alt="" />
