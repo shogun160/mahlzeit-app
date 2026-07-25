@@ -1,0 +1,27 @@
+# Node
+node_modules/
+
+# Capacitor / Android build artifacts
+android/.gradle/
+android/build/
+android/app/build/
+android/.idea/
+android/local.properties
+android/captures/
+android/*.iml
+android/app/*.iml
+android/app/release/
+*.apk
+*.aab
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Env
+.env
+.env.local
