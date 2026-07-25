@@ -1,0 +1,13 @@
+{
+  "appId": "com.mahlzeit.myapp",
+  "appName": "Mahlzeit",
+  "webDir": "www",
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "disable"
+    },
+    "EdgeToEdge": {
+      "backgroundColor": "#f7f8f7"
+    }
+  }
+}
