@@ -1,15 +1,12 @@
 import { state, PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 
 export function renderHeader(root, { onGlobalPortionChange, onRerollAll }) {
-  root.innerHTML = '';
-
-  const header = document.createElement('header');
-  header.className = 'app-header';
-
   const minusDisabled = state.globalPortions <= PORTIONS_MIN;
   const plusDisabled = state.globalPortions >= PORTIONS_MAX;
 
-  header.innerHTML = `
+  // root ist bereits <header id="app-header" class="app-header"> — Inhalt direkt hineinschreiben,
+  // damit sticky auf dem Body-direkten Element wirkt (kein zusätzlicher Wrapper).
+  root.innerHTML = `
     <div class="app-header__logo-wrap">
       <img class="app-header__logo" src="/logo.png" alt="Mahlzeit" />
     </div>
@@ -29,9 +26,7 @@ export function renderHeader(root, { onGlobalPortionChange, onRerollAll }) {
     </div>
   `;
 
-  header.querySelector('[data-action="global-minus"]').addEventListener('click', () => onGlobalPortionChange(-1));
-  header.querySelector('[data-action="global-plus"]').addEventListener('click', () => onGlobalPortionChange(1));
-  header.querySelector('[data-action="reroll-all"]').addEventListener('click', () => onRerollAll());
-
-  root.appendChild(header);
+  root.querySelector('[data-action="global-minus"]').addEventListener('click', () => onGlobalPortionChange(-1));
+  root.querySelector('[data-action="global-plus"]').addEventListener('click', () => onGlobalPortionChange(1));
+  root.querySelector('[data-action="reroll-all"]').addEventListener('click', () => onRerollAll());
 }
