@@ -102,6 +102,18 @@ Insbesondere:
 2. Plan vom User approven lassen — insbesondere Design-Fragen zum Sheet (Höhe, Backdrop-Farbe, Tab-Style)
 3. `executing-plans` direkt in Haupt-Session. Nach jeder größeren Interaktion (Sheet öffnet, Tabs wechseln, Zutaten skalieren) HTTP-Smoke-Test + visueller Checkpoint mit User (Screenshot).
 
+## Nach-Session-3-Feinschliff (kleine UI-Iterationen mit dem User)
+
+Diese Punkte kamen nach dem ursprünglichen Session-3-Abschluss durch visuellen Test und User-Feedback dazu — Card-Struktur und Styles sehen jetzt anders aus als im Plan-Doc beschrieben:
+
+- **Header:** ist direkt `<header id="app-header" class="app-header">` unter `<body>` (kein Wrapper-`<div>` mehr, sonst hätte sticky nicht gewirkt). `renderHeader(root, callbacks)` füllt nur den Inhalt (Logo + Actions), keinen zusätzlichen `<header>`-Wrap.
+- **`html, body { min-height: 100% }`** (nicht `height`) — sonst begrenzt der Viewport-hohe Body den Sticky-Range.
+- **Card-Layout ist Float statt Zwei-Spalten-Flex.** `.day-card__body` ist normaler Block-Flow. Reihenfolge im HTML: Portion-Pille (floated right) → Day-Label → Meta (Zeit·Küche) → Titel → Actions.
+- **Selected-State ist ein Tint, kein Ring.** `.day-card--selected` mixt 15% Primary in den Card-Background. Zusätzlich bekommen **alle** interaktiven Kinder (`.action-btn` + `.stepper--compact`) 30% Primary-Tint, damit die ganze Card visuell "gehoben" wirkt.
+- **`.action-btn--active` Modifier** wird von `card.js` auf den Liste-Button gesetzt wenn ausgewählt — bleibt drin, obwohl `.day-card--selected .action-btn` denselben Style setzt. Redundant, aber signalisiert Intent.
+- **Titel** hat `min-height: 2.6em` (2 Zeilen Reserve, konstante Card-Höhe) und `clear: right` (springt unter die Pille, damit Zeile 1 die volle Breite hat). Der neue Zutaten-Button in Session 4 muss in `.day-card__actions` als **erster** Button rein — Reihenfolge dann Zutaten · Wechseln · Liste, siehe unten.
+- **Icon-Padding-Kompensation:** `.action-btn img[src*="icon-auslosen"]` wird auf 22 px hochskaliert, weil das PNG mehr Transparent-Padding hat als die anderen (Motiv 179×196 vs. 210×198 auf 220×220). Falls Session 4 neue Icons einführt (z. B. für den Zutaten-Button — dort passt `icon-rezept-zutaten.png`), Motiv-BBox vorher messen: `python3` mit stdlib zlib+struct-Snippet aus dem Session-3-Log, oder einfach visuell prüfen.
+
 ## Bewusste Entscheidungen aus Session 3, die für Session 4 relevant sind
 
 - **Card öffnet aktuell kein Detail-Sheet.** Card-Body-Klick macht nichts, nur die drei Buttons (Wechseln, Liste) reagieren. Session 4 muss Card-Klicks auf Bild und Content-Bereich an einen `onOpenDetail(dishId, tab)`-Handler weiterreichen. Handler kommt aus `main.js` und ruft `openDetailSheet(...)`.
