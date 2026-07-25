@@ -1,0 +1,70 @@
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  user-select: none;
+}
+
+.stepper__icon {
+  width: 18px;
+  height: 18px;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0 2px;
+}
+
+.stepper__btn {
+  min-width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.stepper__btn:hover:not(:disabled) {
+  background: var(--md-sys-color-surface-container-lowest);
+}
+
+.stepper__btn:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.stepper__btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.stepper__value {
+  min-width: 20px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Kompakte Variante für die Card — kleiner, damit Meta-Row nicht überläuft */
+.stepper--compact {
+  padding: 2px 4px;
+  gap: 2px;
+}
+
+.stepper--compact .stepper__icon {
+  width: 16px;
+  height: 16px;
+  margin: 0 1px;
+}
+
+.stepper--compact .stepper__btn {
+  min-width: 28px;
+  height: 28px;
+  font-size: 1rem;
+}
