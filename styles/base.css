@@ -5,11 +5,17 @@
   padding: 0;
 }
 
-html, body {
-  min-height: 100%;
+html {
+  height: 100%;
 }
 
+/* Body ist der App-Container: Header oben (fixe Höhe), Main darunter (flex-grow, clippt).
+   Vertikaler Scroll passiert innerhalb der aktiven .view — nicht auf body. */
 body {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
@@ -18,13 +24,14 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Layout: zentrierte Content-Spalte, Safe-Area unten für spätere Bottom-Nav */
+/* Header behält seine bisherigen Styles (siehe header.css). Er ist erstes flex-Kind
+   und wächst nicht — nimmt seine Content-Höhe. */
+
+/* Main clippt horizontales Sliding vom view-track. Vertikales Scrolling passiert
+   innerhalb der einzelnen .view (siehe view-track.css). */
 main {
-  max-width: 600px;
-  margin: 0 auto;
-  padding: 8px 16px;
-  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px);
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
 }
