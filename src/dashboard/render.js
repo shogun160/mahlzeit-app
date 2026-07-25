@@ -14,7 +14,7 @@ function pickInitialAssignment() {
   return assignment;
 }
 
-export function renderDashboard(root, onChange) {
+export function renderDashboard(root, onChange, onOpenDetail) {
   // Erst-Initialisierung: falls noch kein Assignment vorliegt, würfeln.
   if (Object.keys(state.assignment).length === 0) {
     initState(pickInitialAssignment());
@@ -22,7 +22,8 @@ export function renderDashboard(root, onChange) {
 
   root.innerHTML = '';
   for (const day of DAYS) {
-    const dish = dishesById.get(state.assignment[day]);
+    const dishId = state.assignment[day];
+    const dish = dishesById.get(dishId);
     const card = createDayCard({
       day,
       dish,
@@ -40,6 +41,9 @@ export function renderDashboard(root, onChange) {
         onToggleSelected: () => {
           toggleSelected(day);
           onChange();
+        },
+        onOpenDetail: (tab) => {
+          onOpenDetail(dishId, tab, day);
         },
       },
     });
