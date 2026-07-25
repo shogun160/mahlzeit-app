@@ -49,6 +49,9 @@ export function rerollAll() {
   DAYS.forEach((day, i) => {
     state.assignment[day] = pool[i];
     state.selected[day] = false;
+    // "Alle wechseln" ist ein globaler Reset — Portionen fallen auf den globalen
+    // Header-Wert zurück. Einzelnes rerollDay lässt Portionen bewusst unverändert.
+    state.portions[day] = state.globalPortions;
   });
   state.dishBag = {}; // Karten-spezifische Bags starten nach "Alle wechseln" neu
 }
