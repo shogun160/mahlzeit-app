@@ -68,7 +68,7 @@ export function renderStep5(draft) {
                 type="button"
                 data-action="target-reset"
                 data-role="target-reset"
-                ${isOverride ? '' : 'hidden'}
+                style="visibility: ${isOverride ? 'visible' : 'hidden'}"
                 aria-label="Vorschlag wiederherstellen">
           ${ICON_REFRESH}
         </button>
@@ -201,8 +201,9 @@ export function refreshResultDynamic(rootEl, draft) {
     suggestionEl.hidden = !isOverride;
   }
 
+  // visibility statt hidden — Button belegt weiter Platz, Card-Höhe konstant.
   const resetBtn = rootEl.querySelector('[data-role="target-reset"]');
-  if (resetBtn) resetBtn.hidden = !isOverride;
+  if (resetBtn) resetBtn.style.visibility = isOverride ? 'visible' : 'hidden';
 
   const macrosSlot = rootEl.querySelector('[data-role="macros-slot"]');
   if (macrosSlot && macros) macrosSlot.innerHTML = renderMacros(macros);
