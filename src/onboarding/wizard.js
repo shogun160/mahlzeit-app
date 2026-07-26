@@ -1,5 +1,6 @@
 import { state, getActiveProfile, getProfileById, addProfile, removeProfile, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
+import { DEFAULT_USER } from '../nutrition/defaults.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
 import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile, macrosForKcal, renderMacrosPills, THEME_CYCLE, themeIconFor, themeLabelFor } from './result.js';
 
@@ -429,6 +430,39 @@ function attachStep1Handlers() {
       });
     });
   });
+
+  // "Standard"-Preset (dritter Chip in der Gender-Zeile): uebernimmt alle
+  // Wizard-Werte aus DEFAULT_USER (Alter/Groesse/Gewicht/Aktivitaet/Ziel/
+  // Kalorien-Verteilung). Nach Klick kann der User direkt "Fertig" — oder
+  // einzelne Werte noch anpassen. Kein persistenter Gender-State: der Chip
+  // bleibt nicht aria-pressed, weil er eine Aktion ist, kein Toggle.
+  const standardBtn = rootEl.querySelector('[data-action="gender-standard"]');
+  if (standardBtn) {
+    standardBtn.addEventListener('click', () => {
+      draft.name = draft.name; // Name unangetastet
+      draft.gender = DEFAULT_USER.gender;
+      draft.age = DEFAULT_USER.age;
+      draft.heightCm = DEFAULT_USER.heightCm;
+      draft.weightKg = DEFAULT_USER.weightKg;
+      draft.activityLevel = DEFAULT_USER.activityLevel;
+      draft.goal = DEFAULT_USER.goal;
+      draft.breakfastKcal = DEFAULT_USER.breakfastKcal;
+      draft.lunchKcal = DEFAULT_USER.lunchKcal;
+      draft.dailyTargetOverride = DEFAULT_USER.dailyTargetOverride;
+      touched.gender = true;
+      touched.age = true;
+      touched.heightCm = true;
+      touched.weightKg = true;
+      touched.activityLevel = true;
+      touched.goal = true;
+      touched.breakfastKcal = true;
+      touched.lunchKcal = true;
+      touched.dailyTargetOverride = true;
+      // Re-render Step 1, damit alle Anzeigen (Stepper, Slider) die neuen
+      // Werte spiegeln.
+      renderShell();
+    });
+  }
 
   const ageMinus = rootEl.querySelector('[data-action="age-minus"]');
   const agePlus = rootEl.querySelector('[data-action="age-plus"]');

@@ -250,6 +250,17 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+/* Preset-Chip (z. B. "Standard" in der Gender-Zeile): Action, kein Toggle.
+   Visuell mit dashed border + primary-Farbe abgesetzt, damit klar wird
+   dass er eine Aktion ist und keinen selected-Zustand hat. */
+.pref-chip--preset {
+  border-style: dashed !important;
+  border-color: var(--md-sys-color-primary) !important;
+  color: var(--md-sys-color-primary);
+}
+.pref-chip--preset:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
+}
 .onboarding-chips--nowrap {
   flex-wrap: nowrap;
   overflow-x: auto;
