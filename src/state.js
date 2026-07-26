@@ -25,6 +25,45 @@ export const VIEWS = ['dashboard', 'shopping'];
 // Umbenennen dieses Keys braucht bewusste Migration, sonst Datenverlust.
 const STORAGE_KEY = 'mahlzeit-state-v2';
 
+// Profile-Template mit allen Wizard-Slots auf null. Wird sowohl fuer den
+// initialen In-Memory-State (profiles[0] = { id: 'u1', ...blank }) als auch
+// fuer neu angelegte User genutzt (Etappe 3 / Settings-Add). Zentrale Wahrheit
+// ueber die Felder eines Profils.
+function blankProfile(id) {
+  return {
+    id,
+    // Alle Wizard-Slots starten null. Der Onboarding-Wizard ist die einzige
+    // Eingabequelle beim First-Run. hasProfile() bleibt der biometrische
+    // Check (Gender+Age+Height+Weight), isProfileComplete() ergänzt um
+    // activityLevel/goal/breakfastKcal/lunchKcal für die Placeholder-Pille-
+    // Entscheidung. Name ist optional und in beiden Checks nicht enthalten.
+    name: null,
+    gender: null,
+    age: null,
+    heightCm: null,
+    weightKg: null,
+    activityLevel: null,
+    goal: null,
+    // Abendessen-Zielrechnung: Vorschlag aus Profil kann per Override gebrochen
+    // werden. Frühstück/Mittag werden vom Tagesziel abgezogen — der Rest ist
+    // das Abendessen-Ziel gegen das die Wochen-Bar rechnet.
+    dailyTargetOverride: null,
+    breakfastKcal: null,
+    lunchKcal: null,
+    showCalorieBar: true,
+    // Makro-Verteilung: entweder Preset (Ausgewogen/Proteinreich/Kohlenhydratarm/Fettarm)
+    // ODER expliziter Gramm-Override via macroTargets. Slider ziehen setzt
+    // macroTargets und macroPreset = null (Custom). Refresh setzt beides
+    // zurück auf {'balanced', null}. Siehe effectiveMacroTargets in target.js.
+    macroPreset: 'balanced',
+    macroTargets: null,
+    // Lieblingsgerichte: { [dishId]: true }. Bewusst als Map (nicht Array),
+    // damit Toggle O(1) ist und keine Reihenfolge suggeriert wird. Pro Profil
+    // getrennt, damit Partner-User eigene Favoriten pflegen kann.
+    favorites: {},
+  };
+}
+
 // Struktur:
 //   assignment       { [day: string]: number }   // Tag → dishId
 //   selected         { [day: string]: boolean }  // Tag ausgewählt für Einkaufsliste?
@@ -63,38 +102,16 @@ export const state = {
       middleEast: false,
       americas: false,
     },
-    profile: {
-      // Alle Wizard-Slots starten null. Der Onboarding-Wizard ist die einzige
-      // Eingabequelle beim First-Run. hasProfile() bleibt der biometrische
-      // Check (Gender+Age+Height+Weight), isProfileComplete() ergänzt um
-      // activityLevel/goal/breakfastKcal/lunchKcal für die Placeholder-Pille-
-      // Entscheidung. Name ist optional und in beiden Checks nicht enthalten.
-      name: null,
-      gender: null,
-      age: null,
-      heightCm: null,
-      weightKg: null,
-      activityLevel: null,
-      goal: null,
-      // Abendessen-Zielrechnung: Vorschlag aus Profil kann per Override gebrochen
-      // werden. Frühstück/Mittag werden vom Tagesziel abgezogen — der Rest ist
-      // das Abendessen-Ziel gegen das die Wochen-Bar rechnet.
-      dailyTargetOverride: null,
-      breakfastKcal: null,
-      lunchKcal: null,
-      showCalorieBar: true,
-      // Makro-Verteilung: entweder Preset (Ausgewogen/Proteinreich/Kohlenhydratarm/Fettarm)
-      // ODER expliziter Gramm-Override via macroTargets. Slider ziehen setzt
-      // macroTargets und macroPreset = null (Custom). Refresh setzt beides
-      // zurück auf {'balanced', null}. Siehe effectiveMacroTargets in target.js.
-      macroPreset: 'balanced',
-      macroTargets: null,
-      // Lieblingsgerichte: { [dishId]: true }. Bewusst als Map (nicht Array),
-      // damit Toggle O(1) ist und keine Reihenfolge suggeriert wird. Nested im
-      // profile-Slot vorbereitet fuer Multi-User: spaeter zieht ein aeusserer
-      // profiles-Layer die Struktur nach oben, favorites wandert 1:1 mit.
-      favorites: {},
-    },
+    // Multi-Profile: profiles[] ist die primaere Quelle, activeProfileId
+    // markiert den aktiven User (Basis fuer Bedarfs-Pille + Naehrwert-Balken).
+    // profile bleibt als Rollback-Mirror des aktiven Users im Storage — wird
+    // bei jedem saveState() aus getActiveProfile() gespiegelt, damit ein
+    // Downgrade zur Vorgaenger-App-Version (die nur `profile` kennt) nicht
+    // kaputt geht. In-Memory wird `profile` nicht mehr gelesen — alle
+    // Callsites gehen ueber getActiveProfile().
+    profiles: [blankProfile('u1')],
+    activeProfileId: 'u1',
+    profile: blankProfile('u1'),
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
 };
@@ -118,15 +135,104 @@ export function setView(next) {
   state.view = next;
 }
 
+// --- Profile-Helper ------------------------------------------------------
+
+// Liefert das aktive Profil per activeProfileId. Fallback-Kaskade:
+//   1) Match auf activeProfileId
+//   2) profiles[0] wenn Liste nicht leer (Bug-State: activeProfileId zeigt ins Leere)
+//   3) neu angelegtes Blank-Profil (Notfall — sollte in der Praxis nie greifen)
+// Rueckgabe ist immer eine gueltige Reference; Consumer duerfen an ihr mutieren.
+export function getActiveProfile() {
+  const profiles = state.settings.profiles;
+  const activeId = state.settings.activeProfileId;
+  if (Array.isArray(profiles) && profiles.length > 0) {
+    const hit = profiles.find((p) => p && p.id === activeId);
+    if (hit) return hit;
+    // Bug-State: activeId zeigt ins Leere. Auf profiles[0] zuruecksetzen und
+    // repariert weitergeben. Persistenz passiert beim naechsten saveState().
+    state.settings.activeProfileId = profiles[0].id;
+    return profiles[0];
+  }
+  // Notfall: profiles-Liste leer. Fresh Blank anlegen — sollte praktisch nie
+  // passieren (Migration + Add/Remove-Guard verhindern das).
+  const fresh = blankProfile('u1');
+  state.settings.profiles = [fresh];
+  state.settings.activeProfileId = fresh.id;
+  return fresh;
+}
+
+export function getProfileById(id) {
+  const profiles = state.settings.profiles;
+  if (!Array.isArray(profiles)) return null;
+  return profiles.find((p) => p && p.id === id) ?? null;
+}
+
+// Vergibt die naechste freie u<N>-ID (u1, u2, u3, ...). Beim Loeschen bleiben
+// IDs bestehen (Guardrail Etappe 5: keine Reindexierung, damit Assignment-
+// Referenzen stabil bleiben).
+function nextProfileId() {
+  const profiles = state.settings.profiles || [];
+  let n = 1;
+  const used = new Set(profiles.map((p) => p?.id));
+  while (used.has(`u${n}`)) n++;
+  return `u${n}`;
+}
+
+// Legt ein neues Profil an. patch enthaelt die Wizard-Werte; fehlende Felder
+// werden aus blankProfile() ergaenzt. ID wird immer generiert (Caller kann
+// keine setzen). Neuer Eintrag wird ans Ende von profiles[] angehaengt.
+export function addProfile(patch = {}) {
+  const id = nextProfileId();
+  const p = { ...blankProfile(id), ...patch, id };
+  state.settings.profiles.push(p);
+  return p;
+}
+
+// Loescht ein Profil per ID. Verweigert wenn es der erste Eintrag ist
+// (Mindestens-ein-Profil-Regel), rueckgabe true bei Erfolg, false wenn
+// abgelehnt oder unbekannte ID.
+export function removeProfile(id) {
+  const profiles = state.settings.profiles;
+  if (!Array.isArray(profiles) || profiles.length === 0) return false;
+  if (profiles[0]?.id === id) return false; // User 1 bleibt geschuetzt
+  const idx = profiles.findIndex((p) => p && p.id === id);
+  if (idx === -1) return false;
+  profiles.splice(idx, 1);
+  // Falls das geloeschte Profil aktiv war -> Fallback auf profiles[0].
+  if (state.settings.activeProfileId === id) {
+    state.settings.activeProfileId = profiles[0].id;
+  }
+  return true;
+}
+
+// Merged patch in ein bestehendes Profil. Gibt das aktualisierte Profil
+// zurueck oder null wenn ID unbekannt. ID selbst ist immutable (patch.id wird
+// ignoriert).
+export function updateProfile(id, patch) {
+  const p = getProfileById(id);
+  if (!p) return null;
+  for (const [k, v] of Object.entries(patch || {})) {
+    if (k === 'id') continue;
+    p[k] = v;
+  }
+  return p;
+}
+
+export function setActiveProfileId(id) {
+  if (getProfileById(id)) state.settings.activeProfileId = id;
+}
+
 // Favoriten-Helper. isFavorite ist ein reiner Getter (auch fuer Filter/Sort im
 // Picker), toggleFavorite mutiert und muss vom Caller via saveState persistiert
 // werden (refresh() in main.js triggert das ohnehin nach jedem UI-Event).
+// Beide beziehen sich immer auf den aktiven User — Multi-User-Favoriten sind
+// pro Profil getrennt.
 export function isFavorite(dishId) {
-  return !!state.settings.profile.favorites?.[dishId];
+  return !!getActiveProfile().favorites?.[dishId];
 }
 
 export function toggleFavorite(dishId) {
-  const favs = state.settings.profile.favorites;
+  const favs = getActiveProfile().favorites;
   if (favs[dishId]) delete favs[dishId];
   else favs[dishId] = true;
 }
@@ -135,6 +241,11 @@ export function toggleFavorite(dishId) {
 // serialisiert; alle anderen Slots sind plain und gehen direkt durch JSON.
 export function saveState() {
   try {
+    // profile-Mirror aktualisieren, damit ein Rollback zur Vorgaenger-App-
+    // Version (die profiles[]/activeProfileId nicht kennt) den aktiven User
+    // weiterhin unter settings.profile findet. In-App wird der Mirror nicht
+    // gelesen — nur getActiveProfile() zaehlt.
+    state.settings.profile = { ...getActiveProfile() };
     const snapshot = {
       assignment: state.assignment,
       selected: state.selected,
@@ -153,7 +264,8 @@ export function saveState() {
 
 // Lädt persistierten State zurück. Migriert Alt-Format (globalPortions)
 // zu settings.defaultPortions, damit alte Sessions nach dem Rebuild sauber
-// weitergehen.
+// weitergehen. Multi-Profile-Migration: alter settings.profile-Slot wird zu
+// profiles[0] mit id "u1"; profiles[]/activeProfileId werden hinzugefuegt.
 export function loadState() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -179,6 +291,43 @@ export function loadState() {
     // onboardingSeen: true und diese Migration greift nicht mehr.
     const isLegacyPreOnboarding = !('onboardingSeen' in loadedSettings);
     const loadedProfile = loadedSettings.profile ?? {};
+
+    // Multi-Profile-Migration: wenn profiles[] bereits im Storage steht, ist
+    // die Migration schon gelaufen — wir uebernehmen sie 1:1. Sonst bauen wir
+    // profiles[0] aus dem alten Single-profile-Slot. loadedProfile wird durch
+    // dieselbe Feld-fuer-Feld-Sanierung geschickt wie im Legacy-Pfad.
+    const normalizeProfile = (raw, id) => ({
+      id,
+      name:                 isLegacyPreOnboarding ? null : (raw.name ?? null),
+      gender:               isLegacyPreOnboarding ? null : (raw.gender ?? null),
+      age:                  isLegacyPreOnboarding ? null : (raw.age ?? null),
+      heightCm:             isLegacyPreOnboarding ? null : (raw.heightCm ?? null),
+      weightKg:             isLegacyPreOnboarding ? null : (raw.weightKg ?? null),
+      activityLevel:        isLegacyPreOnboarding ? null : (raw.activityLevel ?? null),
+      goal:                 isLegacyPreOnboarding ? null : (raw.goal ?? null),
+      dailyTargetOverride:  raw.dailyTargetOverride ?? null,
+      breakfastKcal:        isLegacyPreOnboarding ? null : (raw.breakfastKcal ?? null),
+      lunchKcal:            isLegacyPreOnboarding ? null : (raw.lunchKcal ?? null),
+      showCalorieBar:       raw.showCalorieBar ?? true,
+      macroPreset:          raw.macroPreset ?? 'balanced',
+      macroTargets:         raw.macroTargets ?? null,
+      favorites:            (raw.favorites && typeof raw.favorites === 'object') ? raw.favorites : {},
+    });
+
+    let profiles;
+    if (Array.isArray(loadedSettings.profiles) && loadedSettings.profiles.length > 0) {
+      // Neuer State — profiles[] direkt uebernehmen, aber jedes Element durch
+      // normalizeProfile schicken damit fehlende Felder aufgefuellt sind.
+      profiles = loadedSettings.profiles.map((p, i) => normalizeProfile(p || {}, p?.id || `u${i + 1}`));
+    } else {
+      // Legacy oder Fresh Install: aus altem profile-Slot bauen. Bei Fresh
+      // Install ist loadedProfile leer -> normalizeProfile liefert Blank u1.
+      profiles = [normalizeProfile(loadedProfile, 'u1')];
+    }
+    const activeProfileId = (loadedSettings.activeProfileId && profiles.some((p) => p.id === loadedSettings.activeProfileId))
+      ? loadedSettings.activeProfileId
+      : profiles[0].id;
+
     state.settings = {
       defaultPortions: loadedSettings.defaultPortions ?? legacyGlobalPortions ?? 1,
       maxCookTime: loadedSettings.maxCookTime ?? COOKTIME_MAX,
@@ -194,24 +343,13 @@ export function loadState() {
         middleEast: loadedSettings.cuisines?.middleEast ?? false,
         americas: loadedSettings.cuisines?.americas ?? false,
       },
-      profile: {
-        name:                 isLegacyPreOnboarding ? null : (loadedProfile.name ?? null),
-        gender:               isLegacyPreOnboarding ? null : (loadedProfile.gender ?? null),
-        age:                  isLegacyPreOnboarding ? null : (loadedProfile.age ?? null),
-        heightCm:             isLegacyPreOnboarding ? null : (loadedProfile.heightCm ?? null),
-        weightKg:             isLegacyPreOnboarding ? null : (loadedProfile.weightKg ?? null),
-        activityLevel:        isLegacyPreOnboarding ? null : (loadedProfile.activityLevel ?? null),
-        goal:                 isLegacyPreOnboarding ? null : (loadedProfile.goal ?? null),
-        dailyTargetOverride:  loadedProfile.dailyTargetOverride ?? null,
-        breakfastKcal:        isLegacyPreOnboarding ? null : (loadedProfile.breakfastKcal ?? null),
-        lunchKcal:            isLegacyPreOnboarding ? null : (loadedProfile.lunchKcal ?? null),
-        showCalorieBar:       loadedProfile.showCalorieBar ?? true,
-        macroPreset:          loadedProfile.macroPreset ?? 'balanced',
-        macroTargets:         loadedProfile.macroTargets ?? null,
-        favorites:            (loadedProfile.favorites && typeof loadedProfile.favorites === 'object')
-                                ? loadedProfile.favorites
-                                : {},
-      },
+      profiles,
+      activeProfileId,
+      // profile-Mirror wird beim naechsten saveState() aus getActiveProfile()
+      // gespiegelt. Fuer die aktuelle In-Memory-Session initial gleich der
+      // aktive Profil-Eintrag; ein direkter Read (den es nicht mehr geben
+      // sollte) wuerde damit dennoch plausible Werte finden.
+      profile: profiles.find((p) => p.id === activeProfileId) ?? profiles[0],
       theme: loadedSettings.theme ?? 'auto',
     };
     return true;

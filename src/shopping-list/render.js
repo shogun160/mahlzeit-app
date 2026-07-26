@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { state, getActiveProfile } from '../state.js';
 import { buildConsolidatedList } from './consolidate.js';
 import { toggleChecked } from './check.js';
 import { toggleCollapsed, expandCategory, isCollapsed } from './collapse.js';
@@ -282,7 +282,7 @@ function renderDoneBanner() {
   // Persoenliche Copy wenn der User im Wizard einen Namen gesetzt hat, sonst
   // die neutrale Duz-Variante. escapeHtml() nicht noetig — der Name laeuft
   // schon durch den Wizard-Trim, kein HTML zugelassen.
-  const name = state.settings.profile?.name;
+  const name = getActiveProfile()?.name;
   const greeting = name ? `Sauber, ${name}, du hast` : 'Sauber, du hast';
   return `
     <div class="shop-done-banner" role="status">

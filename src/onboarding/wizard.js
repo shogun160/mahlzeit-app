@@ -1,4 +1,4 @@
-import { state, saveState } from '../state.js';
+import { state, getActiveProfile, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
 import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile, macrosForKcal, renderMacrosPills, THEME_CYCLE, themeIconFor, themeLabelFor } from './result.js';
@@ -16,8 +16,8 @@ let currentStep = 1;
 let isOpen = false;
 
 // Draft hält die Werte, die der User im Wizard eingibt. Beim Öffnen aus dem
-// aktuellen state.settings.profile pre-fillt. touched trackt pro Feld, ob der
-// User es aktiv angefasst hat — nur touched-Werte werden bei "Überspringen"
+// aktiven Profil (getActiveProfile()) pre-fillt. touched trackt pro Feld, ob
+// der User es aktiv angefasst hat — nur touched-Werte werden bei "Überspringen"
 // persistiert. "Fertig" committet alles inkl. stiller Defaults.
 let draft = {};
 let touched = {};
@@ -32,7 +32,7 @@ export function mountOnboardingWizard(el, { onChange, onThemeChange } = {}) {
 
 export function openOnboardingWizard() {
   if (!rootEl) throw new Error('Onboarding-Wizard nicht gemountet.');
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   draft = {
     name: p.name,
     gender: p.gender,
@@ -92,12 +92,12 @@ function handleEsc(ev) {
   if (ev.key === 'Escape') persistAndClose();
 }
 
-// Persistiert nur touched-Felder in state.settings.profile. Endroutine für
+// Persistiert nur touched-Felder in das aktive Profil. Endroutine für
 // "Überspringen" und Backdrop-Klick — der User hat den Wizard nicht bewusst
 // abgeschlossen, deshalb bleiben stille Defaults null (Placeholder-Pille zeigt
 // die unvollständige Einrichtung im Dashboard).
 function persistAndClose() {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   for (const key of Object.keys(touched)) {
     if (!touched[key]) continue;
     // defaultPortions lebt global auf state.settings, nicht im profile.
@@ -117,7 +117,7 @@ function persistAndClose() {
 // bestätigt. Null-Slots werden aus DEFAULTS gefüllt. Name und
 // dailyTargetOverride bleiben optional (dürfen null sein).
 function finishAndClose() {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   for (const key of Object.keys(draft)) {
     if (key === 'name' || key === 'dailyTargetOverride') {
       p[key] = draft[key];
@@ -334,7 +334,7 @@ function attachStep3Handlers() {
       slot.innerHTML = '';
       return;
     }
-    const preset = state.settings.profile.macroPreset || 'balanced';
+    const preset = getActiveProfile().macroPreset || 'balanced';
     const macros = macrosForKcal(dinner, preset);
     slot.innerHTML = renderMacrosPills(macros);
   };
@@ -362,8 +362,9 @@ function bindMacroPresetChips() {
   rootEl.querySelectorAll('[data-action="macro-preset"]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.value;
-      state.settings.profile.macroPreset = key;
-      state.settings.profile.macroTargets = null;
+      const profile = getActiveProfile();
+      profile.macroPreset = key;
+      profile.macroTargets = null;
       rootEl.querySelectorAll('[data-action="macro-preset"]').forEach((other) => {
         other.setAttribute('aria-pressed', String(other.dataset.value === key));
       });
@@ -404,7 +405,7 @@ function attachStep4Handlers() {
       draft.dailyTargetOverride = null;
       touched.dailyTargetOverride = true;
       if (slider) {
-        const p = state.settings.profile;
+        const p = getActiveProfile();
         const fake = {
           gender:        draft.gender        ?? p.gender        ?? DEFAULTS.gender,
           age:           draft.age           ?? p.age           ?? DEFAULTS.age,

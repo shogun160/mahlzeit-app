@@ -1,4 +1,4 @@
-import { state, DAYS } from '../state.js';
+import { state, getActiveProfile, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import {
   hasProfile,
@@ -75,7 +75,7 @@ export function mountMacroPopup(el, { onOpenDetail, onChange } = {}) {
 
 export function openMacroPopup() {
   if (!rootEl) throw new Error('Makro-Popup nicht gemountet.');
-  const profile = state.settings.profile;
+  const profile = getActiveProfile();
   if (!hasProfile(profile)) return;
   renderShell();
   rootEl.hidden = false;
@@ -126,7 +126,7 @@ function dayMacros(day) {
 // wert höher — Soll-Säule soll aber immer visuell in die Mitte des grünen
 // Bands treffen.
 function dinnerMacroTargets() {
-  const profile = state.settings.profile;
+  const profile = getActiveProfile();
   const dinner = dinnerTarget(profile);
   if (dinner == null || dinner <= 0) return null;
   const range = kcalRange(dinner);
@@ -180,7 +180,7 @@ function averageMacros() {
 }
 
 function renderShell() {
-  const profile = state.settings.profile;
+  const profile = getActiveProfile();
   const target = dinnerTarget(profile);
   const [rangeLow, rangeHigh] = target != null ? kcalRange(target) : [null, null];
   const avg = averageMacros();
@@ -463,7 +463,7 @@ function renderAverageText(avg, targets) {
 // Refresh-Button. Analog zur Settings-Section-Logik, aber hier gemountet damit
 // die Makro-Ziele direkt neben dem Chart einstellbar sind.
 function renderControls() {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   const targets = effectiveMacroTargets(p) ?? { p: 0, kh: 0, f: 0 };
   const isCustom = p.macroTargets != null;
   const activePreset = isCustom ? null : (p.macroPreset ?? MACRO_PRESET_DEFAULT);
@@ -535,7 +535,7 @@ function renderMacroSlider(key, label, value) {
 // Handler-Bindungen am Root nicht verloren gehen. Handler auf den neuen Bar-
 // Hits müssen aber neu gebunden werden.
 function refreshChartAndAvg() {
-  const profile = state.settings.profile;
+  const profile = getActiveProfile();
   const target = dinnerTarget(profile);
   const [rangeLow, rangeHigh] = target != null ? kcalRange(target) : [null, null];
   const avg = averageMacros();
@@ -586,7 +586,7 @@ function attachMacroControlHandlers() {
   rootEl.querySelectorAll('[data-macro-preset]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.macroPreset;
-      const p = state.settings.profile;
+      const p = getActiveProfile();
       p.macroPreset = key;
       p.macroTargets = null;
       rootEl.querySelectorAll('[data-macro-preset]').forEach((other) => {
@@ -610,7 +610,7 @@ function attachMacroControlHandlers() {
     slider.addEventListener('input', () => {
       const v = parseInt(slider.value, 10);
       if (valEl) valEl.textContent = `${v.toLocaleString('de-DE')} g`;
-      const p = state.settings.profile;
+      const p = getActiveProfile();
       p.macroTargets = readSliderMacros();
       p.macroPreset = null;
       rootEl.querySelectorAll('[data-macro-preset]').forEach((other) => {
@@ -629,7 +629,7 @@ function attachMacroControlHandlers() {
   // Refresh: zurück auf Preset "Ausgewogen".
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      const p = state.settings.profile;
+      const p = getActiveProfile();
       p.macroPreset = MACRO_PRESET_DEFAULT;
       p.macroTargets = null;
       const label = MACRO_PRESETS.find((m) => m.key === MACRO_PRESET_DEFAULT)?.label ?? 'Ausgewogen';
@@ -651,7 +651,7 @@ function readSliderMacros() {
 }
 
 function syncSliderValues() {
-  const targets = effectiveMacroTargets(state.settings.profile);
+  const targets = effectiveMacroTargets(getActiveProfile());
   if (!targets) return;
   ['p', 'kh', 'f'].forEach((k) => {
     const slider = rootEl.querySelector(`[data-action="macro-${k}-change"]`);
@@ -662,7 +662,7 @@ function syncSliderValues() {
 }
 
 function refreshAvgOnly() {
-  const profile = state.settings.profile;
+  const profile = getActiveProfile();
   const avg = averageMacros();
   const targets = effectiveMacroTargets(profile);
   const avgSlot = rootEl.querySelector('[data-role="avg-slot"]');

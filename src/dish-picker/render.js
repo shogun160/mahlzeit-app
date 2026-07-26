@@ -1,4 +1,4 @@
-import { state, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
+import { state, getActiveProfile, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
 import { allDishes } from '../data/dishes.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
@@ -470,7 +470,7 @@ function renderResults(main, overflow, currentDishId, used) {
   // Gerichte". Filter darf allein aktiv sein oder in Kombination — Hauptsache
   // 'favorite' ist der Grund fuer's Leere-sein (keine Gerichte matchen).
   const favActive = activeFilters.has('favorite');
-  const hasAnyFav = Object.keys(state.settings.profile.favorites || {}).length > 0;
+  const hasAnyFav = Object.keys(getActiveProfile().favorites || {}).length > 0;
   const emptyMsg = (favActive && !hasAnyFav)
     ? `<p class="picker-empty">Noch keine Favoriten — Nimm dir ein Herz ${ICON_FAV_FILL}</p>`
     : '<p class="picker-empty">Keine Gerichte für diese Filter.</p>';

@@ -1,5 +1,5 @@
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, GOALS } from '../nutrition/target.js';
-import { PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
+import { PORTIONS_MIN, PORTIONS_MAX, getActiveProfile } from '../state.js';
 
 // Stille Defaults — werden im Wizard angezeigt wenn Draft-Wert null ist. Der
 // User sieht sinnvolle Startwerte, muss aber aktiv klicken/ziehen, damit das
@@ -191,8 +191,9 @@ export function renderStep2(draft) {
 export function renderStep3(settings) {
   const prefs = settings.preferences ?? {};
   const cuisines = settings.cuisines ?? {};
-  const macroPreset = settings.profile?.macroPreset ?? 'balanced';
-  const isCustomMacros = settings.profile?.macroTargets != null;
+  const profile = getActiveProfile();
+  const macroPreset = profile?.macroPreset ?? 'balanced';
+  const isCustomMacros = profile?.macroTargets != null;
   // Presets exklusiv im Wizard; wenn User im Makro-Popup einen Custom-Override
   // gesetzt hat, ist kein Chip aktiv (aria-pressed=false auf allen).
   const activePreset = isCustomMacros ? null : macroPreset;

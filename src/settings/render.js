@@ -1,5 +1,6 @@
 import {
   state,
+  getActiveProfile,
   PORTIONS_MIN,
   PORTIONS_MAX,
   COOKTIME_MIN,
@@ -305,7 +306,7 @@ function summaryFor(key) {
     // Abendessen-Zielkorridor als kompakte Zusammenfassung (nicht Tagesziel),
     // weil das der Wert ist gegen den die Wochen-Bar rechnet. Ohne vollständiges
     // Profil oder mit ungültigem Rest: leere Summary.
-    const target = dinnerTarget(s.profile);
+    const target = dinnerTarget(getActiveProfile());
     if (target == null || target <= 0) return '';
     const r = kcalRange(target);
     return `${r[0].toLocaleString('de-DE')}–${r[1].toLocaleString('de-DE')} kcal`;
@@ -367,11 +368,12 @@ function renderCuisineChip(key, label) {
 }
 
 // Profil-Section: Gender-Chips, Alter-Stepper, Größe/Gewicht/Aktivität-Slider,
-// Ziel-Chips. Werte kommen aus state.settings.profile; leere Felder (null)
-// zeigen "—" statt einer Zahl. Nach jeder Änderung updateSectionSummary('profil')
-// + onExternalChange() (letzteres nur bei change, nicht bei input während Ziehen).
+// Ziel-Chips. Werte kommen aus dem aktiven Profil (getActiveProfile()); leere
+// Felder (null) zeigen "—" statt einer Zahl. Nach jeder Änderung
+// updateSectionSummary('profil') + onExternalChange() (letzteres nur bei change,
+// nicht bei input während Ziehen).
 function renderProfileSection() {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   const ageStr = p.age == null ? '—' : String(p.age);
   const ageMinusDis = p.age == null || p.age <= AGE_MIN;
   const agePlusDis = p.age != null && p.age >= AGE_MAX;
@@ -494,7 +496,7 @@ function renderShowBarRow(pressed) {
 // überschreiben den Wert dann nicht mehr. Sichtbar-Label zeigt "Vorschlag: X"
 // wenn kein Override, "Manuell" wenn Override — damit klar ist, was greift.
 function renderDailyTargetRow() {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   const effective = effectiveDailyTarget(p);
   const suggestion = dailyTarget(p);
   const val = effective ?? suggestion ?? Math.round((DAILY_TARGET_MIN + DAILY_TARGET_MAX) / 2);
@@ -567,7 +569,7 @@ function renderMealRow(key, label, value, max) {
 // weil es sich aus den anderen dreien ergibt. Zeigt "0 kcal" wenn Frühstück+
 // Mittag das Tagesziel überschreiten — kein Alarm, User sieht das Problem selbst.
 function renderDinnerTargetRow() {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   const dinner = dinnerTarget(p);
   const display = dinner == null ? '—' : formatRange(dinner);
   // "Details"-Link analog zu "Vorschlag" bei Tagesziel — inline neben dem
@@ -601,7 +603,7 @@ function formatRange(val) {
 }
 
 function renderGenderChip(key, label) {
-  const pressed = state.settings.profile.gender === key;
+  const pressed = getActiveProfile().gender === key;
   return `
     <button class="pref-chip"
             type="button"
@@ -613,7 +615,7 @@ function renderGenderChip(key, label) {
 }
 
 function renderGoalChip(key, label) {
-  const pressed = state.settings.profile.goal === key;
+  const pressed = getActiveProfile().goal === key;
   return `
     <button class="pref-chip"
             type="button"
@@ -823,8 +825,9 @@ function attachProfileHandlers() {
   rootEl.querySelectorAll('.pref-chip[data-gender]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.gender;
-      if (state.settings.profile.gender === key) return;
-      state.settings.profile.gender = key;
+      const profile = getActiveProfile();
+      if (profile.gender === key) return;
+      profile.gender = key;
       rootEl.querySelectorAll('.pref-chip[data-gender]').forEach((other) => {
         other.setAttribute('aria-pressed', String(other.dataset.gender === key));
       });
@@ -839,8 +842,9 @@ function attachProfileHandlers() {
   rootEl.querySelectorAll('.pref-chip[data-goal]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.goal;
-      if (state.settings.profile.goal === key) return;
-      state.settings.profile.goal = key;
+      const profile = getActiveProfile();
+      if (profile.goal === key) return;
+      profile.goal = key;
       rootEl.querySelectorAll('.pref-chip[data-goal]').forEach((other) => {
         other.setAttribute('aria-pressed', String(other.dataset.goal === key));
       });
@@ -857,7 +861,7 @@ function attachProfileHandlers() {
   const agePlusBtn = rootEl.querySelector('[data-action="age-plus"]');
   const ageValueEl = rootEl.querySelector('[data-role="age-value"]');
   const applyAge = (delta) => {
-    const p = state.settings.profile;
+    const p = getActiveProfile();
     const current = p.age ?? AGE_DEFAULT;
     const next = Math.max(AGE_MIN, Math.min(AGE_MAX, current + delta));
     p.age = next;
@@ -878,7 +882,7 @@ function attachProfileHandlers() {
   if (heightSlider) {
     heightSlider.addEventListener('input', () => {
       const v = parseInt(heightSlider.value, 10);
-      state.settings.profile.heightCm = v;
+      getActiveProfile().heightCm = v;
       heightValEl.textContent = `${v} cm`;
       updateDailyTargetFromProfile();
       updateDinnerDisplay();
@@ -893,7 +897,7 @@ function attachProfileHandlers() {
   if (weightSlider) {
     weightSlider.addEventListener('input', () => {
       const v = parseInt(weightSlider.value, 10);
-      state.settings.profile.weightKg = v;
+      getActiveProfile().weightKg = v;
       weightValEl.textContent = `${v} kg`;
       updateDailyTargetFromProfile();
       updateDinnerDisplay();
@@ -908,7 +912,7 @@ function attachProfileHandlers() {
   if (activitySlider) {
     activitySlider.addEventListener('input', () => {
       const v = parseInt(activitySlider.value, 10);
-      state.settings.profile.activityLevel = v;
+      getActiveProfile().activityLevel = v;
       const stage = ACTIVITY_LEVELS.find((a) => a.level === v) ?? ACTIVITY_LEVELS[2];
       activityValEl.textContent = stage.label;
       updateDailyTargetFromProfile();
@@ -927,7 +931,7 @@ function attachProfileHandlers() {
   if (dailySlider) {
     dailySlider.addEventListener('input', () => {
       const v = parseInt(dailySlider.value, 10);
-      state.settings.profile.dailyTargetOverride = v;
+      getActiveProfile().dailyTargetOverride = v;
       dailyValEl.innerHTML = formatRange(v);
       if (dailyHintEl) dailyHintEl.textContent = 'Manuell überschrieben';
       if (dailyResetBtn) dailyResetBtn.hidden = false;
@@ -940,7 +944,7 @@ function attachProfileHandlers() {
   // Refresh-Button beim Tagesziel: Override zurücksetzen → Vorschlag greift.
   if (dailyResetBtn) {
     dailyResetBtn.addEventListener('click', () => {
-      state.settings.profile.dailyTargetOverride = null;
+      getActiveProfile().dailyTargetOverride = null;
       updateDailyTargetFromProfile();
       updateDinnerDisplay();
       updateSectionSummary('profil');
@@ -965,8 +969,9 @@ function attachProfileHandlers() {
   const barToggle = rootEl.querySelector('[data-action="toggle-calorie-bar"]');
   if (barToggle) {
     barToggle.addEventListener('click', () => {
-      const next = state.settings.profile.showCalorieBar === false;
-      state.settings.profile.showCalorieBar = next;
+      const profile = getActiveProfile();
+      const next = profile.showCalorieBar === false;
+      profile.showCalorieBar = next;
       barToggle.setAttribute('aria-checked', String(next));
       onExternalChange();
     });
@@ -982,7 +987,7 @@ function attachMealSlider(action, stateKey) {
   if (!slider) return;
   slider.addEventListener('input', () => {
     const v = parseInt(slider.value, 10);
-    state.settings.profile[stateKey] = v;
+    getActiveProfile()[stateKey] = v;
     valEl.textContent = `${v.toLocaleString('de-DE')} kcal`;
     updateDinnerDisplay();
   });
@@ -994,7 +999,7 @@ function attachMealSlider(action, stateKey) {
 function updateDinnerDisplay() {
   const el = rootEl?.querySelector('[data-role="dinner-value"]');
   if (!el) return;
-  const val = dinnerTarget(state.settings.profile);
+  const val = dinnerTarget(getActiveProfile());
   el.innerHTML = val == null ? '—' : formatRange(val);
 }
 
@@ -1005,7 +1010,7 @@ function updateDinnerDisplay() {
 // mehr anfasst (Semantik: "Profil = Vorschlag, Slider = Feinjustierung
 // solange Profil unverändert").
 function updateDailyTargetFromProfile() {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   p.dailyTargetOverride = null;
   const suggestion = dailyTarget(p);
   const slider = rootEl?.querySelector('[data-action="daily-change"]');
