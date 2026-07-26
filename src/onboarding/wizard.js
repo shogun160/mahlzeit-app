@@ -129,7 +129,10 @@ function renderShell() {
       <div class="onboarding-sheet" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
         <div class="onboarding-handle" aria-hidden="true"></div>
         <div class="onboarding-header">
-          <h2 class="onboarding-header__title" id="onboarding-title">Einrichtung</h2>
+          <div class="onboarding-header__row">
+            <h2 class="onboarding-header__title" id="onboarding-title">Einrichtung</h2>
+            <button class="onboarding-close" type="button" data-action="close" aria-label="Schließen — Entwurf speichern">✕</button>
+          </div>
           <div class="onboarding-progress">
             <div class="onboarding-progress__label">Schritt ${currentStep} von ${TOTAL_STEPS}</div>
             <div class="onboarding-progress__track"
@@ -188,6 +191,11 @@ function attachShellHandlers() {
 
   const skipBtn = rootEl.querySelector('[data-action="skip"]');
   if (skipBtn) skipBtn.addEventListener('click', persistAndClose);
+  // X oben rechts — global auf allen Steps verfügbar. Speichert nur touched-
+  // Felder als Draft, Wizard bleibt im Status "nicht abgeschlossen"
+  // (Placeholder-Pille auf Dashboard bleibt sichtbar).
+  const closeBtn = rootEl.querySelector('[data-action="close"]');
+  if (closeBtn) closeBtn.addEventListener('click', persistAndClose);
   const nextBtn = rootEl.querySelector('[data-action="next"]');
   if (nextBtn) nextBtn.addEventListener('click', goNext);
   const backBtn = rootEl.querySelector('[data-action="back"]');

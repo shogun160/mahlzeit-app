@@ -53,12 +53,45 @@
   flex-shrink: 0;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
+/* Header-Row: Titel mittig, X rechts. Grid mit Spacer links, damit der Titel
+   trotz einseitigem Button optisch zentriert bleibt. */
+.onboarding-header__row {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
 .onboarding-header__title {
-  margin: 0 0 12px;
+  margin: 0;
   font-size: 1.0625rem;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
   text-align: center;
+  grid-column: 2;
+}
+.onboarding-close {
+  grid-column: 3;
+  justify-self: end;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, transform 120ms ease;
+}
+.onboarding-close:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-lowest));
+}
+.onboarding-close:active {
+  transform: scale(0.94);
 }
 
 /* Progress-Zeile — analog zu .shop-progress__track/__fill. */
