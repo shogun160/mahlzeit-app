@@ -253,7 +253,7 @@ function renderShell() {
 }
 
 function formatCookTime(min) {
-  return min >= COOKTIME_MAX ? 'unbegrenzt' : `${min} Min`;
+  return min >= COOKTIME_MAX ? 'egal' : `${min} Min`;
 }
 
 // Header + Body als FLACHE Geschwister direkt im .settings-body — kein
