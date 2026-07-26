@@ -38,7 +38,7 @@ function renderDashboardHeader(root, { onRerollAll, onOpenSettings, onToggleAllS
     <div class="app-header__logo-wrap">
       <img class="app-header__logo" src="/logo.png" alt="Mahlzeit" />
     </div>
-    <div class="app-header__actions">
+    <div class="app-header__center">
       <button class="app-header__selection"
               data-action="toggle-all"
               aria-pressed="${ariaPressed}"
@@ -49,6 +49,8 @@ function renderDashboardHeader(root, { onRerollAll, onOpenSettings, onToggleAllS
         </span>
         <span class="app-header__selection-count">${selectedCount}/${total} Tage</span>
       </button>
+    </div>
+    <div class="app-header__actions">
       <button class="icon-btn" data-action="reroll-all" aria-label="Alle Gerichte neu auslosen" title="Alle neu auslosen">
         ${ICON_REFRESH}
       </button>
@@ -91,8 +93,10 @@ function renderShoppingHeader(root, { onResetChecked, onOpenSettings }) {
     <div class="app-header__logo-wrap">
       <img class="app-header__logo" src="/logo.png" alt="Mahlzeit" />
     </div>
-    <div class="app-header__actions">
+    <div class="app-header__center">
       ${chipHtml}
+    </div>
+    <div class="app-header__actions">
       <button class="icon-btn ${hasChecked ? '' : 'icon-btn--disabled'}"
               data-action="reset-checked"
               ${hasChecked ? '' : 'disabled aria-disabled="true"'}

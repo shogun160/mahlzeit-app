@@ -1,7 +1,11 @@
+/* 3-Spalten-Grid: Logo links, Selection-Chip zentriert (justify-self: center),
+   Icon-Actions rechts. 1fr auto 1fr zentriert die Mitte im Viewport unabhaengig
+   von den unterschiedlichen Breiten links/rechts (Logo ~44px vs. 2 Icon-Btns
+   ~104px) — mit space-between wuerde der Chip aussermittig landen. */
 .app-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
   padding: 12px 16px;
   padding-top: calc(12px + env(safe-area-inset-top, 0px));
@@ -14,6 +18,15 @@
 .app-header__logo-wrap {
   display: flex;
   align-items: center;
+  min-height: var(--touch-target-min);
+  justify-self: start;
+}
+
+.app-header__center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-self: center;
   min-height: var(--touch-target-min);
 }
 
@@ -28,6 +41,7 @@
   align-items: center;
   gap: 8px;
   min-height: var(--touch-target-min);
+  justify-self: end;
 }
 
 /* Selection-Widget im Header: kompakter Chip mit Progress-Ring + Count-Text.
