@@ -86,14 +86,33 @@ function handleEsc(ev) {
   if (ev.key === 'Escape') persistAndClose();
 }
 
-// Persistiert alle touched-Felder in state.settings.profile, ruft saveState() +
-// onChange, schließt Sheet. Gemeinsame Endroutine für "Fertig", "Später" und
-// Backdrop-Klick.
+// Persistiert nur touched-Felder in state.settings.profile. Endroutine für
+// "Später" und Backdrop-Klick — der User hat den Wizard nicht bewusst
+// abgeschlossen, deshalb bleiben stille Defaults null (Placeholder-Pille zeigt
+// die unvollständige Einrichtung im Dashboard).
 function persistAndClose() {
   const p = state.settings.profile;
   for (const key of Object.keys(touched)) {
     if (touched[key]) {
       p[key] = draft[key];
+    }
+  }
+  saveState();
+  onExternalChange();
+  closeOnboardingWizard();
+}
+
+// Persistiert alle Draft-Werte. Endroutine für "Fertig" — der User hat den
+// Wizard bewusst durchlaufen und die stillen Defaults durch Weiter-Klicken
+// bestätigt. Null-Slots werden aus DEFAULTS gefüllt. Name und
+// dailyTargetOverride bleiben optional (dürfen null sein).
+function finishAndClose() {
+  const p = state.settings.profile;
+  for (const key of Object.keys(draft)) {
+    if (key === 'name' || key === 'dailyTargetOverride') {
+      p[key] = draft[key];
+    } else {
+      p[key] = draft[key] ?? DEFAULTS[key];
     }
   }
   saveState();
@@ -176,7 +195,7 @@ function attachShellHandlers() {
   const backBtn = rootEl.querySelector('[data-action="back"]');
   if (backBtn) backBtn.addEventListener('click', goBack);
   const finishBtn = rootEl.querySelector('[data-action="finish"]');
-  if (finishBtn) finishBtn.addEventListener('click', persistAndClose);
+  if (finishBtn) finishBtn.addEventListener('click', finishAndClose);
 
   attachStepHandlers();
 }
