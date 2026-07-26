@@ -76,8 +76,10 @@
   border: none;
   border-radius: 50%;
   background: var(--card-pill-glass);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Stronger blur + saturate haelt den Glas-Look, macht die Werte aber
+     lesbarer weil das Bild darunter unschaerfer + kontrastreicher wird. */
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
   color: var(--md-sys-color-on-glass);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   cursor: pointer;
@@ -105,8 +107,10 @@
 .day-card__portion-overlay .stepper--pill {
   pointer-events: auto;
   background: var(--card-pill-glass);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Stronger blur + saturate haelt den Glas-Look, macht die Werte aber
+     lesbarer weil das Bild darunter unschaerfer + kontrastreicher wird. */
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
   color: var(--md-sys-color-on-glass);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
@@ -144,8 +148,10 @@
 .makro-pill {
   pointer-events: auto;
   background: var(--card-pill-glass);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* Stronger blur + saturate haelt den Glas-Look, macht die Werte aber
+     lesbarer weil das Bild darunter unschaerfer + kontrastreicher wird. */
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
   color: var(--md-sys-color-on-glass);
   font-size: 0.75rem;
   font-weight: 700;
