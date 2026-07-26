@@ -53,6 +53,7 @@ export function renderStep1(draft, { isSubProfile = false } = {}) {
       <div class="onboarding-chips" role="group" aria-label="Geschlecht">
         <button class="pref-chip" type="button" data-action="gender-pick" data-value="female" aria-pressed="${genderVal === 'female'}">Weiblich</button>
         <button class="pref-chip" type="button" data-action="gender-pick" data-value="male" aria-pressed="${genderVal === 'male'}">Männlich</button>
+        <button class="pref-chip pref-chip--preset" type="button" data-action="gender-standard" title="Werte des DGE-Standarderwachsenen uebernehmen">Standard</button>
       </div>
     </div>
 
