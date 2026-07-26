@@ -117,6 +117,26 @@
   transform: scale(0.95);
 }
 
+/* Disabled-Variante: Reset im Shopping-Header ist immer im DOM, damit die
+   Header-Breite zwischen Dashboard- und Shopping-View gleich bleibt. Wenn
+   nichts abgehakt ist, wird der Button nur visuell gedämpft und ignoriert
+   Interaktion. */
+.icon-btn--disabled,
+.icon-btn:disabled {
+  cursor: default;
+  opacity: 0.32;
+}
+
+.icon-btn--disabled:hover,
+.icon-btn:disabled:hover {
+  background: transparent;
+}
+
+.icon-btn--disabled:active,
+.icon-btn:disabled:active {
+  transform: none;
+}
+
 .icon-btn img {
   width: 24px;
   height: 24px;

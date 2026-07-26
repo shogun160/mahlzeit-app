@@ -1,6 +1,6 @@
 import { renderHeader } from './dashboard/header.js';
 import { renderDashboard } from './dashboard/render.js';
-import { rerollAll } from './dashboard/reroll.js';
+import { rerollAll, rerollDay } from './dashboard/reroll.js';
 import { toggleAllSelected } from './dashboard/selection.js';
 import { renderShoppingList } from './shopping-list/render.js';
 import { resetChecked } from './shopping-list/check.js';
@@ -9,7 +9,7 @@ import { mountSettingsSheet, openSettingsSheet } from './settings/render.js';
 import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
-import { state, setView, loadState, saveState } from './state.js';
+import { state, DAYS, setView, loadState, saveState } from './state.js';
 
 const headerRoot = document.getElementById('app-header');
 const mainEl = document.getElementById('app');
@@ -71,8 +71,9 @@ function refresh() {
 mountDetailSheet(sheetRoot, { onChange: refresh });
 mountSettingsSheet(settingsRoot, { onChange: refresh });
 
-// Dish-Picker: onPick mutiert nur das Assignment für den Tag. Selection bleibt
-// erhalten (wenn Tag schon angehakt war, gilt das auch für das neue Gericht).
+// Dish-Picker: onPick mutiert das Assignment für den gewählten Tag und würfelt
+// alle anderen Tage, die dasselbe Gericht hatten, automatisch neu — sonst wäre
+// das Gericht zweifach im Dashboard.
 mountDishPicker(pickerRoot, {
   onPick: (day, dishId) => {
     state.assignment[day] = dishId;
@@ -83,6 +84,18 @@ mountDishPicker(pickerRoot, {
     // bleiben abgehakt, auch wenn sie im neuen Gericht (oder als Leftover)
     // wieder auftauchen.
     state.selected[day] = true;
+    // Doppelbelegung auflösen: jeder andere Tag mit demselben Gericht wird
+    // neu ausgelost. Reihenfolge ist wichtig — assignment[day] steht bereits
+    // auf dishId, sodass rerollDay das gewählte Gericht via usedElsewhere
+    // ausschließt und einen echten Wechsel liefert. Der reroll setzt den
+    // anderen Tag zusätzlich auf selected=false; das trifft im Regelfall
+    // ohnehin nur zu (nur solche Tage waren im Picker klickbar).
+    for (const otherDay of DAYS) {
+      if (otherDay === day) continue;
+      if (state.assignment[otherDay] === dishId) {
+        rerollDay(otherDay);
+      }
+    }
     refresh();
   },
 });

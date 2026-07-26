@@ -1,8 +1,8 @@
-# Handoff — Mahlzeit-App Rebuild, Session 11
+# Handoff — Mahlzeit-App Rebuild, Session 12
 
 ## Kontext in einem Satz
 
-Session 10 hat Iteration 4 (Profil + Tageskalorien) durchgezogen, dabei automatische Rezept-Skalierung eingeführt, die Zutaten-DB aufgeräumt (13 Duplikate fusioniert), Löffel-Anzeige (TL/EL) für Öle/Sauce/Paste ergänzt, den Dish-Picker um kcal-Filter + Wolken-Layout + dyn Font-Fitting erweitert und die Einkaufslisten-Semantik beim Gericht-Wechsel überarbeitet.
+Session 11 hat den Dish-Picker deutlich ausgebaut (Filter-Reset X, Makro-Filter, sticky-Stack ohne Lücken, Gerichte-Container mit Counter, geplante Gerichte anderer Tage sichtbar + Auto-Reroll bei Doppelbelegung, in-Shopping-Locked-Bucket unter "Bereits geplant"-Divider) und den Shopping-Header stabilisiert (Reset-Button dauerhaft sichtbar mit disabled-State).
 
 ## Pflichtlektüre (in dieser Reihenfolge)
 
@@ -10,12 +10,15 @@ Session 10 hat Iteration 4 (Profil + Tageskalorien) durchgezogen, dabei automati
 2. **`docs/redesign/2026-07-25-rebuild-design.md`** — Rebuild-Spec + Roadmap-Tabelle
 3. **`docs/redesign/2026-07-26-session-10-plan.md`** — Session-10 Design (Iteration 4 Kern)
 4. **`docs/redesign/backlog.md`** — offene Ideen: Onboarding + Multi-Profile
-5. **`docs/redesign/handoffs/session-9-to-10.md`** — direkter Vorgänger
+5. **`docs/redesign/handoffs/session-9-to-10.md`** — Vor-Vorgänger (Iteration 3 Küchen)
 
 ## Aktueller Repo-Zustand
 
-- **Branch:** `redesign` (lokal, **11 commits ungepusht** — komplette Session 10 + Feinschliff)
-- **Commits (neueste zuerst):**
+- **Branch:** `redesign` (lokal, gepusht bis inkl. Session-11-Commit — Session 10 + 11)
+- **Session 11 Commits (neueste zuerst):**
+  - `feat(picker+shopping): filter-reset, sticky-stack, makro-filter, auto-reroll`
+  - `9b20740 docs(redesign): handoff session 10 → 11`
+- **Session 10 Commits (davor):**
   - `d0951ef docs(backlog): onboarding / ersteinrichtung als idee vermerkt`
   - `f4d594d feat(reroll+picker): einkaufsliste-semantik + edit-pill zurück auf 40 dp`
   - `579abca feat(picker): filter-wolke, dyn font-size, korb-status-hervorhebung`
@@ -27,8 +30,72 @@ Session 10 hat Iteration 4 (Profil + Tageskalorien) durchgezogen, dabei automati
   - `9e22ab8 docs(redesign): session 10 plan + backlog für multi-profile-idee`
   - `7b91c87 feat(iteration-4): profil + tageskalorien + rezept-skalierung + ingredient-cleanup`
   - `1600a74 fix(picker+card): sortier-bug wenig zutaten, edit-pill 32dp icon-button`
-- **Working Tree:** sauber (Handoff-Update noch ungestagt)
+- **Working Tree:** sauber
 - **Dev-Server:** wenn benötigt via `npm run dev`
+
+## Was in Session 11 gebaut wurde
+
+### Shopping-Header: Reset-Button dauerhaft sichtbar
+
+- `.icon-btn--disabled` + `disabled` + `aria-disabled` wenn `checkedShopping` leer. Header-Breite bleibt zwischen Dashboard- und Shopping-View konstant.
+
+### Dish-Picker: Filter-Reset (X)
+
+- Kleines X-Icon direkt links neben "FILTER" (kein Background, `on-surface-variant` Farbe, 24×24 dp). Sichtbar nur wenn mind. ein Filter aktiv.
+- Der ganze Filter-Header ist selbst der Toggle-Button; Reset ist `<span role="button">` innen (nested `<button>` in `<button>` wäre invalides HTML). Klick auf Reset macht `stopPropagation`, damit der Kollaps nicht mit auslöst.
+- Klick leert alle aktiven Filter komplett — nicht zurück auf Settings-Defaults ("zeig mir wirklich alles"; für Settings-Defaults reicht Picker schließen + neu öffnen).
+
+### Dish-Picker: Sticky-Stack ohne Lücken
+
+- **`.picker-header` in den `.picker-body` verschoben** — alle drei sticky-Ebenen (picker-header, filter-header, grids-header) leben jetzt im gleichen Scroll-Container und stapeln analog zu `shop-progress` + Category-Headers in shopping-list.
+- Positionen über CSS-Vars: `--picker-header-h: 52px` (fest), `--picker-filter-h: 44px` (normal) / `36px` (im `.picker-body--scrolled` Compact-Mode). Grids-Header sitzt auf `top: calc(--picker-header-h + --picker-filter-h)`.
+- **Feste `height` statt `min-height` + kein border**: sub-pixel-Divergenzen (44 vs. 45, 52 vs. 53 wegen 1px border) verursachten transparente Spalten, durch die man die scrollenden Karten sehen konnte.
+- **`transition: top` entfernt**: CSS-Vars sind nicht animierbar → jede Transition auf `top` erzeugt einen 160 ms Zwischenzustand in dem der Header nicht mehr an der neuen Position sitzt (sichtbare Lücke). Wechsel Compact ↔ Normal ist jetzt instant.
+- Swipe-to-close darf weiter auf `.picker-header` greifen (Filter im Selector-Check: `.picker-body` ausgenommen, aber `.picker-header` darin erlaubt).
+
+### Dish-Picker: Gerichte-Container
+
+- Neuer Wrapper `.picker-grids` analog Filter-Wrapper: sticky Header + Body.
+- Header enthält: Titel "Gerichte" (Uppercase), Counter `main.length / allDishes.length` (verfügbare Gerichte / Gesamt — positive Framing), Chevron rein optisch (`pointer-events: none`, kein Kollaps).
+- Header ist selbst ein `<button data-action="scroll-grids-top">` — Klick scrollt zum Anfang der grids-Liste via `scrollIntoView({block:'start'})`. `scroll-margin-top` auf `.picker-grids__body` positioniert das Ziel unter den drei gestapelten sticky Headers, nicht dahinter.
+
+### Dish-Picker: Bucket-Regel neu
+
+Neue Logik in `filteredDishes()` split das Ergebnis in `{ main, overflow }`:
+
+- **In-Shopping-Locked** (`state.selected[plannedDay] === true`) → immer im **overflow** (unter Divider "Bereits geplant"), egal ob Filter passt. Diese Gerichte stehen fest im Wochenplan und sollen den Filter nicht "verwässern".
+- **Planned-not-in-Shopping mit Filter-Match** → normal in **main** einsortiert (in der aktuellen Sortier-Reihenfolge, nicht mehr ans Ende gebucketet). Weekday-Badge markiert Wochenkontext, aber Tile ist **wählbar** (nicht disabled).
+- **Planned-not-in-Shopping ohne Filter-Match** → in **overflow** (weil sonst unsichtbar).
+- **Nicht-geplant + Filter-Match** → in **main**.
+- Aktuelles Gericht (currentDay) immer ganz oben in main.
+
+`renderTile` disabled-Regel: `isDisabled = !!otherDay && state.selected[otherDay] === true` (nur In-Shopping-Locked greift, alle anderen bleiben klickbar).
+
+### Dish-Picker: Auto-Reroll bei Doppelbelegung
+
+- Wenn User im Picker ein Gericht wählt, das bereits an einem anderen Tag geplant ist (Fall: nicht in Shopping = wählbar), passiert in `main.js` `onPick`:
+  1. `state.assignment[day] = dishId; state.selected[day] = true` (regulär)
+  2. Für jeden `otherDay` mit demselben `dishId` → `rerollDay(otherDay)`
+- **Reihenfolge wichtig**: erst neues Assignment setzen, dann rerollen. So schließt `rerollDay` via seiner `usedElsewhere`-Menge das gerade gewählte Gericht aus und liefert einen echten Wechsel. Dashboard bleibt doppelbelegungsfrei.
+
+### Dish-Picker: Makro-Filter
+
+Neue Filter-Row unten im Panel mit drei Chips (OR-Group "macro"):
+
+- **Proteinreich** — Protein-Anteil > 35% (9/32 Gerichte)
+- **KH-arm** — KH-Anteil < 30% (10/32 Gerichte)
+- **Ausgewogen** — alle drei Makros im Bereich 22–42% (19/32 Gerichte)
+
+Neue Helper `macroPct(dish)` berechnet P/KH/F-Anteil in % von Gesamt-Makrokalorien (`p*4 + kh*4 + f*9`). **Skalierungs-invariant**: Anteile bleiben bei Rezept-Skalierung erhalten.
+
+Sortierung wenn genau eines der Extrem-Chips aktiv:
+- Proteinreich → `macroPct(d).p` absteigend (proteinreichstes oben)
+- KH-arm → `macroPct(d).kh` aufsteigend (geringstes oben)
+- Ausgewogen → keine Sortier-Regel (Range-Filter, keine sinnvolle Rangordnung)
+
+Sort-Kette bei Mehrfach-Aktivierung: `fast → simple → kcal_low → kcal_high → protein → lowcarb → id`.
+
+**Grenzen-Rationale**: analysiert über alle 32 Dishes — Spreizung P 20–49%, KH 21–52%, F 18–47% → Filter diskriminierend. Kombinierter Range-Filter aus Settings wäre zu restriktiv (mit ±5% um Ausgewogen-Ziel: nur 3/32 Treffer), deshalb Einzel-Chips bevorzugt.
 
 ## Was in Session 10 gebaut wurde
 
@@ -140,6 +207,34 @@ state = {
 
 `STORAGE_KEY = 'mahlzeit-state-v2'` unverändert.
 
+## Code-Struktur (Deltas Session 11)
+
+```
+src/
+  dashboard/
+    header.js                   ← Reset-Btn dauerhaft im DOM (disabled-Modifier)
+  dish-picker/
+    render.js                   ← Filter-Reset (X), Sticky-Stack-Struktur,
+                                   .picker-grids Container mit Header+Body,
+                                   scroll-grids-top Handler, macroPct + Makro-
+                                   Filter, neue Bucket-Regel (in-shopping →
+                                   overflow, planned-not-in-shopping →
+                                   selectable + Weekday-Badge nicht disabled)
+  main.js                       ← onPick: Auto-Reroll aller anderen Tage mit
+                                   demselben Gericht (rerollDay Loop)
+
+styles/
+  components/
+    header.css                  ← .icon-btn--disabled + :disabled Variante
+    dish-picker.css             ← .picker-header sticky im body, CSS-Vars für
+                                   sticky-Stack, .picker-filters__header als
+                                   Button-Root, .picker-filters__reset (X
+                                   linksbündig ohne Background), .picker-grids
+                                   Container mit Header+Body, .picker-divider
+                                   für "Bereits geplant"-Trenner, transitions
+                                   auf top/height/padding entfernt
+```
+
 ## Code-Struktur (Deltas Session 10)
 
 ```
@@ -194,12 +289,13 @@ docs/redesign/
   - `formatQuantity({unit:'vorrat', displayUnit:'el', gramsPerUnit:14, sum:45})` → "4 EL — Vorrat prüfen"
 - **Manueller Browser-Test durch User** — mehrfach iteriert, jede UI-Feedback-Runde einzeln validiert.
 
-## Wo weitermachen — Iteration-Optionen für Session 11
+## Wo weitermachen — Iteration-Optionen für Session 12
 
 ### Kleine Follow-Ups
 
-- **Onboarding / Ersteinrichtung** (siehe `backlog.md`): First-Run-Wizard oder On-Screen-Anleitung um den User durch die Profil-Eingabe zu führen. Kurz greifbar wenn Profil-Section stabil ist.
-- **Multi-Profile** (siehe `backlog.md`): mehrere Nutzer-Profile, per-Tag Diner-Assignment, skalierung pro Person. Größerer Umbau — braucht State-Erweiterung.
+- **Onboarding / Ersteinrichtung** (siehe `backlog.md`): First-Run-Wizard oder On-Screen-Anleitung um den User durch die Profil-Eingabe zu führen. Kurz greifbar wenn Profil-Section stabil ist. **Aus Session 11 übertragen, weiterhin offen.**
+- **Makro-Awareness-Bar**: analog zur kcal-Range-Pille im Dashboard eine zweite Pille die den Ø-Makro-Anteil der ausgewählten Tage zeigt (z. B. `P 32% · KH 40% · F 28%`). Reine Awareness, kein Filter. Baut auf `macroPct()` aus Session 11 auf.
+- **Multi-Profile** (siehe `backlog.md`): mehrere Nutzer-Profile, per-Tag Diner-Assignment, Skalierung pro Person. Größerer Umbau — braucht State-Erweiterung.
 
 ### Iteration 5 — Dark Mode
 
@@ -253,13 +349,12 @@ docs/redesign/
 - **`curl` im Bash-Sandbox** braucht absoluten Pfad (`/usr/bin/curl`)
 - **Gradle** braucht JDK 11+ — nutze `JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"`
 
-## Erster empfohlener Move für Session 11
+## Erster empfohlener Move für Session 12
 
 ```bash
 git status                                        # sauber, on redesign
-git log --oneline origin/redesign..redesign       # 12+ commits ungepusht
-git push                                          # nach User-Bestätigung
-cat docs/redesign/handoffs/session-10-to-11.md    # diesen Handoff
+git log --oneline -5                              # Session 11 Commits ansehen
+cat docs/redesign/handoffs/session-10-to-11.md    # diesen Handoff (Session 11 → 12 Übergang)
 ```
 
-Danach mit User klären: **Iteration 5 (Dark Mode)** angehen als sichtbarer Quick-Win, oder eines der Follow-Ups (Onboarding, Makro-Ziele, Datenverwaltung)? Meine Empfehlung: **Onboarding**, weil das die Iteration 4 komplettiert (User's-Weg vom App-Start bis zur Bedarfs-Anzeige durchgängig). Dark Mode als zweite Option — sichtbar, gut greifbar, aber MainActivity-Statusbar-Komplikation.
+Danach mit User klären: **Onboarding** (First-Run-Wizard, komplettiert Iteration 4 — bleibt Empfehlung aus Session 11), **Makro-Awareness-Bar** (naheliegender Follow-Up zum Session-11-Filter, klein), **Dark Mode** (sichtbarer Quick-Win, aber MainActivity-Statusbar-Komplikation) oder **Datenverwaltung** (Export/Import)?

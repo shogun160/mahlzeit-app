@@ -82,7 +82,10 @@ function renderShoppingHeader(root, { onResetChecked, onOpenSettings }) {
     </div>
   `;
 
-  const showReset = state.checkedShopping.size > 0;
+  // Reset-Button dauerhaft im Header (Layout-Konsistenz mit Dashboard-View),
+  // aber disabled wenn nichts zum Zurücksetzen da ist. So springt die Header-
+  // Breite beim View-Wechsel nicht mehr.
+  const hasChecked = state.checkedShopping.size > 0;
 
   root.innerHTML = `
     <div class="app-header__logo-wrap">
@@ -90,11 +93,13 @@ function renderShoppingHeader(root, { onResetChecked, onOpenSettings }) {
     </div>
     <div class="app-header__actions">
       ${chipHtml}
-      ${showReset ? `
-        <button class="icon-btn" data-action="reset-checked" aria-label="Alle Häkchen zurücksetzen" title="Alle Häkchen zurücksetzen">
-          ${ICON_REFRESH}
-        </button>
-      ` : ''}
+      <button class="icon-btn ${hasChecked ? '' : 'icon-btn--disabled'}"
+              data-action="reset-checked"
+              ${hasChecked ? '' : 'disabled aria-disabled="true"'}
+              aria-label="Alle Häkchen zurücksetzen"
+              title="Alle Häkchen zurücksetzen">
+        ${ICON_REFRESH}
+      </button>
       <button class="icon-btn" data-action="open-settings" aria-label="Einstellungen öffnen" title="Einstellungen">
         ${ICON_MENU}
       </button>
@@ -102,6 +107,6 @@ function renderShoppingHeader(root, { onResetChecked, onOpenSettings }) {
   `;
 
   const resetBtn = root.querySelector('[data-action="reset-checked"]');
-  if (resetBtn) resetBtn.addEventListener('click', () => onResetChecked());
+  if (resetBtn && hasChecked) resetBtn.addEventListener('click', () => onResetChecked());
   root.querySelector('[data-action="open-settings"]').addEventListener('click', () => onOpenSettings());
 }
