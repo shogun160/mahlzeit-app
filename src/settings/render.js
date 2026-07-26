@@ -115,20 +115,6 @@ function renderShell() {
           </div>
         </div>
         <div class="settings-body">
-          ${section('portionen', 'Portionen', `
-            <div class="settings-row">
-              <div class="settings-row__label">
-                <div class="settings-row__label-primary">Standard-Personenzahl</div>
-                <div class="settings-row__label-secondary">Wird sofort auf alle Tage angewendet</div>
-              </div>
-              <div class="stepper stepper--compact" role="group" aria-label="Standard-Personenzahl">
-                <button class="stepper__btn" data-action="portions-minus" aria-label="Weniger" ${minusDisabled ? 'disabled' : ''}>−</button>
-                <span class="stepper__value" data-role="portions-value">${defaultPortions}</span>
-                <button class="stepper__btn" data-action="portions-plus" aria-label="Mehr" ${plusDisabled ? 'disabled' : ''}>+</button>
-              </div>
-            </div>
-          `)}
-
           ${section('kochzeit', 'Kochzeit', `
             <div class="settings-field">
               <div class="settings-row">
@@ -265,7 +251,6 @@ function section(key, title, contentHtml, extraCls = '') {
 // Filter-Sections: positives Framing "aktiv/gesamt" wie in der Einkaufsliste.
 function summaryFor(key) {
   const s = state.settings;
-  if (key === 'portionen') return String(s.defaultPortions);
   if (key === 'kochzeit')  return formatCookTime(s.maxCookTime);
   if (key === 'praeferenzen') {
     const total = 3;
@@ -278,10 +263,14 @@ function summaryFor(key) {
     return `${active}/${total}`;
   }
   if (key === 'profile') {
-    // Anzahl Profile — kompakte Zusammenfassung. Detailwerte pro Profil sind
-    // im Detail-Sheet.
+    // Anzahl Profile + Ziel-Personenzahl, wenn die abweichen (dann rechnen
+    // wir mit DEFAULT_USER-Auffuellung). Detailwerte pro Profil sind im
+    // Detail-Sheet.
     const count = state.settings.profiles?.length ?? 0;
-    return count <= 1 ? '1 Profil' : `${count} Profile`;
+    const target = state.settings.defaultPortions ?? 1;
+    const label = count === 1 ? '1 Profil' : `${count} Profile`;
+    if (target > count) return `${label} · für ${target}`;
+    return label;
   }
   return '';
 }
@@ -349,6 +338,15 @@ function renderProfileList() {
   const profiles = state.settings.profiles ?? [];
   const activeId = state.settings.activeProfileId;
   const rows = profiles.map((p) => renderProfileRow(p, p.id === activeId)).join('');
+  const defaultPortions = state.settings.defaultPortions;
+  const minusDisabled = defaultPortions <= PORTIONS_MIN;
+  const plusDisabled = defaultPortions >= PORTIONS_MAX;
+  // Hinweis-Text: informiert wenn portions > profiles.length ist, damit klar
+  // ist dass die fehlenden Personen als DGE-Standard-Diner gerechnet werden.
+  const missing = Math.max(0, defaultPortions - profiles.length);
+  const hint = missing > 0
+    ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als DGE-Standard berechnet`
+    : 'Wird sofort auf alle Tage angewendet';
   return `
     <div class="settings-profile-list">
       ${rows}
@@ -358,6 +356,17 @@ function renderProfileList() {
         <span class="settings-profile-add__icon" aria-hidden="true">+</span>
         <span class="settings-profile-add__label">Profil hinzufügen</span>
       </button>
+      <div class="settings-row settings-profile-portions">
+        <div class="settings-row__label">
+          <div class="settings-row__label-primary">Standard-Personenzahl</div>
+          <div class="settings-row__label-secondary" data-role="portions-hint">${hint}</div>
+        </div>
+        <div class="stepper stepper--compact" role="group" aria-label="Standard-Personenzahl">
+          <button class="stepper__btn" data-action="portions-minus" aria-label="Weniger" ${minusDisabled ? 'disabled' : ''}>−</button>
+          <span class="stepper__value" data-role="portions-value">${defaultPortions}</span>
+          <button class="stepper__btn" data-action="portions-plus" aria-label="Mehr" ${plusDisabled ? 'disabled' : ''}>+</button>
+        </div>
+      </div>
     </div>
   `;
 }
@@ -493,8 +502,9 @@ function attachHandlers() {
     });
   }
 
-  rootEl.querySelector('[data-action="portions-minus"]').addEventListener('click', () => handlePortions(-1));
-  rootEl.querySelector('[data-action="portions-plus"]').addEventListener('click', () => handlePortions(1));
+  // Portions-Stepper-Handler leben in attachProfileListHandlers, weil der
+  // Stepper jetzt in der Profile-Section sitzt und mit ihr neu-gebunden werden
+  // muss (Detail-Sheet-Refresh re-rendert die Section).
 
   const slider = rootEl.querySelector('[data-action="cooktime-change"]');
   const valueEl = rootEl.querySelector('[data-role="cooktime-value"]');
@@ -623,6 +633,13 @@ function attachProfileListHandlers() {
       setTimeout(() => onExternalAddProfile(), TRANSITION_MS);
     });
   }
+  // Portions-Stepper: muss hier gebunden werden, weil die Section per
+  // refreshProfileListInOpenSheet neu gerendert werden kann (z. B. nach
+  // Aktiv-Wechsel im Detail-Sheet). Alte Handler waeren dann verloren.
+  const minusBtn = rootEl.querySelector('[data-action="portions-minus"]');
+  const plusBtn = rootEl.querySelector('[data-action="portions-plus"]');
+  if (minusBtn) minusBtn.addEventListener('click', () => handlePortions(-1));
+  if (plusBtn) plusBtn.addEventListener('click', () => handlePortions(1));
 }
 
 // Runter-Swipe auf Handle oder Header schließt das Sheet — identisches Muster
@@ -711,9 +728,17 @@ function handlePortions(delta) {
   const valueEl = rootEl.querySelector('[data-role="portions-value"]');
   const minusBtn = rootEl.querySelector('[data-action="portions-minus"]');
   const plusBtn = rootEl.querySelector('[data-action="portions-plus"]');
+  const hintEl = rootEl.querySelector('[data-role="portions-hint"]');
   if (valueEl) valueEl.textContent = defaultPortions;
   if (minusBtn) minusBtn.disabled = defaultPortions <= PORTIONS_MIN;
   if (plusBtn) plusBtn.disabled = defaultPortions >= PORTIONS_MAX;
-  updateSectionSummary('portionen');
+  if (hintEl) {
+    const profilesCount = state.settings.profiles?.length ?? 0;
+    const missing = Math.max(0, defaultPortions - profilesCount);
+    hintEl.textContent = missing > 0
+      ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als DGE-Standard berechnet`
+      : 'Wird sofort auf alle Tage angewendet';
+  }
+  updateSectionSummary('profile');
   onExternalChange();
 }

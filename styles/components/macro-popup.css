@@ -319,3 +319,42 @@
   flex-wrap: wrap;
   gap: 6px;
 }
+
+/* Profil-Pills oberhalb des Charts — Toggle-Chips zur Multi-User-Anzeige.
+   Aendert NICHT den globalen aktiven User (activeProfileId), nur die im Popup
+   angezeigten Werte. Bei einem Profil wird die Zeile gar nicht gerendert. */
+.macro-profile-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 0 12px;
+}
+.macro-profile-pill {
+  padding: 6px 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.macro-profile-pill[aria-pressed="true"] {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border-color: transparent;
+}
+.macro-profile-pill:active {
+  transform: scale(0.98);
+}
+
+/* Controls disabled bei Multi-Select — visuell abgeschwaecht, klick verhindert
+   ueber disabled auf den Buttons. Pointer-events runter fuer die Slider damit
+   sie nicht bewegbar sind. */
+.macro-controls--disabled .pref-chip,
+.macro-controls--disabled .settings-slider {
+  opacity: 0.5;
+  pointer-events: none;
+}

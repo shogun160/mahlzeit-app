@@ -810,3 +810,12 @@
   font-size: 1rem;
   line-height: 1;
 }
+
+/* Standard-Personenzahl-Stepper unter der Profil-Liste — optisch abgesetzt
+   damit klar wird: das ist der Wochenplan-Default, nicht ein weiteres
+   Profil. Duenner Trenn-Rand oben, kein zusaetzlicher Border-Rahmen. */
+.settings-profile-portions {
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}

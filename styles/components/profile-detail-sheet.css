@@ -7,7 +7,11 @@
 .profile-detail-overlay {
   position: fixed;
   inset: 0;
-  z-index: 60;
+  /* z-index ueber Settings-Sheet (100), analog zum Makro-Popup — sonst wird
+     das Detail-Sheet vom Settings-Sheet ueberdeckt und der Klick "wirkt nichts".
+     Unter Onboarding-Wizard (1300), damit der Wizard beim Add-Profile-Modus
+     weiter oben liegen kann. */
+  z-index: 1250;
   background: color-mix(in srgb, var(--md-sys-color-scrim) 45%, transparent);
   opacity: 0;
   transition: opacity 250ms ease;
