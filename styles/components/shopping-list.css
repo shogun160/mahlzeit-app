@@ -217,12 +217,17 @@
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease, color 120ms ease;
 }
-.shop-group__action:hover {
+.shop-group__action:hover:not(:disabled) {
   background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
   color: var(--md-sys-color-primary);
 }
-.shop-group__action:active {
+.shop-group__action:active:not(:disabled) {
   transform: scale(0.94);
+}
+.shop-group__action:disabled,
+.shop-group__action--disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
 }
 .shop-group__action svg {
   width: 18px;
