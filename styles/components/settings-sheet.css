@@ -388,9 +388,17 @@
   flex-direction: column;
   align-items: stretch;
   gap: 8px;
+  /* min-height der Basis-Row (Touch-Target) hebeln wir hier aus — der
+     Content bestimmt die Hoehe. Sonst schrumpfen die Kinder in eine
+     48px-Zeile und ueberlappen die naechste Row. */
+  min-height: 0;
+  height: auto;
 }
 .settings-row--stacked .settings-prefs {
   width: 100%;
+  /* Chip-Container muss seine natuerliche Hoehe halten (~40px min).
+     Ohne min-height kollabiert er in manchen Browsern trotz stretch. */
+  min-height: 40px;
 }
 
 /* Nur bei Rows mit mehrzeiligem Label (z. B. Tagesziel mit "Vorschlag aus
