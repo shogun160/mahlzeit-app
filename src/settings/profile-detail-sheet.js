@@ -108,7 +108,7 @@ function renderShell() {
           ${renderMealRow('lunch', 'Mittag', currentProfile.lunchKcal, LUNCH_MAX)}
           ${renderDinnerRow()}
           ${renderShowBarRow()}
-          ${renderDeleteRow(isOnlyProfile)}
+          ${renderDeleteRow(isOnlyProfile, isActive)}
         </div>
       </div>
     </div>
@@ -382,14 +382,16 @@ function renderShowBarRow() {
   `;
 }
 
-// Loeschen-Button ganz unten. Verweigert wenn nur ein einziges Profil uebrig
-// waere. Sonst: rot, mit Confirm-Popup. Beim Loeschen des aktuell aktiven
-// Profils rueckt das naechste in profiles[] auf und wird aktiv.
-function renderDeleteRow(isOnlyProfile) {
-  const disabled = isOnlyProfile;
-  const hint = isOnlyProfile
-    ? 'Mindestens ein Profil muss bestehen bleiben.'
-    : 'Das Profil wird entfernt. Favoriten und individuelle Werte gehen verloren.';
+// Loeschen-Button ganz unten. Verweigert:
+//   - wenn nur ein einziges Profil uebrig waere
+//   - wenn das Profil aktuell aktiv ist (User muss vorher ein anderes aktiv
+//     setzen, entweder per D&D in Settings oder "Als aktiv setzen" hier oben)
+function renderDeleteRow(isOnlyProfile, isActive) {
+  const disabled = isOnlyProfile || isActive;
+  let hint;
+  if (isOnlyProfile) hint = 'Mindestens ein Profil muss bestehen bleiben.';
+  else if (isActive) hint = 'Aktives Profil kann nicht gelöscht werden — vorher ein anderes aktiv setzen.';
+  else hint = 'Das Profil wird entfernt. Favoriten und individuelle Werte gehen verloren.';
   return `
     <div class="profile-detail-delete">
       <button class="profile-detail-delete__btn"

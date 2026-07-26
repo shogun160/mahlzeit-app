@@ -196,19 +196,18 @@ export function addProfile(patch = {}) {
   return p;
 }
 
-// Loescht ein Profil per ID. Verweigert wenn nur ein einziges Profil uebrig
-// waere (Mindestens-ein-Profil-Regel). Ansonsten kann jedes Profil geloescht
-// werden — beim Loeschen von profiles[0] rueckt das naechste automatisch nach
-// und wird aktiv (activeProfileId wird gemirrort). Rueckgabe true bei Erfolg,
-// false wenn abgelehnt oder unbekannte ID.
+// Loescht ein Profil per ID. Verweigert:
+//   - wenn nur ein einziges Profil uebrig waere (Mindestens-ein-Profil-Regel)
+//   - wenn es das aktive Profil (profiles[0]) ist — der User muss vorher ein
+//     anderes Profil per Drag&Drop oder "Als aktiv setzen" nach vorne bringen
+// Rueckgabe true bei Erfolg, false wenn abgelehnt oder unbekannte ID.
 export function removeProfile(id) {
   const profiles = state.settings.profiles;
   if (!Array.isArray(profiles) || profiles.length <= 1) return false;
+  if (profiles[0]?.id === id) return false; // aktives Profil geschuetzt
   const idx = profiles.findIndex((p) => p && p.id === id);
   if (idx === -1) return false;
   profiles.splice(idx, 1);
-  // activeProfileId immer aus profiles[0] mirroren — bei Loeschen von
-  // profiles[0] rueckt das naechste Profil nach und uebernimmt die Aktivitaet.
   state.settings.activeProfileId = profiles[0].id;
   return true;
 }

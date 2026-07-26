@@ -122,23 +122,24 @@
 .profile-detail-delete__btn {
   width: 100%;
   min-height: 44px;
-  border: 1px solid var(--md-sys-color-error);
-  background: transparent;
-  color: var(--md-sys-color-error);
+  border: none;
+  background: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
   border-radius: 12px;
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background 120ms ease, transform 120ms ease;
 }
 .profile-detail-delete__btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--md-sys-color-error) 8%, transparent);
+  background: color-mix(in srgb, var(--md-sys-color-error) 88%, black);
 }
 .profile-detail-delete__btn:active:not(:disabled) {
-  background: color-mix(in srgb, var(--md-sys-color-error) 14%, transparent);
+  transform: scale(0.99);
 }
 .profile-detail-delete__btn:disabled {
-  opacity: 0.4;
+  background: color-mix(in srgb, var(--md-sys-color-error) 35%, var(--md-sys-color-surface-container));
+  color: color-mix(in srgb, var(--md-sys-color-on-error) 60%, transparent);
   cursor: not-allowed;
 }
 .profile-detail-delete__hint {
