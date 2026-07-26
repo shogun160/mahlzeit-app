@@ -267,10 +267,8 @@ function summaryFor(key) {
     const profiles = state.settings.profiles ?? [];
     const count = profiles.length;
     const activeName = profiles[0]?.name || 'Aktives Profil';
-    const target = state.settings.defaultPortions ?? 1;
     let label = activeName;
     if (count > 1) label += ` · ${count} Profile`;
-    if (target > count) label += ` · für ${target}`;
     return label;
   }
   return '';
@@ -322,7 +320,7 @@ function renderProfileList() {
   // ist dass die fehlenden Personen ueber das Standard-Profil gerechnet werden.
   const missing = Math.max(0, defaultPortions - profiles.length);
   const hint = missing > 0
-    ? `${missing === 1 ? '1 Person wird' : `${missing} Personen werden`} mit Standard-Profil berechnet`
+    ? `+ ${missing} × Standard-Profil`
     : 'Wird sofort auf alle Tage angewendet';
   // Standard-Profil-Row: separater Marker, nicht loeschbar. Editierbar ueber
   // dasselbe Detail-Sheet (id '_default' erkennt der Sheet). Optisch abgesetzt
@@ -881,7 +879,7 @@ function handlePortions(delta) {
     const profilesCount = state.settings.profiles?.length ?? 0;
     const missing = Math.max(0, defaultPortions - profilesCount);
     hintEl.textContent = missing > 0
-      ? `${missing === 1 ? '1 Person wird' : `${missing} Personen werden`} mit Standard-Profil berechnet`
+      ? `+ ${missing} × Standard-Profil`
       : 'Wird sofort auf alle Tage angewendet';
   }
   updateSectionSummary('profile');
