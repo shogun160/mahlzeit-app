@@ -13,6 +13,7 @@ import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
 import { setNativeNightMode } from './native/theme-plugin.js';
+import { installSliderScrollGuard } from './util/slider-guard.js';
 import { Capacitor } from '@capacitor/core';
 import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support';
 
@@ -31,6 +32,11 @@ const bottomNavRoot = document.getElementById('bottom-nav');
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
 // renderDashboard() beim ersten Render ein frisches Assignment.
 loadState();
+
+// Globaler Guard verhindert dass Slider beim vertikalen Scrollen im Settings-
+// Sheet / Onboarding-Wizard versehentlich verstellt werden. Muss vor dem ersten
+// Render laufen, wirkt aber via Delegation auch fuer spaeter gemountete Slider.
+installSliderScrollGuard();
 
 // Setzt data-theme am <html>-Element auf das *effektive* Theme (light|dark):
 // - 'light'/'dark' → direkt uebernehmen
