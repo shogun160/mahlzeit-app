@@ -400,6 +400,17 @@
   width: 100%;
   min-height: 44px;
   flex-shrink: 0;
+  /* align-items: center bei flex-Container, damit die Chips nicht per
+     default stretch auf die Container-Hoehe gezogen werden. */
+  align-items: center;
+}
+/* Alle Chips in stacked-Rows fest auf 40 px — vermeidet Groessen-Drift
+   z. B. wenn Chips durch align-items: stretch des Parents gestreckt
+   werden oder wenn die Row eine hoehere Content-Basis hat. */
+.settings-row--stacked .pref-chip {
+  height: 40px;
+  min-height: 40px;
+  max-height: 40px;
 }
 
 /* Nur bei Rows mit mehrzeiligem Label (z. B. Tagesziel mit "Vorschlag aus
