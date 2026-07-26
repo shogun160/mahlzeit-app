@@ -212,6 +212,14 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+.onboarding-chips--nowrap {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.onboarding-chips--nowrap::-webkit-scrollbar {
+  display: none;
+}
 
 .onboarding-field__value {
   font-size: 0.9375rem;

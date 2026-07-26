@@ -1,6 +1,6 @@
 import { state, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX } from '../nutrition/target.js';
-import { renderStep1, renderStep2, DEFAULTS } from './steps.js';
+import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 5;
@@ -130,7 +130,8 @@ function renderStepContent() {
   switch (currentStep) {
     case 1: return renderStep1(draft);
     case 2: return renderStep2(draft);
-    // Steps 3–5 folgen in Tasks 7–9
+    case 3: return renderStep3(draft);
+    // Steps 4–5 folgen in Tasks 8–9
     default: return `<p class="onboarding-placeholder">Step ${currentStep} — Content folgt.</p>`;
   }
 }
@@ -183,7 +184,29 @@ function goBack() {
 function attachStepHandlers() {
   if (currentStep === 1) attachStep1Handlers();
   if (currentStep === 2) attachStep2Handlers();
-  // Steps 3–5 folgen in Tasks 7–9
+  if (currentStep === 3) attachStep3Handlers();
+  // Steps 4–5 folgen in Tasks 8–9
+}
+
+function attachStep3Handlers() {
+  bindChipGroup('activity-pick', 'activityLevel', (v) => parseInt(v, 10));
+  bindChipGroup('goal-pick', 'goal', (v) => v);
+}
+
+// Chip-Binding-Helper: Klick setzt Draft + touched, aktualisiert aria-pressed
+// aller Chips in der Gruppe. parser konvertiert data-value (String) in den
+// Draft-Typ (number für activityLevel, string für goal).
+function bindChipGroup(action, draftKey, parser) {
+  rootEl.querySelectorAll(`[data-action="${action}"]`).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const val = parser(btn.dataset.value);
+      draft[draftKey] = val;
+      touched[draftKey] = true;
+      rootEl.querySelectorAll(`[data-action="${action}"]`).forEach((other) => {
+        other.setAttribute('aria-pressed', String(parser(other.dataset.value) === val));
+      });
+    });
+  });
 }
 
 function attachStep2Handlers() {

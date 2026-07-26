@@ -1,4 +1,4 @@
-import { AGE_MIN, AGE_MAX } from '../nutrition/target.js';
+import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, GOALS } from '../nutrition/target.js';
 
 // Stille Defaults — werden im Wizard angezeigt wenn Draft-Wert null ist. Der
 // User sieht sinnvolle Startwerte, muss aber aktiv klicken/ziehen, damit das
@@ -97,6 +97,35 @@ export function renderStep2(draft) {
              value="${weightVal}"
              data-action="weight-change"
              aria-label="Gewicht in Kilogramm" />
+    </div>
+  `;
+}
+
+// Step 3: Alltag — Aktivität (5 Chips, nowrap-scroll) + Ziel (3 Chips).
+// Handler in wizard.js/attachStep3Handlers nutzen den bindChipGroup-Helper.
+export function renderStep3(draft) {
+  const activityVal = draft.activityLevel ?? DEFAULTS.activityLevel;
+  const goalVal = draft.goal ?? DEFAULTS.goal;
+  return `
+    <h3 class="onboarding-step__title">Alltag</h3>
+    <p class="onboarding-step__desc">Wie aktiv bist du und was möchtest du erreichen?</p>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__label">Aktivität</div>
+      <div class="onboarding-chips onboarding-chips--nowrap" role="group" aria-label="Aktivitätslevel">
+        ${ACTIVITY_LEVELS.map((a) => `
+          <button class="pref-chip" type="button" data-action="activity-pick" data-value="${a.level}" aria-pressed="${activityVal === a.level}">${a.label}</button>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__label">Ziel</div>
+      <div class="onboarding-chips" role="group" aria-label="Ziel">
+        ${GOALS.map((g) => `
+          <button class="pref-chip" type="button" data-action="goal-pick" data-value="${g.key}" aria-pressed="${goalVal === g.key}">${g.label}</button>
+        `).join('')}
+      </div>
     </div>
   `;
 }
