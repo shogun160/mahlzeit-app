@@ -9,7 +9,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(15, 22, 32, 0.35);
+  background: var(--overlay-backdrop);
   opacity: 0;
   pointer-events: none;
   transition: opacity 250ms ease;
@@ -183,7 +183,7 @@
   font-size: var(--macro-avg-font);
   color: var(--md-sys-color-on-surface);
   padding: 6px 10px;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--frosted-glass);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: var(--radius-pill);

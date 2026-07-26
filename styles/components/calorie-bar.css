@@ -16,7 +16,7 @@
   gap: 10px;
   padding: 10px 16px;
   border: none;
-  background: rgba(255, 255, 255, 0.78);
+  background: var(--frosted-glass);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: var(--radius-pill);
@@ -29,7 +29,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .calorie-bar:hover {
-  background: rgba(255, 255, 255, 0.9);
+  background: var(--frosted-glass-strong);
 }
 
 .calorie-bar__label {
@@ -76,7 +76,7 @@
    Über: leicht warmer Ton (tertiary im M3-Sinn, hier per direkter Farbe
    damit wir nicht neue Tokens einführen). Unter: primary-Ton. */
 .calorie-bar--over .calorie-bar__intake {
-  color: #b3541e; /* warmer Ton, harmoniert mit den Card-Akzenten */
+  color: var(--semantic-warn);
 }
 
 .calorie-bar--under .calorie-bar__intake {

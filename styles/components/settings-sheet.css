@@ -9,7 +9,7 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  background: rgba(15, 23, 42, 0.42);
+  background: var(--overlay-backdrop);
   opacity: 0;
   pointer-events: none;
   transition: opacity 200ms ease;
