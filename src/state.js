@@ -46,12 +46,12 @@ export const state = {
     defaultPortions: 1,   // Default für neu ausgeloste Gerichte
     maxCookTime: COOKTIME_MAX, // in Minuten, Filter fürs Reroll
     preferences: {
+      // Diät-Gruppe: OR-Verknüpfung wie im Picker. Wenn eine oder mehrere
+      // aktiv sind, muss ein Dish mindestens eine erfüllen. Alle aus =
+      // neutral (kein Filter).
+      meat: false,
+      fish: false,
       vegetarian: false,
-      vegan: false,
-      noFish: false,
-      noMeat: false,
-      lactoseFree: false,
-      glutenFree: false,
     },
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
@@ -122,12 +122,9 @@ export function loadState() {
       defaultPortions: loadedSettings.defaultPortions ?? legacyGlobalPortions ?? 1,
       maxCookTime: loadedSettings.maxCookTime ?? COOKTIME_MAX,
       preferences: {
+        meat: loadedSettings.preferences?.meat ?? false,
+        fish: loadedSettings.preferences?.fish ?? false,
         vegetarian: loadedSettings.preferences?.vegetarian ?? false,
-        vegan: loadedSettings.preferences?.vegan ?? false,
-        noFish: loadedSettings.preferences?.noFish ?? false,
-        noMeat: loadedSettings.preferences?.noMeat ?? false,
-        lactoseFree: loadedSettings.preferences?.lactoseFree ?? false,
-        glutenFree: loadedSettings.preferences?.glutenFree ?? false,
       },
       theme: loadedSettings.theme ?? 'auto',
     };

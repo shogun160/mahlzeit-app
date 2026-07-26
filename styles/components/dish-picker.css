@@ -1,0 +1,373 @@
+/* Dish-Picker: Bottom-Sheet-Overlay mit sticky Filter-Chip-Row und einem
+   scrollbaren Grid aller Gerichte. Öffnet sich per Edit-Pille oben-links
+   auf jeder Card. Ersetzt bei Klick auf ein Tile das Gericht des Tages
+   und schließt das Overlay. Struktur identisch zum Detail-/Settings-Sheet
+   (Overlay-Backdrop, sliding Sheet), z-index über Bottom-Nav. */
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0);
+  transition: background 250ms ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overscroll-behavior: contain;
+}
+
+.picker-overlay.is-open {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.picker-sheet {
+  width: 100%;
+  max-width: 720px;
+  /* Feste Höhe (statt max-height) — das Sheet ist IMMER gleich hoch, unabhängig
+     davon wie viele Dishes das Filter-Ergebnis liefert. Sonst schrumpft es
+     bei wenigen Ergebnissen (z. B. Vegetarisch mit 4 Dishes) auf Content-Höhe. */
+  height: 88vh;
+  background: var(--md-sys-color-surface);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+  padding: 12px 0 0;
+  transform: translateY(100%);
+  transition: transform 250ms cubic-bezier(0.2, 0, 0, 1);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.picker-overlay.is-open .picker-sheet {
+  transform: translateY(0);
+}
+
+/* Handle-Bar analog zu Detail-/Settings-Sheet: 100 % breite Grab-Zone (28 px
+   hoch) mit einer 40×5 px Pille als Indikator. Große Klick-Zone ermöglicht
+   Swipe-Down-zum-Schließen bequem. */
+.picker-handle {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  cursor: grab;
+}
+
+.picker-handle:active {
+  cursor: grabbing;
+}
+
+.picker-handle::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--md-sys-color-outline-variant);
+}
+
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 20px 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.picker-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+
+/* Close-Button analog zu Detail-/Settings-Sheet: 36 px rund, primary-Tint bg. */
+.picker-close {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.picker-close:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-lowest));
+}
+
+.picker-close:active {
+  transform: scale(0.94);
+}
+
+/* Scroll-Container: hält Filter-Row (sticky oben) + Grid.
+   flex-basis: 0 (statt auto) zwingt den Body auf die exakt gleiche Höhe
+   unabhängig vom Content — sonst nimmt Flex bei wenigen Tiles die kürzere
+   Content-Höhe als Basis, was ein anderes visuelles Layout ergibt. */
+.picker-body {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px calc(24px + env(safe-area-inset-bottom));
+}
+
+/* Filter-Container: sticky am oberen Rand des picker-body. Zwei Zeilen —
+   Diät-Chips oben (OR-Gruppe), Attribut-Chips unten (AND-Gruppe). Die
+   Trennung in zwei Rows macht die unterschiedliche Verknüpfungssemantik
+   visuell klar. z-index: 10 sorgt dafür, dass die sticky Row über den
+   Day-Badges der Tiles liegt. */
+.picker-filters {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--md-sys-color-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 0;
+  margin: 0 -4px;
+  transition: padding 160ms ease, box-shadow 160ms ease;
+}
+
+.picker-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Compact-Mode beim Scrollen: kleinere Pills, kleineres Padding, dezenter
+   Schatten unten für Trennung zum Grid. Analog zum sticky-Header-Verhalten
+   in der Shopping-Liste. */
+.picker-body--scrolled .picker-filters {
+  padding: 6px 0 8px;
+  box-shadow: 0 4px 8px -6px rgba(0, 0, 0, 0.15);
+}
+
+.picker-body--scrolled .picker-filter-chip {
+  min-height: 30px;
+  padding: 4px 10px;
+  font-size: 0.8125rem;
+}
+
+/* M3 Filter-Chip — analog zu den Präferenz-Chips im Settings-Sheet. */
+.picker-filter-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease, min-height 160ms ease, padding 160ms ease, font-size 160ms ease;
+}
+
+.picker-filter-chip:hover {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.picker-filter-chip:active {
+  transform: scale(0.97);
+}
+
+.picker-filter-chip[aria-pressed="true"] {
+  background: var(--md-sys-color-primary-tint);
+  border-color: transparent;
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: 700;
+}
+
+.picker-filter-chip[aria-pressed="true"]:hover {
+  background: var(--md-sys-color-primary-tint-hover);
+}
+
+/* Grid: 2-3 Spalten (auto-fill), gleichmäßiger Abstand. */
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.picker-empty {
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 40px 0;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+
+/* Einzelne Kachel im Grid: Bild oben, Titel + Meta unten. Button-Semantik
+   damit Enter/Space out-of-the-box triggern. position: relative + z-index: 0
+   erzeugt einen eigenen Stacking-Context, sodass der absolute Day-Badge
+   (z-index innerhalb des Tiles) beim Scrollen NICHT über die sticky Filter-
+   Row rutschen kann. */
+.picker-tile {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-lowest);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.picker-tile:active {
+  transform: scale(0.98);
+}
+
+/* Aktuell zugewiesenes Dish: primary Border + Elevation + primary-Tint als
+   Body-Background (analog zum .day-card--selected Look im Dashboard —
+   25 % primary in surface-container-lowest gemischt). Nur die Tile-Fläche
+   ist getönt, das Bild überlagert seinen eigenen Hintergrund. */
+.picker-tile--current {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 1px var(--md-sys-color-primary), var(--md-elevation-1);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-lowest));
+}
+
+/* An anderem Wochentag bereits geplantes Dish: M3 Disabled State
+   (Content 38 % opacity, kein Klick). Opacity NUR auf Bild + Body — der Day-
+   Badge oben links bleibt bei voller Opacity, damit der Wochentag klar lesbar
+   ist. Verhindert Doppelbelegung; der User müsste erst den anderen Tag ändern. */
+.picker-tile--disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.picker-tile--disabled .picker-tile__img,
+.picker-tile--disabled .picker-tile__body {
+  opacity: 0.38;
+  transition: opacity 160ms ease;
+}
+
+/* Wochentag-Badge oben links: Style analog zum Dashboard-Day-Label
+   (uppercase, letter-spacing). Standard-Variante (fremder Tag) = frosted-glass
+   mit primary Schrift. Active-Variante (currentDay) = kcal-Pill-Look:
+   primary bg + weiße Schrift. */
+.picker-tile__day-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-primary);
+}
+
+.picker-tile__day-badge--active {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Shopping-Pille unten rechts auf dem Bild: Icon + Anzahl offener Zutaten.
+   Selbe Frosted-Glass-Optik wie der Day-Badge oben. Beim aktuell gewählten
+   Gericht (--current) → Aktiv-Look (primary bg, weiße Schrift), matcht den
+   aktiven Day-Badge und die kcal-Pill auf der Card. */
+.picker-tile__shop {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.picker-tile__shop svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  color: inherit;
+}
+
+.picker-tile__shop-count {
+  color: inherit;
+}
+
+.picker-tile__shop--active {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Image-Wrapper: hält Bild + beide Overlay-Badges (Wochentag oben-links,
+   Shopping unten-rechts). Ohne diesen Wrapper würden absolut positionierte
+   Badges relativ zum ganzen Tile sitzen und im Body-Bereich landen. */
+.picker-tile__image-wrap {
+  position: relative;
+}
+
+.picker-tile__img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.picker-tile__body {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.picker-tile__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.picker-tile__meta {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}

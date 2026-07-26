@@ -5,15 +5,22 @@ import { allDishIds, dishesById, shuffled } from '../data/dishes.js';
 // vegan/vegetarian sind stärkere Über-Filter (schließen mehrere contains-Tags
 // gleichzeitig aus), die einzelnen noMeat/noFish-Flags bleiben aber unabhängig
 // aktivierbar für User, die z. B. nur Fleisch weglassen wollen.
+// Semantik der Ernährungspräferenzen (identisch zum Picker): Diät-Gruppe
+// (meat/fish/vegetarian) = OR-Verknüpfung. Wenn eine oder mehrere aktiv,
+// muss Dish mindestens eine erfüllen. Keine aktiv = neutral (jedes Dish).
 function matchesPreferences(dish, prefs) {
   const tags = dish.tags || [];
   const has = (t) => tags.includes(t);
-  if (prefs.noMeat && has('contains-meat')) return false;
-  if (prefs.noFish && has('contains-fish')) return false;
-  if (prefs.lactoseFree && has('contains-lactose')) return false;
-  if (prefs.glutenFree && has('contains-gluten')) return false;
-  if (prefs.vegetarian && (has('contains-meat') || has('contains-fish'))) return false;
-  if (prefs.vegan && (has('contains-meat') || has('contains-fish') || has('contains-lactose') || has('contains-egg'))) return false;
+  const isMeat = has('contains-meat');
+  const isFish = has('contains-fish');
+  const isVeg  = !isMeat && !isFish;
+
+  const dietChecks = [];
+  if (prefs.meat)       dietChecks.push(isMeat);
+  if (prefs.fish)       dietChecks.push(isFish);
+  if (prefs.vegetarian) dietChecks.push(isVeg);
+  if (dietChecks.length > 0 && !dietChecks.some(Boolean)) return false;
+
   return true;
 }
 
@@ -66,7 +73,9 @@ export function rerollDay(day) {
   if (pick === null) return;
 
   state.assignment[day] = pick;
-  state.selected[day] = false;
+  // Selection bewusst NICHT resetten — wenn der Tag schon für die Einkaufsliste
+  // angehakt war, bleibt er das auch beim Gericht-Wechsel. Nur rerollAll (kompletter
+  // Neustart) leert die Selection global.
 }
 
 export function rerollAll() {

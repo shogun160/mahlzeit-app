@@ -1,0 +1,348 @@
+import { state, DAYS } from '../state.js';
+import { allDishes } from '../data/dishes.js';
+
+// Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
+const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
+
+// Filter-Chips oben im Picker. Zwei Gruppen mit unterschiedlicher Verknüpfung:
+//
+//   diet (Fleisch/Fisch/Vegetarisch): OR — mindestens eine der aktiven muss
+//     matchen. Sind alle drei aktiv oder keine, wirkt die Gruppe wie "alle".
+//     Die drei sind sich gegenseitig ausschließende Kategorien.
+//
+//   attr (Schnell/Wenig Zutaten): AND — jede aktive muss matchen. Das sind
+//     unabhängige Zusatz-Constraints, die man kumulativ enger schneidet.
+//
+// Kombiniert:  dietOk && attrOk
+const FILTERS = [
+  { key: 'meat',   label: 'Fleisch',       group: 'diet', test: (d) => d.tags.includes('contains-meat') },
+  { key: 'fish',   label: 'Fisch',         group: 'diet', test: (d) => d.tags.includes('contains-fish') },
+  { key: 'veg',    label: 'Vegetarisch',   group: 'diet', test: (d) => !d.tags.includes('contains-meat') && !d.tags.includes('contains-fish') },
+  { key: 'fast',   label: 'Schnell',       group: 'attr', test: (d) => d.cooktime <= 30 },
+  { key: 'simple', label: 'Wenig Zutaten', group: 'attr', test: (d) => d.ingredients.length <= 8 },
+];
+
+const TRANSITION_MS = 250;
+const SCROLL_COMPACT_THRESHOLD = 8; // px Scroll bis Filter-Row zusammenklappt
+const SWIPE_THRESHOLD_PX = 55;
+const SWIPE_DIRECTIONAL_RATIO = 1.4; // |dy| muss 1.4x größer als |dx| sein
+
+let rootEl = null;
+let onExternalPick = null;
+let currentDay = null;
+let activeFilters = new Set();
+
+export function mountDishPicker(el, { onPick } = {}) {
+  rootEl = el;
+  onExternalPick = onPick || (() => {});
+  rootEl.innerHTML = '';
+  rootEl.hidden = true;
+}
+
+export function openDishPicker(day) {
+  if (!rootEl) throw new Error('Dish-Picker nicht gemountet.');
+  currentDay = day;
+  activeFilters = deriveInitialFilters();
+  renderShell();
+  rootEl.hidden = false;
+  // Doppel-rAF für Slide-up-Animation (initial translateY(100%) → 0).
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => rootEl.querySelector('.picker-overlay').classList.add('is-open'));
+  });
+  document.addEventListener('keydown', handleEsc);
+}
+
+export function closeDishPicker() {
+  if (!rootEl || rootEl.hidden) return;
+  const overlay = rootEl.querySelector('.picker-overlay');
+  if (overlay) overlay.classList.remove('is-open');
+  document.removeEventListener('keydown', handleEsc);
+  setTimeout(() => {
+    if (rootEl && !rootEl.querySelector('.picker-overlay.is-open')) {
+      rootEl.hidden = true;
+      rootEl.innerHTML = '';
+      currentDay = null;
+    }
+  }, TRANSITION_MS);
+}
+
+function handleEsc(ev) {
+  if (ev.key === 'Escape') closeDishPicker();
+}
+
+// Leitet aus den globalen Settings die vor-aktivierten Picker-Filter ab.
+// Settings-Chips mappen 1:1 auf die Picker-Chips (meat/fish/veg). User kann
+// im Picker jederzeit deaktivieren.
+function deriveInitialFilters() {
+  const set = new Set();
+  const p = state.settings.preferences || {};
+  if (p.meat) set.add('meat');
+  if (p.fish) set.add('fish');
+  if (p.vegetarian) set.add('veg');
+  if ((state.settings.maxCookTime ?? 999) <= 30) set.add('fast');
+  return set;
+}
+
+function chipHtml(f) {
+  return `
+    <button class="picker-filter-chip"
+            type="button"
+            data-filter="${f.key}"
+            aria-pressed="${activeFilters.has(f.key)}">
+      ${f.label}
+    </button>
+  `;
+}
+
+function filteredDishes() {
+  const currentDishId = state.assignment[currentDay];
+  const activeDiet = FILTERS.filter((f) => f.group === 'diet' && activeFilters.has(f.key));
+  const activeAttr = FILTERS.filter((f) => f.group === 'attr' && activeFilters.has(f.key));
+
+  let result;
+  if (activeFilters.size === 0) {
+    result = allDishes.slice();
+  } else {
+    result = allDishes.filter((d) => {
+      // Aktuell zugewiesenes Gericht immer zeigen — auch wenn es die aktiven
+      // Filter nicht erfüllt. So sieht der User seinen Ausgangspunkt und kann
+      // ihn mit dem gefilterten Vorschlag vergleichen.
+      if (d.id === currentDishId) return true;
+      const dietOk = activeDiet.length === 0 || activeDiet.some((f) => f.test(d));
+      const attrOk = activeAttr.every((f) => f.test(d));
+      return dietOk && attrOk;
+    });
+  }
+
+  // Sortierung nach aktivem Attribut-Filter (aufsteigend, weniger = besser):
+  //   Schnell aktiv         → nach cooktime
+  //   Wenig Zutaten aktiv   → nach Zutatenanzahl
+  //   Beide aktiv           → cooktime primär, Zutaten sekundär
+  //   Keiner aktiv          → natürliche Reihenfolge (nach id)
+  const sortFast = activeFilters.has('fast');
+  const sortSimple = activeFilters.has('simple');
+  if (sortFast || sortSimple) {
+    result.sort((a, b) => {
+      if (sortFast) {
+        const d = a.cooktime - b.cooktime;
+        if (d !== 0) return d;
+      }
+      if (sortSimple) {
+        const d = a.ingredients.length - b.ingredients.length;
+        if (d !== 0) return d;
+      }
+      return a.id - b.id;
+    });
+  }
+
+  return result;
+}
+
+// Map dishId → Wochentag (nicht der currentDay), an dem dieses Gericht bereits
+// geplant ist. Für diese Tiles zeigen wir das disabled-Layout + einen Tag-Badge
+// oben links. Bei mehreren Vorkommen gewinnt der zuerst gefundene Tag (DAYS-
+// Reihenfolge = Mo..So).
+function usedElsewhereMap() {
+  const map = new Map();
+  for (const day of DAYS) {
+    if (day === currentDay) continue;
+    const id = state.assignment[day];
+    if (id != null && !map.has(id)) map.set(id, day);
+  }
+  return map;
+}
+
+function renderShell() {
+  const currentDishId = state.assignment[currentDay];
+  const dishes = filteredDishes();
+  const used = usedElsewhereMap();
+  const wasOpen = !rootEl.hidden;
+
+  rootEl.innerHTML = `
+    <div class="picker-overlay ${wasOpen ? 'is-open' : ''}" data-role="backdrop">
+      <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title">
+        <div class="picker-handle" aria-hidden="true"></div>
+        <div class="picker-header">
+          <h2 class="picker-title" id="picker-title">${currentDay} — Gericht wählen</h2>
+          <button class="picker-close" data-action="close" aria-label="Schließen">✕</button>
+        </div>
+        <div class="picker-body">
+          <div class="picker-filters" role="group" aria-label="Filter">
+            <div class="picker-filter-row">
+              ${FILTERS.filter((f) => f.group === 'diet').map(chipHtml).join('')}
+            </div>
+            <div class="picker-filter-row">
+              ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
+            </div>
+          </div>
+          ${dishes.length > 0
+            ? `<div class="picker-grid">${dishes.map((d) => renderTile(d, d.id === currentDishId, used)).join('')}</div>`
+            : '<p class="picker-empty">Keine Gerichte für diese Filter.</p>'}
+        </div>
+      </div>
+    </div>
+  `;
+
+  attachHandlers();
+}
+
+function renderTile(dish, isCurrent, usedMap) {
+  // isCurrent (dieses Gericht ist an currentDay zugewiesen) sticht disabled —
+  // das Tile für den eigenen Tag soll nie ausgegraut sein, auch wenn dasselbe
+  // Gericht an einem anderen Tag ebenfalls geplant ist.
+  const otherDay = isCurrent ? null : (usedMap.get(dish.id) ?? null);
+  const isDisabled = !!otherDay;
+  const displayDay = isCurrent ? currentDay : otherDay;
+  const cls = ['picker-tile'];
+  if (isCurrent) cls.push('picker-tile--current');
+  if (isDisabled) cls.push('picker-tile--disabled');
+  const disabledAttr = isDisabled ? 'aria-disabled="true" tabindex="-1"' : '';
+  // Aktueller Tag: Badge im Aktiv-Look (primary bg, weiße Schrift — analog
+  // zur kcal-Pille auf der Card). Fremder Tag: Frosted-Glass Badge (primary
+  // Schrift auf weißem semi-transparent bg).
+  const badgeCls = 'picker-tile__day-badge' + (isCurrent ? ' picker-tile__day-badge--active' : '');
+  const dayBadge = displayDay
+    ? `<span class="${badgeCls}">${displayDay}</span>`
+    : '';
+  // Anzahl noch nicht abgehakter Zutaten dieses Gerichts — identische Semantik
+  // wie beim Card-Badge im Dashboard ("so viele Zutaten stehen noch offen").
+  const openCount = dish.ingredients.filter((i) => !state.checkedShopping.has(i.key)).length;
+  const shopCls = 'picker-tile__shop' + (isCurrent ? ' picker-tile__shop--active' : '');
+  const shopPill = openCount > 0
+    ? `<span class="${shopCls}" aria-label="${openCount} offene Zutaten">
+         ${ICON_SHOPPING}
+         <span class="picker-tile__shop-count">${openCount}</span>
+       </span>`
+    : '';
+  return `
+    <button class="${cls.join(' ')}"
+            type="button"
+            data-dish-id="${dish.id}"
+            aria-label="${dish.name} auswählen${otherDay ? ` — bereits am ${otherDay} geplant` : ''}"
+            aria-current="${isCurrent ? 'true' : 'false'}"
+            ${disabledAttr}>
+      <div class="picker-tile__image-wrap">
+        ${dayBadge}
+        ${shopPill}
+        <img class="picker-tile__img" src="/dishes/dish-${dish.id}.jpg" alt="" loading="lazy" />
+      </div>
+      <div class="picker-tile__body">
+        <div class="picker-tile__title">${dish.name}</div>
+        <div class="picker-tile__meta">~${dish.cooktime} Min · ${dish.kcal} kcal</div>
+      </div>
+    </button>
+  `;
+}
+
+function attachHandlers() {
+  const overlay = rootEl.querySelector('[data-role="backdrop"]');
+  overlay.addEventListener('click', (ev) => {
+    if (ev.target === overlay) closeDishPicker();
+  });
+  rootEl.querySelector('[data-action="close"]').addEventListener('click', closeDishPicker);
+
+  // Filter-Chip Klick: toggle Filter + Grid neu bauen. Wir ersetzen NUR body-
+  // Inneres, nicht das ganze Sheet — spart Reflow und lässt Scroll-Position stehen.
+  rootEl.querySelectorAll('[data-filter]').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const key = btn.dataset.filter;
+      if (activeFilters.has(key)) activeFilters.delete(key);
+      else activeFilters.add(key);
+      updateFilters();
+      updateGrid();
+    });
+  });
+
+  // Tile-Klick: aria-disabled Tiles ignorieren (bereits an anderem Tag geplant).
+  rootEl.querySelectorAll('[data-dish-id]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (btn.getAttribute('aria-disabled') === 'true') return;
+      const id = parseInt(btn.dataset.dishId, 10);
+      onExternalPick(currentDay, id);
+      closeDishPicker();
+    });
+  });
+
+  // Scroll-Listener für Compact-Filter-Row: schaltet .picker-body--scrolled
+  // beim Erreichen des Thresholds. Position: sticky auf .picker-filters hält
+  // sie sichtbar; in Compact-Modus schrumpfen padding + Pills.
+  const body = rootEl.querySelector('.picker-body');
+  body.addEventListener('scroll', () => {
+    body.classList.toggle('picker-body--scrolled', body.scrollTop > SCROLL_COMPACT_THRESHOLD);
+  }, { passive: true });
+
+  attachCloseSwipe();
+}
+
+// Runter-Swipe auf Handle oder Header schließt das Picker-Sheet — identisches
+// Pattern wie in Detail-/Settings-Sheet. Body (scrollbar) und interaktive
+// Elemente sind ausgenommen, damit Klicks/Scroll dort nicht als Swipe zählen.
+function attachCloseSwipe() {
+  const sheet = rootEl.querySelector('.picker-sheet');
+  if (!sheet) return;
+  const s = { startX: 0, startY: 0, tracking: false };
+
+  sheet.addEventListener('pointerdown', (ev) => {
+    if (ev.pointerType === 'mouse' && ev.button !== 0) return;
+    if (ev.target.closest('button, .picker-filter-chip')) return;
+    if (ev.target.closest('.picker-body')) return;
+    s.startX = ev.clientX;
+    s.startY = ev.clientY;
+    s.tracking = true;
+    try { sheet.setPointerCapture(ev.pointerId); } catch (_) {}
+  });
+
+  sheet.addEventListener('pointerup', (ev) => {
+    if (!s.tracking) return;
+    s.tracking = false;
+    try { sheet.releasePointerCapture(ev.pointerId); } catch (_) {}
+    const dx = ev.clientX - s.startX;
+    const dy = ev.clientY - s.startY;
+    if (dy <= SWIPE_THRESHOLD_PX) return;
+    if (dy <= Math.abs(dx) * SWIPE_DIRECTIONAL_RATIO) return;
+    closeDishPicker();
+  });
+
+  sheet.addEventListener('pointercancel', () => { s.tracking = false; });
+}
+
+function updateFilters() {
+  rootEl.querySelectorAll('[data-filter]').forEach((btn) => {
+    btn.setAttribute('aria-pressed', activeFilters.has(btn.dataset.filter) ? 'true' : 'false');
+  });
+}
+
+function updateGrid() {
+  const currentDishId = state.assignment[currentDay];
+  const dishes = filteredDishes();
+  const used = usedElsewhereMap();
+  const body = rootEl.querySelector('.picker-body');
+  const oldGrid = body.querySelector('.picker-grid');
+  const oldEmpty = body.querySelector('.picker-empty');
+  if (oldGrid) oldGrid.remove();
+  if (oldEmpty) oldEmpty.remove();
+
+  if (dishes.length === 0) {
+    body.insertAdjacentHTML('beforeend', '<p class="picker-empty">Keine Gerichte für diese Filter.</p>');
+  } else {
+    const html = `<div class="picker-grid">${dishes.map((d) => renderTile(d, d.id === currentDishId, used)).join('')}</div>`;
+    body.insertAdjacentHTML('beforeend', html);
+    // Handler für die neuen Tiles neu binden.
+    body.querySelectorAll('[data-dish-id]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        if (btn.getAttribute('aria-disabled') === 'true') return;
+        const id = parseInt(btn.dataset.dishId, 10);
+        onExternalPick(currentDay, id);
+        closeDishPicker();
+      });
+    });
+  }
+
+  // Nach Filter-Wechsel: Scroll auf 0 zurück und Compact-Klasse entfernen,
+  // damit die Filter-Row zurück in den Expanded-State geht. Ohne das würde
+  // ein Filter-Klick nach einem Runter-Scroll die kompakte Filter-Row
+  // beibehalten (visuelle Inkonsistenz gegenüber dem frischen Sheet-Open).
+  body.scrollTop = 0;
+  body.classList.remove('picker-body--scrolled');
+}

@@ -6,6 +6,7 @@ import { renderShoppingList } from './shopping-list/render.js';
 import { resetChecked } from './shopping-list/check.js';
 import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
 import { mountSettingsSheet, openSettingsSheet } from './settings/render.js';
+import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, setView, loadState, saveState } from './state.js';
@@ -17,6 +18,7 @@ const dashboardRoot = document.getElementById('view-dashboard');
 const shoppingRoot = document.getElementById('view-shopping');
 const sheetRoot = document.getElementById('detail-sheet-root');
 const settingsRoot = document.getElementById('settings-sheet-root');
+const pickerRoot = document.getElementById('dish-picker-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
@@ -45,7 +47,7 @@ function refresh() {
   });
 
   // Beide Views immer rendern: der Swipe braucht den Zielinhalt sofort sichtbar.
-  renderDashboard(dashboardRoot, refresh, openDetailSheet);
+  renderDashboard(dashboardRoot, refresh, openDetailSheet, openDishPicker);
   renderShoppingList(shoppingRoot, { onChange: refresh });
 
   // Bottom-Nav: aktiver Tab + Badge sind state-abhängig, deshalb pro refresh() neu.
@@ -68,6 +70,15 @@ function refresh() {
 // dort (Standard-Portionen, Kochzeit) sollen mindestens saveState triggern.
 mountDetailSheet(sheetRoot, { onChange: refresh });
 mountSettingsSheet(settingsRoot, { onChange: refresh });
+
+// Dish-Picker: onPick mutiert nur das Assignment für den Tag. Selection bleibt
+// erhalten (wenn Tag schon angehakt war, gilt das auch für das neue Gericht).
+mountDishPicker(pickerRoot, {
+  onPick: (day, dishId) => {
+    state.assignment[day] = dishId;
+    refresh();
+  },
+});
 
 // Screen-Swipe einmalig mounten — nutzt state.view aus dem Modul.
 attachViewSwipe(mainEl, {

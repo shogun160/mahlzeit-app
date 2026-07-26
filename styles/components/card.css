@@ -53,6 +53,54 @@
   pointer-events: none;
 }
 
+/* Edit-Pille oben links: öffnet das Dish-Picker-Overlay für diesen Tag. Optik
+   symmetrisch zur Portion-Pille (weißer Frosted-Glass, primary-Look bei
+   Selected). */
+.day-card__edit-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  pointer-events: none;
+}
+
+.edit-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 2px 10px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-primary-container);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+/* SVG 14 dp — matcht das Personen-Icon in der Portion-Pill, damit beide
+   Overlay-Pillen exakt 26 dp hoch sind (auch die Makro-Pills unten). */
+.edit-pill svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  color: inherit;
+}
+
+.edit-pill:active {
+  transform: scale(0.96);
+}
+
+/* Selected Card: Edit-Pille wechselt auf denselben primary-Look wie kcal- und
+   Portion-Pille (geschlossene Farbwelt für aktiven Zustand). */
+.day-card--selected .edit-pill {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
 .day-card__portion-overlay .stepper--pill {
   pointer-events: auto;
   background: rgba(255, 255, 255, 0.88);

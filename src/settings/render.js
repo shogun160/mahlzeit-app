@@ -14,6 +14,9 @@ const SWIPE_DIRECTIONAL_RATIO = 1.4; // |dy| muss 1.4x größer als |dx| sein
 
 let rootEl = null;
 let onExternalChange = () => {};
+// Zugeklappte Sections (transient — verliert sich beim App-Restart, überlebt
+// aber Sheet-Close/Reopen weil das Modul lebt).
+const collapsedSections = new Set();
 
 // --- Mount / Lifecycle ---
 
@@ -67,8 +70,7 @@ function renderShell() {
           <button class="settings-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="settings-body">
-          <section class="settings-section">
-            <h3 class="settings-section__title">Portionen</h3>
+          ${section('portionen', 'Portionen', `
             <div class="settings-row">
               <div class="settings-row__label">
                 <div class="settings-row__label-primary">Standard-Personenzahl</div>
@@ -80,10 +82,9 @@ function renderShell() {
                 <button class="stepper__btn" data-action="portions-plus" aria-label="Mehr" ${plusDisabled ? 'disabled' : ''}>+</button>
               </div>
             </div>
-          </section>
+          `)}
 
-          <section class="settings-section">
-            <h3 class="settings-section__title">Kochzeit</h3>
+          ${section('kochzeit', 'Kochzeit', `
             <div class="settings-row">
               <div class="settings-row__label">
                 <div class="settings-row__label-primary">Maximale Kochzeit</div>
@@ -99,42 +100,33 @@ function renderShell() {
                    step="${COOKTIME_STEP}"
                    value="${maxCookTime}"
                    aria-label="Maximale Kochzeit in Minuten" />
-          </section>
+          `)}
 
-          <section class="settings-section">
-            <h3 class="settings-section__title">Ernährungspräferenzen</h3>
+          ${section('praeferenzen', 'Ernährungspräferenzen', `
             <div class="settings-prefs" role="group" aria-label="Ernährungspräferenzen">
+              ${renderPrefChip('meat', 'Fleisch')}
+              ${renderPrefChip('fish', 'Fisch')}
               ${renderPrefChip('vegetarian', 'Vegetarisch')}
-              ${renderPrefChip('vegan', 'Vegan')}
-              ${renderPrefChip('noMeat', 'Kein Fleisch')}
-              ${renderPrefChip('noFish', 'Kein Fisch')}
-              ${renderPrefChip('lactoseFree', 'Laktosefrei')}
-              ${renderPrefChip('glutenFree', 'Glutenfrei')}
             </div>
-          </section>
+          `)}
 
-          <section class="settings-section settings-section--soon">
-            <h3 class="settings-section__title">Küchen-Präferenzen</h3>
+          ${section('kuechen', 'Küchen-Präferenzen', `
             <p class="settings-section__note">Kommt bald — Lieblingsküchen priorisieren beim Reroll</p>
-          </section>
+          `, 'settings-section--soon')}
 
-          <section class="settings-section settings-section--soon">
-            <h3 class="settings-section__title">Profil &amp; Kalorien</h3>
+          ${section('profil', 'Profil &amp; Kalorien', `
             <p class="settings-section__note">Kommt bald — Alter, Größe, Gewicht, Aktivität → Tageskalorien-Ziel</p>
-          </section>
+          `, 'settings-section--soon')}
 
-          <section class="settings-section settings-section--soon">
-            <h3 class="settings-section__title">Darstellung</h3>
+          ${section('darstellung', 'Darstellung', `
             <p class="settings-section__note">Kommt bald — Dark Mode, Akzentfarbe</p>
-          </section>
+          `, 'settings-section--soon')}
 
-          <section class="settings-section settings-section--soon">
-            <h3 class="settings-section__title">Daten</h3>
+          ${section('daten', 'Daten', `
             <p class="settings-section__note">Kommt bald — Backup exportieren/importieren, Alle Daten zurücksetzen</p>
-          </section>
+          `, 'settings-section--soon')}
 
-          <section class="settings-section">
-            <h3 class="settings-section__title">Über</h3>
+          ${section('ueber', 'Über', `
             <div class="settings-row">
               <div class="settings-row__label">
                 <div class="settings-row__label-primary">Mahlzeit — Meal-Planner</div>
@@ -149,7 +141,7 @@ function renderShell() {
                 <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"/>
               </svg>
             </a>
-          </section>
+          `)}
         </div>
       </div>
     </div>
@@ -160,6 +152,28 @@ function renderShell() {
 
 function formatCookTime(min) {
   return min >= COOKTIME_MAX ? 'unbegrenzt' : `${min} Min`;
+}
+
+// Sektions-Wrapper mit klickbarem Header (Chevron rotiert), Body per hidden-
+// Attribut aus-/eingeblendet. State liegt modul-lokal in collapsedSections und
+// überlebt Sheet-Reopens.
+function section(key, title, contentHtml, extraCls = '') {
+  const collapsed = collapsedSections.has(key);
+  const chevron = `<svg class="settings-section__chevron" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>`;
+  return `
+    <section class="settings-section ${extraCls}" data-section="${key}">
+      <button class="settings-section__toggle"
+              type="button"
+              data-section-toggle="${key}"
+              aria-expanded="${!collapsed}">
+        <span class="settings-section__title">${title}</span>
+        ${chevron}
+      </button>
+      <div class="settings-section__body" ${collapsed ? 'hidden' : ''}>
+        ${contentHtml}
+      </div>
+    </section>
+  `;
 }
 
 function renderPrefChip(key, label) {
@@ -203,6 +217,24 @@ function attachHandlers() {
       state.settings.preferences[key] = next;
       btn.setAttribute('aria-pressed', String(next));
       onExternalChange();
+    });
+  });
+
+  // Section-Header togglet Collapse-State (aria-expanded + hidden auf Body).
+  rootEl.querySelectorAll('[data-section-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sectionToggle;
+      const body = btn.parentElement.querySelector('.settings-section__body');
+      const wasExpanded = btn.getAttribute('aria-expanded') === 'true';
+      const nextExpanded = !wasExpanded;
+      btn.setAttribute('aria-expanded', String(nextExpanded));
+      if (nextExpanded) {
+        collapsedSections.delete(key);
+        body.hidden = false;
+      } else {
+        collapsedSections.add(key);
+        body.hidden = true;
+      }
     });
   });
 

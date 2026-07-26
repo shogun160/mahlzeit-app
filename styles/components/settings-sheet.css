@@ -131,13 +131,48 @@
   opacity: 0.55;
 }
 
+/* Klickbarer Section-Header: Titel + Chevron. Toggelt aria-expanded und
+   versteckt den Body via hidden-Attribut. Chevron rotiert -90° wenn collapsed. */
+.settings-section__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 12px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-section__toggle[aria-expanded="false"] {
+  margin-bottom: 0;
+}
+
 .settings-section__title {
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--md-sys-color-primary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  margin: 0 0 12px;
+  margin: 0;
+}
+
+.settings-section__chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--md-sys-color-on-surface-variant);
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+.settings-section__toggle[aria-expanded="false"] .settings-section__chevron {
+  transform: rotate(-90deg);
 }
 
 .settings-section__note {

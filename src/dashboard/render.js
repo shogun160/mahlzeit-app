@@ -14,7 +14,7 @@ function pickInitialAssignment() {
   return assignment;
 }
 
-export function renderDashboard(root, onChange, onOpenDetail) {
+export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker) {
   // Erst-Initialisierung: falls noch kein Assignment vorliegt, würfeln.
   if (Object.keys(state.assignment).length === 0) {
     initState(pickInitialAssignment());
@@ -55,6 +55,9 @@ export function renderDashboard(root, onChange, onOpenDetail) {
         },
         onOpenDetail: (tab) => {
           onOpenDetail(dishId, tab, day);
+        },
+        onOpenPicker: () => {
+          onOpenPicker(day);
         },
       },
     });
