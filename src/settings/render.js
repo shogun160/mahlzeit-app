@@ -319,11 +319,16 @@ function renderProfileList() {
   const minusDisabled = defaultPortions <= PORTIONS_MIN;
   const plusDisabled = defaultPortions >= PORTIONS_MAX;
   // Hinweis-Text: informiert wenn portions > profiles.length ist, damit klar
-  // ist dass die fehlenden Personen als DGE-Standard-Diner gerechnet werden.
+  // ist dass die fehlenden Personen ueber das Standard-Profil gerechnet werden.
   const missing = Math.max(0, defaultPortions - profiles.length);
   const hint = missing > 0
-    ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als DGE-Standard berechnet`
+    ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als Standard-Profil berechnet`
     : 'Wird sofort auf alle Tage angewendet';
+  // Standard-Profil-Row: separater Marker, nicht loeschbar. Editierbar ueber
+  // dasselbe Detail-Sheet (id '_default' erkennt der Sheet). Optisch abgesetzt
+  // via .settings-profile-row--default (dashed border in primary).
+  const std = state.settings.standardProfile;
+  const stdRowHtml = std ? renderStandardProfileRow(std) : '';
   return `
     <div class="settings-profile-list">
       ${rows}
@@ -333,6 +338,7 @@ function renderProfileList() {
         <span class="settings-profile-add__icon" aria-hidden="true">+</span>
         <span class="settings-profile-add__label">Profil hinzufügen</span>
       </button>
+      ${stdRowHtml}
       <div class="settings-row settings-profile-portions">
         <div class="settings-row__label">
           <div class="settings-row__label-primary">Standard-Personenzahl</div>
@@ -351,6 +357,22 @@ function renderProfileList() {
         <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
         <span>Wie werden Kochmengen berechnet?</span>
       </button>
+    </div>
+  `;
+}
+
+function renderStandardProfileRow(profile) {
+  return `
+    <div class="settings-profile-row settings-profile-row--default"
+         role="button"
+         tabindex="0"
+         data-action="open-profile-detail"
+         data-profile-id="${profile.id}">
+      <span class="settings-profile-row__label">
+        <span class="settings-profile-row__name">Standard-Profil</span>
+        <span class="settings-profile-row__meta">${escapeHtml(profileMetaLine(profile))}</span>
+      </span>
+      <svg class="settings-profile-row__chevron" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
     </div>
   `;
 }
