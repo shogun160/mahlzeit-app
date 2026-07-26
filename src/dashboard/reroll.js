@@ -1,5 +1,6 @@
 import { state, DAYS } from '../state.js';
 import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
+import { getEffectivePreferences } from '../nutrition/preferences.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
@@ -54,7 +55,7 @@ function matchesPreferences(dish, prefs) {
 // Export weil auch beim Erst-Auslosen (pickInitialAssignment) genutzt.
 export function eligibleDishIds() {
   const maxTime = state.settings.maxCookTime;
-  const prefs = state.settings.preferences || {};
+  const prefs = getEffectivePreferences();
   const cuisines = state.settings.cuisines || {};
   const activeCuisines = Object.keys(cuisines).filter((k) => cuisines[k]);
 

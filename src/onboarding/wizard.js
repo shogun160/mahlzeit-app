@@ -483,9 +483,10 @@ function attachStep2Handlers() {
 
 // Step 3 (Filter) — Ernährungs- + Küchen-Präferenzen als Toggle-Chips +
 // Makro-Preset als exklusive Auswahl + Live-Vorschau der Verteilung.
-// Alle ändern direkt state.settings (kein Draft), analog zum Settings-Sheet.
+// Diaet-Prefs (pref-toggle) sitzen pro Profil (getEditingProfile()),
+// Kuechen-Prefs weiter global (Etappe steht noch aus).
 function attachStep3Handlers() {
-  bindToggleChips('pref-toggle', 'preferences');
+  bindProfilePrefChips();
   bindToggleChips('cuisine-toggle', 'cuisines');
   bindMacroPresetChips();
 
@@ -517,6 +518,21 @@ function bindToggleChips(action, bucketKey) {
     btn.addEventListener('click', () => {
       const key = btn.dataset.value;
       const bucket = state.settings[bucketKey];
+      if (!bucket) return;
+      bucket[key] = !bucket[key];
+      btn.setAttribute('aria-pressed', String(!!bucket[key]));
+    });
+  });
+}
+
+// Diaet-Prefs pro Profil — bindet auf getEditingProfile().preferences statt
+// state.settings.preferences. Bei Sub-Wizards / Add-Modus schreibt jeder
+// User in seine eigenen Prefs.
+function bindProfilePrefChips() {
+  rootEl.querySelectorAll('[data-action="pref-toggle"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.value;
+      const bucket = getEditingProfile().preferences;
       if (!bucket) return;
       bucket[key] = !bucket[key];
       btn.setAttribute('aria-pressed', String(!!bucket[key]));

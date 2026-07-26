@@ -1,4 +1,5 @@
 import { state, getActiveProfile, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
+import { getEffectivePreferences } from '../nutrition/preferences.js';
 import { allDishes } from '../data/dishes.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
@@ -149,12 +150,13 @@ function handleEsc(ev) {
   if (ev.key === 'Escape') closeDishPicker();
 }
 
-// Leitet aus den globalen Settings die vor-aktivierten Picker-Filter ab.
-// Settings-Chips mappen 1:1 auf die Picker-Chips (Diät + Küche). User kann
-// im Picker jederzeit deaktivieren, ohne die globalen Settings zu ändern.
+// Leitet die vor-aktivierten Picker-Filter ab. Diaet-Prefs kommen aus der
+// Multi-User-Konsens-Logik (Schnitt der mitkochenden Profile, Fallback
+// aktiver User), Kuechen aus den globalen Settings. User kann im Picker
+// jederzeit uebersteuern, ohne die Profile zu aendern.
 function deriveInitialFilters() {
   const set = new Set();
-  const p = state.settings.preferences || {};
+  const p = getEffectivePreferences();
   if (p.meat) set.add('meat');
   if (p.fish) set.add('fish');
   if (p.vegetarian) set.add('veg');

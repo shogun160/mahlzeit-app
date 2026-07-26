@@ -101,6 +101,7 @@ function renderShell() {
           ${renderSliderRow('weight', 'Gewicht', currentProfile.weightKg, WEIGHT_MIN, WEIGHT_MAX, WEIGHT_DEFAULT, 'kg', 'Gewicht in Kilogramm')}
           ${renderActivityRow()}
           ${renderGoalRow()}
+          ${renderPreferencesRow()}
           ${renderDailyTargetRow()}
           ${renderMealRow('breakfast', 'Frühstück', currentProfile.breakfastKcal, BREAKFAST_MAX)}
           ${renderMealRow('lunch', 'Mittag', currentProfile.lunchKcal, LUNCH_MAX)}
@@ -252,6 +253,29 @@ function renderGoalRow() {
   `;
 }
 
+// Diaet-Praeferenzen pro Profil: Toggle-Chips (Fleisch/Fisch/Vegetarisch).
+// Im Dish-Picker + Reroll wird die Schnittmenge aller mitkochenden Profile
+// als Vorauswahl genutzt (Fallback: aktiver User bei leerem Schnitt).
+function renderPreferencesRow() {
+  const prefs = currentProfile.preferences ?? {};
+  const chip = (key, label) => `
+    <button class="pref-chip" type="button" data-pref-toggle="${key}" aria-pressed="${!!prefs[key]}">${label}</button>
+  `;
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Ernährungspräferenz</div>
+        <div class="settings-row__label-secondary">Was darf auf deinem Teller?</div>
+      </div>
+      <div class="settings-prefs" role="group" aria-label="Ernährungspräferenz">
+        ${chip('meat', 'Fleisch')}
+        ${chip('fish', 'Fisch')}
+        ${chip('vegetarian', 'Vegetarisch')}
+      </div>
+    </div>
+  `;
+}
+
 function renderDailyTargetRow() {
   const effective = effectiveDailyTarget(currentProfile);
   const suggestion = dailyTarget(currentProfile);
@@ -390,6 +414,17 @@ function attachHandlers() {
       rootEl.querySelectorAll('[data-gender]').forEach((o) => o.setAttribute('aria-pressed', String(o.dataset.gender === key)));
       updateDailyTargetFromProfile();
       updateDinnerDisplay();
+      onExternalChange();
+    });
+  });
+
+  // Pref-Chips (Diaet pro Profil)
+  rootEl.querySelectorAll('[data-pref-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.prefToggle;
+      if (!currentProfile.preferences) currentProfile.preferences = { meat: false, fish: false, vegetarian: false };
+      currentProfile.preferences[key] = !currentProfile.preferences[key];
+      btn.setAttribute('aria-pressed', String(!!currentProfile.preferences[key]));
       onExternalChange();
     });
   });

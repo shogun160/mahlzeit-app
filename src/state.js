@@ -61,6 +61,14 @@ function blankProfile(id) {
     // damit Toggle O(1) ist und keine Reihenfolge suggeriert wird. Pro Profil
     // getrennt, damit Partner-User eigene Favoriten pflegen kann.
     favorites: {},
+    // Diaet-Praeferenzen pro Profil (Etappe: Prefs pro User). OR-verknuepft
+    // innerhalb eines Profils, Schnittmenge ueber alle mitkochenden Profile
+    // beim Dish-Picker (Fallback: Prefs des aktiven Users bei leerem Schnitt).
+    preferences: {
+      meat: false,
+      fish: false,
+      vegetarian: false,
+    },
   };
 }
 
@@ -260,7 +268,10 @@ export function saveState() {
     // Version (die profiles[]/activeProfileId nicht kennt) den aktiven User
     // weiterhin unter settings.profile findet. In-App wird der Mirror nicht
     // gelesen — nur getActiveProfile() zaehlt.
-    state.settings.profile = { ...getActiveProfile() };
+    const active = getActiveProfile();
+    state.settings.profile = { ...active };
+    // Prefs-Mirror analog: aeltere Versionen lesen settings.preferences global.
+    state.settings.preferences = { ...active.preferences };
     const snapshot = {
       assignment: state.assignment,
       selected: state.selected,
@@ -327,6 +338,11 @@ export function loadState() {
       macroPreset:          raw.macroPreset ?? 'balanced',
       macroTargets:         raw.macroTargets ?? null,
       favorites:            (raw.favorites && typeof raw.favorites === 'object') ? raw.favorites : {},
+      preferences: {
+        meat:       raw.preferences?.meat ?? false,
+        fish:       raw.preferences?.fish ?? false,
+        vegetarian: raw.preferences?.vegetarian ?? false,
+      },
     });
 
     let profiles;
@@ -334,10 +350,31 @@ export function loadState() {
       // Neuer State — profiles[] direkt uebernehmen, aber jedes Element durch
       // normalizeProfile schicken damit fehlende Felder aufgefuellt sind.
       profiles = loadedSettings.profiles.map((p, i) => normalizeProfile(p || {}, p?.id || `u${i + 1}`));
+      // Migration Prefs pro Profil: wenn profiles[i].preferences leer sind
+      // (alter State ohne Diaet-Prefs pro User) UND globale Prefs vorhanden
+      // -> global in profiles[0] uebernehmen, andere Profile bleiben leer.
+      const legacyGlobalPrefs = loadedSettings.preferences;
+      const hasProfilePrefs = profiles.some((p) => p.preferences?.meat || p.preferences?.fish || p.preferences?.vegetarian);
+      if (!hasProfilePrefs && legacyGlobalPrefs && (legacyGlobalPrefs.meat || legacyGlobalPrefs.fish || legacyGlobalPrefs.vegetarian)) {
+        profiles[0].preferences = {
+          meat: !!legacyGlobalPrefs.meat,
+          fish: !!legacyGlobalPrefs.fish,
+          vegetarian: !!legacyGlobalPrefs.vegetarian,
+        };
+      }
     } else {
       // Legacy oder Fresh Install: aus altem profile-Slot bauen. Bei Fresh
       // Install ist loadedProfile leer -> normalizeProfile liefert Blank u1.
       profiles = [normalizeProfile(loadedProfile, 'u1')];
+      // Legacy globale Prefs uebernehmen wenn vorhanden.
+      const legacyGlobalPrefs = loadedSettings.preferences;
+      if (legacyGlobalPrefs) {
+        profiles[0].preferences = {
+          meat: !!legacyGlobalPrefs.meat,
+          fish: !!legacyGlobalPrefs.fish,
+          vegetarian: !!legacyGlobalPrefs.vegetarian,
+        };
+      }
     }
     // Aktives Profil = profiles[0]. Wenn ein alter State activeProfileId auf
     // ein anderes Profil zeigt, verschieben wir dieses an Position 0 damit

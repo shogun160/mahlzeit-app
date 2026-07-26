@@ -136,14 +136,6 @@ function renderShell() {
             </div>
           `)}
 
-          ${section('praeferenzen', 'Ernährungspräferenzen', `
-            <div class="settings-prefs" role="group" aria-label="Ernährungspräferenzen">
-              ${renderPrefChip('meat', 'Fleisch')}
-              ${renderPrefChip('fish', 'Fisch')}
-              ${renderPrefChip('vegetarian', 'Vegetarisch')}
-            </div>
-          `)}
-
           ${section('kuechen', 'Küchen-Präferenzen', `
             <div class="settings-prefs" role="group" aria-label="Küchen-Präferenzen">
               ${renderCuisineChip('asian',         'Asiatisch')}
@@ -268,11 +260,6 @@ function section(key, title, contentHtml, extraCls = '') {
 function summaryFor(key) {
   const s = state.settings;
   if (key === 'kochzeit')  return formatCookTime(s.maxCookTime);
-  if (key === 'praeferenzen') {
-    const total = 3;
-    const active = ['meat', 'fish', 'vegetarian'].filter((k) => s.preferences?.[k]).length;
-    return `${active}/${total}`;
-  }
   if (key === 'kuechen') {
     const total = 4;
     const active = ['asian', 'mediterranean', 'middleEast', 'americas'].filter((k) => s.cuisines?.[k]).length;
@@ -318,18 +305,6 @@ function updateStickyState() {
     const bodyVisible = body && !body.hidden && isBodyVisibleBelow(body, btn);
     btn.classList.toggle('settings-section__toggle--sticky', sticky && !bodyVisible);
   });
-}
-
-function renderPrefChip(key, label) {
-  const pressed = !!state.settings.preferences?.[key];
-  return `
-    <button class="pref-chip"
-            type="button"
-            data-pref="${key}"
-            aria-pressed="${pressed}">
-      ${label}
-    </button>
-  `;
 }
 
 function renderCuisineChip(key, label) {
@@ -555,21 +530,6 @@ function attachHandlers() {
   slider.addEventListener('change', () => {
     state.dishBag = {};
     onExternalChange();
-  });
-
-  // Ernährungs-Chips togglen ihren State + triggern refresh (Reroll-Pool ändert sich).
-  // Bag invalidieren, damit die neue Präferenz sofort beim nächsten Reroll wirkt
-  // (sonst würde der bereits vor-geshuffelte Bag noch alte Kandidaten liefern).
-  rootEl.querySelectorAll('.pref-chip[data-pref]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.pref;
-      const next = !state.settings.preferences[key];
-      state.settings.preferences[key] = next;
-      btn.setAttribute('aria-pressed', String(next));
-      state.dishBag = {};
-      updateSectionSummary('praeferenzen');
-      onExternalChange();
-    });
   });
 
   // Küchen-Chips: Hard-Filter (mit Fallback bei zu wenig Kandidaten) — bewusst
