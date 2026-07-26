@@ -11,6 +11,12 @@ Ideen, die nicht direkt in einer Iteration umgesetzt werden, aber nicht verloren
 
 **Warum später:** Erst müssen die manuellen Einstellungen alle sauber funktionieren (Iteration 4 abgeschlossen). Onboarding ist Politur, kein Kern-Feature.
 
+## Google Health / Health Connect Sync
+
+**Idee:** Kalorien-Ist und Makros an Google Health Connect (Android) synchronisieren, damit die Werte auch in anderen Health-/Fitness-Apps auftauchen. Optional Rückrichtung: Aktivitätslevel oder verbrannte Kalorien aus Health Connect lesen und im Tagesziel-Adjustment berücksichtigen.
+
+**Warum später:** Braucht Capacitor-Plugin (`@capacitor-community/health` oder custom) plus User-Consent-Flow für Health Connect Permissions. Nur Android — iOS würde eigenes HealthKit-Handling brauchen. Klärung nötig ob Push (App → Health) reicht oder Bidirektional gewünscht ist.
+
 ## Favoriten-Gerichte
 
 **Idee:** User markiert Lieblingsgerichte als Favorit (Herz-Icon o. ä.). Auswirkung z. B.:
