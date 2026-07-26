@@ -50,6 +50,17 @@ function openIngredientCount(dish) {
   return dish.ingredients.filter((i) => !state.checkedShopping.has(i.key)).length;
 }
 
+// True wenn das Gericht an mindestens einem der ausgewählten Tage geplant ist —
+// also faktisch auf der Einkaufsliste steht. Steuert die Aktiv-Optik der Shop-
+// Pille im Picker, damit der User beim Umwählen sieht welche Gerichte bereits
+// im Korb liegen.
+function isDishInCart(dishId) {
+  for (const day of DAYS) {
+    if (state.assignment[day] === dishId && state.selected[day]) return true;
+  }
+  return false;
+}
+
 const TRANSITION_MS = 250;
 const SCROLL_COMPACT_THRESHOLD = 8; // px Scroll bis Filter-Row zusammenklappt
 const SWIPE_THRESHOLD_PX = 55;
@@ -162,7 +173,7 @@ function renderFiltersSection() {
       <div class="picker-filter-row">
         ${FILTERS.filter((f) => f.group === 'diet').map(chipHtml).join('')}
       </div>
-      <div class="picker-filter-row">
+      <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'cuisine').map(chipHtml).join('')}
       </div>
       <div class="picker-filter-row">
@@ -295,6 +306,30 @@ function renderShell() {
   `;
 
   attachHandlers();
+  // Font-Fitter läuft nach Layout (rAF), damit scrollWidth/clientWidth bereits
+  // korrekt sind. Betrifft die nowrap-Küchen-Zeile — die bestimmt die minimale
+  // Schriftgröße für alle Filter-Chips.
+  requestAnimationFrame(fitFilterFontSize);
+}
+
+// Verkleinert die Chip-Schrift schrittweise (14 → 10 px in 0.5-Schritten) bis
+// die nowrap-Küchen-Zeile in ihre Container-Breite passt. Der ermittelte Wert
+// wird per CSS-Variable auf rootEl gesetzt und greift für alle Filter-Chips —
+// so bleibt die Optik zwischen den Zeilen konsistent.
+function fitFilterFontSize() {
+  if (!rootEl) return;
+  const row = rootEl.querySelector('.picker-filter-row--nowrap');
+  if (!row) return;
+  const maxPx = 14;
+  const minPx = 10;
+  let size = maxPx;
+  rootEl.style.setProperty('--picker-chip-font', `${size}px`);
+  // scrollWidth > clientWidth heißt Overflow. Loop bis fit oder Minimum.
+  let guard = 20;
+  while (row.scrollWidth > row.clientWidth + 1 && size > minPx && guard-- > 0) {
+    size -= 0.5;
+    rootEl.style.setProperty('--picker-chip-font', `${size}px`);
+  }
 }
 
 function renderTile(dish, isCurrent, usedMap) {
@@ -318,7 +353,11 @@ function renderTile(dish, isCurrent, usedMap) {
   // Anzahl noch nicht abgehakter Zutaten dieses Gerichts — identische Semantik
   // wie beim Card-Badge im Dashboard ("so viele Zutaten stehen noch offen").
   const openCount = openIngredientCount(dish);
-  const shopCls = 'picker-tile__shop' + (isCurrent ? ' picker-tile__shop--active' : '');
+  // Shop-Pille im Aktiv-Look nur wenn das Gericht bereits im Einkaufskorb liegt
+  // (mind. ein selected-Tag mit diesem Gericht). Wenn das aktuelle Gericht des
+  // currentDay nicht im Korb ist, bleibt seine Pille neutral.
+  const isInCart = isDishInCart(dish.id);
+  const shopCls = 'picker-tile__shop' + (isInCart ? ' picker-tile__shop--active' : '');
   const shopPill = openCount > 0
     ? `<span class="${shopCls}" aria-label="${openCount} offene Zutaten">
          ${ICON_SHOPPING}

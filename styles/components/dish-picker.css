@@ -197,25 +197,42 @@
   display: none;
 }
 
-/* Jede Filter-Kategorie bleibt IMMER einzeilig: die semantische Gruppe
-   (Diät / Küche / Attribute) soll nicht in mehrere Zeilen brechen, sonst
-   verwischt die visuelle Zuordnung "Chip → Gruppe". Overflow-x scrollt bei
-   zu wenig Platz — Scrollbar visuell versteckt, weil Touch das nativ macht.
-   Kleines Padding rechts für den letzten Chip. */
+/* Filter-Chips als Wolke: mittig zentriert und wrapend statt einzeilig
+   scrollbar. Die semantische Gruppierung (Diät / Küche / Attribute / kcal)
+   bleibt durch die Zeilen-Trennung im Filter-Panel erhalten, auch wenn eine
+   Gruppe visuell mehrzeilig wird. */
 .picker-filter-row {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  padding-right: 4px;
-  margin-right: -4px;
 }
 
-.picker-filter-row::-webkit-scrollbar {
+/* Modifier für Gruppen die IMMER einzeilig bleiben sollen (Küche mit 4 Chips —
+   sonst würde die Gruppe schnell auf 2 Zeilen brechen und die semantische
+   Zugehörigkeit "vier Küchen" wäre visuell zerteilt). Der JS-Fitter shrinkt
+   die Schriftgröße runter bis die Zeile in die Breite passt; center-Alignment
+   damit sie mittig sitzt sobald sie passt. Overflow als Fallback wenn selbst
+   das Minimum nicht reicht. */
+.picker-filter-row--nowrap {
+  flex-wrap: nowrap;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.picker-filter-row--nowrap::-webkit-scrollbar {
   display: none;
+}
+.picker-filter-row--nowrap > .pref-chip {
+  flex-shrink: 0;
+}
+
+/* Dyn. Schriftgröße für Filter-Chips: der JS-Fitter setzt --picker-chip-font
+   auf rootEl basierend auf der engsten Zeile (Küche). Alle pref-chips im
+   Picker nutzen denselben Wert für konsistente Optik. */
+.picker-body .pref-chip {
+  font-size: var(--picker-chip-font, 0.875rem);
 }
 
 /* Compact-Mode beim Scrollen: kleinere Header + Pills, dezenter Schatten unten
