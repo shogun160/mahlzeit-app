@@ -94,12 +94,12 @@
     --md-sys-color-on-primary-container: #99F6E4;
     --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
 
-    --md-sys-color-surface: #121412;
-    --md-sys-color-surface-container-lowest: #0D0F0E;
-    --md-sys-color-surface-container-low: #1A1D1C;
-    --md-sys-color-surface-container: #1E2221;
-    --md-sys-color-surface-container-high: #282C2B;
-    --md-sys-color-surface-container-highest: #333736;
+    --md-sys-color-surface: #1B1D1F;
+    --md-sys-color-surface-container-lowest: #131517;
+    --md-sys-color-surface-container-low: #22262A;
+    --md-sys-color-surface-container: #2A2E32;
+    --md-sys-color-surface-container-high: #32363A;
+    --md-sys-color-surface-container-highest: #3A3E42;
 
     --md-sys-color-on-surface: #E3E6E4;
     --md-sys-color-on-surface-variant: #A9B0AC;
