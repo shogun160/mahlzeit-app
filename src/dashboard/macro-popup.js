@@ -557,7 +557,7 @@ function renderControls() {
   const isCustom = p.macroTargets != null;
   const activePreset = isCustom ? null : (p.macroPreset ?? MACRO_PRESET_DEFAULT);
   const hint = isMulti
-    ? `Ø aus ${selected.length} Profilen — Anpassen nur bei Einzelauswahl`
+    ? `Ø aus ${selected.length} Profilen`
     : (isCustom
         ? 'Manuell überschrieben'
         : `Preset: ${MACRO_PRESETS.find((m) => m.key === activePreset)?.label ?? 'Ausgewogen'}`);
