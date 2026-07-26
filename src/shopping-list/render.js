@@ -304,8 +304,8 @@ function renderGroup(cat, groupItems, stackIdx) {
         </svg>
       </span>
       <span class="shop-group__title">${CAT_LABELS[cat]}</span>
-      <span class="shop-group__count" aria-label="${openCount} von ${total} offen">${openCount}/${total}</span>
       ${iconsHtml}
+      <span class="shop-group__count" aria-label="${openCount} von ${total} offen">${openCount}/${total}</span>
     </div>
     <ul class="shop-list ${collapsed ? 'shop-list--collapsed' : ''}" data-cat="${cat}" style="--stack-idx: ${stackIdx};">${rows}</ul>
   `;
