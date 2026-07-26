@@ -204,7 +204,7 @@ export function renderStep3(settings) {
         ${macroChip('lowcarb',  'Kohlenhydratarm')}
         ${macroChip('lowfat',   'Fettarm')}
       </div>
-      <div class="onboarding-result__card" data-role="macro-preview-slot"></div>
+      <div data-role="macro-preview-slot"></div>
     </div>
   `;
 }

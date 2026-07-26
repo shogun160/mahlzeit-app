@@ -163,6 +163,19 @@ function renderHorseshoe(macros) {
   `;
 }
 
+// Kompakte Pill-Zeile ohne Donut — für die Vorschau auf Step 3 (Filter).
+// F/P/KH als 3 flache Pills mit farbigem Buchstabe + Gramm. kcal weglassen
+// (kommt erst im Ergebnis-Screen wichtig).
+export function renderMacrosPills(macros) {
+  return `
+    <div class="onboarding-macro-pills">
+      <span class="onboarding-macro-pill"><span class="onboarding-macro__key onboarding-macro__key--f">F</span>${macros.f}&thinsp;g</span>
+      <span class="onboarding-macro-pill"><span class="onboarding-macro__key onboarding-macro__key--p">P</span>${macros.p}&thinsp;g</span>
+      <span class="onboarding-macro-pill"><span class="onboarding-macro__key onboarding-macro__key--kh">KH</span>${macros.kh}&thinsp;g</span>
+    </div>
+  `;
+}
+
 export function renderMacros(macros) {
   return `
     <div class="onboarding-result__label">Makro-Verteilung</div>

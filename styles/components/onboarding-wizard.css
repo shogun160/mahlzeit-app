@@ -374,3 +374,25 @@
 .onboarding-preview [data-role="dinner-preview-value"] {
   font-weight: 600;
 }
+
+/* Kompakte Makro-Pills auf Step 3 (Filter) — schlichte flache Pills mit
+   farbigem Buchstabe + Gramm-Wert, kein Donut. Zeigt nur die grobe Verteilung
+   für den gewählten Preset. */
+.onboarding-macro-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.onboarding-macro-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
