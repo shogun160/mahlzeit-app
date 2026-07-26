@@ -408,6 +408,13 @@
 .settings-row:has(.settings-row__label-secondary) {
   align-items: flex-end;
 }
+/* Bei stacked-Rows (flex-column) wird align-items zur cross-axis (horizontal),
+   d. h. flex-end wuerde Kinder rechts ausrichten. Fuer stacked-Layout
+   explizit auf stretch zurueck. */
+.settings-row--stacked:has(.settings-row__label-secondary),
+.settings-row--stacked {
+  align-items: stretch;
+}
 
 .settings-row__label {
   flex: 1 1 auto;
