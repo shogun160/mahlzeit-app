@@ -614,18 +614,28 @@
 }
 
 /* Kompakte Variante fuer die GitHub-Pille: self-sized (inline-flex), Icon
-   links, Text 'GitHub' daneben — kein Full-Width-Bar. */
+   links, Text 'GitHub' daneben, "extern oeffnen"-Icon ganz rechts. */
 .settings-link--compact {
   display: inline-flex;
   justify-content: flex-start;
   gap: 8px;
   margin-top: 0;
   padding-left: 14px;
-  padding-right: 18px;
+  padding-right: 14px;
 }
 .settings-link--compact svg {
   width: 18px;
   height: 18px;
+}
+.settings-link__label {
+  /* Kein-Wrap, damit die pill kompakt bleibt. */
+  white-space: nowrap;
+}
+.settings-link__external {
+  margin-left: 4px;
+  opacity: 0.7;
+  width: 16px !important;
+  height: 16px !important;
 }
 
 /* Aktions-Button in der Daten-Section — analog zu Settings-Link, aber als
