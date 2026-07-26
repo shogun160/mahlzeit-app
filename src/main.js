@@ -84,9 +84,6 @@ mountMacroPopup(macroPopupRoot, {
 });
 mountOnboardingWizard(onboardingRoot, { onChange: refresh });
 
-// TEMP: manueller Test-Trigger für Wizard-Gerüst — in Task 12 durch Auto-Open ersetzt
-window.__testWizard = openOnboardingWizard;
-
 // Dish-Picker: onPick mutiert das Assignment für den gewählten Tag und würfelt
 // alle anderen Tage, die dasselbe Gericht hatten, automatisch neu — sonst wäre
 // das Gericht zweifach im Dashboard.
@@ -125,3 +122,11 @@ attachViewSwipe(mainEl, {
 });
 
 refresh();
+
+// Onboarding-Auto-Open beim allerersten App-Start. Wizard setzt onboardingSeen
+// sofort auf true (in openOnboardingWizard selbst), damit auch ein Crash
+// während des Wizards kein Re-Trigger auslöst. Ab dem zweiten Start kommt der
+// Wizard nur noch via Placeholder-Pille oder Settings > Daten > Einrichtung.
+if (state.settings.onboardingSeen === false) {
+  openOnboardingWizard();
+}
