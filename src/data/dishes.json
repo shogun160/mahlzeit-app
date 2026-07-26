@@ -242,10 +242,11 @@
         }
       ],
       "steps": [
-        "Filet salzen/pfeffern, in Olivenöl scharf anbraten (3–4 Min./Seite, medium), ruhen lassen.",
-        "Chimichurri: Petersilie fein hacken, mit Olivenöl, Zitronensaft, etwas Knoblauch verrühren.",
+        "Filet salzen und pfeffern.",
+        "In Olivenöl scharf anbraten (3–4 Min./Seite, medium), 5 Min. ruhen lassen.",
+        "Petersilie fein hacken, mit Olivenöl, Zitronensaft und Knoblauch zur Chimichurri verrühren.",
         "Bohnen und Mais abtropfen, mit gewürfelter Paprika und Zwiebel mischen.",
-        "Filet in Scheiben, auf Salat anrichten, Chimichurri darüber."
+        "Filet in Scheiben auf dem Salat anrichten, Chimichurri darüber."
       ],
       "cuisineGroup": "americas"
     },
@@ -345,9 +346,10 @@
       ],
       "steps": [
         "Fenchel in Spalten schneiden, in Olivenöl 10–12 Min. karamellisieren lassen.",
-        "Weiße Bohnen zugeben, kurz erwärmen.",
-        "Lachs würzen, separat 3–4 Min. pro Seite braten.",
-        "Mit Zitronensaft und Petersilie servieren."
+        "Weiße Bohnen abtropfen, zum Fenchel geben und kurz erwärmen.",
+        "Lachs salzen und pfeffern.",
+        "In separater Pfanne 3–4 Min. pro Seite braten.",
+        "Fenchel-Bohnen anrichten, Lachs darauf, mit Zitronensaft und Petersilie servieren."
       ],
       "cuisineGroup": "mediterranean"
     },
@@ -400,10 +402,11 @@
         }
       ],
       "steps": [
-        "Rind in dünne Scheiben schneiden, mit Sojasauce/Sesamöl/Knoblauch 15–20 Min. marinieren.",
-        "Reis kochen.",
-        "Fleisch in heißer Pfanne 2–3 Min. braten.",
-        "Gurke in Scheiben, mit Kimchi, Sesam und Reis servieren."
+        "Rind in dünne Scheiben schneiden.",
+        "Mit Sojasauce, Sesamöl und Knoblauch 15–20 Min. marinieren.",
+        "Reis nach Packungsanleitung kochen.",
+        "Mariniertes Fleisch in heißer Pfanne 2–3 Min. braten.",
+        "Mit Reis, Gurkenscheiben, Kimchi und Sesam anrichten."
       ],
       "cuisineGroup": "asian"
     },
@@ -504,10 +507,11 @@
         }
       ],
       "steps": [
-        "Paprika/Zwiebel in Streifen, in Olivenöl scharf anbraten.",
-        "Garnelen würzen (Paprikapulver, Kreuzkümmel, Limette), zugeben, 3–4 Min. braten.",
-        "Avocado zerdrücken, mit Limettensaft und Petersilie (statt Koriander) zu Guacamole verarbeiten.",
-        "Tortillas erwärmen, alles darin anrichten."
+        "Paprika und Zwiebel in Streifen schneiden, in Olivenöl scharf anbraten.",
+        "Garnelen mit Paprikapulver, Kreuzkümmel und Limette würzen.",
+        "Garnelen zum Gemüse geben, 3–4 Min. braten.",
+        "Avocado zerdrücken, mit Limettensaft und Petersilie zu Guacamole verarbeiten.",
+        "Tortillas erwärmen, Fajita-Mix und Guacamole darin anrichten."
       ],
       "cuisineGroup": "americas"
     },
@@ -548,9 +552,11 @@
         }
       ],
       "steps": [
-        "Kartoffeln schälen, kochen, mit Skyr und etwas Kochwasser zu cremigem Stampf verarbeiten.",
-        "Kabeljau mit Petersilie/Olivenöl bestreichen, bei 180 °C ca. 12–15 Min. im Ofen garen.",
-        "Mit restlichem Skyr als Sauce servieren."
+        "Kartoffeln schälen und in Salzwasser weichkochen.",
+        "Kabeljau mit Petersilie und Olivenöl bestreichen, bei 180 °C 12–15 Min. garen.",
+        "Kartoffeln abgießen, Kochwasser auffangen.",
+        "Kartoffeln mit Skyr und etwas Kochwasser zu cremigem Stampf verarbeiten.",
+        "Fisch auf dem Stampf mit restlichem Skyr als Sauce servieren."
       ],
       "cuisineGroup": "mediterranean"
     },
@@ -881,10 +887,10 @@
       ],
       "steps": [
         "Miso-Paste mit Honig und Sesamöl verrühren, Lachs damit bestreichen, 10 Min. ziehen lassen.",
-        "Bei 200 °C ca. 10–12 Min. im Ofen garen (oder in der Pfanne).",
+        "Bei 200 °C 10–12 Min. im Ofen garen (oder in der Pfanne).",
         "Reis kochen.",
-        "Pak Choi kurz andünsten/dämpfen.",
-        "Anrichten."
+        "Pak Choi kurz andünsten oder dämpfen.",
+        "Reis als Boden, Pak Choi seitlich, Lachs darauf anrichten."
       ],
       "cuisineGroup": "asian"
     },
@@ -1047,11 +1053,9 @@
         "Ganze Gewürze (Kreuzkümmel, Kardamom, Lorbeer) in Öl anrösten.",
         "Zwiebeln und Lauch goldbraun anbraten.",
         "Knoblauch, Ingwer, Kurkuma und Chili dazu, kurz mitrösten.",
-        "Trockengewürze mitrösten.",
-        "Hähnchen anbraten.",
+        "Trockengewürze mitrösten, Hähnchen anbraten.",
         "Tomaten einrühren, köcheln lassen.",
-        "Brühe und Kichererbsen dazu, köcheln.",
-        "Brokkoli dazugeben.",
+        "Brühe und Kichererbsen dazu, dann Brokkoli mitköcheln.",
         "Hitze reduzieren, Skyr einrühren (nicht mehr kochen).",
         "Spinat unterheben, mit Garam Masala, Petersilie und Zitrone servieren."
       ],
@@ -1237,17 +1241,13 @@
         }
       ],
       "steps": [
-        "Cannellini am Vortag einweichen (8-12 h).",
-        "Knoblauch schneiden, 10 min ruhen lassen.",
-        "Gemüse vorbereiten.",
-        "Aromenbasis (Rosmarin, Thymian, Lorbeer, Knoblauch) anziehen.",
-        "Schalotten mit Sardellen und Chili anbraten.",
-        "Paprika und Zucchini scharf anbraten.",
-        "Cherry-Tomaten mitschwenken.",
-        "Cannellini und Erbsen mit Kochwasser 3 min ziehen lassen.",
-        "Filet in rauchheißer Pfanne je 2 min pro Seite braten, 5 min ruhen lassen.",
-        "Bohnen-Mix mit Zitrone abschmecken.",
-        "Anrichten mit Rucola, Avocado, Schafkäse und aufgeschnittenem Filet."
+        "Cannellini am Vortag 8–12 h einweichen.",
+        "Knoblauch schneiden, 10 Min. ruhen lassen.",
+        "Rosmarin, Thymian, Lorbeer und Knoblauch mit Schalotten, Sardellen und Chili anziehen.",
+        "Paprika und Zucchini scharf anbraten, Cherry-Tomaten mitschwenken.",
+        "Cannellini und Erbsen mit Kochwasser 3 Min. ziehen lassen, mit Zitrone abschmecken.",
+        "Filet in rauchheißer Pfanne je 2 Min. pro Seite braten, 5 Min. ruhen lassen.",
+        "Auf Rucola und Avocado mit Bohnen-Mix, Schafkäse und aufgeschnittenem Filet anrichten."
       ],
       "cuisineGroup": "mediterranean"
     },
@@ -1330,11 +1330,11 @@
         }
       ],
       "steps": [
-        "Quinoa in doppelter Menge Wasser 12-15 min garen.",
-        "Lachs mit Öl bestreichen, salzen, pfeffern, mit Zitronenscheiben belegt bei 140 °C ~12-14 min garen.",
+        "Quinoa in doppelter Menge Wasser 12–15 Min. garen.",
+        "Lachs mit Öl, Salz, Pfeffer und Zitronenscheiben belegt bei 140 °C 12–14 Min. garen.",
         "Kurkuma, Ingwer, Knoblauch, Chili und Zitronensaft zum Dressing verrühren.",
-        "Quinoa als Bowl-Boden, rohes Rotkohl, Gurke, Karotte, Sellerie, blanchierten Brokkoli und Avocado darauf, Lachs obenauf.",
-        "Dressing darüber, Chuan-Nan-Chili-Topping und Petersilie zum Schluss."
+        "Quinoa, Rotkohl, Gurke, Karotte, Sellerie, blanchierten Brokkoli und Avocado zur Bowl schichten.",
+        "Lachs obenauf, Dressing, Chili-Topping und Petersilie darüber."
       ],
       "cuisineGroup": "asian"
     },
@@ -1424,14 +1424,13 @@
         }
       ],
       "steps": [
-        "Skyr-Caesar-Dressing anrühren (Skyr, Sardellen, Knoblauch, Zitrone, Dijon, Paprikapulver, Chili).",
-        "2 EL davon als Hähnchen-Marinade abnehmen, 15-30 min ziehen lassen.",
-        "Ei hartkochen (9 min).",
-        "Rote Zwiebel in Zitronensaft schnellpickeln (5 min).",
-        "Hähnchen scharf anbraten (3-4 min pro Seite).",
-        "Kichererbsen mit Knoblauch crispy braten (6-8 min).",
+        "Skyr-Caesar-Dressing anrühren (Skyr, Sardellen, Knoblauch, Zitrone, Dijon, Paprikapulver, Chili), 2 EL als Marinade abnehmen.",
+        "Hähnchen mit Marinade 15–30 Min. ziehen lassen.",
+        "Ei hart kochen (9 Min.), Rote Zwiebel in Zitronensaft schnellpickeln (5 Min.).",
+        "Hähnchen scharf anbraten (3–4 Min. pro Seite).",
+        "Kichererbsen mit Knoblauch crispy braten (6–8 Min.).",
         "Paprika und Zucchini mit Salz und Oregano braten.",
-        "Schichten: Dressing als Basis, Rucola, Gemüse, Kichererbsen, Zwiebel, Kapern, Hähnchen und Ei-Viertel obenauf.",
+        "Dressing als Basis, Rucola, Gemüse, Kichererbsen, Zwiebel, Kapern, Hähnchen und Ei-Viertel darauf schichten.",
         "Mit Petersilie und Sumach finishen."
       ],
       "cuisineGroup": "mediterranean"
@@ -1922,15 +1921,14 @@
         }
       ],
       "steps": [
-        "Reis kochen (Vollkorn-Basmati 1:2 Wasser, ~62 min).",
+        "Vollkorn-Basmati 1:2 Wasser kochen (~62 Min.).",
         "Sauce anrühren.",
-        "Wok sehr heiß, Öl dazu, Garnelen 1-2 min scharf anbraten, rausnehmen.",
-        "Knoblauch, Ingwer, Chili, Frühlingszwiebel-Weiß 30 Sek. anbraten.",
-        "Blumenkohl, Buschbohnen, Karotte, Paprika 2-3 min stir-fry.",
-        "Pak Choi zuletzt dazu.",
+        "Wok sehr heiß, Öl dazu, Garnelen 1–2 Min. scharf anbraten, rausnehmen.",
+        "Knoblauch, Ingwer, Chili und Frühlingszwiebel-Weiß 30 Sek. anbraten.",
+        "Blumenkohl, Buschbohnen, Karotte und Paprika 2–3 Min. stir-fry, Pak Choi zuletzt dazu.",
         "Garnelen zurück, Zhacai dazu, Sauce angießen und kurz binden.",
-        "Sesamöl, weißer Pfeffer und Zitronensaft.",
-        "Frühlingszwiebel-Grün, Sesam und Thai-Basilikum finishen, mit Reis und Ei servieren."
+        "Mit Sesamöl, weißem Pfeffer und Zitronensaft abschmecken.",
+        "Mit Frühlingszwiebel-Grün, Sesam und Thai-Basilikum finishen, mit Reis und Ei servieren."
       ],
       "cuisineGroup": "asian"
     },
@@ -2015,14 +2013,12 @@
       ],
       "steps": [
         "Ganze Gewürze trocken rösten, grob mörsern.",
-        "Zwiebel in Öl 15-20 min goldbraun braten, Ingwer-Knoblauch-Paste 1 min mit.",
-        "Gemahlene Gewürze (außer Garam Masala) kurz mitrösten.",
-        "Passata dazu, 20-25 min offen einkochen.",
-        "Hähnchen dazu, 5 min anziehen.",
-        "Kichererbsen, Karotte, Wasser dazu, 15-20 min köcheln.",
-        "Spinat einfallen lassen.",
-        "Hitze runter, Skyr temperiert einrühren (nicht kochen), Garam Masala final.",
-        "Restlichen Skyr mit Salz als Raita separat anrichten, mit Basmati Vollkorn servieren."
+        "Zwiebel in Öl 15–20 Min. goldbraun braten, Ingwer-Knoblauch-Paste 1 Min. mitrösten.",
+        "Gemahlene Gewürze (außer Garam Masala) und Passata dazu, 20–25 Min. offen einkochen.",
+        "Hähnchen dazu, 5 Min. anziehen.",
+        "Kichererbsen, Karotte und Wasser dazu, 15–20 Min. köcheln.",
+        "Spinat einfallen lassen, Hitze runter, Skyr temperiert einrühren (nicht kochen).",
+        "Mit Garam Masala abschmecken, Basmati Vollkorn und Raita aus restlichem Skyr servieren."
       ],
       "cuisineGroup": "asian"
     },
@@ -2091,10 +2087,11 @@
         }
       ],
       "steps": [
-        "Lachsfilet aus der Sauce nehmen, wenig Sauce mitnehmen, kurz erwärmen.",
+        "Ei hart kochen (8–10 Min.), abschrecken.",
+        "Wildlachs aus der Dose nehmen, etwas Sauce mitnehmen, kurz erwärmen.",
         "Kidneybohnen, Zwiebel, Oliven, Rucola, Sellerie, Gurke, Knoblauch und Chili mischen.",
         "Schafskäse zerbröseln, Ei vierteln.",
-        "Skyr als Topping/Dressing."
+        "Salat mit Lachs, Ei und Feta anrichten, Skyr als Dressing darüber."
       ],
       "cuisineGroup": "mediterranean"
     },
