@@ -625,6 +625,8 @@
       "label": "Tikka-Gewürzmischung",
       "cat": "gewuerze",
       "unit": "vorrat",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 300,
         "p": 10.0,
@@ -636,6 +638,8 @@
       "label": "Ras-el-Hanout",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 320,
         "p": 12.0,
@@ -647,6 +651,8 @@
       "label": "Rogan-Josh-Gewürzmischung",
       "cat": "gewuerze",
       "unit": "vorrat",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 300,
         "p": 10.0,
@@ -658,6 +664,8 @@
       "label": "Sesam, Samen",
       "cat": "gewuerze",
       "unit": "vorrat",
+      "displayUnit": "tl",
+      "gramsPerUnit": 3,
       "per100g": {
         "kcal": 572,
         "p": 17.5,
@@ -1072,7 +1080,8 @@
     "karotten_bunt": {
       "label": "Karotten, bunt",
       "cat": "frisch",
-      "unit": "g",
+      "unit": "stueck",
+      "size": 70,
       "per100g": {
         "kcal": 41,
         "p": 0.9,
@@ -1321,6 +1330,8 @@
       "label": "Za'atar",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 350,
         "p": 10.0,
@@ -1332,6 +1343,8 @@
       "label": "Sumach",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 310,
         "p": 8.0,
@@ -1343,6 +1356,8 @@
       "label": "Garam Masala",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 380,
         "p": 15.0,
@@ -1354,6 +1369,8 @@
       "label": "Kreuzkümmel, gemahlen",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 375,
         "p": 18.0,
@@ -1365,6 +1382,8 @@
       "label": "Koriandersamen, gemahlen",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 300,
         "p": 12.4,
@@ -1376,6 +1395,8 @@
       "label": "Geräuchertes Paprikapulver",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 282,
         "p": 14.0,
@@ -1387,6 +1408,8 @@
       "label": "Kurkuma gemahlen",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 354,
         "p": 8.0,
@@ -1398,6 +1421,8 @@
       "label": "Chiliflocken",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
       "per100g": {
         "kcal": 282,
         "p": 13.0,
@@ -1409,6 +1434,8 @@
       "label": "Backpulver",
       "cat": "gewuerze",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 4,
       "per100g": {
         "kcal": 53,
         "p": 0,
@@ -1419,7 +1446,8 @@
     "chili_frisch": {
       "label": "Chili frisch (mit Kernen)",
       "cat": "frisch",
-      "unit": "g",
+      "unit": "stueck",
+      "size": 6,
       "per100g": {
         "kcal": 40,
         "p": 1.9,
