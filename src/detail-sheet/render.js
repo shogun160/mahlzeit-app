@@ -2,12 +2,15 @@ import { state, PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { changePortion } from '../dashboard/portions.js';
 import { toggleSelected } from '../dashboard/selection.js';
+import { rerollDay } from '../dashboard/reroll.js';
 import { toggleChecked } from '../shopping-list/check.js';
 import { renderIngredients } from './ingredients.js';
 import { renderRecipe } from './recipe.js';
 
 // Material Symbol shopping_bag (outlined) — für den Toggle-Button im Sheet.
 const ICON_LIST = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
+// Material Symbol refresh — für Reroll direkt aus dem Sheet.
+const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
 
 const TAB_ORDER = ['zutaten', 'rezept'];
 const TAB_LABELS = { zutaten: 'Zutaten', rezept: 'Rezept' };
@@ -104,6 +107,9 @@ function renderShell() {
           </div>
         </div>
         <div class="sheet-portion-row ${isSelected ? 'sheet-portion-row--active' : ''}">
+          <button class="sheet-reroll-toggle" data-action="reroll-day" aria-label="Anderes Gericht auslosen" title="Anderes Gericht auslosen">
+            ${ICON_REFRESH}
+          </button>
           <button class="sheet-list-toggle" data-action="toggle-list" aria-pressed="${isSelected}" aria-label="${listToggleLabel}">
             ${ICON_LIST}
           </button>
@@ -133,6 +139,7 @@ function attachHandlers() {
   rootEl.querySelector('[data-action="sheet-portion-minus"]').addEventListener('click', () => handleSheetPortion(-1));
   rootEl.querySelector('[data-action="sheet-portion-plus"]').addEventListener('click', () => handleSheetPortion(1));
   rootEl.querySelector('[data-action="toggle-list"]').addEventListener('click', () => handleToggleList());
+  rootEl.querySelector('[data-action="reroll-day"]').addEventListener('click', () => handleReroll());
   rootEl.querySelectorAll('.sheet-tabs__btn').forEach((btn) => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });
@@ -253,6 +260,26 @@ function handleToggleList() {
     btn.setAttribute('aria-pressed', isSelected);
     btn.setAttribute('aria-label', isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen');
   }
+  onExternalChange();
+}
+
+// Reroll direkt aus dem Sheet: würfelt ein neues Dish für den aktuellen Tag,
+// aktualisiert currentContext auf die neue dishId und baut den Sheet-Inhalt neu
+// (Titel, Panels, Selection-Zustand). Cards im Hintergrund ziehen via
+// onExternalChange nach.
+function handleReroll() {
+  if (!currentContext) return;
+  const beforeId = currentContext.dishId;
+  rerollDay(currentContext.day);
+  const nextId = state.assignment[currentContext.day];
+  if (nextId === beforeId) {
+    // Kein Wechsel möglich (z. B. alle anderen Dishes sind bereits vergeben) —
+    // nichts weiter zu tun.
+    onExternalChange();
+    return;
+  }
+  currentContext.dishId = nextId;
+  renderShell();
   onExternalChange();
 }
 

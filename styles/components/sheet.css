@@ -206,16 +206,18 @@
 }
 
 .sheet-portion-row .stepper--floating,
-.sheet-list-toggle {
+.sheet-list-toggle,
+.sheet-reroll-toggle {
   pointer-events: auto;
   background: var(--md-sys-color-surface-container-lowest);
   box-shadow: var(--md-elevation-2), 0 0 0 1px var(--md-sys-color-outline-variant);
   transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 
-/* Einkaufslisten-Toggle-Button: gleicher Höhen-Rhythmus wie der Stepper daneben,
-   Icon zentriert. */
-.sheet-list-toggle {
+/* Einkaufslisten-Toggle- und Reroll-Button: gleicher Höhen-Rhythmus wie der
+   Stepper daneben, Icon zentriert. */
+.sheet-list-toggle,
+.sheet-reroll-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -229,20 +231,23 @@
   font-family: inherit;
 }
 
-.sheet-list-toggle svg {
+.sheet-list-toggle svg,
+.sheet-reroll-toggle svg {
   width: 20px;
   height: 20px;
   display: block;
   color: inherit;
 }
 
-.sheet-list-toggle:active {
+.sheet-list-toggle:active,
+.sheet-reroll-toggle:active {
   transform: scale(0.96);
 }
 
 /* Aktive Row: Toggle-Button UND Stepper werden primary (identisch zum kcal-
    Pill-Look auf der Card). Innere Stepper-Elemente haben in stepper.css eigene
-   Farben — hier explizit auf on-primary überschreiben. */
+   Farben — hier explizit auf on-primary überschreiben. Reroll-Pill bleibt
+   bewusst neutral — sie ist Aktions-Button, nicht State-Anzeige. */
 .sheet-portion-row--active .sheet-list-toggle,
 .sheet-portion-row--active .stepper--floating {
   background: var(--md-sys-color-primary);
