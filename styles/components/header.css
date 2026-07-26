@@ -169,3 +169,15 @@
 .icon-btn--active:hover {
   background: var(--md-sys-color-primary-tint-hover);
 }
+
+/* Logo ist ein dunkelgrünes PNG. Im Dark Mode via brightness(0) invert(1)
+   auf Weiß gezogen — funktioniert bei jedem PNG mit transparentem Hintergrund.
+   Sowohl bei Auto-Modus (System-Media-Query) als auch bei explizitem Override. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .app-header__logo {
+    filter: brightness(0) invert(1);
+  }
+}
+:root[data-theme="dark"] .app-header__logo {
+  filter: brightness(0) invert(1);
+}
