@@ -889,15 +889,20 @@
   color: var(--md-sys-color-primary);
 }
 
-/* Info-Dialog — native <dialog>-Element mit Material-3-Look. Card zentriert,
-   Backdrop leicht abgedunkelt. Body scrollbar wenn Inhalt zu lang. */
+/* Info-Dialog — native <dialog>-Element mit Material-3-Look. Card zentriert
+   auf dem Viewport (position: fixed + inset: 0 + margin: auto), Backdrop
+   leicht abgedunkelt. Body scrollbar wenn Inhalt zu lang. */
 .settings-info-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   border: none;
   border-radius: 20px;
   padding: 0;
   max-width: 480px;
   width: calc(100% - 32px);
   max-height: 80vh;
+  height: fit-content;
   background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.24);
