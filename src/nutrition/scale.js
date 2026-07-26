@@ -1,4 +1,4 @@
-import { state } from '../state.js';
+import { getActiveProfile } from '../state.js';
 import { dinnerTarget, dishScale, scaledGrams } from './target.js';
 
 // State-abhängige Convenience-Wrapper: Kombinieren des aktuellen Profil-Ziels
@@ -6,7 +6,7 @@ import { dinnerTarget, dishScale, scaledGrams } from './target.js';
 // Einkaufsliste, Wochen-Bar) brauchen so nur einen einzigen Aufruf, wenn sie
 // den passenden Faktor für ein Gericht wollen.
 export function getScaleForDish(dish) {
-  const target = dinnerTarget(state.settings.profile);
+  const target = dinnerTarget(getActiveProfile());
   return dishScale(dish?.kcal, target);
 }
 
