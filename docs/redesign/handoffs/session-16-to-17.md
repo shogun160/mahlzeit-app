@@ -107,6 +107,7 @@ Details in `docs/redesign/2026-07-26-kalender-export-design.md`. Kurzform:
 ### Andere Kandidaten (falls Prioritaet wechselt)
 
 **Klein (~½-1 Session):**
+- **Rechtschreibung-Sweep** — alle user-sichtbaren Strings systematisch pruefen. Vorschlag: mit `general-purpose`-Subagent oder passendem Skill parallel arbeiten. Umfang: `src/**/*.js` (UI-Strings, aria-labels), `src/data/dishes.json` (Rezept-Namen + Zutaten + Zubereitungs-Schritte, groesste Fehler-Quelle), `src/data/ingredients.json` (Zutaten-Namen), `index.html`. Agent liefert Fehlerliste, Fixes dann im Main-Thread.
 - **Favoriten Weighted-Reroll** — Favoriten haeufiger beim `rerollDay`/`rerollAll` ziehen (analog Cuisine-Weighting). Rundet das Favoriten-Feature ab.
 - **Datenverwaltung / Iteration 7** — Export/Import JSON + „Alle Daten zuruecksetzen"-Bestaetigung. Nuetzliches Safety-Net vor allen weiteren Aenderungen.
 - **Bar-Bootstrap-Anti-Flash** — `SharedPreferences` in `MainActivity.onCreate` (Doppel-Wahrheit-Trade-off, siehe Session 15 Handoff)
