@@ -1,6 +1,7 @@
 import { state, saveState } from '../state.js';
-import { AGE_MIN, AGE_MAX } from '../nutrition/target.js';
+import { AGE_MIN, AGE_MAX, dailyTarget } from '../nutrition/target.js';
 import { renderStep1, renderStep2, renderStep3, renderStep4, DEFAULTS } from './steps.js';
+import { renderStep5, refreshResultDynamic } from './result.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 5;
@@ -132,8 +133,8 @@ function renderStepContent() {
     case 2: return renderStep2(draft);
     case 3: return renderStep3(draft);
     case 4: return renderStep4(draft);
-    // Step 5 folgt in Task 9
-    default: return `<p class="onboarding-placeholder">Step ${currentStep} — Content folgt.</p>`;
+    case 5: return renderStep5(draft);
+    default: return `<p class="onboarding-placeholder">Step ${currentStep}</p>`;
   }
 }
 
@@ -187,7 +188,41 @@ function attachStepHandlers() {
   if (currentStep === 2) attachStep2Handlers();
   if (currentStep === 3) attachStep3Handlers();
   if (currentStep === 4) attachStep4Handlers();
-  // Step 5 folgt in Task 9
+  if (currentStep === 5) attachStep5Handlers();
+}
+
+function attachStep5Handlers() {
+  const slider = rootEl.querySelector('[data-action="target-change"]');
+  if (slider) {
+    slider.addEventListener('input', () => {
+      draft.dailyTargetOverride = parseInt(slider.value, 10);
+      touched.dailyTargetOverride = true;
+      refreshResultDynamic(rootEl, draft);
+    });
+  }
+  const resetBtn = rootEl.querySelector('[data-action="target-reset"]');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', () => {
+      draft.dailyTargetOverride = null;
+      touched.dailyTargetOverride = true;
+      // Slider zurück auf berechneten Vorschlag setzen — gleiche resolvedProfile-
+      // Logik wie in result.js (Draft-Werte oder Fallbacks aus DEFAULTS).
+      if (slider) {
+        const p = state.settings.profile;
+        const fake = {
+          gender:        draft.gender        ?? p.gender        ?? DEFAULTS.gender,
+          age:           draft.age           ?? p.age           ?? DEFAULTS.age,
+          heightCm:      draft.heightCm      ?? p.heightCm      ?? DEFAULTS.heightCm,
+          weightKg:      draft.weightKg      ?? p.weightKg      ?? DEFAULTS.weightKg,
+          activityLevel: draft.activityLevel ?? p.activityLevel ?? DEFAULTS.activityLevel,
+          goal:          draft.goal          ?? p.goal          ?? DEFAULTS.goal,
+        };
+        const s = dailyTarget(fake);
+        if (s != null) slider.value = String(s);
+      }
+      refreshResultDynamic(rootEl, draft);
+    });
+  }
 }
 
 function attachStep4Handlers() {
