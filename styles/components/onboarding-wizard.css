@@ -212,13 +212,22 @@
   margin-bottom: 12px;
   color: var(--md-sys-color-on-surface);
 }
-/* Abendessen als "active card" — analog zur ausgewählten Card im Dashboard
-   (siehe card.css: color-mix 25% primary in surface-container-lowest). Der
-   dezente Grün-Ton macht klar dass das der zentrale Wert ist, ohne aus
-   der Palette rauszufallen. */
+/* Abendessen als "active card" — Primary-Background wie ein filled Button,
+   weißer Text. Macht deutlich klar dass das der zentrale Wert im Ergebnis ist.
+   Die inneren Label/Value-Farben werden hier hart überschrieben, weil die
+   Basis-Klassen jeweils eigene Farben setzen (on-surface / on-surface-variant). */
 .onboarding-result__card--accent {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-lowest));
+  background: var(--md-sys-color-primary);
   border-color: transparent;
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-result__card--accent .onboarding-result__label,
+.onboarding-result__card--accent .onboarding-result__value,
+.onboarding-result__card--accent .onboarding-result__value--big {
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-result__card--accent .onboarding-result__label {
+  opacity: 0.85;
 }
 .onboarding-result__card-header {
   display: flex;
