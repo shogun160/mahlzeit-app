@@ -53,6 +53,15 @@ export const state = {
       fish: false,
       vegetarian: false,
     },
+    cuisines: {
+      // Küchen-Präferenzen: kein Hard-Filter, sondern Weighted-Reroll.
+      // Bevorzugte Buckets bekommen Faktor 3 im Auslos-Pool. Alle aus =
+      // neutral (gleichverteilt).
+      asian: false,
+      mediterranean: false,
+      middleEast: false,
+      americas: false,
+    },
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
 };
@@ -125,6 +134,12 @@ export function loadState() {
         meat: loadedSettings.preferences?.meat ?? false,
         fish: loadedSettings.preferences?.fish ?? false,
         vegetarian: loadedSettings.preferences?.vegetarian ?? false,
+      },
+      cuisines: {
+        asian: loadedSettings.cuisines?.asian ?? false,
+        mediterranean: loadedSettings.cuisines?.mediterranean ?? false,
+        middleEast: loadedSettings.cuisines?.middleEast ?? false,
+        americas: loadedSettings.cuisines?.americas ?? false,
       },
       theme: loadedSettings.theme ?? 'auto',
     };

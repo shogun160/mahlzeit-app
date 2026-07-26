@@ -111,8 +111,13 @@ function renderShell() {
           `)}
 
           ${section('kuechen', 'Küchen-Präferenzen', `
-            <p class="settings-section__note">Kommt bald — Lieblingsküchen priorisieren beim Reroll</p>
-          `, 'settings-section--soon')}
+            <div class="settings-prefs" role="group" aria-label="Küchen-Präferenzen">
+              ${renderCuisineChip('asian',         'Asiatisch')}
+              ${renderCuisineChip('mediterranean', 'Mediterran')}
+              ${renderCuisineChip('middleEast',    'Nahost')}
+              ${renderCuisineChip('americas',      'Amerika')}
+            </div>
+          `)}
 
           ${section('profil', 'Profil &amp; Kalorien', `
             <p class="settings-section__note">Kommt bald — Alter, Größe, Gewicht, Aktivität → Tageskalorien-Ziel</p>
@@ -188,6 +193,18 @@ function renderPrefChip(key, label) {
   `;
 }
 
+function renderCuisineChip(key, label) {
+  const pressed = !!state.settings.cuisines?.[key];
+  return `
+    <button class="pref-chip"
+            type="button"
+            data-cuisine="${key}"
+            aria-pressed="${pressed}">
+      ${label}
+    </button>
+  `;
+}
+
 function attachHandlers() {
   const overlay = rootEl.querySelector('[data-role="backdrop"]');
   overlay.addEventListener('click', (ev) => {
@@ -215,6 +232,18 @@ function attachHandlers() {
       const key = btn.dataset.pref;
       const next = !state.settings.preferences[key];
       state.settings.preferences[key] = next;
+      btn.setAttribute('aria-pressed', String(next));
+      onExternalChange();
+    });
+  });
+
+  // Küchen-Chips: analog Diät-Chips, wirkt sich auf Weighted-Reroll aus
+  // (kein Hard-Filter — bevorzugte Gruppe bekommt Faktor 3 beim nächsten Reroll).
+  rootEl.querySelectorAll('.pref-chip[data-cuisine]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.cuisine;
+      const next = !state.settings.cuisines[key];
+      state.settings.cuisines[key] = next;
       btn.setAttribute('aria-pressed', String(next));
       onExternalChange();
     });

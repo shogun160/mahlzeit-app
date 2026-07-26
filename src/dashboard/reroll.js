@@ -1,5 +1,22 @@
 import { state, DAYS } from '../state.js';
-import { allDishIds, dishesById, shuffled } from '../data/dishes.js';
+import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
+
+// Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
+// tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
+// docs/redesign/2026-07-26-session-9-plan.md für die Entscheidung.
+const CUISINE_PREFERENCE_WEIGHT = 3;
+
+// Gewicht einer Dish-ID für den Weighted-Reroll: 3, wenn dish.cuisineGroup
+// einer aktiven Präferenz entspricht; sonst 1. Wenn keine Präferenz aktiv
+// ist, gibt sie für alle 1 zurück → Verhalten identisch zu shuffled().
+function cuisineWeight(id) {
+  const dish = dishesById.get(id);
+  if (!dish) return 1;
+  const prefs = state.settings.cuisines || {};
+  const anyActive = Object.values(prefs).some(Boolean);
+  if (!anyActive) return 1;
+  return prefs[dish.cuisineGroup] ? CUISINE_PREFERENCE_WEIGHT : 1;
+}
 
 // Prüft, ob ein Dish alle aktiven Ernährungspräferenzen erfüllt.
 // vegan/vegetarian sind stärkere Über-Filter (schließen mehrere contains-Tags
@@ -45,7 +62,7 @@ export function eligibleDishIds() {
 // zufällig geordnet — nur aus dem eligible Pool (Kochzeit-Filter greift auch beim Reroll).
 function refillBag(day) {
   const currentId = state.assignment[day];
-  state.dishBag[day] = shuffled(eligibleDishIds()).filter((id) => id !== currentId);
+  state.dishBag[day] = weightedShuffle(eligibleDishIds(), cuisineWeight).filter((id) => id !== currentId);
 }
 
 export function rerollDay(day) {
@@ -81,10 +98,11 @@ export function rerollDay(day) {
 export function rerollAll() {
   const previousIds = new Set(Object.values(state.assignment));
   const pool = eligibleDishIds();
-  let shuffledPool = shuffled(pool).filter((id) => !previousIds.has(id));
+  let shuffledPool = weightedShuffle(pool, cuisineWeight).filter((id) => !previousIds.has(id));
   if (shuffledPool.length < DAYS.length) {
     // Fallback: nimm auch bekannte Gerichte, damit wir 7 zusammenbekommen.
-    shuffledPool = shuffled(pool);
+    // Weighted bleibt aktiv — Präferenzen sollen auch im Fallback wirken.
+    shuffledPool = weightedShuffle(pool, cuisineWeight);
   }
   DAYS.forEach((day, i) => {
     state.assignment[day] = shuffledPool[i];

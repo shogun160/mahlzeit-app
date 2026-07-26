@@ -53,3 +53,27 @@ export function shuffled(arr) {
   }
   return a;
 }
+
+// Gewichteter Shuffle: iterativ wird pro Runde ein Kandidat proportional zu
+// seinem weightFn-Gewicht aus dem verbleibenden Pool gezogen. Ergebnis ist eine
+// Permutation aller IDs, aber Kandidaten mit höherem Gewicht landen tendenziell
+// weiter vorne. weightFn(id) muss > 0 sein — Sicherheitsclamp auf 0.0001.
+// Genutzt vom Reroll, um bevorzugte Küchen (Faktor 3) sichtbar häufiger, aber
+// nicht ausschließlich in der Woche unterzubringen.
+export function weightedShuffle(ids, weightFn) {
+  const pool = ids.slice();
+  const result = [];
+  while (pool.length > 0) {
+    const weights = pool.map((id) => Math.max(0.0001, weightFn(id)));
+    const total = weights.reduce((a, b) => a + b, 0);
+    let r = Math.random() * total;
+    let idx = 0;
+    for (; idx < weights.length; idx++) {
+      r -= weights[idx];
+      if (r <= 0) break;
+    }
+    if (idx >= pool.length) idx = pool.length - 1;
+    result.push(pool.splice(idx, 1)[0]);
+  }
+  return result;
+}

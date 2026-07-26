@@ -59,7 +59,8 @@
         "Lachs salzen/pfeffern, in wenig Öl 3–4 Min. pro Seite braten.",
         "Sojasauce + Sesamöl zu Dressing verrühren.",
         "Reis in Bowl anrichten, Lachs, Edamame, Karotte, Gurke verteilen, Dressing darüber, mit Sesam und Frühlingszwiebel bestreuen."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 2,
@@ -126,7 +127,8 @@
         "Hähnchen in Öl anbraten, restlichen Skyr + Spritzer Wasser zugeben, 8–10 Min. köcheln.",
         "Blumenkohlreis kurz andünsten, Spinat unterheben bis zusammengefallen.",
         "Anrichten."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 3,
@@ -188,7 +190,8 @@
         "Chili (mit Kernen, nach Geschmack) und Knoblauch in Olivenöl andünsten, Garnelen 2–3 Min. pro Seite braten.",
         "Zucchininudeln kurz mitschwenken.",
         "Pasta unterheben, mit Zitronensaft, gehackten Mandeln, Feta und Petersilie servieren."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 4,
@@ -243,7 +246,8 @@
         "Chimichurri: Petersilie fein hacken, mit Olivenöl, Zitronensaft, etwas Knoblauch verrühren.",
         "Bohnen und Mais abtropfen, mit gewürfelter Paprika und Zwiebel mischen.",
         "Filet in Scheiben, auf Salat anrichten, Chimichurri darüber."
-      ]
+      ],
+      "cuisineGroup": "americas"
     },
     {
       "id": 5,
@@ -297,7 +301,8 @@
         "Zwiebel/Knoblauch dazu, kurz mitdünsten, passierte Tomaten zugeben, 15 Min. köcheln.",
         "Couscous mit heißem Wasser übergießen, quellen lassen.",
         "Anrichten, Feta darüberbröckeln."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 6,
@@ -343,7 +348,8 @@
         "Weiße Bohnen zugeben, kurz erwärmen.",
         "Lachs würzen, separat 3–4 Min. pro Seite braten.",
         "Mit Zitronensaft und Petersilie servieren."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 7,
@@ -398,7 +404,8 @@
         "Reis kochen.",
         "Fleisch in heißer Pfanne 2–3 Min. braten.",
         "Gurke in Scheiben, mit Kimchi, Sesam und Reis servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 8,
@@ -451,7 +458,8 @@
         "Aprikosen + etwas Wasser/Brühe zugeben, 15–20 Min. köcheln.",
         "Couscous mit heißer Flüssigkeit übergießen, quellen lassen.",
         "Mandeln kurz rösten, darüberstreuen."
-      ]
+      ],
+      "cuisineGroup": "middleEast"
     },
     {
       "id": 9,
@@ -500,7 +508,8 @@
         "Garnelen würzen (Paprikapulver, Kreuzkümmel, Limette), zugeben, 3–4 Min. braten.",
         "Avocado zerdrücken, mit Limettensaft und Petersilie (statt Koriander) zu Guacamole verarbeiten.",
         "Tortillas erwärmen, alles darin anrichten."
-      ]
+      ],
+      "cuisineGroup": "americas"
     },
     {
       "id": 10,
@@ -542,7 +551,8 @@
         "Kartoffeln schälen, kochen, mit Skyr und etwas Kochwasser zu cremigem Stampf verarbeiten.",
         "Kabeljau mit Petersilie/Olivenöl bestreichen, bei 180 °C ca. 12–15 Min. im Ofen garen.",
         "Mit restlichem Skyr als Sauce servieren."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 11,
@@ -597,7 +607,8 @@
         "Orangensaft, Sojasauce, Honig, Sesamöl zu Glasur einkochen.",
         "Pak Choi kurz andünsten.",
         "Ente in Scheiben, mit Glasur bestreichen, Sesam darüber, mit Reis und Pak Choi servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 12,
@@ -644,7 +655,8 @@
         "Sauce: übrige Paprika/Zwiebel klein schneiden, mit Tomatenmark und etwas Wasser 10 Min. köcheln, mit Paprikapulver edelsüß würzen.",
         "Kartoffeln kochen.",
         "Spieße mit Sauce und Kartoffeln servieren."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 13,
@@ -702,7 +714,8 @@
         "Garnelen zugeben, 3–4 Min. garen.",
         "Hitze reduzieren, Skyr einrühren (nicht kochen), Erdnüsse grob hacken.",
         "Reis kochen, Curry darauf anrichten. Chili (falls verwendet: immer mit Kernen) nach Geschmack zugeben."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 14,
@@ -759,7 +772,8 @@
         "Passierte Tomaten und heiße Brühe nach und nach zugeben, ca. 18–20 Min. köcheln.",
         "Hähnchen und Erbsen nach halber Garzeit zugeben.",
         "Garnelen in den letzten 3–4 Min. zugeben, bis gar."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 15,
@@ -822,7 +836,8 @@
         "Spinat kurz vor Ende unterrühren.",
         "Eier separat als Spiegeleier braten.",
         "Dal mit Spiegeleiern und einem Klecks Skyr servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 16,
@@ -870,7 +885,8 @@
         "Reis kochen.",
         "Pak Choi kurz andünsten/dämpfen.",
         "Anrichten."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 17,
@@ -933,7 +949,8 @@
         "Mit Wasser/Brühe auffüllen, 35–40 Min. köcheln bis Rind zart.",
         "Joghurt kurz vor Ende unterrühren (nicht kochen).",
         "Mit Basmatireis servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 18,
@@ -1037,7 +1054,8 @@
         "Brokkoli dazugeben.",
         "Hitze reduzieren, Skyr einrühren (nicht mehr kochen).",
         "Spinat unterheben, mit Garam Masala, Petersilie und Zitrone servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 19,
@@ -1139,7 +1157,8 @@
         "Tahini-Dressing und Kräuter-Joghurt anrühren.",
         "Lachs Haut-Seite zuerst kross braten, wenden, Za'atar nur auf Fleischseite.",
         "Lachs auf Kräuter-Freekeh mit Joghurt, Pinienkernen, Granatapfel und Sumach anrichten."
-      ]
+      ],
+      "cuisineGroup": "middleEast"
     },
     {
       "id": 20,
@@ -1229,7 +1248,8 @@
         "Filet in rauchheißer Pfanne je 2 min pro Seite braten, 5 min ruhen lassen.",
         "Bohnen-Mix mit Zitrone abschmecken.",
         "Anrichten mit Rucola, Avocado, Schafkäse und aufgeschnittenem Filet."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 21,
@@ -1315,7 +1335,8 @@
         "Kurkuma, Ingwer, Knoblauch, Chili und Zitronensaft zum Dressing verrühren.",
         "Quinoa als Bowl-Boden, rohes Rotkohl, Gurke, Karotte, Sellerie, blanchierten Brokkoli und Avocado darauf, Lachs obenauf.",
         "Dressing darüber, Chuan-Nan-Chili-Topping und Petersilie zum Schluss."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 22,
@@ -1412,7 +1433,8 @@
         "Paprika und Zucchini mit Salz und Oregano braten.",
         "Schichten: Dressing als Basis, Rucola, Gemüse, Kichererbsen, Zwiebel, Kapern, Hähnchen und Ei-Viertel obenauf.",
         "Mit Petersilie und Sumach finishen."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 23,
@@ -1516,7 +1538,8 @@
         "Austernpilze und Tempeh parallel scharf anbraten, unter das Curry heben.",
         "Babyspinat einrühren, mit Zitrone abschmecken.",
         "Skyr-Raita (Skyr, Salz, Zitronenabrieb) obendrauf, Minze zum Finish."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 24,
@@ -1604,7 +1627,8 @@
         "Garnelen kurz mitgaren.",
         "Spinat und Rucola unterheben, mit Zitrone und Kapern abschmecken.",
         "Skyr-Aioli separat (Skyr, Knoblauch, Dijon, Zitrone, Salz) als Dip reichen."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 25,
@@ -1704,7 +1728,8 @@
         "Karotten, Paprika und Pak Choi 2-3 min stir-fry.",
         "Edamame und Glaze unterheben, kurz schwenken.",
         "Auf Reis anrichten, mit Sesamöl, Sesamsamen und Frühlingszwiebeln finishen."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 26,
@@ -1793,7 +1818,8 @@
         "Grillpfanne heiß: Gemüse 3-4 min pro Seite, dann Pute 4-5 min pro Seite.",
         "Choriatiki mischen (Tomaten, Gurke, Zwiebel, Oliven, Öl, Zitrone, Oregano), Feta obenauf.",
         "Brot rösten, alles anrichten, mit Sumach und Minze finishen."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 27,
@@ -1905,7 +1931,8 @@
         "Garnelen zurück, Zhacai dazu, Sauce angießen und kurz binden.",
         "Sesamöl, weißer Pfeffer und Zitronensaft.",
         "Frühlingszwiebel-Grün, Sesam und Thai-Basilikum finishen, mit Reis und Ei servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 28,
@@ -1996,7 +2023,8 @@
         "Spinat einfallen lassen.",
         "Hitze runter, Skyr temperiert einrühren (nicht kochen), Garam Masala final.",
         "Restlichen Skyr mit Salz als Raita separat anrichten, mit Basmati Vollkorn servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 29,
@@ -2067,7 +2095,8 @@
         "Kidneybohnen, Zwiebel, Oliven, Rucola, Sellerie, Gurke, Knoblauch und Chili mischen.",
         "Schafskäse zerbröseln, Ei vierteln.",
         "Skyr als Topping/Dressing."
-      ]
+      ],
+      "cuisineGroup": "mediterranean"
     },
     {
       "id": 30,
@@ -2140,7 +2169,8 @@
         "Gurke und Radieschen in feine Scheiben, Avocado in Spalten.",
         "Ponzu verrühren (Sojasauce, Limettensaft, Reisessig, Wasser, Ingwer).",
         "Quinoa als Basis, Thunfisch fächern, Gemüse und Avocado anrichten, Ponzu darüber, Frühlingszwiebel finishen."
-      ]
+      ],
+      "cuisineGroup": "asian"
     },
     {
       "id": 31,
@@ -2221,7 +2251,8 @@
         "Bulgur in Salzwasser 10-12 min quellen lassen.",
         "Tahini, Skyr, Zitronensaft und etwas Wasser glattrühren.",
         "Bulgur, Rucola, Falafel und Granatapfelkerne anrichten, Sauce darüber."
-      ]
+      ],
+      "cuisineGroup": "middleEast"
     },
     {
       "id": 32,
@@ -2298,7 +2329,8 @@
         "Buschbohnen unterheben.",
         "Hitze runter, Skyr und Limettensaft einrühren (nicht mehr kochen).",
         "Honig am Ende unterrühren, mit Reis servieren."
-      ]
+      ],
+      "cuisineGroup": "asian"
     }
   ]
 }
