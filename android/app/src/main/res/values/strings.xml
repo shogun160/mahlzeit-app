@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Mahlzeit</string>
-    <string name="title_activity_main">Mahlzeit</string>
+    <string name="app_name">Mahlzeit Beta</string>
+    <string name="title_activity_main">Mahlzeit Beta</string>
     <string name="package_name">com.mahlzeit.myapp</string>
     <string name="custom_url_scheme">com.mahlzeit.myapp</string>
 </resources>

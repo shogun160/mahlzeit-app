@@ -5,6 +5,10 @@ android {
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
         applicationId "com.mahlzeit.myapp"
+        // Suffix macht die installierte App-ID zu "com.mahlzeit.myapp.beta" —
+        // Beta-App laeuft dadurch parallel zur Stable "com.mahlzeit.myapp".
+        // Auf main NICHT gesetzt. Vor Merge beta -> main: diese Zeile entfernen.
+        applicationIdSuffix ".beta"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
