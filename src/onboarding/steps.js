@@ -60,6 +60,47 @@ export function renderStep1(draft) {
   `;
 }
 
+// Step 2: Körper — Größe + Gewicht (beide Slider). Handler in wizard.js/
+// attachStep2Handlers nutzen den bindSlider-Helper.
+export function renderStep2(draft) {
+  const heightVal = draft.heightCm ?? DEFAULTS.heightCm;
+  const weightVal = draft.weightKg ?? DEFAULTS.weightKg;
+  return `
+    <h3 class="onboarding-step__title">Körper</h3>
+    <p class="onboarding-step__desc">Für die Berechnung des Grundumsatzes.</p>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__row">
+        <div class="onboarding-field__label">Größe</div>
+        <div class="onboarding-field__value" data-role="height-value">${heightVal} cm</div>
+      </div>
+      <input class="settings-slider"
+             type="range"
+             min="140"
+             max="220"
+             step="1"
+             value="${heightVal}"
+             data-action="height-change"
+             aria-label="Größe in Zentimetern" />
+    </div>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__row">
+        <div class="onboarding-field__label">Gewicht</div>
+        <div class="onboarding-field__value" data-role="weight-value">${weightVal} kg</div>
+      </div>
+      <input class="settings-slider"
+             type="range"
+             min="40"
+             max="200"
+             step="1"
+             value="${weightVal}"
+             data-action="weight-change"
+             aria-label="Gewicht in Kilogramm" />
+    </div>
+  `;
+}
+
 function escapeAttr(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

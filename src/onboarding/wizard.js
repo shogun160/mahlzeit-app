@@ -1,6 +1,6 @@
 import { state, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX } from '../nutrition/target.js';
-import { renderStep1, DEFAULTS } from './steps.js';
+import { renderStep1, renderStep2, DEFAULTS } from './steps.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 5;
@@ -129,7 +129,8 @@ function renderShell() {
 function renderStepContent() {
   switch (currentStep) {
     case 1: return renderStep1(draft);
-    // Steps 2–5 folgen in Tasks 6–9
+    case 2: return renderStep2(draft);
+    // Steps 3–5 folgen in Tasks 7–9
     default: return `<p class="onboarding-placeholder">Step ${currentStep} — Content folgt.</p>`;
   }
 }
@@ -181,7 +182,27 @@ function goBack() {
 
 function attachStepHandlers() {
   if (currentStep === 1) attachStep1Handlers();
-  // Steps 2–5 folgen in Tasks 6–9
+  if (currentStep === 2) attachStep2Handlers();
+  // Steps 3–5 folgen in Tasks 7–9
+}
+
+function attachStep2Handlers() {
+  bindSlider('height-change', 'height-value', 'heightCm', (v) => `${v} cm`);
+  bindSlider('weight-change', 'weight-value', 'weightKg', (v) => `${v} kg`);
+}
+
+// Slider-Binding-Helper: setzt Draft + touched auf input, aktualisiert Value-
+// Label live. Wird auch in Tasks 8 und 9 verwendet.
+function bindSlider(action, valueRole, draftKey, formatter) {
+  const slider = rootEl.querySelector(`[data-action="${action}"]`);
+  const valEl = rootEl.querySelector(`[data-role="${valueRole}"]`);
+  if (!slider) return;
+  slider.addEventListener('input', () => {
+    const v = parseInt(slider.value, 10);
+    draft[draftKey] = v;
+    touched[draftKey] = true;
+    if (valEl) valEl.textContent = formatter(v);
+  });
 }
 
 function attachStep1Handlers() {
