@@ -1,6 +1,6 @@
 import { createDayCard } from './card.js';
 import { renderCalorieBar } from './calorie-bar.js';
-import { state, DAYS, initState } from '../state.js';
+import { state, DAYS, initState, toggleFavorite } from '../state.js';
 import { dishesById, shuffled } from '../data/dishes.js';
 import { rerollDay, eligibleDishIds } from './reroll.js';
 import { changePortion } from './portions.js';
@@ -80,6 +80,10 @@ export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker, onOp
         },
         onOpenPicker: () => {
           onOpenPicker(day);
+        },
+        onToggleFavorite: () => {
+          toggleFavorite(dishId);
+          onChange();
         },
       },
     });

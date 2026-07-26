@@ -1,10 +1,17 @@
-import { state, DAYS } from '../state.js';
+import { state, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
 import { allDishes } from '../data/dishes.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
 const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
 // Material Symbol close — X-Icon für den Filter-Reset-Button im Picker-Header.
 const ICON_CLOSE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>`;
+// Material Symbols favorite — Outline fuer nicht-favorisiert, Fill fuer On.
+// Genutzt in Tile-Badge, Filter-Chip und Empty-State.
+const ICON_FAV_OUTLINE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q57 0 105.5 27t84.5 78q42-54 89-79.5T670-854q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Zm0-79q101.24-93.15 166.62-159.58Q712-426 750.5-476t54-89.13q15.5-39.13 15.5-77.87 0-65-42.5-107.5T670-793q-51.63 0-95.31 31.5Q531-730 504-660h-49q-26-69-70-101t-95-32q-65 0-107.5 42.5T140-643q0 38.74 15.5 77.87Q171-526 209.5-476t104 116.42Q378.87-293.15 480-200Zm0-296Z"/></svg>`;
+const ICON_FAV_FILL    = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q52 0 98.5 22t81.5 62q35-40 81.5-62t98.5-22q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Z"/></svg>`;
+// Material Symbols timer + inventory_2 — Icon-only Chips fuer Schnell + Wenig Zutaten.
+const ICON_TIMER = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-840v-80h240v80H360Zm80 440h80v-240h-80v240Zm40 320q-74 0-139.5-28.5T226-186q-49-49-77.5-114.5T120-440q0-74 28.5-139.5T226-694q49-49 114.5-77.5T480-800q62 0 119 20t107 58l56-56 56 56-56 56q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80Zm0-80q116 0 198-82t82-198q0-116-82-198t-198-82q-116 0-198 82t-82 198q0 116 82 198t198 82Zm0-280Z"/></svg>`;
+const ICON_INVENTORY = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M160-120q-33 0-56.5-23.5T80-200v-440q-14-8-22-21.5t-8-31.5v-107q0-33 23.5-56.5T130-880h700q33 0 56.5 23.5T910-800v107q0 18-8 31.5T880-640v440q0 33-23.5 56.5T800-120H160Zm0-480v400h640v-400H160Zm-30-80h700v-120H130v120Zm230 280h240v-80H360v80ZM160-200v-400 400Z"/></svg>`;
 
 // Filter-Chips oben im Picker. Vier Gruppen mit unterschiedlicher Verknüpfung:
 //
@@ -34,8 +41,9 @@ const FILTERS = [
   { key: 'mediterranean', label: 'Mediterran',  group: 'cuisine', test: (d) => d.cuisineGroup === 'mediterranean' },
   { key: 'middleEast',    label: 'Nahost',      group: 'cuisine', test: (d) => d.cuisineGroup === 'middleEast' },
   { key: 'americas',      label: 'Amerikanisch', group: 'cuisine', test: (d) => d.cuisineGroup === 'americas' },
-  { key: 'fast',   label: 'Schnell',       group: 'attr',    test: (d) => d.cooktime <= 30 },
-  { key: 'simple', label: 'Wenig Zutaten', group: 'attr',    test: (d) => openIngredientCount(d) <= 8 },
+  { key: 'fast',      label: 'Schnell',       group: 'attr', icon: ICON_TIMER,       test: (d) => d.cooktime <= 30 },
+  { key: 'simple',    label: 'Wenig Zutaten', group: 'attr', icon: ICON_INVENTORY,   test: (d) => openIngredientCount(d) <= 8 },
+  { key: 'favorite',  label: 'Favoriten',     group: 'attr', icon: ICON_FAV_FILL,    test: (d) => isFavorite(d.id) },
   { key: 'kcal_low',  label: 'Kalorienarm',   group: 'kcal', test: (d) => d.kcal < KCAL_MEDIAN },
   { key: 'kcal_high', label: 'Kalorienreich', group: 'kcal', test: (d) => d.kcal > KCAL_MEDIAN },
   { key: 'macro_protein', label: 'Proteinreich',    group: 'macro', test: (d) => macroPct(d).p > 35 },
@@ -88,6 +96,11 @@ const TRANSITION_MS = 250;
 const SCROLL_COMPACT_THRESHOLD = 8; // px Scroll bis Filter-Row zusammenklappt
 const SWIPE_THRESHOLD_PX = 55;
 const SWIPE_DIRECTIONAL_RATIO = 1.4; // |dy| muss 1.4x größer als |dx| sein
+// FLIP-Animation fuer Tile-Umsortierung beim Fav-Toggle. Werte analog zur
+// Shopping-Liste, damit sich alle Neu-Sortier-Effekte in der App gleich
+// anfuehlen. NICHT fuer Filter-Klicks — dort scrollt der Picker ohnehin auf 0.
+const FLIP_DURATION_MS = 380;
+const FLIP_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
 
 let rootEl = null;
 let onExternalPick = null;
@@ -158,6 +171,21 @@ function deriveInitialFilters() {
 }
 
 function chipHtml(f) {
+  // Icon-Only-Variante fuer die attr-Gruppe (Schnell, Wenig Zutaten, Favoriten).
+  // Chip zeigt dann nur das Icon, Label wandert nach aria-label. Klick-Area
+  // bleibt gross genug (padding via .picker-filter-chip--icon).
+  if (f.icon) {
+    return `
+      <button class="picker-filter-chip picker-filter-chip--icon"
+              type="button"
+              data-filter="${f.key}"
+              aria-pressed="${activeFilters.has(f.key)}"
+              aria-label="${f.label}"
+              title="${f.label}">
+        ${f.icon}
+      </button>
+    `;
+  }
   return `
     <button class="picker-filter-chip"
             type="button"
@@ -295,8 +323,15 @@ function filteredDishes() {
   const sortProtein = activeFilters.has('macro_protein');
   const sortLowCarb = activeFilters.has('macro_lowcarb');
   const sortLowFat = activeFilters.has('macro_lowfat');
-  if (sortFast || sortSimple || sortKcalLow || sortKcalHigh || sortProtein || sortLowCarb || sortLowFat) {
+  // Favoriten stehen IMMER zuerst — wenn ein Fav im Ergebnis liegt, gewinnt
+  // er vor allen anderen Sort-Kriterien. Ohne aktive Filter greift der Sort
+  // auch (unten via else-Zweig).
+  const anySort = sortFast || sortSimple || sortKcalLow || sortKcalHigh || sortProtein || sortLowCarb || sortLowFat;
+  if (anySort) {
     result.sort((a, b) => {
+      const favA = isFavorite(a.id) ? 1 : 0;
+      const favB = isFavorite(b.id) ? 1 : 0;
+      if (favA !== favB) return favB - favA;
       if (sortFast) {
         const d = a.cooktime - b.cooktime;
         if (d !== 0) return d;
@@ -327,30 +362,42 @@ function filteredDishes() {
       }
       return a.id - b.id;
     });
+  } else {
+    // Ohne aktiven Sort trotzdem Favoriten nach oben ziehen, id als Tiebreaker.
+    result.sort((a, b) => {
+      const favA = isFavorite(a.id) ? 1 : 0;
+      const favB = isFavorite(b.id) ? 1 : 0;
+      if (favA !== favB) return favB - favA;
+      return a.id - b.id;
+    });
   }
 
   // Bucket-Logik nach Shopping-Status:
   //   main (obere Liste):
-  //     1. aktuelles Gericht ganz oben (Ausgangspunkt)
-  //     2. wählbare Gerichte + geplante Gerichte deren Tag NICHT in der
-  //        Einkaufsliste steht und die den Filter erfüllen — alle gemischt
-  //        in der Sortier-Reihenfolge (result.sort weiter oben).
+  //     wählbare Gerichte inkl. aktuelles Gericht + geplante Gerichte deren
+  //     Tag NICHT in der Einkaufsliste steht und die den Filter erfüllen —
+  //     alle gemischt in der Sortier-Reihenfolge (result.sort weiter oben,
+  //     Favoriten zuerst).
   //   overflow (unter Divider "Bereits geplant"):
-  //     3. geplante Gerichte deren Tag IN der Einkaufsliste steht — egal ob
-  //        der Filter passt oder nicht (die stehen fest im Wochenplan).
-  //     4. geplante Gerichte deren Tag NICHT in der Einkaufsliste steht, aber
-  //        den Filter nicht erfüllen (wären sonst nicht sichtbar).
-  const current = [];
+  //     geplante Gerichte deren Tag IN der Einkaufsliste steht — egal ob
+  //     der Filter passt oder nicht (die stehen fest im Wochenplan).
+  //     Plus: geplante Gerichte deren Tag NICHT in der Einkaufsliste steht,
+  //     aber den Filter nicht erfüllen (wären sonst nicht sichtbar).
+  //
+  // Das aktuelle Gericht (currentDay) wird NICHT mehr an die Spitze gezogen —
+  // es fliesst durch die normale Sortierung, damit Favoriten und Filter-Ranking
+  // Vorrang haben.
   const selectable = [];
   const overflow = [];
   for (const d of result) {
-    if (d.id === currentDishId) {
-      current.push(d);
-      continue;
-    }
-    if (used.has(d.id)) {
-      const plannedDay = used.get(d.id);
-      const lockedByShopping = state.selected[plannedDay] === true;
+    const isCurrent = d.id === currentDishId;
+    const isUsed = used.has(d.id);
+    if (isCurrent || isUsed) {
+      // Geplante Gerichte (currentDay + andere Tage): Shopping-Lock triggert
+      // overflow. Fuer currentDay gibt's keinen Lock — der User wechselt
+      // gerade aktiv, deshalb nur Filter-Check.
+      const plannedDay = isUsed ? used.get(d.id) : null;
+      const lockedByShopping = !isCurrent && state.selected[plannedDay] === true;
       if (lockedByShopping) {
         overflow.push(d);
       } else if (passesFilter(d)) {
@@ -365,7 +412,7 @@ function filteredDishes() {
   const byWeekday = (a, b) => DAYS.indexOf(used.get(a.id)) - DAYS.indexOf(used.get(b.id));
   overflow.sort(byWeekday);
   return {
-    main: [...current, ...selectable],
+    main: selectable,
     overflow,
   };
 }
@@ -421,9 +468,18 @@ function renderShell() {
 // trotzdem angezeigt (mit "Bereits geplant" wird klar, warum die Tiles trotz
 // Filter-Empty da sind).
 function renderResults(main, overflow, currentDishId, used) {
+  // Empty-State-Spezialfall: Favoriten-Filter aktiv, aber keine Favoriten
+  // gesetzt → freundliche Copy mit gefuelltem Herz statt generisches "Keine
+  // Gerichte". Filter darf allein aktiv sein oder in Kombination — Hauptsache
+  // 'favorite' ist der Grund fuer's Leere-sein (keine Gerichte matchen).
+  const favActive = activeFilters.has('favorite');
+  const hasAnyFav = Object.keys(state.settings.profile.favorites || {}).length > 0;
+  const emptyMsg = (favActive && !hasAnyFav)
+    ? `<p class="picker-empty">Noch keine Favoriten — Nimm dir ein Herz ${ICON_FAV_FILL}</p>`
+    : '<p class="picker-empty">Keine Gerichte für diese Filter.</p>';
   const mainHtml = main.length > 0
     ? `<div class="picker-grid">${main.map((d) => renderTile(d, d.id === currentDishId, used)).join('')}</div>`
-    : '<p class="picker-empty">Keine Gerichte für diese Filter.</p>';
+    : emptyMsg;
   const overflowHtml = overflow.length > 0
     ? `
       <div class="picker-divider" role="separator" aria-label="Bereits geplant">
@@ -514,6 +570,24 @@ function renderTile(dish, isCurrent, usedMap) {
          <span class="picker-tile__shop-count">${openCount}</span>
        </span>`
     : '';
+  // Favoriten-Badge oben rechts. Kein <button> — Tile selbst ist bereits button
+  // (nested button waere invalides HTML), deswegen <span role="button"> analog
+  // zu picker-filters__reset. Click-Handler stopPropagation, damit der Tile-
+  // Klick (dish-pick) nicht mit ausgeloest wird.
+  const favOn = isFavorite(dish.id);
+  const favCls = 'picker-tile__fav' + (favOn ? ' picker-tile__fav--active' : '');
+  const favBadge = `
+    <span class="${favCls}"
+          role="button"
+          tabindex="0"
+          data-action="toggle-fav"
+          data-dish-id="${dish.id}"
+          aria-pressed="${favOn}"
+          aria-label="${favOn ? 'Favorit entfernen' : 'Als Favorit markieren'}"
+          title="${favOn ? 'Favorit entfernen' : 'Als Favorit markieren'}">
+      ${favOn ? ICON_FAV_FILL : ICON_FAV_OUTLINE}
+    </span>
+  `;
   return `
     <button class="${cls.join(' ')}"
             type="button"
@@ -523,6 +597,7 @@ function renderTile(dish, isCurrent, usedMap) {
             ${disabledAttr}>
       <div class="picker-tile__image-wrap">
         ${dayBadge}
+        ${favBadge}
         ${shopPill}
         <img class="picker-tile__img" src="/dishes/dish-${dish.id}.jpg" alt="" loading="lazy" />
       </div>
@@ -554,13 +629,36 @@ function attachHandlers() {
     });
   });
 
-  // Tile-Klick: aria-disabled Tiles ignorieren (bereits an anderem Tag geplant).
-  rootEl.querySelectorAll('[data-dish-id]').forEach((btn) => {
+  // Tile-Klick: nur die Tile-Buttons selbst (nicht die inneren Fav-Badges),
+  // aria-disabled Tiles ignorieren (bereits an anderem Tag geplant).
+  rootEl.querySelectorAll('button[data-dish-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (btn.getAttribute('aria-disabled') === 'true') return;
       const id = parseInt(btn.dataset.dishId, 10);
       onExternalPick(currentDay, id);
       closeDishPicker();
+    });
+  });
+
+  // Favoriten-Badge: togglet Fav-Status und rendert das Grid neu, damit
+  // Icon-Fill, Filter-Zaehler und ggf. Empty-State live folgen. saveState
+  // haendisch, weil der Picker sonst keinen externen Change-Callback hat.
+  rootEl.querySelectorAll('[data-action="toggle-fav"]').forEach((el) => {
+    el.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const id = parseInt(el.dataset.dishId, 10);
+      toggleFavorite(id);
+      saveState();
+      updateGrid({ preserveScroll: true, animate: true });
+    });
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = parseInt(el.dataset.dishId, 10);
+      toggleFavorite(id);
+      saveState();
+      updateGrid({ preserveScroll: true, animate: true });
     });
   });
 
@@ -654,7 +752,7 @@ function attachCloseSwipe() {
 
   sheet.addEventListener('pointerdown', (ev) => {
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-    if (ev.target.closest('button, .picker-filter-chip')) return;
+    if (ev.target.closest('button, .picker-filter-chip, [data-action="toggle-fav"]')) return;
     // Body-Inhalt (scrollbar) ist ausgenommen — aber .picker-header darin ist
     // erlaubt, weil er als sticky Titel-Zeile die klassische Drag-Handle-Funktion
     // mit übernimmt (analog Detail-/Settings-Sheet).
@@ -698,18 +796,24 @@ function updateFilters() {
   }
 }
 
-function updateGrid() {
+function updateGrid({ preserveScroll = false, animate = false } = {}) {
   const currentDishId = state.assignment[currentDay];
   const { main, overflow } = filteredDishes();
   const used = usedElsewhereMap();
   const body = rootEl.querySelector('.picker-body');
+  const prevScrollTop = body.scrollTop;
+  // FLIP-Snapshot vor dem Re-render — nur wenn animate=true (Fav-Toggle). Bei
+  // Filter-Klicks wird ohnehin auf 0 gescrollt, da wuerde FLIP die alten Rects
+  // gegen ganz andere Viewport-Positionen matchen.
+  const oldRects = animate ? collectTileRects(body) : null;
   // Kompletten Grids-Container wegräumen — Filter-Header/Body bleiben.
   const oldGrids = body.querySelector('.picker-grids');
   if (oldGrids) oldGrids.remove();
 
   body.insertAdjacentHTML('beforeend', renderResults(main, overflow, currentDishId, used));
-  // Handler für alle neuen Tiles binden (main + overflow).
-  body.querySelectorAll('[data-dish-id]').forEach((btn) => {
+  // Handler für alle neuen Tiles binden (main + overflow) — nur die Tile-
+  // Buttons, NICHT die inneren Fav-Badges (die haben denselben data-dish-id).
+  body.querySelectorAll('button[data-dish-id]').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (btn.getAttribute('aria-disabled') === 'true') return;
       const id = parseInt(btn.dataset.dishId, 10);
@@ -717,13 +821,77 @@ function updateGrid() {
       closeDishPicker();
     });
   });
+  // Fav-Badge-Handler nach Grid-Rebuild neu binden.
+  body.querySelectorAll('[data-action="toggle-fav"]').forEach((el) => {
+    el.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const id = parseInt(el.dataset.dishId, 10);
+      toggleFavorite(id);
+      saveState();
+      updateGrid({ preserveScroll: true, animate: true });
+    });
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const id = parseInt(el.dataset.dishId, 10);
+      toggleFavorite(id);
+      saveState();
+      updateGrid({ preserveScroll: true, animate: true });
+    });
+  });
 
   // Nach Filter-Wechsel: Scroll auf 0 zurück und Compact-Klasse entfernen,
   // damit die Filter-Row zurück in den Expanded-State geht. Ohne das würde
   // ein Filter-Klick nach einem Runter-Scroll die kompakte Filter-Row
   // beibehalten (visuelle Inkonsistenz gegenüber dem frischen Sheet-Open).
-  body.scrollTop = 0;
-  body.classList.remove('picker-body--scrolled');
+  // Bei preserveScroll=true (z.B. Fav-Toggle) bleibt der Scroll-Zustand stehen —
+  // der User will da bleiben wo er ist, das Grid mutiert nur an der Stelle
+  // des angeklickten Tiles.
+  if (preserveScroll) {
+    body.scrollTop = prevScrollTop;
+  } else {
+    body.scrollTop = 0;
+    body.classList.remove('picker-body--scrolled');
+  }
+  // FLIP-Play muss NACH dem Scroll-Reset laufen — sonst matchen die neuen
+  // Rects nicht zu den alten (Viewport haette sich verschoben).
+  if (oldRects) playTileFlip(body, oldRects);
+}
+
+// Sammelt Bounding-Rects aller Tile-Buttons vor einem Re-render, keyed by
+// dish-id. Nur die Tile-Buttons selbst (nicht innere Fav-Badges) — der
+// button-Selector filtert das raus.
+function collectTileRects(body) {
+  const rects = new Map();
+  body.querySelectorAll('button[data-dish-id]').forEach((el) => {
+    rects.set(el.dataset.dishId, el.getBoundingClientRect());
+  });
+  return rects;
+}
+
+// FLIP (First-Last-Invert-Play) fuer die Tile-Neusortierung. Analog zur
+// Shopping-Liste: neu gerenderte Tiles bekommen zunaechst einen Transform der
+// sie an ihre alte Position zurueckschiebt, dann in einem rAF zurueck auf 0 —
+// sanfter Slide vom alten zum neuen Layout-Ort. Enter/Leave nicht animiert
+// (Tiles ohne oldRect bleiben unbewegt, verschwundene sind einfach weg).
+function playTileFlip(body, oldRects) {
+  body.querySelectorAll('button[data-dish-id]').forEach((el) => {
+    const oldRect = oldRects.get(el.dataset.dishId);
+    if (!oldRect) return;
+    const newRect = el.getBoundingClientRect();
+    if (!newRect.width || !newRect.height) return;
+    if (!oldRect.width || !oldRect.height) return;
+    const dx = oldRect.left - newRect.left;
+    const dy = oldRect.top - newRect.top;
+    if (Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    el.style.transition = 'none';
+    el.style.transform = `translate(${dx}px, ${dy}px)`;
+    requestAnimationFrame(() => {
+      el.style.transition = `transform ${FLIP_DURATION_MS}ms ${FLIP_EASING}`;
+      el.style.transform = '';
+    });
+  });
 }
 
 // Ist der Filter-Toggle-Header aktuell im Sticky-Modus (top: 0 im scrollRoot)?

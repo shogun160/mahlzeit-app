@@ -1,4 +1,4 @@
-import { state, PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
+import { state, PORTIONS_MIN, PORTIONS_MAX, isFavorite, toggleFavorite } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { changePortion } from '../dashboard/portions.js';
 import { toggleSelected } from '../dashboard/selection.js';
@@ -11,6 +11,10 @@ import { renderRecipe } from './recipe.js';
 const ICON_LIST = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
 // Material Symbol refresh — für Reroll direkt aus dem Sheet.
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
+// Material Symbols favorite — Outline off, Fill on. Sitzt in der Header-Day-
+// Zeile neben dem Wochentag.
+const ICON_FAV_OUTLINE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q57 0 105.5 27t84.5 78q42-54 89-79.5T670-854q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Zm0-79q101.24-93.15 166.62-159.58Q712-426 750.5-476t54-89.13q15.5-39.13 15.5-77.87 0-65-42.5-107.5T670-793q-51.63 0-95.31 31.5Q531-730 504-660h-49q-26-69-70-101t-95-32q-65 0-107.5 42.5T140-643q0 38.74 15.5 77.87Q171-526 209.5-476t104 116.42Q378.87-293.15 480-200Zm0-296Z"/></svg>`;
+const ICON_FAV_FILL    = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q52 0 98.5 22t81.5 62q35-40 81.5-62t98.5-22q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Z"/></svg>`;
 
 const TAB_ORDER = ['zutaten', 'rezept'];
 const TAB_LABELS = { zutaten: 'Zutaten', rezept: 'Rezept' };
@@ -85,7 +89,17 @@ function renderShell() {
         <div class="sheet-handle" aria-hidden="true"></div>
         <div class="sheet-header">
           <div class="sheet-header__title-wrap">
-            <div class="sheet-header__day">${day}</div>
+            <div class="sheet-header__day">
+              <span>${day}</span>
+              <button class="sheet-header__fav ${isFavorite(dish.id) ? 'is-on' : ''}"
+                      type="button"
+                      data-action="toggle-fav"
+                      aria-pressed="${isFavorite(dish.id)}"
+                      aria-label="${isFavorite(dish.id) ? 'Favorit entfernen' : 'Als Favorit markieren'}"
+                      title="${isFavorite(dish.id) ? 'Favorit entfernen' : 'Als Favorit markieren'}">
+                ${isFavorite(dish.id) ? ICON_FAV_FILL : ICON_FAV_OUTLINE}
+              </button>
+            </div>
             <h2 class="sheet-header__title" id="sheet-title">${dish.name}</h2>
           </div>
           <div class="sheet-header__actions">
@@ -140,6 +154,25 @@ function attachHandlers() {
   rootEl.querySelector('[data-action="sheet-portion-plus"]').addEventListener('click', () => handleSheetPortion(1));
   rootEl.querySelector('[data-action="toggle-list"]').addEventListener('click', () => handleToggleList());
   rootEl.querySelector('[data-action="reroll-day"]').addEventListener('click', () => handleReroll());
+  // Favoriten-Toggle in der Header-Day-Zeile. In-place Icon/Klass-Swap,
+  // damit der Sheet-Inhalt nicht neu gerendert wird (Tab-Scroll bleibt stehen).
+  const favBtn = rootEl.querySelector('[data-action="toggle-fav"]');
+  if (favBtn) {
+    favBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const id = currentContext.dishId;
+      toggleFavorite(id);
+      const on = isFavorite(id);
+      favBtn.classList.toggle('is-on', on);
+      favBtn.setAttribute('aria-pressed', String(on));
+      const label = on ? 'Favorit entfernen' : 'Als Favorit markieren';
+      favBtn.setAttribute('aria-label', label);
+      favBtn.setAttribute('title', label);
+      favBtn.innerHTML = on ? ICON_FAV_FILL : ICON_FAV_OUTLINE;
+      // onExternalChange triggert Dashboard-Rerender (Card-Herz folgt) + saveState.
+      onExternalChange();
+    });
+  }
   rootEl.querySelectorAll('.sheet-tabs__btn').forEach((btn) => {
     btn.addEventListener('click', () => switchTab(btn.dataset.tab));
   });

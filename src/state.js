@@ -89,6 +89,11 @@ export const state = {
       // zurück auf {'balanced', null}. Siehe effectiveMacroTargets in target.js.
       macroPreset: 'balanced',
       macroTargets: null,
+      // Lieblingsgerichte: { [dishId]: true }. Bewusst als Map (nicht Array),
+      // damit Toggle O(1) ist und keine Reihenfolge suggeriert wird. Nested im
+      // profile-Slot vorbereitet fuer Multi-User: spaeter zieht ein aeusserer
+      // profiles-Layer die Struktur nach oben, favorites wandert 1:1 mit.
+      favorites: {},
     },
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
@@ -111,6 +116,19 @@ export function initState(assignment) {
 export function setView(next) {
   if (!VIEWS.includes(next)) return;
   state.view = next;
+}
+
+// Favoriten-Helper. isFavorite ist ein reiner Getter (auch fuer Filter/Sort im
+// Picker), toggleFavorite mutiert und muss vom Caller via saveState persistiert
+// werden (refresh() in main.js triggert das ohnehin nach jedem UI-Event).
+export function isFavorite(dishId) {
+  return !!state.settings.profile.favorites?.[dishId];
+}
+
+export function toggleFavorite(dishId) {
+  const favs = state.settings.profile.favorites;
+  if (favs[dishId]) delete favs[dishId];
+  else favs[dishId] = true;
 }
 
 // Speichert den gesamten State nach localStorage. Sets werden zu Arrays
@@ -190,6 +208,9 @@ export function loadState() {
         showCalorieBar:       loadedProfile.showCalorieBar ?? true,
         macroPreset:          loadedProfile.macroPreset ?? 'balanced',
         macroTargets:         loadedProfile.macroTargets ?? null,
+        favorites:            (loadedProfile.favorites && typeof loadedProfile.favorites === 'object')
+                                ? loadedProfile.favorites
+                                : {},
       },
       theme: loadedSettings.theme ?? 'auto',
     };

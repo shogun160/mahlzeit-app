@@ -86,12 +86,51 @@
 }
 
 .sheet-header__day {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--md-sys-color-primary);
   margin-bottom: 2px;
+}
+
+/* Favoriten-Toggle in der Day-Zeile — Ghost-Style analog settings-refresh,
+   quadratischer Klickbereich, Herz-SVG 16 px zentriert. Off: neutrale
+   on-surface-variant; On: primary. Kein Hintergrund — die Day-Zeile ist
+   schon farbig, ein Pill-Look wuerde ueberladen wirken. */
+.sheet-header__fav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: -6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.sheet-header__fav svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.sheet-header__fav:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+}
+.sheet-header__fav.is-on {
+  color: var(--md-sys-color-primary);
+}
+.sheet-header__fav:active {
+  transform: scale(0.92);
 }
 
 .sheet-header__title {

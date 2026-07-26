@@ -351,6 +351,25 @@
   background: color-mix(in srgb, var(--md-sys-color-primary) 90%, black);
 }
 
+/* Icon-Only-Variante fuer Schnell/Wenig Zutaten/Favoriten in der attr-Gruppe.
+   Quadratisch, Icon zentriert — Label sitzt nur als aria-label + title. Groesse
+   angepasst auf die 36-px-Chip-Hoehe der Text-Chips, damit die attr-Row nicht
+   in der Hoehe springt. Im scrolled-Modus schrumpft die Chip-Hoehe analog. */
+.picker-filter-chip--icon {
+  width: 36px;
+  padding: 0;
+}
+.picker-filter-chip--icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  color: currentColor;
+}
+.picker-body--scrolled .picker-filter-chip--icon {
+  width: 30px;
+  padding: 0;
+}
+
 /* Gerichte-Container: analog zum Filter-Wrapper — sticky Header + Body.
    Kein Toggle/Chevron, nur ein visueller Titel. Header stapelt sich UNTER
    dem Filter-Header (z-index 9 vs. 10), sticky-Top = aktuelle Filter-Header-
@@ -445,6 +464,16 @@
   padding: 40px 0;
   margin: 0;
   font-size: 0.9375rem;
+}
+/* Herz-Icon inline im Favoriten-Empty-State — Groesse zur Copy-Zeilenhoehe,
+   Farbe primary damit's zum aktivierten Fav-Zustand passt. */
+.picker-empty svg {
+  display: inline-block;
+  vertical-align: -3px;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  color: var(--md-sys-color-primary);
 }
 
 /* Divider zwischen Filter-Treffern und "Bereits geplant"-Overflow-Bereich.
@@ -593,6 +622,44 @@
 .picker-tile__shop--active {
   background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
   color: var(--md-sys-color-on-primary);
+}
+
+/* Favoriten-Badge oben rechts im Tile-Bild — Style analog Day-Badge:
+   Off = frosted-glass mit primary Schrift, On = primary bg mit weisser
+   Schrift. Quadratischer Klickbereich, Herz-SVG 16 px zentriert. */
+.picker-tile__fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  background: var(--frosted-glass-strong);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-glass);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.picker-tile__fav svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: inherit;
+}
+.picker-tile__fav--active {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+.picker-tile__fav:active {
+  transform: scale(0.92);
 }
 
 /* Image-Wrapper: hält Bild + beide Overlay-Badges (Wochentag oben-links,
