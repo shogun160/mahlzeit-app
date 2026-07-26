@@ -196,19 +196,18 @@ function renderShell() {
             <div class="settings-row">
               <div class="settings-row__label">
                 <div class="settings-row__label-primary">Erscheinungsbild</div>
-                <div class="settings-row__label-secondary">Auto folgt dem System-Modus</div>
               </div>
-            </div>
-            <div class="theme-toggle" role="group" aria-label="Erscheinungsbild">
-              <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="auto"  aria-pressed="${state.settings.theme === 'auto'}"  aria-label="Automatisch">
-                ${ICON_CONTRAST}<span>Auto</span>
-              </button>
-              <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="light" aria-pressed="${state.settings.theme === 'light'}" aria-label="Hell">
-                ${ICON_LIGHT_MODE}<span>Hell</span>
-              </button>
-              <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="dark"  aria-pressed="${state.settings.theme === 'dark'}"  aria-label="Dunkel">
-                ${ICON_DARK_MODE}<span>Dunkel</span>
-              </button>
+              <div class="theme-toggle" role="group" aria-label="Erscheinungsbild">
+                <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="auto"  aria-pressed="${state.settings.theme === 'auto'}"  aria-label="System">
+                  ${ICON_CONTRAST}<span>System</span>
+                </button>
+                <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="light" aria-pressed="${state.settings.theme === 'light'}" aria-label="Hell">
+                  ${ICON_LIGHT_MODE}<span>Hell</span>
+                </button>
+                <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="dark"  aria-pressed="${state.settings.theme === 'dark'}"  aria-label="Dunkel">
+                  ${ICON_DARK_MODE}<span>Dunkel</span>
+                </button>
+              </div>
             </div>
             <p class="settings-section__note settings-section__note--soft">Akzentfarbe kommt in einer späteren Iteration</p>
           `)}

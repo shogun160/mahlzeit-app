@@ -452,9 +452,13 @@
 
 /* Aktiv-Pill für berechnete Werte (Tagesziel-Range, Abendessen-Range) —
    primary bg + on-primary Text, gleiche Optik wie kcal-Pille auf der Card.
-   Signalisiert: "das ist ein aktiver Wert der aus anderen Feldern folgt". */
+   Signalisiert: "das ist ein aktiver Wert der aus anderen Feldern folgt".
+   Hoehe an die restlichen Pills im Sheet angeglichen (min-height 40px). */
 .settings-row__value--pill {
-  padding: 4px 12px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
@@ -573,14 +577,16 @@
   justify-content: space-between;
   gap: 12px;
   margin-top: 12px;
-  padding: 12px 16px;
+  padding: 6px 16px;
   border-radius: var(--radius-pill);
   background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
-  min-height: var(--touch-target-min);
+  /* Hoehe an .pref-chip angeglichen (Abnehmen etc.), damit alle Pills im
+     Settings-Sheet einheitlich wirken. */
+  min-height: 40px;
   transition: background 120ms ease, transform 120ms ease;
   -webkit-tap-highlight-color: transparent;
 }
@@ -603,8 +609,10 @@
 /* Aktions-Button in der Daten-Section — analog zu Settings-Link, aber als
    Trigger für den Onboarding-Wizard. */
 .settings-action-btn {
-  min-height: var(--touch-target-min);
-  padding: 8px 20px;
+  /* Hoehe an .pref-chip angeglichen (Abnehmen etc.), damit alle Pills im
+     Settings-Sheet einheitlich wirken. */
+  min-height: 40px;
+  padding: 6px 20px;
   border-radius: 999px;
   border: 1px solid var(--md-sys-color-outline);
   background: transparent;
@@ -623,20 +631,24 @@
 }
 
 /* Theme-Toggle im Settings-Sheet: 3 Pill-Buttons, Icon links + Label rechts.
-   Aktiver Pill in primary-container-Farben analog Präferenz-Chips. */
+   Layout inline (flex, kein grid) — sitzt in derselben .settings-row wie das
+   Label 'Erscheinungsbild', analog Ziel/Geschlecht-Zeilen. Kein margin-top,
+   Row-Gap regelt den Abstand. */
 .theme-toggle {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 8px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
 }
 .theme-toggle__chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: var(--touch-target-min);
-  padding: 8px 16px;
+  /* Hoehe angepasst an .pref-chip (Abnehmen/Halten/Zunehmen), damit die
+     Chip-Reihen im Sheet einheitlich wirken. Touch-Target-Guardrail bleibt
+     ueber die volle Zeilenbreite (3 Chips im Grid) erfuellt. */
+  min-height: 40px;
+  padding: 6px 12px;
   border: 1px solid var(--md-sys-color-outline);
   border-radius: var(--radius-pill);
   background: transparent;
@@ -652,18 +664,15 @@
   height: 18px;
   flex-shrink: 0;
 }
+/* Aktive Chip zieht in BEIDEN Modi die Optik der kcal-Pille (voller primary-
+   Grund mit on-primary-Text) — konsistent zur Selection-Chip im Header und
+   zum aktiven Wochentag-Badge im Picker. Im Light-Modus war primary-container
+   zu blass, im Dark-Modus wollte der User denselben kraeftigen Ton wie im
+   Light. Ergebnis: eine einzige Regel ohne Theme-Split. */
 .theme-toggle__chip[aria-pressed="true"] {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-  border-color: transparent;
-}
-/* Im Light-Modus zieht die aktive Chip die Optik der kcal-Pille im Sheet
-   (settings-row__value--pill) — voller primary-Grund mit weissem Text. Das
-   primary-container aus der Default-Regel wirkt im Light zu blass. Im Dark
-   bleibt es beim primary-container-Ton, damit der Akzent dort ruhiger sitzt. */
-:root[data-theme="light"] .theme-toggle__chip[aria-pressed="true"] {
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
+  border-color: transparent;
 }
 .theme-toggle__chip:active {
   transform: scale(0.98);
