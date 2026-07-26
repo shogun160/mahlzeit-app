@@ -40,10 +40,18 @@ const SWIPE_DIRECTIONAL_RATIO = 1.4; // |dy| muss 1.4x größer als |dx| sein
 // vom Wert-Label, klein (20 px), nur sichtbar wenn Override aktiv ist.
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
 
+// Material Symbols für Theme-Toggle. Alle im viewBox 0 -960 960 960.
+// contrast: Kreis halb hell/halb dunkel (Auto-Modus).
+// light_mode: Sonne mit Strahlen. dark_mode: Sichel-Mond.
+const ICON_CONTRAST   = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm40-82q100-15 170-92.5T760-480q0-108-70-185.5T520-758v596Z"/></svg>`;
+const ICON_LIGHT_MODE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-360q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm0 80q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>`;
+const ICON_DARK_MODE  = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
+
 let rootEl = null;
 let onExternalChange = () => {};
 let onExternalOpenMacro = () => {};
 let onExternalOpenOnboarding = () => {};
+let onExternalThemeChange = () => {};
 // Zugeklappte Sections (transient — verliert sich beim App-Restart, überlebt
 // aber Sheet-Close/Reopen weil das Modul lebt).
 const collapsedSections = new Set();
@@ -55,11 +63,12 @@ let sectionStackIdx = 0;
 
 // --- Mount / Lifecycle ---
 
-export function mountSettingsSheet(el, { onChange, onOpenMacro, onOpenOnboarding } = {}) {
+export function mountSettingsSheet(el, { onChange, onOpenMacro, onOpenOnboarding, onThemeChange } = {}) {
   rootEl = el;
   onExternalChange = onChange || (() => {});
   onExternalOpenMacro = onOpenMacro || (() => {});
   onExternalOpenOnboarding = onOpenOnboarding || (() => {});
+  onExternalThemeChange = onThemeChange || (() => {});
   rootEl.innerHTML = '';
   rootEl.hidden = true;
 }
@@ -184,8 +193,25 @@ function renderShell() {
           ${section('profil', 'Profil &amp; Kalorien', renderProfileSection())}
 
           ${section('darstellung', 'Darstellung', `
-            <p class="settings-section__note">Kommt bald — Dark Mode, Akzentfarbe</p>
-          `, 'settings-section-body--soon')}
+            <div class="settings-row">
+              <div class="settings-row__label">
+                <div class="settings-row__label-primary">Erscheinungsbild</div>
+                <div class="settings-row__label-secondary">Auto folgt dem System-Modus</div>
+              </div>
+            </div>
+            <div class="theme-toggle" role="group" aria-label="Erscheinungsbild">
+              <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="auto"  aria-pressed="${state.settings.theme === 'auto'}"  aria-label="Automatisch">
+                ${ICON_CONTRAST}<span>Auto</span>
+              </button>
+              <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="light" aria-pressed="${state.settings.theme === 'light'}" aria-label="Hell">
+                ${ICON_LIGHT_MODE}<span>Hell</span>
+              </button>
+              <button class="theme-toggle__chip" type="button" data-action="theme-pick" data-value="dark"  aria-pressed="${state.settings.theme === 'dark'}"  aria-label="Dunkel">
+                ${ICON_DARK_MODE}<span>Dunkel</span>
+              </button>
+            </div>
+            <p class="settings-section__note settings-section__note--soft">Akzentfarbe kommt in einer späteren Iteration</p>
+          `)}
 
           ${section('daten', 'Daten', `
             <div class="settings-row">
@@ -618,6 +644,20 @@ function attachHandlers() {
     btn.addEventListener('click', () => {
       closeSettingsSheet();
       setTimeout(() => onExternalOpenOnboarding(), TRANSITION_MS);
+    });
+  });
+
+  // Theme-Toggle — 3 exklusive Chips. Klick setzt state.settings.theme,
+  // ruft onExternalThemeChange (das applyTheme + saveState triggert),
+  // aktualisiert aria-pressed. Kein Sheet-Rerender nötig.
+  rootEl.querySelectorAll('[data-action="theme-pick"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.value;
+      state.settings.theme = val;
+      rootEl.querySelectorAll('[data-action="theme-pick"]').forEach((other) => {
+        other.setAttribute('aria-pressed', String(other.dataset.value === val));
+      });
+      onExternalThemeChange();
     });
   });
 

@@ -93,6 +93,10 @@ mountSettingsSheet(settingsRoot, {
   onChange: refresh,
   onOpenMacro: () => openMacroPopup(),
   onOpenOnboarding: () => openOnboardingWizard(),
+  onThemeChange: () => {
+    applyTheme();
+    saveState();
+  },
 });
 mountMacroPopup(macroPopupRoot, {
   onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),
