@@ -6,7 +6,7 @@ import {
   MACRO_PRESETS,
   MACRO_PRESET_DEFAULT,
 } from '../nutrition/target.js';
-import { state } from '../state.js';
+import { state, getActiveProfile } from '../state.js';
 import { DEFAULTS } from './steps.js';
 
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
@@ -37,7 +37,7 @@ export function themeLabelFor(theme) {
 // User vorherige Steps übersprungen hat. Fallbacks aus DEFAULTS greifen für
 // Slots die noch null sind.
 export function resolvedProfile(draft) {
-  const p = state.settings.profile;
+  const p = getActiveProfile();
   return {
     gender:               draft.gender        ?? p.gender        ?? DEFAULTS.gender,
     age:                  draft.age           ?? p.age           ?? DEFAULTS.age,

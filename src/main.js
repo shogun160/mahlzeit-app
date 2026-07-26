@@ -5,10 +5,11 @@ import { toggleAllSelected } from './dashboard/selection.js';
 import { renderShoppingList } from './shopping-list/render.js';
 import { resetChecked } from './shopping-list/check.js';
 import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
-import { mountSettingsSheet, openSettingsSheet } from './settings/render.js';
+import { mountSettingsSheet, openSettingsSheet, refreshProfileListInOpenSheet } from './settings/render.js';
 import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
 import { mountMacroPopup, openMacroPopup } from './dashboard/macro-popup.js';
 import { mountOnboardingWizard, openOnboardingWizard } from './onboarding/wizard.js';
+import { mountProfileDetailSheet, openProfileDetailSheet } from './settings/profile-detail-sheet.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
@@ -27,6 +28,7 @@ const settingsRoot = document.getElementById('settings-sheet-root');
 const pickerRoot = document.getElementById('dish-picker-root');
 const macroPopupRoot = document.getElementById('macro-popup-root');
 const onboardingRoot = document.getElementById('onboarding-root');
+const profileDetailRoot = document.getElementById('profile-detail-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
@@ -140,11 +142,20 @@ function refresh() {
 mountDetailSheet(sheetRoot, { onChange: refresh });
 mountSettingsSheet(settingsRoot, {
   onChange: refresh,
-  onOpenMacro: () => openMacroPopup(),
   onOpenOnboarding: () => openOnboardingWizard(),
+  onOpenProfileDetail: (profileId) => openProfileDetailSheet(profileId),
+  onAddProfile: () => openOnboardingWizard({ addProfile: true }),
   onThemeChange: () => {
     applyTheme();
     saveState();
+  },
+});
+mountProfileDetailSheet(profileDetailRoot, {
+  onChange: () => {
+    refresh();
+    // Profil-Liste im Settings-Sheet aktualisieren, falls es noch offen ist
+    // (Aktiv-Wechsel/Delete/Name-Aenderung reflektieren sich in der Liste).
+    refreshProfileListInOpenSheet();
   },
 });
 mountMacroPopup(macroPopupRoot, {

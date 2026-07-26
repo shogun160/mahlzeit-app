@@ -1,9 +1,9 @@
-import { state, DAYS } from '../state.js';
+import { state, getActiveProfile, getProfileById, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import {
   hasProfile,
-  effectiveDailyTarget,
   dinnerTarget,
+  dishScale,
   kcalRange,
   effectiveMacroTargets,
   MACRO_PRESETS,
@@ -12,7 +12,6 @@ import {
   MACRO_MAX,
   MACRO_STEP,
 } from '../nutrition/target.js';
-import { getScaleForDish } from '../nutrition/scale.js';
 
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
 
@@ -64,6 +63,60 @@ function topRoundedRectPath(x, y, w, h, r) {
 let rootEl = null;
 let onExternalOpenDetail = null;
 let onExternalChange = null;
+// Trackt ob das Popup gerade offen ist. Wichtig fuer Re-Renders nach Pill-
+// Klick: renderShell() muss die is-open-Klasse direkt ins HTML nehmen, sonst
+// startet die CSS-Fade-Transition beim neuen Overlay bei opacity 0 und das
+// Popup schliesst sich sichtbar.
+let isOpen = false;
+
+// Popup-lokale Auswahl fuer Multi-User-Anzeige (bewusst nicht im state — die
+// Auswahl ist eine reine Anzeige-Praeferenz im Popup und soll nicht persistieren,
+// aendert vor allem NICHT den globalen activeProfileId). Bei Multi-Select
+// werden Ist- und Soll-Werte als Durchschnitt ueber die selected User gerechnet.
+let selectedProfileIds = new Set();
+
+function getSelectedProfiles() {
+  const list = [];
+  for (const id of selectedProfileIds) {
+    const p = getProfileById(id);
+    if (p) list.push(p);
+  }
+  if (list.length === 0) {
+    // Fallback: aktiver User — passiert nur wenn alle Pills abgewaehlt wurden
+    // oder ein selected Profil geloescht wurde.
+    const active = getActiveProfile();
+    if (active) list.push(active);
+  }
+  return list;
+}
+
+// Durchschnitt des Abendessen-Ziels (kcal) ueber alle selected Profile. Fuer
+// Chart-Zielkorridor + Soll-Balken.
+function avgDinnerTargetOfSelected() {
+  const list = getSelectedProfiles();
+  let sum = 0, count = 0;
+  for (const p of list) {
+    const t = dinnerTarget(p);
+    if (t == null || t <= 0) continue;
+    sum += t;
+    count++;
+  }
+  return count > 0 ? sum / count : null;
+}
+
+// Durchschnitt der effektiven Makro-Ziele (Gramm) ueber alle selected. Wird
+// fuer die Delta-Klassifizierung (ok/off) in renderAverageText gebraucht.
+function avgMacroTargetsOfSelected() {
+  const list = getSelectedProfiles();
+  let sp = 0, skh = 0, sf = 0, count = 0;
+  for (const p of list) {
+    const t = effectiveMacroTargets(p);
+    if (!t) continue;
+    sp += t.p; skh += t.kh; sf += t.f;
+    count++;
+  }
+  return count > 0 ? { p: sp / count, kh: skh / count, f: sf / count } : null;
+}
 
 export function mountMacroPopup(el, { onOpenDetail, onChange } = {}) {
   rootEl = el;
@@ -75,18 +128,26 @@ export function mountMacroPopup(el, { onOpenDetail, onChange } = {}) {
 
 export function openMacroPopup() {
   if (!rootEl) throw new Error('Makro-Popup nicht gemountet.');
-  const profile = state.settings.profile;
+  const profile = getActiveProfile();
   if (!hasProfile(profile)) return;
+  // Auswahl initialisieren: standardmaessig nur der aktive User. Der User kann
+  // im Popup weitere Pills antippen (Toggle) um Multi-User-Durchschnitt zu sehen.
+  selectedProfileIds = new Set([profile.id]);
   renderShell();
   rootEl.hidden = false;
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => rootEl.querySelector('.macro-overlay').classList.add('is-open'));
+    requestAnimationFrame(() => {
+      isOpen = true;
+      const overlay = rootEl.querySelector('.macro-overlay');
+      if (overlay) overlay.classList.add('is-open');
+    });
   });
   document.addEventListener('keydown', handleEsc);
 }
 
 export function closeMacroPopup() {
   if (!rootEl || rootEl.hidden) return;
+  isOpen = false;
   const overlay = rootEl.querySelector('.macro-overlay');
   if (overlay) overlay.classList.remove('is-open');
   document.removeEventListener('keydown', handleEsc);
@@ -102,14 +163,21 @@ function handleEsc(ev) {
   if (ev.key === 'Escape') closeMacroPopup();
 }
 
-// Ist-Makros eines Tages in Gramm, skaliert mit userScale (was der User isst,
-// nicht die Rezept-Basis). Rückgabe {p, kh, f, kcal, dishId} oder null wenn
-// kein Assignment oder Dish unbekannt.
+// Ist-Makros eines Tages in Gramm, gemittelt ueber die selected Profile. Bei
+// Einzelauswahl = wie frueher (was DIESER User isst). Bei Mehrfachauswahl =
+// Durchschnitt der individuellen Portionen — nur Anzeige, aendert nichts an
+// Assignment oder Kochmengen.
 function dayMacros(day) {
   const dishId = state.assignment[day];
   const dish = dishId != null ? dishesById.get(dishId) : null;
   if (!dish) return null;
-  const scale = getScaleForDish(dish);
+  const list = getSelectedProfiles();
+  let sum = 0, count = 0;
+  for (const p of list) {
+    const s = dishScale(dish.kcal, dinnerTarget(p));
+    sum += s; count++;
+  }
+  const scale = count > 0 ? sum / count : 0;
   return {
     dishId,
     p: dish.p * scale,
@@ -119,33 +187,23 @@ function dayMacros(day) {
   };
 }
 
-// Soll-Werte für ein Abendessen: nimmt die Preset-Verteilung (bzw. das Custom-
-// Verhältnis) und rechnet sie auf die Soll-kcal um. Soll-kcal = Mittelwert des
-// visuellen Zielkorridors (kcalRange). In der Regel = dinnerTarget selbst;
-// bei clamped rangeLow (sehr kleines Dinner-Ziel < 125 kcal) liegt der Mittel-
-// wert höher — Soll-Säule soll aber immer visuell in die Mitte des grünen
-// Bands treffen.
+// Soll-Werte für ein Abendessen. Bei Multi-Select: dinnerTarget und die
+// Ziel-Verteilung werden ueber alle selected Profile gemittelt — die Ziel-
+// Saeule zeigt dann "was der Durchschnitt der ausgewaehlten User haben soll".
+// Soll-kcal = Mittelwert des visuellen Zielkorridors (kcalRange).
 function dinnerMacroTargets() {
-  const profile = state.settings.profile;
-  const dinner = dinnerTarget(profile);
+  const dinner = avgDinnerTargetOfSelected();
   if (dinner == null || dinner <= 0) return null;
   const range = kcalRange(dinner);
   const sollKcal = range ? (range[0] + range[1]) / 2 : dinner;
-  let pPct, khPct, fPct;
-  if (profile.macroTargets && typeof profile.macroTargets === 'object') {
-    const { p, kh, f } = profile.macroTargets;
-    const totalKcal = p * 4 + kh * 4 + f * 9;
-    if (totalKcal <= 0) return null;
-    pPct  = (p * 4)  / totalKcal;
-    khPct = (kh * 4) / totalKcal;
-    fPct  = (f * 9)  / totalKcal;
-  } else {
-    const key = profile.macroPreset ?? MACRO_PRESET_DEFAULT;
-    const preset = MACRO_PRESETS.find((m) => m.key === key) ?? MACRO_PRESETS[0];
-    pPct  = preset.p  / 100;
-    khPct = preset.kh / 100;
-    fPct  = preset.f  / 100;
-  }
+  // Ø der effektiven Ziel-Verteilung (Gramm) ueber selected → daraus Prozente.
+  const avgTargets = avgMacroTargetsOfSelected();
+  if (!avgTargets) return null;
+  const totalKcal = avgTargets.p * 4 + avgTargets.kh * 4 + avgTargets.f * 9;
+  if (totalKcal <= 0) return null;
+  const pPct  = (avgTargets.p * 4)  / totalKcal;
+  const khPct = (avgTargets.kh * 4) / totalKcal;
+  const fPct  = (avgTargets.f * 9)  / totalKcal;
   return {
     p:  (sollKcal * pPct)  / 4,
     kh: (sollKcal * khPct) / 4,
@@ -180,14 +238,13 @@ function averageMacros() {
 }
 
 function renderShell() {
-  const profile = state.settings.profile;
-  const target = dinnerTarget(profile);
+  const target = avgDinnerTargetOfSelected();
   const [rangeLow, rangeHigh] = target != null ? kcalRange(target) : [null, null];
   const avg = averageMacros();
-  const targets = effectiveMacroTargets(profile);
+  const targets = avgMacroTargetsOfSelected();
 
   rootEl.innerHTML = `
-    <div class="macro-overlay" data-role="backdrop">
+    <div class="macro-overlay${isOpen ? ' is-open' : ''}" data-role="backdrop">
       <div class="macro-sheet" role="dialog" aria-modal="true" aria-labelledby="macro-title">
         <div class="macro-handle" aria-hidden="true"></div>
         <div class="macro-header">
@@ -195,6 +252,7 @@ function renderShell() {
           <button class="macro-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="macro-body">
+          ${renderProfilePills()}
           <div data-role="chart-slot">${renderChart(target, rangeLow, rangeHigh, avg)}</div>
           <div data-role="avg-slot">${renderAverageText(avg, targets)}</div>
           ${renderControls()}
@@ -206,6 +264,33 @@ function renderShell() {
   attachHandlers();
   // Font-Fitter erst nach Layout (rAF), sonst sind scrollWidth/clientWidth null.
   requestAnimationFrame(fitAvgFontSize);
+}
+
+// Pills-Zeile ueber dem Chart: pro Profil eine Toggle-Pille. Klick togglet die
+// Auswahl. Bei Multi-Select werden Chart + Ø-Werte + Soll ueber die selected
+// gemittelt. AENDERT NICHT activeProfileId — reine Anzeige-Praeferenz. Bei nur
+// einem Profil wird die Zeile nicht gerendert (nichts zu waehlen).
+function renderProfilePills() {
+  const profiles = state.settings.profiles ?? [];
+  if (profiles.length <= 1) return '';
+  const pills = profiles.map((p) => {
+    const isSelected = selectedProfileIds.has(p.id);
+    const label = p.name || 'Profil';
+    return `
+      <button class="macro-profile-pill"
+              type="button"
+              data-action="toggle-profile"
+              data-profile-id="${p.id}"
+              aria-pressed="${isSelected}">
+        ${escapeHtml(label)}
+      </button>
+    `;
+  }).join('');
+  return `<div class="macro-profile-pills" role="group" aria-label="Profile für die Anzeige">${pills}</div>`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // Verkleinert die Pill-Schrift schrittweise von 14 → 10 px in 0.5-Schritten
@@ -460,18 +545,26 @@ function renderAverageText(avg, targets) {
 }
 
 // Controls-Section unten im Popup: Preset-Chips + Ø-Werte-Slider (P/KH/F) +
-// Refresh-Button. Analog zur Settings-Section-Logik, aber hier gemountet damit
-// die Makro-Ziele direkt neben dem Chart einstellbar sind.
+// Refresh-Button. Bei Einzelauswahl wird das SELECTED Profil editiert (nicht
+// zwingend activeProfileId — der bleibt unveraendert). Bei Multi-Select
+// werden die Controls disabled, weil ein Wert nicht in mehrere Profile
+// gleichzeitig geschrieben werden kann.
 function renderControls() {
-  const p = state.settings.profile;
+  const selected = getSelectedProfiles();
+  const isMulti = selected.length > 1;
+  const p = selected[0] ?? getActiveProfile();
   const targets = effectiveMacroTargets(p) ?? { p: 0, kh: 0, f: 0 };
   const isCustom = p.macroTargets != null;
   const activePreset = isCustom ? null : (p.macroPreset ?? MACRO_PRESET_DEFAULT);
-  const hint = isCustom
-    ? 'Manuell überschrieben'
-    : `Preset: ${MACRO_PRESETS.find((m) => m.key === activePreset)?.label ?? 'Ausgewogen'}`;
+  const hint = isMulti
+    ? `Ø aus ${selected.length} Profilen`
+    : (isCustom
+        ? 'Manuell überschrieben'
+        : `Preset: ${MACRO_PRESETS.find((m) => m.key === activePreset)?.label ?? 'Ausgewogen'}`);
+  const disabledAttr = isMulti ? 'disabled' : '';
+  const controlsDisabledCls = isMulti ? ' macro-controls--disabled' : '';
   return `
-    <div class="macro-controls">
+    <div class="macro-controls${controlsDisabledCls}">
       <div class="macro-controls__header">
         <h3 class="macro-controls__title">Ziel-Verteilung</h3>
         <span class="macro-controls__hint" data-role="macro-hint">${hint}</span>
@@ -479,7 +572,7 @@ function renderControls() {
                 type="button"
                 data-action="macros-reset"
                 data-role="macros-reset"
-                ${isCustom ? '' : 'hidden'}
+                ${(isCustom && !isMulti) ? '' : 'hidden'}
                 aria-label="Vorschlag wiederherstellen"
                 title="Vorschlag wiederherstellen">
           ${ICON_REFRESH}
@@ -490,7 +583,8 @@ function renderControls() {
           <button class="pref-chip"
                   type="button"
                   data-macro-preset="${m.key}"
-                  aria-pressed="${activePreset === m.key}">
+                  aria-pressed="${activePreset === m.key}"
+                  ${disabledAttr}>
             ${m.label}
           </button>
         `).join('')}
@@ -535,11 +629,10 @@ function renderMacroSlider(key, label, value) {
 // Handler-Bindungen am Root nicht verloren gehen. Handler auf den neuen Bar-
 // Hits müssen aber neu gebunden werden.
 function refreshChartAndAvg() {
-  const profile = state.settings.profile;
-  const target = dinnerTarget(profile);
+  const target = avgDinnerTargetOfSelected();
   const [rangeLow, rangeHigh] = target != null ? kcalRange(target) : [null, null];
   const avg = averageMacros();
-  const targets = effectiveMacroTargets(profile);
+  const targets = avgMacroTargetsOfSelected();
   const chartSlot = rootEl.querySelector('[data-role="chart-slot"]');
   const avgSlot = rootEl.querySelector('[data-role="avg-slot"]');
   if (chartSlot) chartSlot.innerHTML = renderChart(target, rangeLow, rangeHigh, avg);
@@ -567,6 +660,25 @@ function attachHandlers() {
   });
   rootEl.querySelector('[data-action="close"]').addEventListener('click', closeMacroPopup);
 
+  // Profil-Pills: Klick togglet die Auswahl. Kein Persist — reine Anzeige-
+  // Praeferenz. Nach Toggle wird das Popup komplett re-rendered damit auch die
+  // Controls-Section auf Multi/Single-Semantik reagiert.
+  rootEl.querySelectorAll('[data-action="toggle-profile"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.profileId;
+      if (!id) return;
+      if (selectedProfileIds.has(id)) {
+        // Mindestens ein Profil muss selected bleiben — sonst waere die
+        // Anzeige leer. Der User soll stattdessen eine andere Pille aktivieren.
+        if (selectedProfileIds.size === 1) return;
+        selectedProfileIds.delete(id);
+      } else {
+        selectedProfileIds.add(id);
+      }
+      renderShell();
+    });
+  });
+
   // Tap-Handler auf Bar-Hit-Overlays: öffnet das Rezept-Detail-Sheet des jeweiligen
   // Tages. Kapsel-Funktion, weil wir nach jedem Preset-/Slider-Change den Chart
   // neu rendern und die Handler erneut binden müssen.
@@ -586,7 +698,7 @@ function attachMacroControlHandlers() {
   rootEl.querySelectorAll('[data-macro-preset]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.macroPreset;
-      const p = state.settings.profile;
+      const p = getSelectedProfiles()[0] ?? getActiveProfile();
       p.macroPreset = key;
       p.macroTargets = null;
       rootEl.querySelectorAll('[data-macro-preset]').forEach((other) => {
@@ -610,7 +722,7 @@ function attachMacroControlHandlers() {
     slider.addEventListener('input', () => {
       const v = parseInt(slider.value, 10);
       if (valEl) valEl.textContent = `${v.toLocaleString('de-DE')} g`;
-      const p = state.settings.profile;
+      const p = getSelectedProfiles()[0] ?? getActiveProfile();
       p.macroTargets = readSliderMacros();
       p.macroPreset = null;
       rootEl.querySelectorAll('[data-macro-preset]').forEach((other) => {
@@ -629,7 +741,7 @@ function attachMacroControlHandlers() {
   // Refresh: zurück auf Preset "Ausgewogen".
   if (resetBtn) {
     resetBtn.addEventListener('click', () => {
-      const p = state.settings.profile;
+      const p = getSelectedProfiles()[0] ?? getActiveProfile();
       p.macroPreset = MACRO_PRESET_DEFAULT;
       p.macroTargets = null;
       const label = MACRO_PRESETS.find((m) => m.key === MACRO_PRESET_DEFAULT)?.label ?? 'Ausgewogen';
@@ -651,7 +763,8 @@ function readSliderMacros() {
 }
 
 function syncSliderValues() {
-  const targets = effectiveMacroTargets(state.settings.profile);
+  const p = getSelectedProfiles()[0] ?? getActiveProfile();
+  const targets = effectiveMacroTargets(p);
   if (!targets) return;
   ['p', 'kh', 'f'].forEach((k) => {
     const slider = rootEl.querySelector(`[data-action="macro-${k}-change"]`);
@@ -662,9 +775,8 @@ function syncSliderValues() {
 }
 
 function refreshAvgOnly() {
-  const profile = state.settings.profile;
   const avg = averageMacros();
-  const targets = effectiveMacroTargets(profile);
+  const targets = avgMacroTargetsOfSelected();
   const avgSlot = rootEl.querySelector('[data-role="avg-slot"]');
   if (avgSlot) avgSlot.innerHTML = renderAverageText(avg, targets);
   requestAnimationFrame(fitAvgFontSize);

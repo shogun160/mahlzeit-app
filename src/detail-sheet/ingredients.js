@@ -1,6 +1,6 @@
 import { formatIngredientQuantity } from '../util/format.js';
 import { state } from '../state.js';
-import { getScaleForDish, scaledGramsForDay } from '../nutrition/scale.js';
+import { scaledGramsForDay, totalFactorForDish, dinerScalesForDish } from '../nutrition/scale.js';
 
 // Reihenfolge nach Rezept-Logik (Hauptzutat zuerst), bewusst anders als die
 // Einkaufsliste (die folgt dem Einkaufsweg mit Obst/Gemüse zuerst).
@@ -63,8 +63,12 @@ export function renderIngredients(dish, portions) {
 // Prozente = kcal-Anteil des Makros (Atwater: 4 kcal/g P, 4 kcal/g KH, 9 kcal/g F).
 // Basis für die %-Berechnung ist die Summe der Makro-Kalorien (nicht dish.kcal),
 // damit sich die drei Prozente auf ~100 % addieren.
+//
+// Multi-Profile: totalFactor aggregiert ueber alle teilnehmenden Diner
+// (portions Personen). Bei portions > 1 wird zusaetzlich pro Diner eine
+// kompakte Zeile eingeblendet, damit sichtbar ist wer wieviel bekommt.
 function renderMacroSum(dish, portions) {
-  const totalFactor = portions * getScaleForDish(dish);
+  const totalFactor = totalFactorForDish(dish, portions);
   const kcal = Math.round(dish.kcal * totalFactor);
   const p = Math.round(dish.p * totalFactor);
   const kh = Math.round(dish.kh * totalFactor);
@@ -76,6 +80,8 @@ function renderMacroSum(dish, portions) {
   const pctP = total > 0 ? Math.round((kcalP / total) * 100) : 0;
   const pctKh = total > 0 ? Math.round((kcalKh / total) * 100) : 0;
   const pctF = total > 0 ? Math.round((kcalF / total) * 100) : 0;
+
+  const dinerRows = portions > 1 ? renderDinerRows(dish, portions) : '';
 
   return `
     <div class="ingredient-sum" role="group" aria-label="Gesamt-Nährwerte">
@@ -90,6 +96,36 @@ function renderMacroSum(dish, portions) {
         <span class="ingredient-sum__sep" aria-hidden="true">·</span>
         <span>${f} g <span class="ingredient-sum__key ingredient-sum__key--f">F</span> (${pctF}%)</span>
       </div>
+      ${dinerRows}
     </div>
   `;
+}
+
+// Pro-Diner-Aufteilung: eine kleine Zeile pro Person mit kcal + P/KH/F.
+// Reihenfolge: erste N Profile in profiles-Reihenfolge, dann Gaeste
+// (DEFAULT_USER). Name-Fallback: "User 1"/"User 2"/... wenn kein Name
+// gesetzt, "Gast" fuer DEFAULT_USER-Fueller.
+function renderDinerRows(dish, portions) {
+  const rows = dinerScalesForDish(dish, portions).map(({ diner, scale, isDefault }, idx) => {
+    const label = isDefault ? 'Gast' : (diner.name || `User ${idx + 1}`);
+    const kcal = Math.round(dish.kcal * scale);
+    const p = Math.round(dish.p * scale);
+    const kh = Math.round(dish.kh * scale);
+    const f = Math.round(dish.f * scale);
+    return `
+      <div class="ingredient-sum__diner-row">
+        <span class="ingredient-sum__diner-label">${escapeHtml(label)}</span>
+        <span class="ingredient-sum__diner-values">
+          ${kcal} kcal · ${p} g <span class="ingredient-sum__key ingredient-sum__key--p">P</span>
+          · ${kh} g <span class="ingredient-sum__key ingredient-sum__key--kh">KH</span>
+          · ${f} g <span class="ingredient-sum__key ingredient-sum__key--f">F</span>
+        </span>
+      </div>
+    `;
+  }).join('');
+  return `<div class="ingredient-sum__diners" aria-label="Aufteilung pro Person">${rows}</div>`;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }

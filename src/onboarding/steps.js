@@ -1,5 +1,5 @@
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, GOALS } from '../nutrition/target.js';
-import { PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
+import { PORTIONS_MIN, PORTIONS_MAX, getActiveProfile } from '../state.js';
 
 // Stille Defaults — werden im Wizard angezeigt wenn Draft-Wert null ist. Der
 // User sieht sinnvolle Startwerte, muss aber aktiv klicken/ziehen, damit das
@@ -20,7 +20,10 @@ export const DEFAULTS = {
 // Step 1: Über dich — Name (optional) + Geschlecht (Chips) + Alter (Stepper) +
 // Größe + Gewicht (Slider). Handler in wizard.js/attachStep1Handlers nutzen
 // bindSlider-Helper für die zwei Slider am Ende.
-export function renderStep1(draft) {
+//
+// options.isSubProfile blendet den Personen-Slider aus (defaultPortions ist
+// globales Setting, nicht per Profil — im 2..N-Wizard sinnlos).
+export function renderStep1(draft, { isSubProfile = false } = {}) {
   const nameVal = draft.name ?? '';
   const genderVal = draft.gender ?? DEFAULTS.gender;
   const ageVal = draft.age ?? DEFAULTS.age;
@@ -94,6 +97,7 @@ export function renderStep1(draft) {
              aria-label="Gewicht in Kilogramm" />
     </div>
 
+    ${isSubProfile ? '' : `
     <div class="onboarding-field">
       <div class="onboarding-field__row">
         <div class="onboarding-field__label">Für wie viele kochst du?</div>
@@ -108,6 +112,7 @@ export function renderStep1(draft) {
              data-action="portions-change"
              aria-label="Anzahl Personen im Haushalt" />
     </div>
+    `}
   `;
 }
 
@@ -188,11 +193,15 @@ export function renderStep2(draft) {
 // Verteilung (Ausgewogen/Proteinreich/Kohlenhydratarm/Fettarm). Toggle-Chips
 // analog Settings-Sheet. Anders als profile-Slots kein Draft — Booleans und
 // macroPreset ändern sich direkt im State beim Klick.
-export function renderStep3(settings) {
-  const prefs = settings.preferences ?? {};
-  const cuisines = settings.cuisines ?? {};
-  const macroPreset = settings.profile?.macroPreset ?? 'balanced';
-  const isCustomMacros = settings.profile?.macroTargets != null;
+export function renderStep3(profile) {
+  // Prefs + Cuisines liegen jetzt pro Profil. Der Wizard uebergibt das
+  // gerade editierte Profil — bei User 1 = getActiveProfile(), bei
+  // Sub-Wizards = das jeweils neu angelegte Profil.
+  const p = profile ?? getActiveProfile();
+  const prefs = p?.preferences ?? {};
+  const cuisines = p?.cuisines ?? {};
+  const macroPreset = p?.macroPreset ?? 'balanced';
+  const isCustomMacros = p?.macroTargets != null;
   // Presets exklusiv im Wizard; wenn User im Makro-Popup einen Custom-Override
   // gesetzt hat, ist kein Chip aktiv (aria-pressed=false auf allen).
   const activePreset = isCustomMacros ? null : macroPreset;
