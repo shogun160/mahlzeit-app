@@ -657,6 +657,14 @@
   color: var(--md-sys-color-on-primary-container);
   border-color: transparent;
 }
+/* Im Light-Modus zieht die aktive Chip die Optik der kcal-Pille im Sheet
+   (settings-row__value--pill) — voller primary-Grund mit weissem Text. Das
+   primary-container aus der Default-Regel wirkt im Light zu blass. Im Dark
+   bleibt es beim primary-container-Ton, damit der Akzent dort ruhiger sitzt. */
+:root[data-theme="light"] .theme-toggle__chip[aria-pressed="true"] {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
 .theme-toggle__chip:active {
   transform: scale(0.98);
 }
