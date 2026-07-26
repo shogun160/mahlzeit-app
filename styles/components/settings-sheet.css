@@ -625,10 +625,12 @@
   color: inherit;
 }
 
-/* Kompakte Variante fuer die GitHub-Pille: self-sized (inline-flex), Icon
-   links, Text 'GitHub' daneben, "extern oeffnen"-Icon ganz rechts. */
+/* Kompakte Variante fuer die GitHub-Pille: Icon + Label links, "extern
+   oeffnen"-Icon ganz rechts. Volle Breite, damit margin-left: auto das
+   externe Icon rechtsbuendig pushen kann. */
 .settings-link--compact {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   justify-content: flex-start;
   gap: 8px;
   margin-top: 0;
@@ -644,7 +646,7 @@
   white-space: nowrap;
 }
 .settings-link__external {
-  margin-left: 4px;
+  margin-left: auto;
   opacity: 0.7;
   width: 16px !important;
   height: 16px !important;
