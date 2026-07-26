@@ -71,3 +71,53 @@ Ideen, die nicht direkt in einer Iteration umgesetzt werden, aber nicht verloren
 - `state.assignment[day].dishId` bleibt, dazu `state.assignment[day].diners: [profileId]`
 - Rezept-Skalierung: Faktor pro Person, dann Aggregat für Einkaufsliste
 - Wochen-Bar: eine pro aktivem Profil oder Umschalter
+
+## Rezept-Import
+
+**Idee:** Rezepte per File-Import hinzufügen, statt manuell in `src/data/dishes.json` zu editieren. User füllt ein Template aus (JSON), generiert Bild per Prompt-Vorlage, importiert beides in der App über Settings > Daten. Wächst zur Grundlage für „Rezept-Community" oder eigenen Kochkatalog.
+
+**UX-Skizze:** Neuer Button in Settings > Daten: „Rezept importieren". File-Picker akzeptiert eine `.json`-Datei (Rezept-Template) + eine Bild-Datei (JPG). App validiert das JSON gegen Pflichtfelder und prüft dass alle referenzierten `ingredients.key`-Werte existieren. Bei Erfolg: Rezept landet in Custom-Rezept-Liste (parallel zu `dishes.json`), Bild wird ins App-Verzeichnis kopiert. Bei Validierungsfehler: klare Fehlermeldung („Zutat 'foo' ist unbekannt — bitte im Template mit `newIngredients:` deklarieren").
+
+**Format:** JSON, weil `dishes.json` schon JSON ist und die Struktur bekannt. Template unter [`docs/redesign/recipe-import-template.md`](recipe-import-template.md) — enthält Rezept-Schema + Bildgenerierungs-Prompt-Vorlage.
+
+**Pflichtfelder** (aus `dishes.json` abgeleitet):
+- `name` (String)
+- `cuisine` (String, z. B. „Italienisch")
+- `cuisineGroup` (String — Enum: mediterranean, asian, indian, middleEast, americas, european, german)
+- `cooktime` (Number, Minuten)
+- `kcal`, `p`, `kh`, `f` (Number, Nährwerte)
+- `tags` (String[], z. B. `["contains-meat", "contains-gluten"]`)
+- `ingredients` (Array von `{ key, grams, note? }`)
+- `steps` (String[])
+- `image` (relative File-Referenz, z. B. `./mein-rezept.jpg`)
+
+**Optional:**
+- `id` — wird beim Import automatisch vergeben (ab z. B. 1000 für Custom, damit keine Kollision mit `dishes.json`)
+- `newIngredients` — Array neuer Zutaten die noch nicht in `ingredients.json` existieren. Struktur wie `ingredients.json`-Einträge (label, cat, unit, per100g, optional displayUnit/gramsPerUnit).
+
+**State-Skizze:**
+- `state.customDishes: Dish[]` — parallele Liste zu Build-Time-`dishes.json`
+- `state.customIngredients: { [key]: Ingredient }` — parallele Registry für neue Zutaten
+- Loader: mergt `dishes.json` + `customDishes` und `ingredients.json` + `customIngredients` beim App-Start
+
+**Bild-Handling:** Guardrail 3 sagt „Bilder als externe Dateien". Für Import:
+- **Web / Dev:** Bild wird als Blob URL im State gehalten (`URL.createObjectURL`) und wieder freigegeben beim Rezept-Löschen. Persistenz per IndexedDB (localStorage ist zu klein).
+- **Android:** Capacitor Filesystem API → speichert unter `Directory.Data/dishes/dish-<id>.jpg`. State hält nur die relative Pfad-Referenz.
+
+**Validation beim Import:**
+1. JSON parsen — bei Fehler: Zeilenangabe zurückgeben
+2. Alle Pflichtfelder vorhanden — sonst Liste der fehlenden Felder
+3. Nährwerte-Sanity-Check (kcal > 0, p/kh/f ≥ 0)
+4. `cuisineGroup` gegen Enum prüfen
+5. Alle `ingredients[].key` müssen in `ingredients.json` ODER in `newIngredients` existieren — sonst Liste der unbekannten Keys mit Hint auf `newIngredients`
+6. `tags` gegen bekannte Tag-Liste prüfen (Warnung, kein Error — unbekannte Tags werden gespeichert aber ohne Filter-Effekt)
+7. Bild-Datei: Format (JPG/PNG), Größe (< 2 MB), Ratio (empfohlen 1:1)
+
+**Warum später:** Braucht:
+- Neuen State-Slot + Loader-Merge-Logik
+- File-Picker + Bild-Handling (Capacitor Filesystem oder IndexedDB)
+- Solide Validation mit User-lesbaren Fehlermeldungen
+- UX-Entscheidung ob Custom-Rezepte visuell markiert werden (klein „eigenes Rezept"-Badge auf Dish-Card?)
+- Bild-Prompt-Template-Pflege (bei neuen Rezepten von Custom-Import: passt der Foodblog-Stil noch, oder darf der User frei stylen?)
+
+Ideal in derselben Session wie **Datenverwaltung / Iteration 7** (Export/Import JSON + Reset) — der Import-Flow überschneidet sich am Datei-Handling und Validation-Framework.
