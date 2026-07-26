@@ -1,6 +1,6 @@
 import { state, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX } from '../nutrition/target.js';
-import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
+import { renderStep1, renderStep2, renderStep3, renderStep4, DEFAULTS } from './steps.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 5;
@@ -131,7 +131,8 @@ function renderStepContent() {
     case 1: return renderStep1(draft);
     case 2: return renderStep2(draft);
     case 3: return renderStep3(draft);
-    // Steps 4–5 folgen in Tasks 8–9
+    case 4: return renderStep4(draft);
+    // Step 5 folgt in Task 9
     default: return `<p class="onboarding-placeholder">Step ${currentStep} — Content folgt.</p>`;
   }
 }
@@ -185,7 +186,14 @@ function attachStepHandlers() {
   if (currentStep === 1) attachStep1Handlers();
   if (currentStep === 2) attachStep2Handlers();
   if (currentStep === 3) attachStep3Handlers();
-  // Steps 4–5 folgen in Tasks 8–9
+  if (currentStep === 4) attachStep4Handlers();
+  // Step 5 folgt in Task 9
+}
+
+function attachStep4Handlers() {
+  const fmt = (v) => `${v.toLocaleString('de-DE')} kcal`;
+  bindSlider('breakfast-change', 'breakfast-value', 'breakfastKcal', fmt);
+  bindSlider('lunch-change', 'lunch-value', 'lunchKcal', fmt);
 }
 
 function attachStep3Handlers() {

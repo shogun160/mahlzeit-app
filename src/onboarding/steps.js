@@ -130,6 +130,48 @@ export function renderStep3(draft) {
   `;
 }
 
+// Step 4: Mahlzeiten — Frühstück + Mittag als Slider (100-1000 kcal, Step 50).
+// Der Rest des Tagesziels wird zu Abendessen. Handler in wizard.js/
+// attachStep4Handlers nutzen den bindSlider-Helper aus Task 6.
+export function renderStep4(draft) {
+  const breakfastVal = draft.breakfastKcal ?? DEFAULTS.breakfastKcal;
+  const lunchVal = draft.lunchKcal ?? DEFAULTS.lunchKcal;
+  return `
+    <h3 class="onboarding-step__title">Mahlzeiten</h3>
+    <p class="onboarding-step__desc">Was isst du typischerweise vor dem Abendessen? Der Rest wird dein Abend-Ziel.</p>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__row">
+        <div class="onboarding-field__label">Frühstück</div>
+        <div class="onboarding-field__value" data-role="breakfast-value">${breakfastVal.toLocaleString('de-DE')} kcal</div>
+      </div>
+      <input class="settings-slider"
+             type="range"
+             min="100"
+             max="1000"
+             step="50"
+             value="${breakfastVal}"
+             data-action="breakfast-change"
+             aria-label="Frühstück-Kalorien" />
+    </div>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__row">
+        <div class="onboarding-field__label">Mittag</div>
+        <div class="onboarding-field__value" data-role="lunch-value">${lunchVal.toLocaleString('de-DE')} kcal</div>
+      </div>
+      <input class="settings-slider"
+             type="range"
+             min="100"
+             max="1000"
+             step="50"
+             value="${lunchVal}"
+             data-action="lunch-change"
+             aria-label="Mittag-Kalorien" />
+    </div>
+  `;
+}
+
 function escapeAttr(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
