@@ -1,10 +1,10 @@
 import { state, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX, dailyTarget } from '../nutrition/target.js';
-import { renderStep1, renderStep2, DEFAULTS } from './steps.js';
-import { renderStep5 as renderStep3, refreshResultDynamic } from './result.js';
+import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
+import { renderStep5 as renderStep4, refreshResultDynamic } from './result.js';
 
 const TRANSITION_MS = 250;
-const TOTAL_STEPS = 3;
+const TOTAL_STEPS = 4;
 
 let rootEl = null;
 let onExternalChange = () => {};
@@ -157,7 +157,8 @@ function renderStepContent() {
   switch (currentStep) {
     case 1: return renderStep1(draft);
     case 2: return renderStep2(draft);
-    case 3: return renderStep3(draft);
+    case 3: return renderStep3(state.settings);
+    case 4: return renderStep4(draft);
     default: return `<p class="onboarding-placeholder">Step ${currentStep}</p>`;
   }
 }
@@ -215,6 +216,7 @@ function attachStepHandlers() {
   if (currentStep === 1) attachStep1Handlers();
   if (currentStep === 2) attachStep2Handlers();
   if (currentStep === 3) attachStep3Handlers();
+  if (currentStep === 4) attachStep4Handlers();
 }
 
 // Step 1 (Über dich) — Name + Geschlecht + Alter + Größe + Gewicht.
@@ -267,8 +269,28 @@ function attachStep2Handlers() {
   bindSlider('lunch-change', 'lunch-value', 'lunchKcal', fmt);
 }
 
-// Step 3 (Ergebnis) — Tagesbedarf-Slider + Refresh.
+// Step 3 (Filter) — Ernährungs- + Küchen-Präferenzen als Toggle-Chips.
+// Ändern direkt state.settings.preferences/cuisines (kein Draft), analog
+// zum Settings-Sheet. saveState wird beim Persistieren am Ende gerufen.
 function attachStep3Handlers() {
+  bindToggleChips('pref-toggle', 'preferences');
+  bindToggleChips('cuisine-toggle', 'cuisines');
+}
+
+function bindToggleChips(action, bucketKey) {
+  rootEl.querySelectorAll(`[data-action="${action}"]`).forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.value;
+      const bucket = state.settings[bucketKey];
+      if (!bucket) return;
+      bucket[key] = !bucket[key];
+      btn.setAttribute('aria-pressed', String(!!bucket[key]));
+    });
+  });
+}
+
+// Step 4 (Ergebnis) — Tagesbedarf-Slider + Refresh.
+function attachStep4Handlers() {
   const slider = rootEl.querySelector('[data-action="target-change"]');
   if (slider) {
     slider.addEventListener('input', () => {

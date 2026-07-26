@@ -153,6 +153,38 @@ export function renderStep2(draft) {
   `;
 }
 
+// Step 3: Filter — Ernährungspräferenzen (Fleisch/Fisch/Vegetarisch) +
+// Küchen-Präferenzen (Asiatisch/Mediterran/Nahost/Amerikanisch). Toggle-Chips
+// analog Settings-Sheet. Anders als profile-Slots kein Draft — Booleans
+// starten auf false und ändern sich direkt im State beim Klick.
+export function renderStep3(settings) {
+  const prefs = settings.preferences ?? {};
+  const cuisines = settings.cuisines ?? {};
+  return `
+    <h3 class="onboarding-step__title">Filter</h3>
+    <p class="onboarding-step__desc">Optional — was soll bei den Vorschlägen berücksichtigt werden?</p>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__label">Ernährungspräferenzen</div>
+      <div class="onboarding-chips" role="group" aria-label="Ernährungspräferenzen">
+        <button class="pref-chip" type="button" data-action="pref-toggle" data-value="meat" aria-pressed="${!!prefs.meat}">Fleisch</button>
+        <button class="pref-chip" type="button" data-action="pref-toggle" data-value="fish" aria-pressed="${!!prefs.fish}">Fisch</button>
+        <button class="pref-chip" type="button" data-action="pref-toggle" data-value="vegetarian" aria-pressed="${!!prefs.vegetarian}">Vegetarisch</button>
+      </div>
+    </div>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__label">Küchen-Präferenzen</div>
+      <div class="onboarding-chips" role="group" aria-label="Küchen-Präferenzen">
+        <button class="pref-chip" type="button" data-action="cuisine-toggle" data-value="asian" aria-pressed="${!!cuisines.asian}">Asiatisch</button>
+        <button class="pref-chip" type="button" data-action="cuisine-toggle" data-value="mediterranean" aria-pressed="${!!cuisines.mediterranean}">Mediterran</button>
+        <button class="pref-chip" type="button" data-action="cuisine-toggle" data-value="middleEast" aria-pressed="${!!cuisines.middleEast}">Nahost</button>
+        <button class="pref-chip" type="button" data-action="cuisine-toggle" data-value="americas" aria-pressed="${!!cuisines.americas}">Amerikanisch</button>
+      </div>
+    </div>
+  `;
+}
+
 function escapeAttr(s) {
   return String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
