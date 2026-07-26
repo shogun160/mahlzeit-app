@@ -1,4 +1,5 @@
 import { PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
+import { getScaleForDish } from '../nutrition/scale.js';
 
 // Material-Symbols-Icons für die Card-Actions (SVG, currentColor).
 // - format_list_bulleted für Zutaten (klare Listen-Metapher)
@@ -38,11 +39,15 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
   const plusDisabled = portions >= PORTIONS_MAX;
   const selectionLabel = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
 
-  // Makros werden mit den Portionen skaliert und ganzzahlig gerundet.
-  const kcal = Math.round(dish.kcal * portions);
-  const protein = Math.round(dish.p * portions);
-  const carbs = Math.round(dish.kh * portions);
-  const fat = Math.round(dish.f * portions);
+  // Makros werden mit portions (Haushalts-Menge) UND userScale (Portionsgröße
+  // für dich, aus dem Abendessen-Ziel abgeleitet) skaliert. Ohne Profil ist
+  // userScale = 1 → Verhalten identisch zum bisherigen.
+  const userScale = getScaleForDish(dish);
+  const totalFactor = portions * userScale;
+  const kcal = Math.round(dish.kcal * totalFactor);
+  const protein = Math.round(dish.p * totalFactor);
+  const carbs = Math.round(dish.kh * totalFactor);
+  const fat = Math.round(dish.f * totalFactor);
 
   article.innerHTML = `
     <div class="day-card__image-wrap">

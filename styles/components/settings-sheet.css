@@ -295,6 +295,21 @@
   gap: 6px;
 }
 
+/* Inline-Variante für kurze Chip-Gruppen im Row-Layout (Ziel, Gender-Chips
+   neben dem Label). Flex nowrap statt Grid, damit alle Chips auf einer Zeile
+   bleiben — wenn eng, scrollt horizontal. */
+.settings-prefs--inline {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.settings-prefs--inline::-webkit-scrollbar { display: none; }
+.settings-prefs--inline .pref-chip {
+  flex-shrink: 0;
+}
+
 /* Filter-Chip (Material 3 style): tonal ohne Rahmen, primary-Tint wenn aktiv.
    aria-pressed=true statt :checked, weil wir <button> nutzen — visuell und
    semantisch klarer als hidden <input type="checkbox">. Höhe knapp unter dem

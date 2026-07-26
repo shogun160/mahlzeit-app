@@ -1,0 +1,65 @@
+/* Kompakte Wochen-Kalorien-Bar, sitzt im Dashboard über dem Card-Grid.
+   Drei-Segment-Layout: Label links, Ist/Ziel mittig-prominent, Ø rechts.
+   Nur sichtbar wenn Profil ausgefüllt (siehe dashboard/calorie-bar.js). */
+.calorie-bar {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--radius-card);
+  font-variant-numeric: tabular-nums;
+}
+
+.calorie-bar__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  letter-spacing: 0.02em;
+}
+
+.calorie-bar__values {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--md-sys-color-on-surface);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.calorie-bar__target {
+  color: var(--md-sys-color-on-surface);
+  font-weight: 600;
+}
+
+.calorie-bar__avg {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.calorie-bar__avg-label {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px;
+}
+
+.calorie-bar__intake {
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  font-size: 14px;
+}
+
+/* Farbcodierung — dezent, nur der Ist-Wert erhält den Akzentton.
+   Über: leicht warmer Ton (tertiary im M3-Sinn, hier per direkter Farbe
+   damit wir nicht neue Tokens einführen). Unter: primary-Ton. */
+.calorie-bar--over .calorie-bar__intake {
+  color: #b3541e; /* warmer Ton, harmoniert mit den Card-Akzenten */
+}
+
+.calorie-bar--under .calorie-bar__intake {
+  color: var(--md-sys-color-primary);
+}

@@ -170,7 +170,7 @@
           "grams": 10
         },
         {
-          "key": "feta",
+          "key": "feta_schaf",
           "grams": 45,
           "note": "Packung à 200 g"
         },
@@ -290,7 +290,7 @@
           "grams": 18
         },
         {
-          "key": "feta",
+          "key": "feta_schaf",
           "grams": 30,
           "note": "Packung à 200 g"
         }
@@ -790,7 +790,7 @@
       ],
       "ingredients": [
         {
-          "key": "linsen_rot",
+          "key": "linsen_rot_trocken",
           "grams": 120
         },
         {
@@ -1031,7 +1031,7 @@
           "grams": 100
         },
         {
-          "key": "spinat_baby",
+          "key": "spinat",
           "grams": 125
         },
         {
@@ -1039,7 +1039,7 @@
           "grams": 5
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 15
         }
       ],
@@ -1113,7 +1113,7 @@
           "grams": 60
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 15
         },
         {
@@ -1228,7 +1228,7 @@
           "grams": 8
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 10
         },
         {
@@ -1277,7 +1277,7 @@
           "grams": 167
         },
         {
-          "key": "gurke_salat",
+          "key": "gurke",
           "grams": 158
         },
         {
@@ -1305,7 +1305,7 @@
           "grams": 15
         },
         {
-          "key": "ingwer_frisch_neu",
+          "key": "ingwer",
           "grams": 5
         },
         {
@@ -1325,7 +1325,7 @@
           "grams": 50
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 20
         }
       ],
@@ -1391,7 +1391,7 @@
           "grams": 50
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 15
         },
         {
@@ -1470,7 +1470,7 @@
           "grams": 10
         },
         {
-          "key": "ingwer_frisch_neu",
+          "key": "ingwer",
           "grams": 10
         },
         {
@@ -1506,7 +1506,7 @@
           "grams": 140
         },
         {
-          "key": "spinat_baby",
+          "key": "spinat",
           "grams": 100
         },
         {
@@ -1584,7 +1584,7 @@
           "grams": 200
         },
         {
-          "key": "spinat_baby",
+          "key": "spinat",
           "grams": 25
         },
         {
@@ -1612,7 +1612,7 @@
           "grams": 2
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 10
         },
         {
@@ -1692,7 +1692,7 @@
           "grams": 7
         },
         {
-          "key": "ingwer_frisch_neu",
+          "key": "ingwer",
           "grams": 15
         },
         {
@@ -1775,7 +1775,7 @@
           "grams": 200
         },
         {
-          "key": "gurke_salat",
+          "key": "gurke",
           "grams": 150
         },
         {
@@ -1803,7 +1803,7 @@
           "grams": 5
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 5
         },
         {
@@ -1877,7 +1877,7 @@
           "grams": 9
         },
         {
-          "key": "ingwer_frisch_neu",
+          "key": "ingwer",
           "grams": 6
         },
         {
@@ -1973,11 +1973,11 @@
           "grams": 25
         },
         {
-          "key": "spinat_baby",
+          "key": "spinat",
           "grams": 63
         },
         {
-          "key": "ingwer_frisch_neu",
+          "key": "ingwer",
           "grams": 5
         },
         {
@@ -2062,7 +2062,7 @@
           "grams": 50
         },
         {
-          "key": "gurke_salat",
+          "key": "gurke",
           "grams": 172
         },
         {
@@ -2125,7 +2125,7 @@
           "grams": 60
         },
         {
-          "key": "gurke_salat",
+          "key": "gurke",
           "grams": 100
         },
         {
@@ -2149,7 +2149,7 @@
           "grams": 5
         },
         {
-          "key": "ingwer_frisch_neu",
+          "key": "ingwer",
           "grams": 5
         },
         {
@@ -2211,7 +2211,7 @@
           "grams": 50
         },
         {
-          "key": "petersilie_neu",
+          "key": "petersilie",
           "grams": 20
         },
         {

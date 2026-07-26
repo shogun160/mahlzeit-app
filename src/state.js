@@ -62,6 +62,24 @@ export const state = {
       middleEast: false,
       americas: false,
     },
+    profile: {
+      // Nutzer-Profil für Tageskalorien-Berechnung (Mifflin-St Jeor × PAL).
+      // Biometrische Felder null = noch nicht ausgefüllt → keine Wochen-Bar.
+      // activityLevel/goal haben immer sinnvolle Defaults, damit ein frisch
+      // ausgefülltes Profil nicht mit "kein Wert" startet.
+      gender: null,               // 'male' | 'female' | null (bewusst leer — User muss wählen)
+      age: 40,                    // pragmatische Defaults (siehe target.js AGE_DEFAULT etc.),
+      heightCm: 180,              // damit Slider beim ersten Öffnen sinnvoll starten.
+      weightKg: 80,
+      activityLevel: 3,           // Index 1..5 (siehe nutrition/target.js ACTIVITY_LEVELS)
+      goal: 'maintain',           // 'maintain' | 'lose' | 'gain'
+      // Abendessen-Zielrechnung: Vorschlag aus Profil kann per Override gebrochen
+      // werden. Frühstück/Mittag werden vom Tagesziel abgezogen — der Rest ist
+      // das Abendessen-Ziel gegen das die Wochen-Bar rechnet.
+      dailyTargetOverride: null,  // number | null — null = nimm berechneten Wert
+      breakfastKcal: 400,         // Default-Aufteilung, User kann anpassen
+      lunchKcal: 700,
+    },
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
 };
@@ -140,6 +158,17 @@ export function loadState() {
         mediterranean: loadedSettings.cuisines?.mediterranean ?? false,
         middleEast: loadedSettings.cuisines?.middleEast ?? false,
         americas: loadedSettings.cuisines?.americas ?? false,
+      },
+      profile: {
+        gender: loadedSettings.profile?.gender ?? null,
+        age: loadedSettings.profile?.age ?? 40,
+        heightCm: loadedSettings.profile?.heightCm ?? 180,
+        weightKg: loadedSettings.profile?.weightKg ?? 80,
+        activityLevel: loadedSettings.profile?.activityLevel ?? 3,
+        goal: loadedSettings.profile?.goal ?? 'maintain',
+        dailyTargetOverride: loadedSettings.profile?.dailyTargetOverride ?? null,
+        breakfastKcal: loadedSettings.profile?.breakfastKcal ?? 400,
+        lunchKcal: loadedSettings.profile?.lunchKcal ?? 700,
       },
       theme: loadedSettings.theme ?? 'auto',
     };

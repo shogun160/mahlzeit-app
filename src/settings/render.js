@@ -7,6 +7,29 @@ import {
   COOKTIME_STEP,
 } from '../state.js';
 import { changeDefaultPortions } from '../dashboard/portions.js';
+import {
+  ACTIVITY_LEVELS,
+  GOALS,
+  AGE_MIN,
+  AGE_MAX,
+  HEIGHT_MIN,
+  HEIGHT_MAX,
+  WEIGHT_MIN,
+  WEIGHT_MAX,
+  AGE_DEFAULT,
+  HEIGHT_DEFAULT,
+  WEIGHT_DEFAULT,
+  DAILY_TARGET_MIN,
+  DAILY_TARGET_MAX,
+  DAILY_TARGET_STEP,
+  MEAL_KCAL_STEP,
+  BREAKFAST_MAX,
+  LUNCH_MAX,
+  dailyTarget,
+  effectiveDailyTarget,
+  dinnerTarget,
+  kcalRange,
+} from '../nutrition/target.js';
 
 const TRANSITION_MS = 250;
 const SWIPE_THRESHOLD_PX = 55;
@@ -147,9 +170,7 @@ function renderShell() {
             </div>
           `)}
 
-          ${section('profil', 'Profil &amp; Kalorien', `
-            <p class="settings-section__note">Kommt bald — Alter, Größe, Gewicht, Aktivität → Tageskalorien-Ziel</p>
-          `, 'settings-section-body--soon')}
+          ${section('profil', 'Profil &amp; Kalorien', renderProfileSection())}
 
           ${section('darstellung', 'Darstellung', `
             <p class="settings-section__note">Kommt bald — Dark Mode, Akzentfarbe</p>
@@ -242,6 +263,15 @@ function summaryFor(key) {
     const active = ['asian', 'mediterranean', 'middleEast', 'americas'].filter((k) => s.cuisines?.[k]).length;
     return `${active}/${total}`;
   }
+  if (key === 'profil') {
+    // Abendessen-Zielkorridor als kompakte Zusammenfassung (nicht Tagesziel),
+    // weil das der Wert ist gegen den die Wochen-Bar rechnet. Ohne vollständiges
+    // Profil oder mit ungültigem Rest: leere Summary.
+    const target = dinnerTarget(s.profile);
+    if (target == null || target <= 0) return '';
+    const r = kcalRange(target);
+    return `${r[0].toLocaleString('de-DE')}–${r[1].toLocaleString('de-DE')} kcal`;
+  }
   return '';
 }
 
@@ -292,6 +322,207 @@ function renderCuisineChip(key, label) {
     <button class="pref-chip"
             type="button"
             data-cuisine="${key}"
+            aria-pressed="${pressed}">
+      ${label}
+    </button>
+  `;
+}
+
+// Profil-Section: Gender-Chips, Alter-Stepper, Größe/Gewicht/Aktivität-Slider,
+// Ziel-Chips. Werte kommen aus state.settings.profile; leere Felder (null)
+// zeigen "—" statt einer Zahl. Nach jeder Änderung updateSectionSummary('profil')
+// + onExternalChange() (letzteres nur bei change, nicht bei input während Ziehen).
+function renderProfileSection() {
+  const p = state.settings.profile;
+  const ageStr = p.age == null ? '—' : String(p.age);
+  const ageMinusDis = p.age == null || p.age <= AGE_MIN;
+  const agePlusDis = p.age != null && p.age >= AGE_MAX;
+  const heightVal = p.heightCm ?? HEIGHT_DEFAULT;
+  const weightVal = p.weightKg ?? WEIGHT_DEFAULT;
+  const activity = ACTIVITY_LEVELS.find((a) => a.level === p.activityLevel) ?? ACTIVITY_LEVELS[2];
+
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Geschlecht</div>
+      </div>
+      <div class="settings-prefs" role="group" aria-label="Geschlecht">
+        ${renderGenderChip('female', 'Weiblich')}
+        ${renderGenderChip('male',   'Männlich')}
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Alter</div>
+      </div>
+      <div class="stepper stepper--compact" role="group" aria-label="Alter in Jahren">
+        <button class="stepper__btn" data-action="age-minus" aria-label="Weniger" ${ageMinusDis ? 'disabled' : ''}>−</button>
+        <span class="stepper__value" data-role="age-value">${ageStr}</span>
+        <button class="stepper__btn" data-action="age-plus" aria-label="Mehr" ${agePlusDis ? 'disabled' : ''}>+</button>
+      </div>
+    </div>
+
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Größe</div>
+      </div>
+      <div class="settings-row__value" data-role="height-value">${p.heightCm == null ? '—' : `${p.heightCm} cm`}</div>
+    </div>
+    <input type="range"
+           class="settings-slider"
+           data-action="height-change"
+           min="${HEIGHT_MIN}"
+           max="${HEIGHT_MAX}"
+           step="1"
+           value="${heightVal}"
+           aria-label="Größe in Zentimetern" />
+
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Gewicht</div>
+      </div>
+      <div class="settings-row__value" data-role="weight-value">${p.weightKg == null ? '—' : `${p.weightKg} kg`}</div>
+    </div>
+    <input type="range"
+           class="settings-slider"
+           data-action="weight-change"
+           min="${WEIGHT_MIN}"
+           max="${WEIGHT_MAX}"
+           step="1"
+           value="${weightVal}"
+           aria-label="Gewicht in Kilogramm" />
+
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Aktivitätslevel</div>
+      </div>
+      <div class="settings-row__value" data-role="activity-value">${activity.label}</div>
+    </div>
+    <input type="range"
+           class="settings-slider"
+           data-action="activity-change"
+           min="1"
+           max="5"
+           step="1"
+           value="${activity.level}"
+           aria-label="Aktivitätslevel" />
+
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Ziel</div>
+      </div>
+      <div class="settings-prefs settings-prefs--inline" role="group" aria-label="Ziel">
+        ${GOALS.map((g) => renderGoalChip(g.key, g.label)).join('')}
+      </div>
+    </div>
+
+    ${renderDailyTargetRow()}
+    ${renderMealRow('breakfast', 'Frühstück', p.breakfastKcal, BREAKFAST_MAX)}
+    ${renderMealRow('lunch', 'Mittagessen', p.lunchKcal, LUNCH_MAX)}
+    ${renderDinnerTargetRow()}
+  `;
+}
+
+// Tagesziel-Slider: startet beim berechneten Vorschlag aus Profil. Wenn User
+// den Slider zieht, wird der Wert als Override gespeichert — Profil-Änderungen
+// überschreiben den Wert dann nicht mehr. Sichtbar-Label zeigt "Vorschlag: X"
+// wenn kein Override, "Manuell" wenn Override — damit klar ist, was greift.
+function renderDailyTargetRow() {
+  const p = state.settings.profile;
+  const effective = effectiveDailyTarget(p);
+  const suggestion = dailyTarget(p);
+  const val = effective ?? suggestion ?? Math.round((DAILY_TARGET_MIN + DAILY_TARGET_MAX) / 2);
+  const hint = p.dailyTargetOverride != null
+    ? 'Manuell überschrieben'
+    : (suggestion != null ? `Vorschlag aus Profil: ${format(suggestion)}` : 'Profil unvollständig');
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Tagesziel</div>
+        <div class="settings-row__label-secondary" data-role="daily-hint">${hint}</div>
+      </div>
+      <div class="settings-row__value" data-role="daily-value">${formatRange(val)}</div>
+    </div>
+    <input type="range"
+           class="settings-slider"
+           data-action="daily-change"
+           min="${DAILY_TARGET_MIN}"
+           max="${DAILY_TARGET_MAX}"
+           step="${DAILY_TARGET_STEP}"
+           value="${val}"
+           aria-label="Tagesziel in Kilokalorien" />
+  `;
+}
+
+function renderMealRow(key, label, value, max) {
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">${label}</div>
+      </div>
+      <div class="settings-row__value" data-role="${key}-value">${format(value)} kcal</div>
+    </div>
+    <input type="range"
+           class="settings-slider"
+           data-action="${key}-change"
+           min="0"
+           max="${max}"
+           step="${MEAL_KCAL_STEP}"
+           value="${value}"
+           aria-label="${label} in Kilokalorien" />
+  `;
+}
+
+// Abendessen-Ziel = Tagesziel − Frühstück − Mittag. Read-only (kein Slider),
+// weil es sich aus den anderen dreien ergibt. Zeigt "0 kcal" wenn Frühstück+
+// Mittag das Tagesziel überschreiten — kein Alarm, User sieht das Problem selbst.
+function renderDinnerTargetRow() {
+  const p = state.settings.profile;
+  const dinner = dinnerTarget(p);
+  const display = dinner == null ? '—' : formatRange(dinner);
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Abendessen (Rest)</div>
+        <div class="settings-row__label-secondary">Zielkorridor für die Wochen-Bar</div>
+      </div>
+      <div class="settings-row__value settings-row__value--strong" data-role="dinner-value">${display}</div>
+    </div>
+  `;
+}
+
+function format(n) {
+  return n.toLocaleString('de-DE');
+}
+
+// Ausgabe eines Zielkorridors "1.375 – 1.625 kcal". En-dash ohne Punkte, damit
+// die Zeile schmal bleibt. Basis-Wert (val) ist die Mitte des Korridors.
+function formatRange(val) {
+  const range = kcalRange(val);
+  if (!range) return '—';
+  const [lo, hi] = range;
+  return `${format(lo)}&thinsp;–&thinsp;${format(hi)} kcal`;
+}
+
+function renderGenderChip(key, label) {
+  const pressed = state.settings.profile.gender === key;
+  return `
+    <button class="pref-chip"
+            type="button"
+            data-gender="${key}"
+            aria-pressed="${pressed}">
+      ${label}
+    </button>
+  `;
+}
+
+function renderGoalChip(key, label) {
+  const pressed = state.settings.profile.goal === key;
+  return `
+    <button class="pref-chip"
+            type="button"
+            data-goal="${key}"
             aria-pressed="${pressed}">
       ${label}
     </button>
@@ -403,6 +634,8 @@ function attachHandlers() {
     });
   });
 
+  attachProfileHandlers();
+
   // Section-Header-Klick — identisches Muster wie Einkaufslisten-Kategorien:
   //   - Header sticky UND Body nicht mehr sichtbar unter ihm → expand + Scroll
   //     zur Body-Position (statt "aus dem Nichts eingeklappt zu werden").
@@ -459,6 +692,181 @@ function attachHandlers() {
   });
 
   attachCloseSwipe();
+}
+
+// Alle Inputs der Profil-Section verdrahten. Chips togglen exklusiv innerhalb
+// ihrer Gruppe (Gender/Goal — anders als Diät/Küche wo Mehrfach-Auswahl gilt).
+// Slider updaten den Wert live bei "input" (kein onExternalChange), speichern
+// dann bei "change" (Loslassen) und triggern refresh.
+function attachProfileHandlers() {
+  // Gender-Chips: exklusive Auswahl, kein Toggle-Off — Geschlecht ist für die
+  // Berechnung binär notwendig, Ausschalten wäre semantisch leer.
+  rootEl.querySelectorAll('.pref-chip[data-gender]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.gender;
+      if (state.settings.profile.gender === key) return;
+      state.settings.profile.gender = key;
+      rootEl.querySelectorAll('.pref-chip[data-gender]').forEach((other) => {
+        other.setAttribute('aria-pressed', String(other.dataset.gender === key));
+      });
+      updateDailyTargetFromProfile();
+      updateDinnerDisplay();
+      updateSectionSummary('profil');
+      onExternalChange();
+    });
+  });
+
+  // Goal-Chips: exklusive Auswahl, kein Toggle-Off — Standard bleibt "maintain".
+  rootEl.querySelectorAll('.pref-chip[data-goal]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.goal;
+      if (state.settings.profile.goal === key) return;
+      state.settings.profile.goal = key;
+      rootEl.querySelectorAll('.pref-chip[data-goal]').forEach((other) => {
+        other.setAttribute('aria-pressed', String(other.dataset.goal === key));
+      });
+      updateDailyTargetFromProfile();
+      updateDinnerDisplay();
+      updateSectionSummary('profil');
+      onExternalChange();
+    });
+  });
+
+  // Alter-Stepper: Erstklick auf ±  aus null-State startet bei Mitte des Bereichs,
+  // damit der User nicht 50-mal drücken muss. Danach normales Inkrementieren.
+  const ageMinusBtn = rootEl.querySelector('[data-action="age-minus"]');
+  const agePlusBtn = rootEl.querySelector('[data-action="age-plus"]');
+  const ageValueEl = rootEl.querySelector('[data-role="age-value"]');
+  const applyAge = (delta) => {
+    const p = state.settings.profile;
+    const current = p.age ?? AGE_DEFAULT;
+    const next = Math.max(AGE_MIN, Math.min(AGE_MAX, current + delta));
+    p.age = next;
+    ageValueEl.textContent = String(next);
+    if (ageMinusBtn) ageMinusBtn.disabled = next <= AGE_MIN;
+    if (agePlusBtn) agePlusBtn.disabled = next >= AGE_MAX;
+    updateDailyTargetFromProfile();
+    updateDinnerDisplay();
+    updateSectionSummary('profil');
+    onExternalChange();
+  };
+  if (ageMinusBtn) ageMinusBtn.addEventListener('click', () => applyAge(-1));
+  if (agePlusBtn) agePlusBtn.addEventListener('click', () => applyAge(1));
+
+  // Größe-Slider
+  const heightSlider = rootEl.querySelector('[data-action="height-change"]');
+  const heightValEl = rootEl.querySelector('[data-role="height-value"]');
+  if (heightSlider) {
+    heightSlider.addEventListener('input', () => {
+      const v = parseInt(heightSlider.value, 10);
+      state.settings.profile.heightCm = v;
+      heightValEl.textContent = `${v} cm`;
+      updateDailyTargetFromProfile();
+      updateDinnerDisplay();
+      updateSectionSummary('profil');
+    });
+    heightSlider.addEventListener('change', () => onExternalChange());
+  }
+
+  // Gewicht-Slider
+  const weightSlider = rootEl.querySelector('[data-action="weight-change"]');
+  const weightValEl = rootEl.querySelector('[data-role="weight-value"]');
+  if (weightSlider) {
+    weightSlider.addEventListener('input', () => {
+      const v = parseInt(weightSlider.value, 10);
+      state.settings.profile.weightKg = v;
+      weightValEl.textContent = `${v} kg`;
+      updateDailyTargetFromProfile();
+      updateDinnerDisplay();
+      updateSectionSummary('profil');
+    });
+    weightSlider.addEventListener('change', () => onExternalChange());
+  }
+
+  // Aktivitätslevel-Slider — 5 Rastern, Label zeigt aktuelle Stufe.
+  const activitySlider = rootEl.querySelector('[data-action="activity-change"]');
+  const activityValEl = rootEl.querySelector('[data-role="activity-value"]');
+  if (activitySlider) {
+    activitySlider.addEventListener('input', () => {
+      const v = parseInt(activitySlider.value, 10);
+      state.settings.profile.activityLevel = v;
+      const stage = ACTIVITY_LEVELS.find((a) => a.level === v) ?? ACTIVITY_LEVELS[2];
+      activityValEl.textContent = stage.label;
+      updateDailyTargetFromProfile();
+      updateDinnerDisplay();
+      updateSectionSummary('profil');
+    });
+    activitySlider.addEventListener('change', () => onExternalChange());
+  }
+
+  // Tagesziel-Slider: jeder Zug setzt Override. Damit übersteuert der User den
+  // Profil-Vorschlag dauerhaft, spätere Profil-Änderungen ändern den Wert nicht.
+  const dailySlider = rootEl.querySelector('[data-action="daily-change"]');
+  const dailyValEl = rootEl.querySelector('[data-role="daily-value"]');
+  const dailyHintEl = rootEl.querySelector('[data-role="daily-hint"]');
+  if (dailySlider) {
+    dailySlider.addEventListener('input', () => {
+      const v = parseInt(dailySlider.value, 10);
+      state.settings.profile.dailyTargetOverride = v;
+      dailyValEl.innerHTML = formatRange(v);
+      if (dailyHintEl) dailyHintEl.textContent = 'Manuell überschrieben';
+      updateSectionSummary('profil');
+      updateDinnerDisplay();
+    });
+    dailySlider.addEventListener('change', () => onExternalChange());
+  }
+
+  attachMealSlider('breakfast', 'breakfastKcal');
+  attachMealSlider('lunch', 'lunchKcal');
+}
+
+// Frühstück/Mittag-Slider — beide teilen dasselbe Muster (Live-Update + Dinner-
+// Rest neu berechnen + externes Save bei change). Als Helper extrahiert damit
+// die Deklaration im Handler-Setup einzeilig bleibt.
+function attachMealSlider(action, stateKey) {
+  const slider = rootEl.querySelector(`[data-action="${action}-change"]`);
+  const valEl = rootEl.querySelector(`[data-role="${action}-value"]`);
+  if (!slider) return;
+  slider.addEventListener('input', () => {
+    const v = parseInt(slider.value, 10);
+    state.settings.profile[stateKey] = v;
+    valEl.textContent = `${v.toLocaleString('de-DE')} kcal`;
+    updateDinnerDisplay();
+  });
+  slider.addEventListener('change', () => onExternalChange());
+}
+
+// Aktualisiert die Read-only-Anzeige des Abendessen-Rests live, ohne die ganze
+// Section neu zu rendern (Slider-Position würde sonst beim Zug springen).
+function updateDinnerDisplay() {
+  const el = rootEl?.querySelector('[data-role="dinner-value"]');
+  if (!el) return;
+  const val = dinnerTarget(state.settings.profile);
+  el.innerHTML = val == null ? '—' : formatRange(val);
+}
+
+// Nach Änderung eines Profil-Feldes: Override aufheben (damit Aktivität/Alter/
+// etc. wieder durchschlagen), Vorschlag-Hint aktualisieren, Slider-Position und
+// Value-Anzeige des Tagesziels auf den neuen Vorschlag setzen. Bewusstes
+// Overriden funktioniert weiter — aber nur solange der User keine Profil-Werte
+// mehr anfasst (Semantik: "Profil = Vorschlag, Slider = Feinjustierung
+// solange Profil unverändert").
+function updateDailyTargetFromProfile() {
+  const p = state.settings.profile;
+  p.dailyTargetOverride = null;
+  const suggestion = dailyTarget(p);
+  const slider = rootEl?.querySelector('[data-action="daily-change"]');
+  const valEl = rootEl?.querySelector('[data-role="daily-value"]');
+  const hintEl = rootEl?.querySelector('[data-role="daily-hint"]');
+  if (hintEl) {
+    hintEl.textContent = suggestion != null
+      ? `Vorschlag aus Profil: ${suggestion.toLocaleString('de-DE')}`
+      : 'Profil unvollständig';
+  }
+  if (suggestion != null) {
+    if (slider) slider.value = String(suggestion);
+    if (valEl) valEl.innerHTML = formatRange(suggestion);
+  }
 }
 
 // Runter-Swipe auf Handle oder Header schließt das Sheet — identisches Muster

@@ -3,7 +3,7 @@ import { renderDashboard } from './dashboard/render.js';
 import { rerollAll } from './dashboard/reroll.js';
 import { toggleAllSelected } from './dashboard/selection.js';
 import { renderShoppingList } from './shopping-list/render.js';
-import { resetChecked } from './shopping-list/check.js';
+import { resetChecked, forgetCheckedForOldDish } from './shopping-list/check.js';
 import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
 import { mountSettingsSheet, openSettingsSheet } from './settings/render.js';
 import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
@@ -75,6 +75,7 @@ mountSettingsSheet(settingsRoot, { onChange: refresh });
 // erhalten (wenn Tag schon angehakt war, gilt das auch für das neue Gericht).
 mountDishPicker(pickerRoot, {
   onPick: (day, dishId) => {
+    forgetCheckedForOldDish(day);
     state.assignment[day] = dishId;
     refresh();
   },

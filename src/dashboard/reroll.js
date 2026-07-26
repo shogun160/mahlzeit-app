@@ -1,5 +1,6 @@
 import { state, DAYS } from '../state.js';
 import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
+import { forgetCheckedForOldDish } from '../shopping-list/check.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
@@ -109,6 +110,7 @@ export function rerollDay(day) {
   }
   if (pick === null) return;
 
+  forgetCheckedForOldDish(day);
   state.assignment[day] = pick;
   // Selection bewusst NICHT resetten — wenn der Tag schon für die Einkaufsliste
   // angehakt war, bleibt er das auch beim Gericht-Wechsel. Nur rerollAll (kompletter
@@ -125,6 +127,7 @@ export function rerollAll() {
     shuffledPool = weightedShuffle(pool, cuisineWeight);
   }
   DAYS.forEach((day, i) => {
+    forgetCheckedForOldDish(day);
     state.assignment[day] = shuffledPool[i];
     state.selected[day] = false;
     // Portionen springen auf den User-Standard (settings.defaultPortions).

@@ -88,6 +88,7 @@ Diese Regeln gelten übergreifend — nicht ändern ohne bewusste Rückfrage:
 5. **Kein Framework-Umbau** (Vue/React/Angular) ohne Rückfrage. Vanilla JS + Vite ist bewusste Wahl
 6. **Statusbar-Farbe `#F7F8F7` = `--md-sys-color-surface`** (bzw. aktuell `--bg`) — immer synchron ändern in `capacitor.config.json` und CSS
 7. **Nach Änderungen zwingend syncen** — `npx cap sync` (bzw. `npm run build && npx cap sync` nach Rebuild), sonst landet nichts im Android-Projekt
+8. **Zutaten-Wiederverwendung, keine Duplikate** — beim Anlegen/Ändern von Rezepten (`dishes.json`) IMMER prüfen, ob die Zutat bereits in `ingredients.json` existiert (auch unter leicht anderem Namen). Nur neuen Key anlegen, wenn es wirklich eine neue Zutat ist. Verhindert Drifts wie zwei Petersilie-Einträge (Bund vs. g), die die Einkaufsliste doppelt zeigt.
 
 ## Referenz
 

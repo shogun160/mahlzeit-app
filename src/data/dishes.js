@@ -26,6 +26,11 @@ function enrichIngredient(ing) {
     cat: entry.cat,
     unit: entry.unit,
     size: entry.size ?? null,
+    // Rezept-Anzeige-Einheit ("tl" / "el") — nur bei löffelbaren Zutaten
+    // (Öle, Sauce, Süßes, Paste). Konvertiert grams zur Ausgabe in Löffel,
+    // ohne die interne g-Rechnung (kcal, Skalierung, Einkaufsliste) zu ändern.
+    displayUnit: entry.displayUnit ?? null,
+    gramsPerUnit: entry.gramsPerUnit ?? null,
     // Dish-spezifisches note (z. B. "TK-Packung à 400 g") hat Vorrang vor der
     // DB-Note; wenn beide fehlen, null.
     note: ing.note ?? entry.note ?? null,

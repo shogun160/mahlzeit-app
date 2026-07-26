@@ -260,9 +260,9 @@
       "note": "1 kleines Stück deckt den Bedarf mehrerer Gerichte",
       "per100g": {
         "kcal": 80,
-        "p": 2.0,
+        "p": 1.8,
         "kh": 18.0,
-        "f": 0.0
+        "f": 0.8
       }
     },
     "gurke": {
@@ -290,16 +290,15 @@
       "size": 70
     },
     "orange": {
-      "label": "Orange (für Saft)",
+      "label": "Orange",
       "cat": "frisch",
-      "unit": "stueck",
+      "unit": "g",
       "per100g": {
-        "kcal": 45,
-        "p": 0.6,
-        "kh": 10.4,
-        "f": 0.2
-      },
-      "size": 70
+        "kcal": 47,
+        "p": 0.9,
+        "kh": 8.3,
+        "f": 0.1
+      }
     },
     "zitrone": {
       "label": "Zitrone (für Saft)",
@@ -349,18 +348,6 @@
         "f": 2.0
       }
     },
-    "feta": {
-      "label": "Feta",
-      "cat": "kuehlung",
-      "unit": "g",
-      "note": "Packung à 200 g",
-      "per100g": {
-        "kcal": 264,
-        "p": 14.2,
-        "kh": 4.0,
-        "f": 21.3
-      }
-    },
     "avocado": {
       "label": "Avocado",
       "cat": "frisch",
@@ -398,14 +385,13 @@
       "size": 30
     },
     "kimchi": {
-      "label": "Kimchi (Gurken-Kimchi, fertig)",
+      "label": "Kimchi",
       "cat": "kuehlung",
       "unit": "g",
-      "note": "Glas à 300 g",
       "per100g": {
-        "kcal": 23,
-        "p": 1.5,
-        "kh": 4.0,
+        "kcal": 15,
+        "p": 1.1,
+        "kh": 2.4,
         "f": 0.2
       }
     },
@@ -431,17 +417,6 @@
         "p": 5.3,
         "kh": 14.5,
         "f": 0.3
-      }
-    },
-    "linsen_rot": {
-      "label": "Rote Linsen, roh",
-      "cat": "trocken",
-      "unit": "g",
-      "per100g": {
-        "kcal": 352,
-        "p": 24.3,
-        "kh": 60.1,
-        "f": 1.1
       }
     },
     "reis_basmati": {
@@ -574,6 +549,8 @@
       "label": "Miso-Paste",
       "cat": "trocken",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 6,
       "note": "Glas/Packung à 250 g",
       "per100g": {
         "kcal": 199,
@@ -584,8 +561,10 @@
     },
     "currypaste_thai": {
       "label": "Thai-Currypaste",
-      "cat": "trocken",
+      "cat": "sonstig",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 6,
       "note": "Glas à 200 g",
       "per100g": {
         "kcal": 120,
@@ -656,11 +635,11 @@
     "gewuerz_raselhanout": {
       "label": "Ras-el-Hanout",
       "cat": "gewuerze",
-      "unit": "vorrat",
+      "unit": "g",
       "per100g": {
-        "kcal": 300,
-        "p": 10.0,
-        "kh": 40.0,
+        "kcal": 320,
+        "p": 12.0,
+        "kh": 45.0,
         "f": 10.0
       }
     },
@@ -690,6 +669,8 @@
       "label": "Olivenöl",
       "cat": "oel",
       "unit": "vorrat",
+      "displayUnit": "el",
+      "gramsPerUnit": 14,
       "per100g": {
         "kcal": 884,
         "p": 0.0,
@@ -701,6 +682,8 @@
       "label": "Sesamöl",
       "cat": "oel",
       "unit": "vorrat",
+      "displayUnit": "tl",
+      "gramsPerUnit": 4.5,
       "per100g": {
         "kcal": 884,
         "p": 0.0,
@@ -712,6 +695,8 @@
       "label": "Sojasauce",
       "cat": "sonstig",
       "unit": "vorrat",
+      "displayUnit": "el",
+      "gramsPerUnit": 15,
       "per100g": {
         "kcal": 53,
         "p": 8.0,
@@ -723,6 +708,8 @@
       "label": "Honig",
       "cat": "sonstig",
       "unit": "vorrat",
+      "displayUnit": "el",
+      "gramsPerUnit": 20,
       "per100g": {
         "kcal": 304,
         "p": 0.0,
@@ -1071,28 +1058,6 @@
         "f": 0.5
       }
     },
-    "spinat_baby": {
-      "label": "Babyspinat",
-      "cat": "frisch",
-      "unit": "g",
-      "per100g": {
-        "kcal": 23,
-        "p": 2.9,
-        "kh": 3.6,
-        "f": 0.4
-      }
-    },
-    "gurke_salat": {
-      "label": "Salatgurke",
-      "cat": "frisch",
-      "unit": "g",
-      "per100g": {
-        "kcal": 12,
-        "p": 0.6,
-        "kh": 2.2,
-        "f": 0.2
-      }
-    },
     "radieschen": {
       "label": "Radieschen",
       "cat": "frisch",
@@ -1124,17 +1089,6 @@
         "p": 3.3,
         "kh": 6.1,
         "f": 0.4
-      }
-    },
-    "pak_choi_neu": {
-      "label": "Pak Choi",
-      "cat": "frisch",
-      "unit": "g",
-      "per100g": {
-        "kcal": 13,
-        "p": 1.5,
-        "kh": 2.2,
-        "f": 0.2
       }
     },
     "haselnuesse": {
@@ -1174,22 +1128,12 @@
       "label": "Schafskäse (Feta)",
       "cat": "kuehlung",
       "unit": "g",
+      "note": "Packung à 200 g",
       "per100g": {
         "kcal": 264,
         "p": 14.2,
         "kh": 4.0,
         "f": 21.3
-      }
-    },
-    "kimchi_neu": {
-      "label": "Kimchi",
-      "cat": "kuehlung",
-      "unit": "g",
-      "per100g": {
-        "kcal": 15,
-        "p": 1.1,
-        "kh": 2.4,
-        "f": 0.2
       }
     },
     "zhacai": {
@@ -1236,17 +1180,6 @@
         "f": 0.3
       }
     },
-    "mais_dose_neu": {
-      "label": "Mais aus der Dose",
-      "cat": "sonstig",
-      "unit": "g",
-      "per100g": {
-        "kcal": 86,
-        "p": 3.2,
-        "kh": 19.0,
-        "f": 1.2
-      }
-    },
     "kalamata_oliven": {
       "label": "Kalamata-Oliven",
       "cat": "sonstig",
@@ -1280,22 +1213,12 @@
         "f": 3.5
       }
     },
-    "tortilla_mais_neu": {
-      "label": "Tortilla, Mais",
-      "cat": "trocken",
-      "unit": "stueck",
-      "per100g": {
-        "kcal": 218,
-        "p": 5.7,
-        "kh": 45.0,
-        "f": 2.9
-      },
-      "size": 30
-    },
     "tahini": {
       "label": "Tahini",
       "cat": "oel",
       "unit": "g",
+      "displayUnit": "el",
+      "gramsPerUnit": 16,
       "per100g": {
         "kcal": 595,
         "p": 17.0,
@@ -1303,21 +1226,12 @@
         "f": 53.8
       }
     },
-    "sesamoel_neu": {
-      "label": "Sesamöl",
-      "cat": "oel",
-      "unit": "g",
-      "per100g": {
-        "kcal": 884,
-        "p": 0,
-        "kh": 0,
-        "f": 100
-      }
-    },
     "reisessig": {
       "label": "Reisessig",
       "cat": "sonstig",
       "unit": "ml",
+      "displayUnit": "el",
+      "gramsPerUnit": 15,
       "per100g": {
         "kcal": 20,
         "p": 0.3,
@@ -1329,6 +1243,8 @@
       "label": "Shaoxing-Reiswein",
       "cat": "sonstig",
       "unit": "ml",
+      "displayUnit": "el",
+      "gramsPerUnit": 15,
       "per100g": {
         "kcal": 130,
         "p": 0.4,
@@ -1340,6 +1256,8 @@
       "label": "Fischsauce",
       "cat": "sonstig",
       "unit": "ml",
+      "displayUnit": "el",
+      "gramsPerUnit": 15,
       "per100g": {
         "kcal": 35,
         "p": 5.0,
@@ -1351,6 +1269,8 @@
       "label": "Limettensaft",
       "cat": "frisch",
       "unit": "ml",
+      "displayUnit": "el",
+      "gramsPerUnit": 15,
       "per100g": {
         "kcal": 25,
         "p": 0.4,
@@ -1362,6 +1282,8 @@
       "label": "Zitronensaft",
       "cat": "frisch",
       "unit": "ml",
+      "displayUnit": "el",
+      "gramsPerUnit": 15,
       "per100g": {
         "kcal": 22,
         "p": 0.4,
@@ -1373,6 +1295,8 @@
       "label": "Ahornsirup",
       "cat": "sonstig",
       "unit": "g",
+      "displayUnit": "el",
+      "gramsPerUnit": 20,
       "per100g": {
         "kcal": 260,
         "p": 0,
@@ -1380,32 +1304,12 @@
         "f": 0.2
       }
     },
-    "miso_neu": {
-      "label": "Miso-Paste",
-      "cat": "sonstig",
-      "unit": "g",
-      "per100g": {
-        "kcal": 199,
-        "p": 12.8,
-        "kh": 26.5,
-        "f": 6.0
-      }
-    },
-    "currypaste_thai_neu": {
-      "label": "Thai-Currypaste",
-      "cat": "sonstig",
-      "unit": "g",
-      "per100g": {
-        "kcal": 100,
-        "p": 3.0,
-        "kh": 16.0,
-        "f": 3.0
-      }
-    },
     "dijon_senf": {
       "label": "Dijon-Senf",
       "cat": "sonstig",
       "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 5,
       "per100g": {
         "kcal": 60,
         "p": 4.4,
@@ -1433,17 +1337,6 @@
         "p": 8.0,
         "kh": 62.0,
         "f": 6.0
-      }
-    },
-    "gewuerz_ras": {
-      "label": "Ras-el-Hanout",
-      "cat": "gewuerze",
-      "unit": "g",
-      "per100g": {
-        "kcal": 320,
-        "p": 12.0,
-        "kh": 45.0,
-        "f": 10.0
       }
     },
     "gewuerz_garam": {
@@ -1578,17 +1471,6 @@
         "f": 6.0
       }
     },
-    "ingwer_frisch_neu": {
-      "label": "Ingwer frisch",
-      "cat": "frisch",
-      "unit": "g",
-      "per100g": {
-        "kcal": 80,
-        "p": 1.8,
-        "kh": 18.0,
-        "f": 0.8
-      }
-    },
     "galangal": {
       "label": "Galangal",
       "cat": "frisch",
@@ -1611,37 +1493,16 @@
         "f": 0.5
       }
     },
-    "orange_neu": {
-      "label": "Orange",
-      "cat": "frisch",
-      "unit": "g",
-      "per100g": {
-        "kcal": 47,
-        "p": 0.9,
-        "kh": 8.3,
-        "f": 0.1
-      }
-    },
-    "petersilie_neu": {
-      "label": "Petersilie frisch",
-      "cat": "frisch",
-      "unit": "g",
-      "per100g": {
-        "kcal": 36,
-        "p": 3.0,
-        "kh": 6.3,
-        "f": 0.8
-      }
-    },
     "mais_kolben": {
-      "label": "Mais aus der Dose",
-      "cat": "sonstig",
-      "unit": "g",
+      "label": "Maiskolben",
+      "cat": "frisch",
+      "unit": "stueck",
+      "size": 200,
       "per100g": {
-        "kcal": 86,
-        "p": 3.2,
-        "kh": 19.0,
-        "f": 1.2
+        "kcal": 108,
+        "p": 3.3,
+        "kh": 21.0,
+        "f": 1.5
       }
     }
   }

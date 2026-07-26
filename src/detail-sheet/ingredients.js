@@ -1,5 +1,32 @@
-import { formatGrams } from '../util/format.js';
+import { formatIngredientQuantity } from '../util/format.js';
 import { state } from '../state.js';
+import { getScaleForDish, scaledGramsForDay } from '../nutrition/scale.js';
+
+// Reihenfolge nach Rezept-Logik (Hauptzutat zuerst), bewusst anders als die
+// Einkaufsliste (die folgt dem Einkaufsweg mit Obst/Gemüse zuerst).
+const CAT_ORDER_DETAIL = [
+  'fleisch_fisch',
+  'frisch',
+  'trocken',
+  'kuehlung',
+  'gewuerze',
+  'oel',
+  'sonstig',
+];
+
+function sortByCategory(ingredients) {
+  return ingredients
+    .map((ing, idx) => ({ ing, idx }))
+    .sort((a, b) => {
+      const rankA = CAT_ORDER_DETAIL.indexOf(a.ing.cat);
+      const rankB = CAT_ORDER_DETAIL.indexOf(b.ing.cat);
+      const ra = rankA === -1 ? CAT_ORDER_DETAIL.length : rankA;
+      const rb = rankB === -1 ? CAT_ORDER_DETAIL.length : rankB;
+      if (ra !== rb) return ra - rb;
+      return a.idx - b.idx;
+    })
+    .map(({ ing }) => ing);
+}
 
 // Baut die Zutaten-Liste als HTML-String, inklusive Check-Kreise vor jeder Zeile
 // und einer Sum-Row am Ende mit Gesamt-kcal + Makro-Aufteilung.
@@ -7,10 +34,13 @@ import { state } from '../state.js';
 // portions: aktuell gültige Portionen für den zugehörigen Tag (state.portions[day])
 // Der Check-Zustand kommt aus state.checkedShopping — geteilt mit der Einkaufsliste.
 export function renderIngredients(dish, portions) {
-  const rows = dish.ingredients.map((ing) => {
+  const rows = sortByCategory(dish.ingredients).map((ing) => {
     const checked = state.checkedShopping.has(ing.key);
     const cls = ['ingredient'];
     if (checked) cls.push('ingredient--checked');
+    // scaledGramsForDay wendet portions × userScale an und rundet bei
+    // diskreten Einheiten (Eier, Stück, Bund, Zehen) auf ganze Stück.
+    const grams = scaledGramsForDay(ing, portions, dish);
     return `
       <li class="${cls.join(' ')}" data-key="${ing.key}">
         <span class="ingredient__check" aria-hidden="true">
@@ -19,7 +49,7 @@ export function renderIngredients(dish, portions) {
           </svg>
         </span>
         <span class="ingredient__label">${ing.label}</span>
-        <span class="ingredient__qty">${formatGrams(ing.grams, portions)}</span>
+        <span class="ingredient__qty">${formatIngredientQuantity(ing, grams)}</span>
       </li>
     `;
   }).join('');
@@ -34,10 +64,11 @@ export function renderIngredients(dish, portions) {
 // Basis für die %-Berechnung ist die Summe der Makro-Kalorien (nicht dish.kcal),
 // damit sich die drei Prozente auf ~100 % addieren.
 function renderMacroSum(dish, portions) {
-  const kcal = Math.round(dish.kcal * portions);
-  const p = Math.round(dish.p * portions);
-  const kh = Math.round(dish.kh * portions);
-  const f = Math.round(dish.f * portions);
+  const totalFactor = portions * getScaleForDish(dish);
+  const kcal = Math.round(dish.kcal * totalFactor);
+  const p = Math.round(dish.p * totalFactor);
+  const kh = Math.round(dish.kh * totalFactor);
+  const f = Math.round(dish.f * totalFactor);
   const kcalP = p * 4;
   const kcalKh = kh * 4;
   const kcalF = f * 9;

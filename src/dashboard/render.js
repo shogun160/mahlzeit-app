@@ -1,4 +1,5 @@
 import { createDayCard } from './card.js';
+import { renderCalorieBar } from './calorie-bar.js';
 import { state, DAYS, initState } from '../state.js';
 import { dishesById, shuffled } from '../data/dishes.js';
 import { rerollDay, eligibleDishIds } from './reroll.js';
@@ -24,6 +25,15 @@ export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker) {
 
   // Selection-Toolbar früherer Iteration ist in den App-Header umgezogen
   // (Progress-Ring + Count-Text, siehe dashboard/header.js).
+
+  // Wochen-Kalorien-Bar über den Cards — nur sichtbar wenn Profil ausgefüllt.
+  // renderCalorieBar() liefert leeren String wenn nicht → kein DOM-Element.
+  const calorieBarHtml = renderCalorieBar();
+  if (calorieBarHtml) {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = calorieBarHtml;
+    root.appendChild(wrap.firstElementChild);
+  }
 
   for (const day of DAYS) {
     const dishId = state.assignment[day];
