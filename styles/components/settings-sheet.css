@@ -466,11 +466,16 @@
 
 /* Native range-input mit primary Akzentfarbe — Browser rendert Thumb + Track
    selbst, wir setzen nur die Farbe. Für konsistente Optik in Android WebView
-   und Browser reicht das. */
+   und Browser reicht das.
+   touch-action: pan-y sagt dem Browser: vertikales Panning ist fuer Scrollen
+   reserviert, Slider greift nur bei echter horizontaler Bewegung. Verhindert
+   dass beim Runterscrollen der Settings/Onboarding-Sheets ein Slider
+   versehentlich verstellt wird, wenn der Finger auf einem liegt. */
 .settings-slider {
   width: 100%;
   margin-top: 0;
   accent-color: var(--md-sys-color-primary);
+  touch-action: pan-y;
 }
 
 /* Refresh-Icon-Button für Override-Reset (Tagesziel, Makros). Ghost-Style
