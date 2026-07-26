@@ -35,8 +35,14 @@ const TRANSITION_MS = 250;
 const SWIPE_THRESHOLD_PX = 55;
 const SWIPE_DIRECTIONAL_RATIO = 1.4; // |dy| muss 1.4x größer als |dx| sein
 
+// Material Symbol refresh — Reset-Icon für Override-Zurücksetzen (Tagesziel-
+// Slider, Makro-Slider). Platzierung analog zum X-Icon im Dish-Picker: links
+// vom Wert-Label, klein (20 px), nur sichtbar wenn Override aktiv ist.
+const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
+
 let rootEl = null;
 let onExternalChange = () => {};
+let onExternalOpenMacro = () => {};
 // Zugeklappte Sections (transient — verliert sich beim App-Restart, überlebt
 // aber Sheet-Close/Reopen weil das Modul lebt).
 const collapsedSections = new Set();
@@ -48,9 +54,10 @@ let sectionStackIdx = 0;
 
 // --- Mount / Lifecycle ---
 
-export function mountSettingsSheet(el, { onChange } = {}) {
+export function mountSettingsSheet(el, { onChange, onOpenMacro } = {}) {
   rootEl = el;
   onExternalChange = onChange || (() => {});
+  onExternalOpenMacro = onOpenMacro || (() => {});
   rootEl.innerHTML = '';
   rootEl.hidden = true;
 }
@@ -462,9 +469,13 @@ function renderDailyTargetRow() {
   const effective = effectiveDailyTarget(p);
   const suggestion = dailyTarget(p);
   const val = effective ?? suggestion ?? Math.round((DAILY_TARGET_MIN + DAILY_TARGET_MAX) / 2);
-  const hint = p.dailyTargetOverride != null
+  const overridden = p.dailyTargetOverride != null;
+  const hint = overridden
     ? 'Manuell überschrieben'
     : (suggestion != null ? `Vorschlag: ${format(suggestion)} kcal` : 'Profil unvollständig');
+  // Refresh-Button setzt den Override zurück auf null → Auto-Vorschlag aus
+  // Profil greift wieder. Analog zum X im Dish-Picker: nur sichtbar wenn was
+  // zurückzusetzen ist. hidden statt Remove damit der Handler stehen bleibt.
   return `
     <div class="settings-field">
       <div class="settings-row">
@@ -472,6 +483,15 @@ function renderDailyTargetRow() {
           <span class="settings-row__label-primary">Tagesziel</span>
           <span class="settings-row__label-secondary" data-role="daily-hint">${hint}</span>
         </div>
+        <button class="settings-refresh"
+                type="button"
+                data-action="daily-reset"
+                data-role="daily-reset"
+                ${overridden ? '' : 'hidden'}
+                aria-label="Tagesziel-Vorschlag wiederherstellen"
+                title="Vorschlag wiederherstellen">
+          ${ICON_REFRESH}
+        </button>
         <div class="settings-row__value" data-role="daily-value">${formatRange(val)}</div>
       </div>
       <input type="range"
@@ -514,10 +534,17 @@ function renderDinnerTargetRow() {
   const p = state.settings.profile;
   const dinner = dinnerTarget(p);
   const display = dinner == null ? '—' : formatRange(dinner);
+  // "Details"-Link analog zu "Vorschlag" bei Tagesziel — inline neben dem
+  // Label. Klick öffnet das Makro-Popup (Chart + Ø + Preset-/Slider-Einstellungen).
+  // Dort sitzen alle Makro-Verteilungs-Einstellungen; die Bedarfs-Anzeige lässt
+  // sich zusätzlich unten in dieser Section deaktivieren.
   return `
     <div class="settings-row">
-      <div class="settings-row__label">
-        <div class="settings-row__label-primary">Abendessen</div>
+      <div class="settings-row__label settings-row__label--inline">
+        <span class="settings-row__label-primary">Abendessen</span>
+        <button class="settings-row__label-link"
+                type="button"
+                data-action="open-macro-details">Details</button>
       </div>
       <div class="settings-row__value settings-row__value--pill" data-role="dinner-value">${display}</div>
     </div>
@@ -836,20 +863,41 @@ function attachProfileHandlers() {
   const dailySlider = rootEl.querySelector('[data-action="daily-change"]');
   const dailyValEl = rootEl.querySelector('[data-role="daily-value"]');
   const dailyHintEl = rootEl.querySelector('[data-role="daily-hint"]');
+  const dailyResetBtn = rootEl.querySelector('[data-role="daily-reset"]');
   if (dailySlider) {
     dailySlider.addEventListener('input', () => {
       const v = parseInt(dailySlider.value, 10);
       state.settings.profile.dailyTargetOverride = v;
       dailyValEl.innerHTML = formatRange(v);
       if (dailyHintEl) dailyHintEl.textContent = 'Manuell überschrieben';
+      if (dailyResetBtn) dailyResetBtn.hidden = false;
       updateSectionSummary('profil');
       updateDinnerDisplay();
     });
     dailySlider.addEventListener('change', () => onExternalChange());
   }
 
+  // Refresh-Button beim Tagesziel: Override zurücksetzen → Vorschlag greift.
+  if (dailyResetBtn) {
+    dailyResetBtn.addEventListener('click', () => {
+      state.settings.profile.dailyTargetOverride = null;
+      updateDailyTargetFromProfile();
+      updateDinnerDisplay();
+      updateSectionSummary('profil');
+      onExternalChange();
+    });
+  }
+
   attachMealSlider('breakfast', 'breakfastKcal');
   attachMealSlider('lunch', 'lunchKcal');
+
+  // "Details"-Link neben Abendessen öffnet das Makro-Popup. Dort sitzen alle
+  // Makro-Verteilungs-Einstellungen (Preset-Chips + Slider). Settings-Sheet
+  // bleibt offen darunter — Popup ist z-index-lastig eine Ebene drüber.
+  const macroLinkBtn = rootEl.querySelector('[data-action="open-macro-details"]');
+  if (macroLinkBtn) {
+    macroLinkBtn.addEventListener('click', () => onExternalOpenMacro());
+  }
 
   // Bedarfs-Anzeige-Toggle: togglet Sichtbarkeit der Wochen-Pille im Dashboard.
   // M3-Switch: aria-checked steuert Anzeige, CSS reagiert per Selector auf den
@@ -903,6 +951,7 @@ function updateDailyTargetFromProfile() {
   const slider = rootEl?.querySelector('[data-action="daily-change"]');
   const valEl = rootEl?.querySelector('[data-role="daily-value"]');
   const hintEl = rootEl?.querySelector('[data-role="daily-hint"]');
+  const resetBtn = rootEl?.querySelector('[data-role="daily-reset"]');
   if (hintEl) {
     hintEl.textContent = suggestion != null
       ? `Vorschlag: ${suggestion.toLocaleString('de-DE')} kcal`
@@ -912,6 +961,7 @@ function updateDailyTargetFromProfile() {
     if (slider) slider.value = String(suggestion);
     if (valEl) valEl.innerHTML = formatRange(suggestion);
   }
+  if (resetBtn) resetBtn.hidden = true;
 }
 
 // Runter-Swipe auf Handle oder Header schließt das Sheet — identisches Muster

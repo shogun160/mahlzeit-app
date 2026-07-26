@@ -1,0 +1,304 @@
+/* Makro-Popup — Bottom-Sheet mit Verlaufsdiagramm + Ø + Preset-Chips + Slider.
+   z-index über dem Settings-Sheet, damit sich das Popup aus den Settings
+   heraus öffnen lässt und drüber liegt. */
+
+.macro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgba(15, 22, 32, 0.35);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+
+.macro-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.macro-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  max-height: 92vh;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  box-shadow: 0 -6px 24px rgba(15, 22, 32, 0.18);
+  transform: translateY(100%);
+  transition: transform 250ms ease;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  overflow: hidden;
+}
+
+.macro-overlay.is-open .macro-sheet {
+  transform: translateY(0);
+}
+
+.macro-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--md-sys-color-outline-variant);
+  margin: 8px auto 4px;
+}
+
+.macro-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px 4px;
+}
+
+.macro-title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+
+.macro-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 999px;
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.macro-body {
+  overflow-y: auto;
+  padding: 12px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* SVG-Chart: nimmt volle Breite, Höhe folgt aus viewBox-Aspect. */
+.macro-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Zielkorridor als dezentes Grün-Band im Hintergrund. Sehr transparent damit
+   die Bars visuell dominieren und das Band als sanfte Zielzone wirkt (nicht
+   als eigenes Feature). Kein Stroke — sonst würde die Rahmenlinie über die
+   Bar-Kanten laufen und Unruhe stiften. Render-Reihenfolge im JS stellt
+   sicher, dass das Band vor den Bars gezeichnet wird → optisch dahinter. */
+.macro-chart__target-band {
+  fill: color-mix(in srgb, var(--chart-color-ok) 8%, transparent);
+  stroke: none;
+}
+
+.macro-chart__axis line {
+  stroke: var(--md-sys-color-outline-variant);
+  stroke-width: 0.75;
+}
+.macro-chart__axis-label {
+  fill: var(--md-sys-color-on-surface-variant);
+  font-size: 9px;
+  font-family: inherit;
+}
+
+/* Stack-Farben klassisch: KH Amber (Getreide), P Rot (Muskel/Fleisch),
+   F Blau (Öl). Konvention aus Fitness-Apps, sofort intuitiv. */
+.macro-chart__bar--kh {
+  fill: var(--chart-color-kh);
+}
+.macro-chart__bar--p {
+  fill: var(--chart-color-p);
+}
+.macro-chart__bar--f {
+  fill: var(--chart-color-f);
+}
+
+/* Nicht-selected Tage: voller Stack, aber gedämpft — Wochen-Position und
+   geplante Verteilung bleiben sichtbar, aber optisch klar sekundär gegenüber
+   den ausgewählten Tagen (die die Ø-Berechnung tragen). */
+.macro-chart__bar--muted {
+  opacity: 0.35;
+}
+
+/* Soll-Säule: gleiche volle Optik wie Ø-Balken. Unterscheidung nur über das
+   Label darunter ("Ø" vs "Soll"). */
+
+/* Unsichtbares Klick-Hitfeld über dem Stack (Task 8: Tap → Rezept-Detail). */
+.macro-chart__bar-hit {
+  fill: transparent;
+  cursor: pointer;
+}
+.macro-chart__bar-hit:hover {
+  fill: color-mix(in srgb, var(--md-sys-color-on-surface) 6%, transparent);
+}
+
+.macro-chart__day-label {
+  fill: var(--md-sys-color-on-surface-variant);
+  font-size: 10px;
+  font-family: inherit;
+  font-weight: 500;
+}
+.macro-chart__day-label--avg {
+  fill: var(--md-sys-color-on-surface);
+  font-weight: 700;
+}
+.macro-chart__day-label--muted {
+  opacity: 0.55;
+}
+
+/* Vier getrennte Pillen: P, KH, F je einzeln + kcal. Row-Wrapper gruppiert
+   mit knappem Gap — die Pillen sitzen als Reihe, jede eigenständig. */
+.macro-avg-row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 6px;
+}
+
+/* Einzel-Pille: Frosted-Glass Weiß + Pill-Radius (identisch zur Bedarfs-Pille
+   im Dashboard). Font-Size dynamisch via --macro-avg-font, JS-Fitter shrinkt
+   bis der schmalste Content-Pille in eine Zeilenhöhe passt. */
+.macro-avg {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --macro-avg-font: 14px;
+  font-size: var(--macro-avg-font);
+  color: var(--md-sys-color-on-surface);
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+/* kcal-Pille: dieselbe Optik, aber Inhalt einzeilig (kein zweizeiliger
+   g/%-Stack), prominenter Ton. */
+.macro-avg--kcal {
+  flex: 0 0 auto;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  padding: 6px 12px;
+}
+
+/* Eine Makro-Zelle: Buchstabe links (mittig vertikal), rechts daneben
+   zweizeilig g/%. Der Buchstabe bekommt genug vertikalen Raum durch die
+   zweizeilige Werte-Spalte — dadurch wirkt er "groß neben Werten". */
+.macro-avg__col {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.macro-avg__values {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1.1;
+}
+.macro-avg__grams {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* kcal einzeilig, mittig vertikal (align-items: center des Pill-Containers
+   sorgt dafür). Prominenter Ton (primary, fett) — Ø-Gesamtsumme ist der
+   Anker-Wert. */
+.macro-avg__kcal {
+  margin-left: auto;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.macro-avg--empty {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-style: italic;
+}
+.macro-avg__key {
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 1.05em;
+  line-height: 1;
+}
+/* Chart-Farben auf den Buchstaben-Keys — ersetzt die Legende. Explicit color
+   überschreibt das inherit vom .macro-avg__val-Wrapper (auch wenn dort ok/off
+   aktiv ist), damit KH/P/F immer in ihrer Diagramm-Farbe stehen. */
+.macro-avg__key--kh {
+  color: var(--chart-color-kh);
+}
+.macro-avg__key--p {
+  color: var(--chart-color-p);
+}
+.macro-avg__key--f {
+  color: var(--chart-color-f);
+}
+.macro-avg__pct {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.9em;
+}
+.macro-avg__grams--ok {
+  color: var(--chart-color-ok);
+}
+/* "Off" bewusst dezent — on-surface-variant statt Warn-Rot, sonst kollidiert
+   es visuell mit der roten Protein-Bar. Wer die genaue Zielabweichung will,
+   sieht die Zahlen; Rot wäre hier Alarm ohne Grund. */
+.macro-avg__grams--off {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Einstellungs-Bereich unten im Popup — Preset-Chips + 3 Slider + Refresh.
+   Layout analog zu Settings-Section, wiederverwendet .settings-field-Struktur
+   damit Slider-Optik konsistent bleibt. */
+.macro-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+.macro-controls__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.macro-controls__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+.macro-controls__hint {
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.macro-controls__presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

@@ -80,6 +80,12 @@ export const state = {
       breakfastKcal: 400,         // Default-Aufteilung, User kann anpassen
       lunchKcal: 700,
       showCalorieBar: true,       // Sichtbarkeit der Bedarfs-Pille im Dashboard
+      // Makro-Verteilung: entweder Preset (Ausgewogen/P-reich/KH-arm/F-arm)
+      // ODER expliziter Gramm-Override via macroTargets. Slider ziehen setzt
+      // macroTargets und macroPreset = null (Custom). Refresh setzt beides
+      // zurück auf {'balanced', null}. Siehe effectiveMacroTargets in target.js.
+      macroPreset: 'balanced',    // 'balanced' | 'protein' | 'lowcarb' | 'lowfat' | null
+      macroTargets: null,         // { p, kh, f } in Gramm | null
     },
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
@@ -171,6 +177,8 @@ export function loadState() {
         breakfastKcal: loadedSettings.profile?.breakfastKcal ?? 400,
         lunchKcal: loadedSettings.profile?.lunchKcal ?? 700,
         showCalorieBar: loadedSettings.profile?.showCalorieBar ?? true,
+        macroPreset: loadedSettings.profile?.macroPreset ?? 'balanced',
+        macroTargets: loadedSettings.profile?.macroTargets ?? null,
       },
       theme: loadedSettings.theme ?? 'auto',
     };

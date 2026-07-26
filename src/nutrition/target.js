@@ -123,6 +123,58 @@ export function kcalRange(value, factor = 1) {
   return [Math.max(0, value - window), value + window];
 }
 
+// Makro-Presets — Verteilung der Tageskalorien auf P/KH/F in Prozent.
+// Werte evidenzbasiert (AMDR: KH 45-65%, P 10-35%, F 20-35%). Bewusst so
+// gewählt, dass P in 3 von 4 Presets bei 30% liegt — nur P-reich bewegt es.
+// Damit ist jeder Preset-Name = das, was sich verändert.
+//   Ausgewogen — 30/40/30, klassisches Zone-Balanced-Setup.
+//   P-reich    — 40/30/30, High-Protein — Muskelaufbau/Sattheit.
+//   KH-arm     — 30/25/45, moderate Low-Carb (nicht Keto).
+//   F-arm      — 30/50/20, F an AMDR-Untergrenze — Ausdauer-lastig.
+export const MACRO_PRESETS = [
+  { key: 'balanced', label: 'Ausgewogen', p: 30, kh: 40, f: 30 },
+  { key: 'protein',  label: 'P-reich',    p: 40, kh: 30, f: 30 },
+  { key: 'lowcarb',  label: 'KH-arm',     p: 30, kh: 25, f: 45 },
+  { key: 'lowfat',   label: 'F-arm',      p: 30, kh: 50, f: 20 },
+];
+export const MACRO_PRESET_DEFAULT = 'balanced';
+
+// Slider-Ranges für die Makro-Slider (Gramm/Tag). Ranges sind großzügig
+// bemessen, damit auch untypische Verteilungen (extrem Low-Carb, hoch P)
+// erreichbar sind. Step 5 g ist fein genug für spürbare Änderungen und
+// grob genug, um klickbar zu bleiben.
+export const MACRO_MIN = 0;
+export const MACRO_MAX = 400;
+export const MACRO_STEP = 5;
+
+// Wandelt ein Preset in Gramm-Werte bei gegebenem Tages-kcal-Ziel.
+// Basiert auf den Kalorien-Faktoren P/KH = 4 kcal/g, F = 9 kcal/g.
+// Runde auf MACRO_STEP damit Slider-Rasterung sauber greift.
+export function macroTargetsFromPreset(kcalTarget, presetKey) {
+  if (!kcalTarget || kcalTarget <= 0) return null;
+  const preset = MACRO_PRESETS.find((p) => p.key === presetKey) ?? MACRO_PRESETS[0];
+  const p = Math.round((kcalTarget * preset.p / 100 / 4) / MACRO_STEP) * MACRO_STEP;
+  const kh = Math.round((kcalTarget * preset.kh / 100 / 4) / MACRO_STEP) * MACRO_STEP;
+  const f = Math.round((kcalTarget * preset.f / 100 / 9) / MACRO_STEP) * MACRO_STEP;
+  return { p, kh, f };
+}
+
+// Effektive Makro-Ziele: expliziter Override (macroTargets) sticht Preset.
+// Ohne beides → Preset-Default. Damit hat der User drei Interaktions-Ebenen:
+//   1) Preset-Chip klicken       → macroPreset gesetzt, macroTargets = null
+//   2) Slider ziehen             → macroTargets = {p,kh,f}, macroPreset = null
+//   3) Refresh-Button klicken    → macroTargets = null, macroPreset = 'balanced'
+export function effectiveMacroTargets(profile) {
+  if (!profile) return null;
+  if (profile.macroTargets && typeof profile.macroTargets === 'object') {
+    return profile.macroTargets;
+  }
+  const kcal = effectiveDailyTarget(profile);
+  if (kcal == null) return null;
+  const preset = profile.macroPreset ?? MACRO_PRESET_DEFAULT;
+  return macroTargetsFromPreset(kcal, preset);
+}
+
 // Skalierungs-Grenzen und -Stufen für die automatische Rezept-Anpassung.
 // 0.25-Stufen erhalten die Rezept-Vielfalt: unterschiedliche Basis-Gerichte
 // landen bei unterschiedlichen kcal-Werten (fließend würde alle exakt aufs

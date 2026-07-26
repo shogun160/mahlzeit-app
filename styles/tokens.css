@@ -16,6 +16,17 @@
      bleibt. Leicht teal-getönt, um den Bezug zum aktiven primary-Segment zu halten. */
   --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
 
+  /* Chart-Farben für Makro-Bars — klassisch aus Fitness-App-Konvention.
+     KH Amber (Getreide), P Rot (Muskel/Fleisch), F Blau (Öl). Bewusst
+     off-theme, weil Charts eigene visuelle Kategorien brauchen und die
+     App sonst nur Teal-Töne hat (keine klare Trennung möglich). */
+  --chart-color-kh: #D97706;
+  --chart-color-p:  #B91C1C;
+  --chart-color-f:  #2563EB;
+  /* Semantische Ok-Farbe für Ø-Anzeige (grün = im Zielkorridor).
+     "Off" nutzt on-surface-variant — bewusst leise, kein Alarm. */
+  --chart-color-ok: #15803D;
+
   /* Surface (matcht Statusbar-Farbe der App). Volle M3-Tonal-Skala für Elevation:
      lowest (Karten-Boden) < low (Card-Hover) < surface (Base) < container (Nav) < high < highest */
   --md-sys-color-surface: #F7F8F7;

@@ -84,11 +84,11 @@ function renderMacroSum(dish, portions) {
         <span class="ingredient-sum__kcal">${kcal} kcal</span>
       </div>
       <div class="ingredient-sum__macros">
-        <span>${p} g P (${pctP}%)</span>
+        <span class="ingredient-sum__macro ingredient-sum__macro--p">${p} g P (${pctP}%)</span>
         <span class="ingredient-sum__sep" aria-hidden="true">·</span>
-        <span>${kh} g KH (${pctKh}%)</span>
+        <span class="ingredient-sum__macro ingredient-sum__macro--kh">${kh} g KH (${pctKh}%)</span>
         <span class="ingredient-sum__sep" aria-hidden="true">·</span>
-        <span>${f} g F (${pctF}%)</span>
+        <span class="ingredient-sum__macro ingredient-sum__macro--f">${f} g F (${pctF}%)</span>
       </div>
     </div>
   `;

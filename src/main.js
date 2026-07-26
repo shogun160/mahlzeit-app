@@ -7,6 +7,7 @@ import { resetChecked } from './shopping-list/check.js';
 import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
 import { mountSettingsSheet, openSettingsSheet } from './settings/render.js';
 import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
+import { mountMacroPopup, openMacroPopup } from './dashboard/macro-popup.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
@@ -19,6 +20,7 @@ const shoppingRoot = document.getElementById('view-shopping');
 const sheetRoot = document.getElementById('detail-sheet-root');
 const settingsRoot = document.getElementById('settings-sheet-root');
 const pickerRoot = document.getElementById('dish-picker-root');
+const macroPopupRoot = document.getElementById('macro-popup-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
@@ -47,7 +49,7 @@ function refresh() {
   });
 
   // Beide Views immer rendern: der Swipe braucht den Zielinhalt sofort sichtbar.
-  renderDashboard(dashboardRoot, refresh, openDetailSheet, openDishPicker);
+  renderDashboard(dashboardRoot, refresh, openDetailSheet, openDishPicker, openMacroPopup);
   renderShoppingList(shoppingRoot, { onChange: refresh });
 
   // Bottom-Nav: aktiver Tab + Badge sind state-abhängig, deshalb pro refresh() neu.
@@ -69,7 +71,14 @@ function refresh() {
 // refresh() (Card-Badges, Shopping-Mengen). Settings-Sheet auch — Änderungen
 // dort (Standard-Portionen, Kochzeit) sollen mindestens saveState triggern.
 mountDetailSheet(sheetRoot, { onChange: refresh });
-mountSettingsSheet(settingsRoot, { onChange: refresh });
+mountSettingsSheet(settingsRoot, {
+  onChange: refresh,
+  onOpenMacro: () => openMacroPopup(),
+});
+mountMacroPopup(macroPopupRoot, {
+  onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),
+  onChange: refresh,
+});
 
 // Dish-Picker: onPick mutiert das Assignment für den gewählten Tag und würfelt
 // alle anderen Tage, die dasselbe Gericht hatten, automatisch neu — sonst wäre

@@ -39,17 +39,20 @@ export function renderCalorieBar() {
 
   const avgText = avg == null ? '—' : `${format(avg)} kcal`;
 
+  // Klick auf die Pille öffnet das Makro-Popup (Chart + Ø + Preset-Einstellungen).
+  // Die Pille ist ein <button>, damit sie Screenreader-freundlich als
+  // interaktives Element angekündigt wird.
   return `
-    <div class="calorie-bar ${modifier}" role="status" aria-label="Bedarf pro Tag: Zielkorridor ${format(low)} bis ${format(high)} Kilokalorien, Durchschnitt der ausgewählten Gerichte ${avg == null ? 'nicht verfügbar' : format(avg) + ' Kilokalorien'}">
-      <div class="calorie-bar__label">Bedarf</div>
-      <div class="calorie-bar__values">
+    <button class="calorie-bar ${modifier}" type="button" data-action="open-macro-popup" aria-label="Bedarf pro Tag: Zielkorridor ${format(low)} bis ${format(high)} Kilokalorien, Durchschnitt der ausgewählten Gerichte ${avg == null ? 'nicht verfügbar' : format(avg) + ' Kilokalorien'} — Details öffnen">
+      <span class="calorie-bar__label">Bedarf</span>
+      <span class="calorie-bar__values">
         <span class="calorie-bar__target">${format(low)}&thinsp;–&thinsp;${format(high)} kcal</span>
-      </div>
-      <div class="calorie-bar__avg">
+      </span>
+      <span class="calorie-bar__avg">
         <span class="calorie-bar__avg-label">Ø ${selectedCount}/${DAYS.length}</span>
         <span class="calorie-bar__intake">${avgText}</span>
-      </div>
-    </div>
+      </span>
+    </button>
   `;
 }
 

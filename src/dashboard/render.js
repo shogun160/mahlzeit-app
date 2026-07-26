@@ -15,7 +15,7 @@ function pickInitialAssignment() {
   return assignment;
 }
 
-export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker) {
+export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker, onOpenMacroPopup) {
   // Erst-Initialisierung: falls noch kein Assignment vorliegt, würfeln.
   if (Object.keys(state.assignment).length === 0) {
     initState(pickInitialAssignment());
@@ -32,7 +32,15 @@ export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker) {
   if (calorieBarHtml) {
     const wrap = document.createElement('div');
     wrap.innerHTML = calorieBarHtml;
-    root.appendChild(wrap.firstElementChild);
+    const barEl = wrap.firstElementChild;
+    root.appendChild(barEl);
+    // Klick auf die Bedarfs-Pille öffnet das Makro-Popup (Chart + Ø + Preset-
+    // Einstellungen). Selector via data-action, damit die Bindung robust ist
+    // wenn die Klasse mal wandert.
+    const trigger = barEl.matches('[data-action="open-macro-popup"]') ? barEl : barEl.querySelector('[data-action="open-macro-popup"]');
+    if (trigger && onOpenMacroPopup) {
+      trigger.addEventListener('click', () => onOpenMacroPopup());
+    }
   }
 
   for (const day of DAYS) {

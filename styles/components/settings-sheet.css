@@ -421,6 +421,27 @@
   margin-top: 0;
 }
 
+/* Text-Link im Inline-Label (z. B. "Details" bei Abendessen — öffnet das
+   Makro-Popup). Optik bewusst identisch zu label-secondary ("Vorschlag: X"):
+   gleiche Schriftgröße, gleiche Farbe, kein Unterstrich, kein Fettdruck. Der
+   Kontext (Klick auf inline-Text) macht die Interaktivität klar. */
+.settings-row__label-link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: inherit;
+  line-height: 1.35;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.settings-row__label-link:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
 .settings-row__value {
   flex-shrink: 0;
   font-size: 0.9375rem;
@@ -446,6 +467,47 @@
   width: 100%;
   margin-top: 0;
   accent-color: var(--md-sys-color-primary);
+}
+
+/* Refresh-Icon-Button für Override-Reset (Tagesziel, Makros). Ghost-Style
+   ohne Background — analog zum X-Icon im Dish-Picker-Filter. 24 px Icon in
+   32-dp Klickfläche (kleiner als der 48-dp Standard, weil optional-Aktion —
+   Slider bleibt der Haupt-Klickbereich). */
+.settings-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease;
+}
+.settings-refresh svg {
+  width: 20px;
+  height: 20px;
+}
+.settings-refresh:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
+.settings-refresh[hidden] {
+  display: none;
+}
+
+/* Makro-Section: Header-Row + Preset-Chip-Zeile + 3 Slider. Gleicher gap wie
+   .settings-field, damit die Optik konsistent mit den anderen Slider-Feldern
+   in der Profil-Section bleibt. */
+.settings-macros {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 /* Material 3 Switch: 52×32 dp Track mit gleitendem Thumb (16 dp inaktiv, 24 dp

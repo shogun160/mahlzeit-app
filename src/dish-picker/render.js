@@ -38,8 +38,9 @@ const FILTERS = [
   { key: 'simple', label: 'Wenig Zutaten', group: 'attr',    test: (d) => openIngredientCount(d) <= 8 },
   { key: 'kcal_low',  label: 'Kalorienarm',   group: 'kcal', test: (d) => d.kcal < KCAL_MEDIAN },
   { key: 'kcal_high', label: 'Kalorienreich', group: 'kcal', test: (d) => d.kcal > KCAL_MEDIAN },
-  { key: 'macro_protein', label: 'Proteinreich', group: 'macro', test: (d) => macroPct(d).p > 35 },
+  { key: 'macro_protein', label: 'P-reich',      group: 'macro', test: (d) => macroPct(d).p > 35 },
   { key: 'macro_lowcarb', label: 'KH-arm',       group: 'macro', test: (d) => macroPct(d).kh < 30 },
+  { key: 'macro_lowfat',  label: 'F-arm',        group: 'macro', test: (d) => macroPct(d).f < 25 },
   { key: 'macro_balanced', label: 'Ausgewogen',  group: 'macro', test: (d) => {
     const m = macroPct(d);
     return m.p >= 22 && m.p <= 42 && m.kh >= 22 && m.kh <= 42 && m.f >= 22 && m.f <= 42;
@@ -215,14 +216,14 @@ function renderFiltersSection() {
       <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'cuisine').map(chipHtml).join('')}
       </div>
-      <div class="picker-filter-row">
-        ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
+      <div class="picker-filter-row picker-filter-row--nowrap">
+        ${FILTERS.filter((f) => f.group === 'macro').map(chipHtml).join('')}
       </div>
       <div class="picker-filter-row">
         ${FILTERS.filter((f) => f.group === 'kcal').map(chipHtml).join('')}
       </div>
       <div class="picker-filter-row">
-        ${FILTERS.filter((f) => f.group === 'macro').map(chipHtml).join('')}
+        ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
       </div>
     </div>
   `;
@@ -293,7 +294,8 @@ function filteredDishes() {
   const sortKcalHigh = kcalHigh && !kcalLow;
   const sortProtein = activeFilters.has('macro_protein');
   const sortLowCarb = activeFilters.has('macro_lowcarb');
-  if (sortFast || sortSimple || sortKcalLow || sortKcalHigh || sortProtein || sortLowCarb) {
+  const sortLowFat = activeFilters.has('macro_lowfat');
+  if (sortFast || sortSimple || sortKcalLow || sortKcalHigh || sortProtein || sortLowCarb || sortLowFat) {
     result.sort((a, b) => {
       if (sortFast) {
         const d = a.cooktime - b.cooktime;
@@ -317,6 +319,10 @@ function filteredDishes() {
       }
       if (sortLowCarb) {
         const d = macroPct(a).kh - macroPct(b).kh;
+        if (d !== 0) return d;
+      }
+      if (sortLowFat) {
+        const d = macroPct(a).f - macroPct(b).f;
         if (d !== 0) return d;
       }
       return a.id - b.id;
@@ -451,20 +457,20 @@ function renderResults(main, overflow, currentDishId, used) {
 }
 
 // Verkleinert die Chip-Schrift schrittweise (14 → 10 px in 0.5-Schritten) bis
-// die nowrap-Küchen-Zeile in ihre Container-Breite passt. Der ermittelte Wert
-// wird per CSS-Variable auf rootEl gesetzt und greift für alle Filter-Chips —
-// so bleibt die Optik zwischen den Zeilen konsistent.
+// ALLE nowrap-Rows in ihre Container-Breite passen. Der ermittelte Wert wird
+// per CSS-Variable auf rootEl gesetzt und greift für alle Filter-Chips — so
+// bleibt die Optik zwischen den Zeilen konsistent (kleinster Fit gewinnt).
 function fitFilterFontSize() {
   if (!rootEl) return;
-  const row = rootEl.querySelector('.picker-filter-row--nowrap');
-  if (!row) return;
+  const rows = rootEl.querySelectorAll('.picker-filter-row--nowrap');
+  if (rows.length === 0) return;
   const maxPx = 14;
   const minPx = 10;
   let size = maxPx;
   rootEl.style.setProperty('--picker-chip-font', `${size}px`);
-  // scrollWidth > clientWidth heißt Overflow. Loop bis fit oder Minimum.
+  const overflows = () => Array.from(rows).some((r) => r.scrollWidth > r.clientWidth + 1);
   let guard = 20;
-  while (row.scrollWidth > row.clientWidth + 1 && size > minPx && guard-- > 0) {
+  while (overflows() && size > minPx && guard-- > 0) {
     size -= 0.5;
     rootEl.style.setProperty('--picker-chip-font', `${size}px`);
   }
