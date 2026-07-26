@@ -15,15 +15,17 @@ export const DEFAULTS = {
   lunchKcal: 700,
 };
 
-// Step 1: Über dich — Name (optional Text-Input) + Geschlecht (2 Chips) + Alter
-// (Stepper). Draft-Werte aus dem übergebenen draft-Object; Chip-Aktive-States
-// über aria-pressed. Handler in wizard.js/attachStep1Handlers.
+// Step 1: Über dich — Name (optional) + Geschlecht (Chips) + Alter (Stepper) +
+// Größe + Gewicht (Slider). Handler in wizard.js/attachStep1Handlers nutzen
+// bindSlider-Helper für die zwei Slider am Ende.
 export function renderStep1(draft) {
   const nameVal = draft.name ?? '';
   const genderVal = draft.gender ?? DEFAULTS.gender;
   const ageVal = draft.age ?? DEFAULTS.age;
   const ageMinusDisabled = ageVal <= AGE_MIN;
   const agePlusDisabled = ageVal >= AGE_MAX;
+  const heightVal = draft.heightCm ?? DEFAULTS.heightCm;
+  const weightVal = draft.weightKg ?? DEFAULTS.weightKg;
   return `
     <h3 class="onboarding-step__title">Über dich</h3>
     <p class="onboarding-step__desc">Damit wir deinen täglichen Kalorienbedarf berechnen können.</p>
@@ -57,17 +59,6 @@ export function renderStep1(draft) {
         </div>
       </div>
     </div>
-  `;
-}
-
-// Step 2: Körper — Größe + Gewicht (beide Slider). Handler in wizard.js/
-// attachStep2Handlers nutzen den bindSlider-Helper.
-export function renderStep2(draft) {
-  const heightVal = draft.heightCm ?? DEFAULTS.heightCm;
-  const weightVal = draft.weightKg ?? DEFAULTS.weightKg;
-  return `
-    <h3 class="onboarding-step__title">Körper</h3>
-    <p class="onboarding-step__desc">Für die Berechnung des Grundumsatzes.</p>
 
     <div class="onboarding-field">
       <div class="onboarding-field__row">
@@ -101,14 +92,16 @@ export function renderStep2(draft) {
   `;
 }
 
-// Step 3: Alltag — Aktivität (5 Chips, nowrap-scroll) + Ziel (3 Chips).
-// Handler in wizard.js/attachStep3Handlers nutzen den bindChipGroup-Helper.
-export function renderStep3(draft) {
+// Step 2: Alltag — Aktivität (Chips) + Ziel (Chips) + Frühstück + Mittag (Slider).
+// Handler in wizard.js/attachStep2Handlers nutzen bindChipGroup + bindSlider.
+export function renderStep2(draft) {
   const activityVal = draft.activityLevel ?? DEFAULTS.activityLevel;
   const goalVal = draft.goal ?? DEFAULTS.goal;
+  const breakfastVal = draft.breakfastKcal ?? DEFAULTS.breakfastKcal;
+  const lunchVal = draft.lunchKcal ?? DEFAULTS.lunchKcal;
   return `
     <h3 class="onboarding-step__title">Alltag</h3>
-    <p class="onboarding-step__desc">Wie aktiv bist du und was möchtest du erreichen?</p>
+    <p class="onboarding-step__desc">Wie aktiv bist du und wie verteilst du deine Mahlzeiten?</p>
 
     <div class="onboarding-field">
       <div class="onboarding-field__label">Aktivität</div>
@@ -127,18 +120,6 @@ export function renderStep3(draft) {
         `).join('')}
       </div>
     </div>
-  `;
-}
-
-// Step 4: Mahlzeiten — Frühstück + Mittag als Slider (100-1000 kcal, Step 50).
-// Der Rest des Tagesziels wird zu Abendessen. Handler in wizard.js/
-// attachStep4Handlers nutzen den bindSlider-Helper aus Task 6.
-export function renderStep4(draft) {
-  const breakfastVal = draft.breakfastKcal ?? DEFAULTS.breakfastKcal;
-  const lunchVal = draft.lunchKcal ?? DEFAULTS.lunchKcal;
-  return `
-    <h3 class="onboarding-step__title">Mahlzeiten</h3>
-    <p class="onboarding-step__desc">Was isst du typischerweise vor dem Abendessen? Der Rest wird dein Abend-Ziel.</p>
 
     <div class="onboarding-field">
       <div class="onboarding-field__row">
