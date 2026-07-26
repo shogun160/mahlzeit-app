@@ -1,6 +1,6 @@
 {
   "appId": "com.mahlzeit.myapp",
-  "appName": "Mahlzeit Beta",
+  "appName": "Mahlzeit",
   "webDir": "www",
   "plugins": {
     "EdgeToEdge": {
