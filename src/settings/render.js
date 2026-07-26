@@ -199,6 +199,21 @@ function renderShell() {
           `)}
         </div>
       </div>
+      <dialog class="settings-info-dialog" data-role="portions-info-dialog" aria-labelledby="portions-info-title">
+        <h3 class="settings-info-dialog__title" id="portions-info-title">Kochmengen bei mehreren Personen</h3>
+        <div class="settings-info-dialog__body">
+          <p>Jedes Profil hat ein eigenes Abendessen-Ziel (aus Alter, Gewicht, Aktivität und Ziel berechnet). Beim Kochen für <strong>N Personen</strong> summiert die App die Bedarfe der beteiligten Profile:</p>
+          <ul>
+            <li><strong>1 Person</strong> → nur das aktive Profil zählt. Rezept wird auf dessen Ziel skaliert.</li>
+            <li><strong>2+ Personen</strong> → die ersten N Profile aus deiner Liste kochen mit. Für jedes wird ein individueller Anteil berechnet und aufsummiert.</li>
+            <li><strong>N &gt; Anzahl Profile</strong> → für jede fehlende Person wird ein DGE-Standard-Gast angenommen (2200 kcal/Tag, davon 880 kcal Abendessen).</li>
+          </ul>
+          <p>Die <strong>Bedarfs-Anzeige</strong> im Dashboard folgt immer nur dem aktiven Profil (dem ersten in der Liste) — sie zeigt, was <em>du persönlich</em> von dem Gericht bekommst.</p>
+        </div>
+        <div class="settings-info-dialog__actions">
+          <button class="settings-info-dialog__ok" type="button" data-action="close-portions-info">Verstanden</button>
+        </div>
+      </dialog>
     </div>
   `;
 
@@ -368,6 +383,13 @@ function renderProfileList() {
           <button class="stepper__btn" data-action="portions-plus" aria-label="Mehr" ${plusDisabled ? 'disabled' : ''}>+</button>
         </div>
       </div>
+      <button class="settings-profile-info"
+              type="button"
+              data-action="show-portions-info"
+              aria-label="Wie werden Kochmengen berechnet?">
+        <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M440-280h80v-240h-80v240Zm40-320q17 0 28.5-11.5T520-640q0-17-11.5-28.5T480-680q-17 0-28.5 11.5T440-640q0 17 11.5 28.5T480-600Zm0 520q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Z"/></svg>
+        <span>Wie werden Kochmengen berechnet?</span>
+      </button>
     </div>
   `;
 }
@@ -661,6 +683,23 @@ function attachProfileListHandlers() {
   const plusBtn = rootEl.querySelector('[data-action="portions-plus"]');
   if (minusBtn) minusBtn.addEventListener('click', () => handlePortions(-1));
   if (plusBtn) plusBtn.addEventListener('click', () => handlePortions(1));
+
+  // Info-Dialog: Klick auf "Wie werden Kochmengen berechnet?" oeffnet ein
+  // Modal-Dialog mit Erklaerung. Native <dialog>-API — showModal() macht den
+  // Rest inkl. Backdrop + Focus-Trap. close per Button oder ESC.
+  const infoBtn = rootEl.querySelector('[data-action="show-portions-info"]');
+  const infoDialog = rootEl.querySelector('[data-role="portions-info-dialog"]');
+  if (infoBtn && infoDialog) {
+    infoBtn.addEventListener('click', () => {
+      if (typeof infoDialog.showModal === 'function') infoDialog.showModal();
+      else infoDialog.setAttribute('open', ''); // Fallback
+    });
+    infoDialog.addEventListener('click', (ev) => {
+      if (ev.target === infoDialog) infoDialog.close();
+    });
+    const closeBtn = infoDialog.querySelector('[data-action="close-portions-info"]');
+    if (closeBtn) closeBtn.addEventListener('click', () => infoDialog.close());
+  }
 
   attachProfileDragHandlers();
 }
