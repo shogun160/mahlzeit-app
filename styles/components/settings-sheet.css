@@ -381,6 +381,18 @@
   min-height: var(--touch-target-min);
 }
 
+/* Zweizeilig: Label oben, Chip-Reihe darunter voll-breit. Nutzen wir im
+   Profile-Detail-Sheet fuer Ziel/Ernaehrung/Kueche — dort waeren die Chips
+   nebeneinander mit dem Label zu eng und wuerden ueberlappen. */
+.settings-row--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.settings-row--stacked .settings-prefs {
+  width: 100%;
+}
+
 /* Nur bei Rows mit mehrzeiligem Label (z. B. Tagesziel mit "Vorschlag aus
    Profil" als Zweitzeile) den Wert an der unteren Baseline ausrichten,
    damit er zur Zweitzeile passt statt visuell in der Mitte zu schweben. */
