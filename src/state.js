@@ -150,11 +150,14 @@ export function getActiveProfile() {
     if (hit) return hit;
     // Bug-State: activeId zeigt ins Leere. Auf profiles[0] zuruecksetzen und
     // repariert weitergeben. Persistenz passiert beim naechsten saveState().
+    console.warn('[state] activeProfileId "%s" ohne Match — fallback auf profiles[0].id "%s"', activeId, profiles[0].id);
     state.settings.activeProfileId = profiles[0].id;
     return profiles[0];
   }
   // Notfall: profiles-Liste leer. Fresh Blank anlegen — sollte praktisch nie
-  // passieren (Migration + Add/Remove-Guard verhindern das).
+  // passieren (Migration + Add/Remove-Guard verhindern das). Loud, damit der
+  // Bug in DevTools sofort sichtbar wird.
+  console.warn('[state] settings.profiles ist leer — Notfall-Profil u1 angelegt.');
   const fresh = blankProfile('u1');
   state.settings.profiles = [fresh];
   state.settings.activeProfileId = fresh.id;
