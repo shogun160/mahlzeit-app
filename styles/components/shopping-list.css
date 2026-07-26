@@ -186,19 +186,20 @@
 
 .shop-group__count {
   flex-shrink: 0;
+  margin-left: auto;
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--md-sys-color-on-surface-variant);
   font-variant-numeric: tabular-nums;
 }
 
-/* Per-Kategorie-Aktionen (Reset + Check-All): ganz rechts im Header,
-   sichtbar nur wenn Kategorie ausgeklappt (Rendering-seitig entschieden). */
+/* Per-Kategorie-Aktionen (Reset + Check-All): direkt nach dem Titel,
+   Count wandert ganz nach rechts. Sichtbar nur wenn Kategorie ausgeklappt
+   (Rendering-seitig entschieden). */
 .shop-group__actions {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-left: auto;
   flex-shrink: 0;
 }
 .shop-group__action {
