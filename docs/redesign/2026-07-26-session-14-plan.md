@@ -8,10 +8,14 @@
 
 **Architecture:**
 
-- **Tokens:** In `styles/tokens.css` bekommt jedes `--md-sys-color-*` Token eine Dark-Variante. Aktivierung über zwei Wege: `@media (prefers-color-scheme: dark)` (Auto-Modus) und `html[data-theme="dark"]` (Manual-Override).
+- **Tokens:** In `styles/tokens.css` bekommt jedes `--md-sys-color-*` Token eine Dark-Variante. Farbwerte adaptiert aus einer Zweit-Analyse (WCAG-Kontrast-geprüft, siehe `docs/redesign/handoffs/session-13-to-14.md`-Follow-Up). Aktivierung über zwei Wege: `@media (prefers-color-scheme: dark)` (Auto-Modus) und `html[data-theme="dark"]` (Manual-Override).
 - **State-driven Theme:** `state.settings.theme` (`'auto' | 'light' | 'dark'`, existiert bereits) steuert ein `data-theme`-Attribut am `<html>`-Element. `'auto'` → kein Attribut → System-Media-Query greift. `'light'`/`'dark'` → explizites Attribut → Media-Query wird überschrieben.
-- **Custom-Farben aufräumen:** `rgba(255,255,255,0.78)`-Frosted-Glass in `calorie-bar.css`, `macro-popup.css`, `card.css`, `dish-picker.css` bekommen Dark-Varianten (z. B. `rgba(0,0,0,0.4)`). `#b3541e` Warnfarbe in `calorie-bar.css` wird auf Token gezogen.
-- **Chart-Farben:** Bekommen dedizierte Dark-Varianten (heller/kräftiger) für Sichtbarkeit auf dunklem Grund.
+- **Custom-Farben — differenzierte Behandlung:**
+  - **Frosted-Pillen** auf Card-/Sheet-Background (calorie-bar, macro-popup `.macro-avg`) bekommen `--frosted-glass` Token → im Dark auf `rgba(0,0,0,0.4)`
+  - **Foto-Overlays** auf Card-Bildern (Day-Badge, Shop-Indikator, Makro-Ø-Pille, Picker-Tile-Overlays) behalten den weißen `rgba(255,255,255,X)`-Background hart — nur der Textinhalt wandert auf einen neuen `--md-sys-color-on-glass`-Token (permanent dunkel-teal, kein Theme-Switch), damit die Zahlen/Icons auf weißem Foto-Overlay in beiden Modi lesbar bleiben
+  - **Backdrops** hinter Modals auf `--overlay-backdrop`
+  - **Warnfarbe** `#b3541e` → `--semantic-warn` Token
+- **Chart-Farben:** Bekommen dedizierte Dark-Varianten (heller/kräftiger) für Sichtbarkeit auf dunklem Grund. Zusätzlich `--chart-color-*-on-glass` (permanent Light-Werte) für Foto-Overlays.
 - **Logo:** PNG bleibt Original, wird im Dark Mode via `filter: brightness(0) invert(1)` auf Weiß gezogen.
 - **Android-StatusBar:** `MainActivity.java` nutzt `Configuration.UI_MODE_NIGHT_YES` für die Bar-Icon-Farbe. Best-Effort — bei App-Override (Hell/Dunkel) und System-Modus im Konflikt kann die Bar-Icon-Farbe leicht mismatchen. Akzeptierter Trade-off für Session 14 (kein neues Plugin nötig).
 
@@ -71,55 +75,66 @@ Mahlzeit-App/
 **Files:**
 - Modify: `styles/tokens.css`
 
-- [ ] **Step 1.1: Frosted-Glass-Tokens im `:root` ergänzen (Light-Mode-Defaults)**
+- [ ] **Step 1.1: Neue Tokens im `:root` ergänzen (Light-Mode-Defaults)**
 
 Am Ende des `:root {}`-Blocks (vor der schließenden `}` in Zeile 57) einfügen:
 
 ```css
-  /* Frosted-Glass für schwebende Pillen (Bedarfs-Pille, Card-Overlays, Sheet-
-     Header). Semi-transparent damit der Content darunter durchschimmert.
-     Dark-Mode überschreibt auf dunkles Glas mit invertiertem Alpha-Ratio. */
+  /* Frosted-Glass für schwebende Pillen auf Card-/Sheet-Backgrounds
+     (Bedarfs-Pille im Dashboard, Makro-Ø-Pille im Makro-Popup). Semi-
+     transparent damit der Content darunter durchschimmert. Dark-Mode
+     überschreibt auf dunkles Glas. */
   --frosted-glass: rgba(255, 255, 255, 0.78);
-  --frosted-glass-strong: rgba(255, 255, 255, 0.88);
-  --frosted-glass-strongest: rgba(255, 255, 255, 0.92);
+  --frosted-glass-strong: rgba(255, 255, 255, 0.9);
 
-  /* Backdrop hinter Modals — dunkler halbtransparenter Overlay-Ton. Bleibt
-     im Dark Mode praktisch gleich (dunkel auf dunkel ist ok, backdrop-blur
-     im Kontrast). */
+  /* Backdrop hinter Modals — halbtransparenter Overlay-Ton für Sheets. */
   --overlay-backdrop: rgba(15, 23, 42, 0.42);
 
   /* Warnfarbe für "über Zielkorridor"-Zustand (Bedarfs-Pille). */
   --semantic-warn: #b3541e;
+
+  /* On-Glass: Text-/Icon-Farbe für Foto-Overlay-Badges auf Dish-Bildern
+     (Day-Badge, Shop-Indikator, Makro-Ø-Pille auf Card, Picker-Tile-Overlays).
+     Diese Overlays behalten in BEIDEN Themes ihren weißen Background (weil
+     das Foto darunter variabel ist). Der Text-Vordergrund darf sich deshalb
+     nicht mit dem Theme mitverändern — sonst wird er im Dark Mode auf dem
+     weißen Overlay unlesbar (aufgehelltes primary vs. Weiß = 1.3:1 Kontrast).
+     Werte hier permanent = Light-Palette-Primary/Chart-Colors. */
+  --md-sys-color-on-glass: #0F766E;
+  --chart-color-kh-on-glass: #D97706;
+  --chart-color-p-on-glass:  #B91C1C;
+  --chart-color-f-on-glass:  #2563EB;
 ```
 
 - [ ] **Step 1.2: Dark-Palette am Ende der Datei ergänzen**
 
-Direkt nach `}` des `:root`-Blocks anfügen:
+Farbwerte adaptiert aus einer Zweit-Analyse (WCAG-Kontraste rechnerisch geprüft: on-surface 14.7:1, primary 9.9:1 auf Surface, chart-p 6.7:1). Direkt nach der schließenden `}` des `:root`-Blocks anfügen:
 
 ```css
 
-/* Dark Mode: aktiv bei @media prefers-color-scheme: dark ODER bei explizitem
-   data-theme="dark" am <html>. Der User-Toggle in Settings überschreibt das
-   System-Preference via data-theme. */
+/* Dark Mode — Farbwerte: WCAG-geprüfte Kontraste gegen jeweils typische
+   Hintergründe. Aktivierung entweder via @media prefers-color-scheme: dark
+   (System-Auto) ODER via html[data-theme="dark"] (User-Override). Der Toggle
+   in Settings überschreibt das System-Preference. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --md-sys-color-primary: #4FD1C5;
-    --md-sys-color-on-primary: #063C3A;
-    --md-sys-color-primary-container: #164E4B;
-    --md-sys-color-on-primary-container: #A7F3D0;
+    --md-sys-color-primary: #2DD4BF;
+    --md-sys-color-on-primary: #042F2E;
+    --md-sys-color-primary-container: #115E59;
+    --md-sys-color-on-primary-container: #99F6E4;
     --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
 
-    --md-sys-color-surface: #0E1414;
-    --md-sys-color-surface-container-lowest: #060A0A;
-    --md-sys-color-surface-container-low: #131A1A;
-    --md-sys-color-surface-container: #1A2222;
-    --md-sys-color-surface-container-high: #232C2C;
-    --md-sys-color-surface-container-highest: #2C3636;
+    --md-sys-color-surface: #121412;
+    --md-sys-color-surface-container-lowest: #0D0F0E;
+    --md-sys-color-surface-container-low: #1A1D1C;
+    --md-sys-color-surface-container: #1E2221;
+    --md-sys-color-surface-container-high: #282C2B;
+    --md-sys-color-surface-container-highest: #333736;
 
-    --md-sys-color-on-surface: #E5E7EB;
-    --md-sys-color-on-surface-variant: #9CA3AF;
-    --md-sys-color-outline: #6B7280;
-    --md-sys-color-outline-variant: #2A3434;
+    --md-sys-color-on-surface: #E3E6E4;
+    --md-sys-color-on-surface-variant: #A9B0AC;
+    --md-sys-color-outline: #5B625E;
+    --md-sys-color-outline-variant: #3A3F3D;
 
     --chart-color-kh: #FBBF24;
     --chart-color-p:  #F87171;
@@ -127,33 +142,35 @@ Direkt nach `}` des `:root`-Blocks anfügen:
     --chart-color-ok: #4ADE80;
 
     --frosted-glass: rgba(0, 0, 0, 0.4);
-    --frosted-glass-strong: rgba(0, 0, 0, 0.5);
-    --frosted-glass-strongest: rgba(0, 0, 0, 0.6);
+    --frosted-glass-strong: rgba(0, 0, 0, 0.55);
     --overlay-backdrop: rgba(0, 0, 0, 0.6);
-    --semantic-warn: #F97316;
+    --semantic-warn: #FB923C;
+
+    /* On-Glass bleibt bewusst UNVERÄNDERT — die Foto-Overlays behalten
+       ihren weißen Background auch im Dark Mode. */
   }
 }
 
 /* Manuelles Dark-Override — User hat in Settings "Dunkel" gewählt. Gleiche
    Werte wie oben, greift unabhängig vom System-Preference. */
 :root[data-theme="dark"] {
-  --md-sys-color-primary: #4FD1C5;
-  --md-sys-color-on-primary: #063C3A;
-  --md-sys-color-primary-container: #164E4B;
-  --md-sys-color-on-primary-container: #A7F3D0;
+  --md-sys-color-primary: #2DD4BF;
+  --md-sys-color-on-primary: #042F2E;
+  --md-sys-color-primary-container: #115E59;
+  --md-sys-color-on-primary-container: #99F6E4;
   --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
 
-  --md-sys-color-surface: #0E1414;
-  --md-sys-color-surface-container-lowest: #060A0A;
-  --md-sys-color-surface-container-low: #131A1A;
-  --md-sys-color-surface-container: #1A2222;
-  --md-sys-color-surface-container-high: #232C2C;
-  --md-sys-color-surface-container-highest: #2C3636;
+  --md-sys-color-surface: #121412;
+  --md-sys-color-surface-container-lowest: #0D0F0E;
+  --md-sys-color-surface-container-low: #1A1D1C;
+  --md-sys-color-surface-container: #1E2221;
+  --md-sys-color-surface-container-high: #282C2B;
+  --md-sys-color-surface-container-highest: #333736;
 
-  --md-sys-color-on-surface: #E5E7EB;
-  --md-sys-color-on-surface-variant: #9CA3AF;
-  --md-sys-color-outline: #6B7280;
-  --md-sys-color-outline-variant: #2A3434;
+  --md-sys-color-on-surface: #E3E6E4;
+  --md-sys-color-on-surface-variant: #A9B0AC;
+  --md-sys-color-outline: #5B625E;
+  --md-sys-color-outline-variant: #3A3F3D;
 
   --chart-color-kh: #FBBF24;
   --chart-color-p:  #F87171;
@@ -161,10 +178,9 @@ Direkt nach `}` des `:root`-Blocks anfügen:
   --chart-color-ok: #4ADE80;
 
   --frosted-glass: rgba(0, 0, 0, 0.4);
-  --frosted-glass-strong: rgba(0, 0, 0, 0.5);
-  --frosted-glass-strongest: rgba(0, 0, 0, 0.6);
+  --frosted-glass-strong: rgba(0, 0, 0, 0.55);
   --overlay-backdrop: rgba(0, 0, 0, 0.6);
-  --semantic-warn: #F97316;
+  --semantic-warn: #FB923C;
 }
 ```
 
@@ -185,76 +201,141 @@ git commit -m "feat(tokens): dark-palette + frosted-glass + semantic tokens"
 
 ---
 
-## Task 2 — Custom-Farben in Components auf Tokens ziehen
+## Task 2 — Frosted-Pillen + Backdrops auf Tokens
 
 **Files:**
 - Modify: `styles/components/calorie-bar.css`
-- Modify: `styles/components/card.css`
 - Modify: `styles/components/macro-popup.css`
 - Modify: `styles/components/dish-picker.css`
 - Modify: `styles/components/sheet.css`
 - Modify: `styles/components/settings-sheet.css`
 
+**Nicht in dieser Task:** `card.css` und die 2 Foto-Overlays im dish-picker — die kriegen in Task 3 die On-Glass-Behandlung (Background bleibt weiß).
+
 - [ ] **Step 2.1: `calorie-bar.css` — Frosted + Warnfarbe auf Tokens**
 
-Ersetze in `styles/components/calorie-bar.css`:
+In `styles/components/calorie-bar.css`:
 
-Zeile 19 (`background: rgba(255, 255, 255, 0.78);`) → `background: var(--frosted-glass);`
-Zeile 32 (`background: rgba(255, 255, 255, 0.9);` — hover) → `background: var(--frosted-glass-strong);`
-Zeile 79 (`color: #b3541e;`) → `color: var(--semantic-warn);`
+- Zeile 19 (`background: rgba(255, 255, 255, 0.78);`) → `background: var(--frosted-glass);`
+- Zeile 32 (`background: rgba(255, 255, 255, 0.9);` im hover) → `background: var(--frosted-glass-strong);`
+- Zeile 79 (`color: #b3541e;`) → `color: var(--semantic-warn);`
 
-- [ ] **Step 2.2: `card.css` — Frosted-Overlays auf Tokens**
-
-In `styles/components/card.css`:
-
-Zeile 79 (`background: rgba(255, 255, 255, 0.88);`) → `background: var(--frosted-glass-strong);`
-Zeile 108 (`background: rgba(255, 255, 255, 0.88);`) → `background: var(--frosted-glass-strong);`
-Zeile 147 (`background: rgba(255, 255, 255, 0.78);`) → `background: var(--frosted-glass);`
-
-- [ ] **Step 2.3: `macro-popup.css` — Backdrop + Frosted auf Tokens**
+- [ ] **Step 2.2: `macro-popup.css` — Backdrop + `.macro-avg` Frosted auf Tokens**
 
 In `styles/components/macro-popup.css`:
 
-Zeile 12 (`background: rgba(15, 22, 32, 0.35);`) → `background: var(--overlay-backdrop);`
-Zeile 186 (`background: rgba(255, 255, 255, 0.78);`) → `background: var(--frosted-glass);`
+- Zeile 12 (`background: rgba(15, 22, 32, 0.35);` — Overlay-Backdrop) → `background: var(--overlay-backdrop);`
+- Zeile 186 (`background: rgba(255, 255, 255, 0.78);` — `.macro-avg` Pille im Sheet, kein Foto-Overlay) → `background: var(--frosted-glass);`
 
-- [ ] **Step 2.4: `dish-picker.css` — Backdrop + Frosted auf Tokens**
+- [ ] **Step 2.3: `dish-picker.css` — Backdrop auf Token**
 
 In `styles/components/dish-picker.css`:
 
-Zeile 19 (`background: rgba(0, 0, 0, 0.35);`) → `background: var(--overlay-backdrop);`
-Zeile 546 (`background: rgba(255, 255, 255, 0.92);`) → `background: var(--frosted-glass-strongest);`
-Zeile 571 (`background: rgba(255, 255, 255, 0.92);`) → `background: var(--frosted-glass-strongest);`
+- Zeile 19 (`background: rgba(0, 0, 0, 0.35);` — Overlay-Backdrop) → `background: var(--overlay-backdrop);`
+- Zeile 10 (`background: rgba(0, 0, 0, 0);` — transparent placeholder) bleibt unverändert
+- Zeilen 546 + 571 (rgba weiß auf Dish-Tiles) → **bleiben unverändert in dieser Task**, kommen in Task 3
 
-Zeile 10 (`background: rgba(0, 0, 0, 0);` — transparent placeholder) bleibt.
+- [ ] **Step 2.4: `sheet.css` und `settings-sheet.css` — Backdrops auf Tokens**
 
-- [ ] **Step 2.5: `sheet.css` und `settings-sheet.css` — Backdrops auf Tokens**
+- In `styles/components/sheet.css` Zeile 9 (`background: rgba(15, 23, 42, 0.42);`) → `background: var(--overlay-backdrop);`
+- In `styles/components/settings-sheet.css` Zeile 12 (`background: rgba(15, 23, 42, 0.42);`) → `background: var(--overlay-backdrop);`
 
-In `styles/components/sheet.css` Zeile 9 (`background: rgba(15, 23, 42, 0.42);`) → `background: var(--overlay-backdrop);`
-
-In `styles/components/settings-sheet.css` Zeile 12 (`background: rgba(15, 23, 42, 0.42);`) → `background: var(--overlay-backdrop);`
-
-- [ ] **Step 2.6: Build check**
+- [ ] **Step 2.5: Build check**
 
 ```bash
 npm run build
 ```
 
-- [ ] **Step 2.7: Commit**
+- [ ] **Step 2.6: Commit**
 
 ```bash
-git add styles/components/calorie-bar.css styles/components/card.css styles/components/macro-popup.css styles/components/dish-picker.css styles/components/sheet.css styles/components/settings-sheet.css
-git commit -m "refactor(styles): frosted-glass + backdrop + warn auf tokens ziehen"
+git add styles/components/calorie-bar.css styles/components/macro-popup.css styles/components/dish-picker.css styles/components/sheet.css styles/components/settings-sheet.css
+git commit -m "refactor(styles): frosted-pillen + backdrops + warn auf tokens"
 ```
 
 ---
 
-## Task 3 — Logo weiß im Dark Mode
+## Task 3 — Foto-Overlays auf On-Glass umstellen
+
+**Files:**
+- Modify: `styles/components/card.css`
+- Modify: `styles/components/dish-picker.css`
+
+**Kontext:** Diese Overlays sitzen auf Foto-Backgrounds (Dish-Bilder). Ihr weißer Halbtransparent-Background bleibt in beiden Themes — das Foto darunter ist ja variabel farbig. Nur die Text-/Icon-Farbe darin darf sich beim Theme-Wechsel nicht mitverändern, sonst wird sie auf dem weißen Overlay unlesbar. Deshalb: Background bleibt hardcoded `rgba(255,255,255,X)`, Text wandert auf `--md-sys-color-on-glass` (permanent Light-Teal).
+
+- [ ] **Step 3.1: `card.css` — 3 Foto-Overlays auf on-glass umstellen**
+
+Öffne `styles/components/card.css`. Die 3 Regeln mit `background: rgba(255, 255, 255, 0.88|0.78)` (Zeilen 79, 108, 147) haben aktuell `color: var(--md-sys-color-on-primary-container)`. Ersetze in allen drei Regel-Blöcken:
+
+```css
+  color: var(--md-sys-color-on-primary-container);
+```
+
+durch:
+
+```css
+  color: var(--md-sys-color-on-glass);
+```
+
+Der weiße Background (`rgba(255, 255, 255, ...)`) bleibt.
+
+**Wichtig:** die Ersetzung nur bei den 3 Regeln mit rgba-weißem-Background durchführen, NICHT bei anderen `on-primary-container`-Nutzern im File (die auf normalem Card-Grund sitzen — dort soll sie mitziehen).
+
+Zur Sicherheit: nach dem Edit einmal grep, welche Regeln `on-primary-container` noch nutzen:
+
+```bash
+grep -n "on-primary-container" /Users/oliverwosnitza/Documents/Mahlzeit-App/styles/components/card.css
+```
+
+Übrig bleibende Nutzungen prüfen und ggf. lassen.
+
+- [ ] **Step 3.2: `dish-picker.css` — 2 Foto-Overlays auf on-glass**
+
+Öffne `styles/components/dish-picker.css`. Die 2 Regeln mit `background: rgba(255, 255, 255, 0.92);` (Zeilen 546, 571) haben aktuell `color: var(--md-sys-color-primary);`. Ersetze in beiden Regel-Blöcken:
+
+```css
+  color: var(--md-sys-color-primary);
+```
+
+durch:
+
+```css
+  color: var(--md-sys-color-on-glass);
+```
+
+Wieder: nur bei den 2 Regeln mit weißem rgba-Background, NICHT bei anderen `--md-sys-color-primary`-Nutzungen im File.
+
+- [ ] **Step 3.3: Chart-Colors in Foto-Overlays (falls vorhanden)**
+
+Prüfen ob es in card.css oder dish-picker.css Foto-Overlay-Regeln gibt, die `--chart-color-*` als Farbe nutzen (z. B. für Makro-Buchstaben auf Card):
+
+```bash
+grep -n "chart-color" /Users/oliverwosnitza/Documents/Mahlzeit-App/styles/components/card.css /Users/oliverwosnitza/Documents/Mahlzeit-App/styles/components/dish-picker.css
+```
+
+Falls Treffer innerhalb einer Foto-Overlay-Selector-Kette (das kann man am umgebenden Kontext sehen): ersetze `--chart-color-p` durch `--chart-color-p-on-glass` etc. Falls keine Treffer: Step ist erledigt.
+
+- [ ] **Step 3.4: Build check**
+
+```bash
+npm run build
+```
+
+- [ ] **Step 3.5: Commit**
+
+```bash
+git add styles/components/card.css styles/components/dish-picker.css
+git commit -m "refactor(styles): foto-overlays nutzen on-glass token (theme-stabil)"
+```
+
+---
+
+## Task 4 — Logo weiß im Dark Mode
 
 **Files:**
 - Modify: `styles/components/header.css`
 
-- [ ] **Step 3.1: Filter-Regel für Dark Mode ergänzen**
+- [ ] **Step 4.1: Filter-Regel für Dark Mode ergänzen**
 
 Am Ende von `styles/components/header.css` einfügen:
 
@@ -272,7 +353,7 @@ Am Ende von `styles/components/header.css` einfügen:
 }
 ```
 
-- [ ] **Step 3.2: Commit**
+- [ ] **Step 4.2: Commit**
 
 ```bash
 git add styles/components/header.css
@@ -281,12 +362,12 @@ git commit -m "feat(header): logo weiß im dark mode via brightness+invert filte
 
 ---
 
-## Task 4 — `state.settings.theme` aktivieren
+## Task 5 — `state.settings.theme` aktivieren
 
 **Files:**
 - Modify: `src/main.js`
 
-- [ ] **Step 4.1: `applyTheme()`-Helper anlegen und beim Start rufen**
+- [ ] **Step 5.1: `applyTheme()`-Helper anlegen und beim Start rufen**
 
 In `src/main.js`, nach dem `loadState()`-Aufruf (Zeile 28), folgende Funktion + Aufruf ergänzen:
 
@@ -308,13 +389,13 @@ export function applyTheme() {
 applyTheme();
 ```
 
-- [ ] **Step 4.2: Build check**
+- [ ] **Step 5.2: Build check**
 
 ```bash
 npm run build
 ```
 
-- [ ] **Step 4.3: Commit**
+- [ ] **Step 5.3: Commit**
 
 ```bash
 git add src/main.js
@@ -323,14 +404,14 @@ git commit -m "feat(theme): applyTheme setzt data-theme am html-element beim sta
 
 ---
 
-## Task 5 — Theme-Toggle in Settings > Darstellung
+## Task 6 — Theme-Toggle in Settings > Darstellung
 
 **Files:**
 - Modify: `src/settings/render.js`
 - Modify: `src/main.js` (Callback für Theme-Change)
 - Modify: `styles/components/settings-sheet.css` (Chip-Styles falls nötig)
 
-- [ ] **Step 5.1: Icons in `settings/render.js` ergänzen**
+- [ ] **Step 6.1: Icons in `settings/render.js` ergänzen**
 
 Am Anfang der Datei (nach den bestehenden Imports und `ICON_REFRESH`, ca. Zeile 41) einfügen:
 
@@ -343,7 +424,7 @@ const ICON_LIGHT_MODE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-
 const ICON_DARK_MODE  = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
 ```
 
-- [ ] **Step 5.2: Darstellung-Section aktivieren**
+- [ ] **Step 6.2: Darstellung-Section aktivieren**
 
 Ersetze in `src/settings/render.js` (ca. Zeile 184):
 
@@ -378,7 +459,7 @@ durch:
           `)}
 ```
 
-- [ ] **Step 5.3: Handler + Callback in `settings/render.js`**
+- [ ] **Step 6.3: Handler + Callback in `settings/render.js`**
 
 In der `attachHandlers()`-Funktion (ca. Zeile 600, nach dem `open-onboarding`-Handler) ergänzen:
 
@@ -418,7 +499,7 @@ export function mountSettingsSheet(el, { onChange, onOpenMacro, onOpenOnboarding
 }
 ```
 
-- [ ] **Step 5.4: `main.js` — onThemeChange-Callback durchreichen**
+- [ ] **Step 6.4: `main.js` — onThemeChange-Callback durchreichen**
 
 In `src/main.js` — den `mountSettingsSheet`-Aufruf erweitern:
 
@@ -434,7 +515,7 @@ mountSettingsSheet(settingsRoot, {
 });
 ```
 
-- [ ] **Step 5.5: Chip-Styles in `settings-sheet.css`**
+- [ ] **Step 6.5: Chip-Styles in `settings-sheet.css`**
 
 Am Ende der Datei einfügen:
 
@@ -480,13 +561,13 @@ Am Ende der Datei einfügen:
 }
 ```
 
-- [ ] **Step 5.6: Build check**
+- [ ] **Step 6.6: Build check**
 
 ```bash
 npm run build
 ```
 
-- [ ] **Step 5.7: Commit**
+- [ ] **Step 6.7: Commit**
 
 ```bash
 git add src/settings/render.js src/main.js styles/components/settings-sheet.css
@@ -495,12 +576,12 @@ git commit -m "feat(settings): theme-toggle in darstellung-section (auto/hell/du
 
 ---
 
-## Task 6 — Android StatusBar dynamisch
+## Task 7 — Android StatusBar dynamisch
 
 **Files:**
 - Modify: `android/app/src/main/java/com/mahlzeit/myapp/MainActivity.java`
 
-- [ ] **Step 6.1: `MainActivity.java` — StatusBar-Icons je nach System-Dark-Mode**
+- [ ] **Step 7.1: `MainActivity.java` — StatusBar-Icons je nach System-Dark-Mode**
 
 Ersetze die komplette Datei `android/app/src/main/java/com/mahlzeit/myapp/MainActivity.java` durch:
 
@@ -546,7 +627,7 @@ public class MainActivity extends BridgeActivity {
 }
 ```
 
-- [ ] **Step 6.2: `AndroidManifest.xml` — `uiMode` in `configChanges` sicherstellen**
+- [ ] **Step 7.2: `AndroidManifest.xml` — `uiMode` in `configChanges` sicherstellen**
 
 Damit `onConfigurationChanged()` bei System-Dark-Mode-Wechsel gefeuert wird (statt die Activity komplett neu zu starten), muss `uiMode` in `android:configChanges` gelistet sein.
 
@@ -572,13 +653,13 @@ android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|sma
 
 Datei speichern.
 
-- [ ] **Step 6.3: `npx cap sync`**
+- [ ] **Step 7.3: `npx cap sync`**
 
 ```bash
 npx cap sync
 ```
 
-- [ ] **Step 6.4: Commit**
+- [ ] **Step 7.4: Commit**
 
 ```bash
 git add android/app/src/main/java/com/mahlzeit/myapp/MainActivity.java
@@ -587,9 +668,9 @@ git commit -m "feat(android): statusbar-icons je nach system-dark-mode dynamisch
 
 ---
 
-## Task 7 — Manueller Browser-Test (E2E)
+## Task 8 — Manueller Browser-Test (E2E)
 
-- [ ] **Step 7.1: Vite starten und im Browser durchgehen**
+- [ ] **Step 8.1: Vite starten und im Browser durchgehen**
 
 ```bash
 npm run dev
@@ -621,31 +702,31 @@ Browser: http://localhost:5173
 **Test Persistenz:**
 9. `location.reload()` — Theme bleibt bei letzter Wahl.
 
-- [ ] **Step 7.2: Bugs sammeln**
+- [ ] **Step 8.2: Bugs sammeln**
 
 Wenn ein Screen kaputt aussieht: Screenshot oder Beschreibung → Fix inline, dann Commit als `fix(dark-mode): <screen>`.
 
-- [ ] **Step 7.3: Wenn alles ok — kein extra Commit nötig**
+- [ ] **Step 8.3: Wenn alles ok — kein extra Commit nötig**
 
 Testing hat keine File-Changes wenn nichts gebrochen war.
 
 ---
 
-## Task 8 — Vite Build + Sync (APK auf Anfrage)
+## Task 9 — Vite Build + Sync (APK auf Anfrage)
 
-- [ ] **Step 8.1: Vite-Build**
+- [ ] **Step 9.1: Vite-Build**
 
 ```bash
 npm run build
 ```
 
-- [ ] **Step 8.2: `npx cap sync`**
+- [ ] **Step 9.2: `npx cap sync`**
 
 ```bash
 npx cap sync
 ```
 
-- [ ] **Step 8.3: APK-Build nur auf explizite User-Anfrage**
+- [ ] **Step 9.3: APK-Build nur auf explizite User-Anfrage**
 
 Wenn der User "apk bauen" sagt:
 
