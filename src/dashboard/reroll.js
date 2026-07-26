@@ -41,21 +41,41 @@ function matchesPreferences(dish, prefs) {
   return true;
 }
 
-// Gerichte, die den Filter des Users passieren (Kochzeit + Ernährungspräferenzen).
-// Falls die Filter-Regel zu wenige Kandidaten für 7 Tage lässt, fallen wir auf
-// das komplette Dish-Set zurück — sonst könnte der User sich in einen Zustand
-// klicken, in dem gar kein Reroll mehr möglich ist.
+// Gerichte, die den Filter des Users passieren. Zweistufige Fallback-Kaskade,
+// damit der User sich nicht in einen leeren Pool klicken kann:
+//   1. cooktime + diet + cuisine (Küche ist Hard-Filter, wenn aktiv)
+//   2. cooktime + diet         (Küche gedroppt, wenn Stufe 1 < DAYS liefert)
+//   3. allDishIds              (letzte Rettung — auch cooktime/diet gedroppt)
+// Küche als Hard-Filter statt Weighted: bevorzugte Buckets liefern verbindlich,
+// solange genug Kandidaten für die Woche existieren. Bei kleinen Buckets
+// (z. B. "Amerika" mit nur 2 Rezepten und "vegetarisch" aktiv → evtl. 0 Treffer)
+// greift Stufe 2 und `cuisineWeight` sorgt im Weighted-Shuffle weiter dafür,
+// dass die bevorzugten Küchen wenigstens tendenziell nach vorne kommen.
 // Export weil auch beim Erst-Auslosen (pickInitialAssignment) genutzt.
 export function eligibleDishIds() {
   const maxTime = state.settings.maxCookTime;
   const prefs = state.settings.preferences || {};
-  const filtered = allDishIds.filter((id) => {
+  const cuisines = state.settings.cuisines || {};
+  const activeCuisines = Object.keys(cuisines).filter((k) => cuisines[k]);
+
+  const withoutCuisine = allDishIds.filter((id) => {
     const dish = dishesById.get(id);
     if (!dish) return false;
     if (dish.cooktime > maxTime) return false;
     return matchesPreferences(dish, prefs);
   });
-  return filtered.length >= DAYS.length ? filtered : allDishIds;
+
+  if (activeCuisines.length === 0) {
+    return withoutCuisine.length >= DAYS.length ? withoutCuisine : allDishIds;
+  }
+
+  const withCuisine = withoutCuisine.filter((id) => {
+    const dish = dishesById.get(id);
+    return activeCuisines.includes(dish.cuisineGroup);
+  });
+  if (withCuisine.length >= DAYS.length) return withCuisine;
+  if (withoutCuisine.length >= DAYS.length) return withoutCuisine;
+  return allDishIds;
 }
 
 // Baut den Card-spezifischen Bag neu: alle IDs außer der aktuell auf DIESER Karte gezeigten,

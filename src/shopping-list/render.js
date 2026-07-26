@@ -63,6 +63,28 @@ export function renderShoppingList(root, { onChange }) {
     });
   });
 
+  // Expand-All: nur Kategorien mit noch offenen Zutaten aufklappen — vollständig
+  // erledigte bleiben zu (Auto-Collapse ist bewusst dorthin gefahren).
+  const expandAllBtn = root.querySelector('[data-action="expand-all-shopping"]');
+  if (expandAllBtn) {
+    expandAllBtn.addEventListener('click', () => {
+      for (const it of items) {
+        if (!state.checkedShopping.has(it.key)) state.collapsedCategories.delete(it.cat);
+      }
+      onChange();
+    });
+  }
+
+  // Collapse-All: alle gerenderten Kategorien zuklappen (idempotent — bereits
+  // eingeklappte bleiben eingeklappt).
+  const collapseAllBtn = root.querySelector('[data-action="collapse-all-shopping"]');
+  if (collapseAllBtn) {
+    collapseAllBtn.addEventListener('click', () => {
+      for (const it of items) state.collapsedCategories.add(it.cat);
+      onChange();
+    });
+  }
+
   root.querySelectorAll('.shop-group__header').forEach((btn) => {
     btn.addEventListener('click', () => {
       const cat = btn.dataset.cat;

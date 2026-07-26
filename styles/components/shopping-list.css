@@ -20,6 +20,17 @@
   touch-action: pan-y;
 }
 
+/* Label links, Expand/Collapse-Buttons rechts. Buttons sind vertikal gegen die
+   baseline des Labels ausgerichtet, damit die Progress-Bar darunter bündig
+   sitzt. */
+.shop-progress__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
 .shop-progress__label {
   display: flex;
   align-items: baseline;
@@ -27,8 +38,46 @@
   font-size: 0.8125rem;
   font-weight: 700;
   color: var(--md-sys-color-on-surface);
-  margin-bottom: 6px;
   font-variant-numeric: tabular-nums;
+}
+
+.shop-progress__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Kompakter Icon-Button in der Progress-Zeile. Kleiner als der Header-icon-btn
+   (36 dp), damit die Progress-Zeile nicht ungewohnt hoch wird — 32 dp mit
+   20-px-Icon fühlt sich in dem Kontext richtig. */
+.shop-progress__action {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shop-progress__action svg {
+  width: 20px;
+  height: 20px;
+}
+
+.shop-progress__action:hover {
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+}
+
+.shop-progress__action:active {
+  transform: scale(0.94);
 }
 
 .shop-progress__of {

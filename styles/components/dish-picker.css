@@ -120,35 +120,109 @@
   padding: 0 20px calc(24px + env(safe-area-inset-bottom));
 }
 
-/* Filter-Container: sticky am oberen Rand des picker-body. Zwei Zeilen —
-   Diät-Chips oben (OR-Gruppe), Attribut-Chips unten (AND-Gruppe). Die
-   Trennung in zwei Rows macht die unterschiedliche Verknüpfungssemantik
-   visuell klar. z-index: 10 sorgt dafür, dass die sticky Row über den
-   Day-Badges der Tiles liegt. */
-.picker-filters {
+/* FLACHE Struktur: Header und Body als Geschwister direkt im .picker-body.
+   Der Header ist sticky (nicht ein Wrapper), so klebt er bis zum Ende des
+   Scroll-Containers — analog Einstellungen und Einkaufslisten-Kategorien.
+   z-index: 10 sorgt dafür, dass er über den Day-Badges der Tiles liegt.
+   Volle Breite über negatives Margin, damit der opake Hintergrund die
+   Content-Kante rechts und links abdeckt (kein Durchschimmern der Tiles). */
+.picker-filters__toggle {
   position: sticky;
   top: 0;
   z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  margin: 0 -20px;
+  width: calc(100% + 40px);
+  border: none;
   background: var(--md-sys-color-surface);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--md-sys-color-on-surface);
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+  transition: padding 160ms ease, min-height 160ms ease, box-shadow 160ms ease;
+}
+
+.picker-filters__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-sys-color-on-surface-variant);
+  /* Drückt Counter + Chevron als Gruppe nach rechts — analog Settings. */
+  margin-right: auto;
+}
+
+/* Counter im Header: "aktiv/gesamt", positive Framing (Aktiv-Zahl vorne).
+   Transparent — reine Text-Info direkt links vom Chevron. */
+.picker-filters__count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-primary);
+  background: transparent;
+  line-height: 1.2;
+}
+
+.picker-filters__chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform 160ms ease;
+}
+
+.picker-filters__toggle--collapsed .picker-filters__chevron {
+  transform: rotate(-90deg);
+}
+
+.picker-filters__body {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  padding: 12px 0;
-  margin: 0 -4px;
-  transition: padding 160ms ease, box-shadow 160ms ease;
+  padding: 6px 0 8px;
+  /* scrollIntoView beim Klick auf den sticky Header würde sonst den Body-Top
+     bündig an den Scroll-Container-Top setzen — der eigene sticky Header
+     überdeckt dann die ersten 44 px. Analog scroll-margin-top-Setup in
+     shopping-list.css und settings-sheet.css. */
+  scroll-margin-top: 44px;
 }
 
+/* Muss explizit stehen — display: flex oben hat gleiche Spezifität wie der
+   Browser-Default [hidden] { display: none } und die Klasse (later declared)
+   gewinnt sonst → hidden-Attribut hätte keine Wirkung. */
+.picker-filters__body[hidden] {
+  display: none;
+}
+
+/* Jede Filter-Kategorie bleibt IMMER einzeilig: die semantische Gruppe
+   (Diät / Küche / Attribute) soll nicht in mehrere Zeilen brechen, sonst
+   verwischt die visuelle Zuordnung "Chip → Gruppe". Overflow-x scrollt bei
+   zu wenig Platz — Scrollbar visuell versteckt, weil Touch das nativ macht.
+   Kleines Padding rechts für den letzten Chip. */
 .picker-filter-row {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  padding-right: 4px;
+  margin-right: -4px;
 }
 
-/* Compact-Mode beim Scrollen: kleinere Pills, kleineres Padding, dezenter
-   Schatten unten für Trennung zum Grid. Analog zum sticky-Header-Verhalten
-   in der Shopping-Liste. */
-.picker-body--scrolled .picker-filters {
-  padding: 6px 0 8px;
+.picker-filter-row::-webkit-scrollbar {
+  display: none;
+}
+
+/* Compact-Mode beim Scrollen: kleinere Header + Pills, dezenter Schatten unten
+   für die Trennung zum Grid. Header bleibt sticky, aber schlanker. */
+.picker-body--scrolled .picker-filters__toggle {
+  min-height: 36px;
+  padding: 4px 20px;
   box-shadow: 0 4px 8px -6px rgba(0, 0, 0, 0.15);
 }
 
@@ -186,15 +260,17 @@
   transform: scale(0.97);
 }
 
+/* Aktiv-Look identisch zur kcal-Pille auf der Card und zur aktiven Portion-
+   Row im Detail-Sheet: primary bg + weißer Text. Kein Border. */
 .picker-filter-chip[aria-pressed="true"] {
-  background: var(--md-sys-color-primary-tint);
+  background: var(--md-sys-color-primary);
   border-color: transparent;
-  color: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-on-primary);
   font-weight: 700;
 }
 
 .picker-filter-chip[aria-pressed="true"]:hover {
-  background: var(--md-sys-color-primary-tint-hover);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 90%, black);
 }
 
 /* Grid: 2-3 Spalten (auto-fill), gleichmäßiger Abstand. */

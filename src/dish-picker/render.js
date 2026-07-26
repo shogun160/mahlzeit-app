@@ -4,22 +4,29 @@ import { allDishes } from '../data/dishes.js';
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
 const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
 
-// Filter-Chips oben im Picker. Zwei Gruppen mit unterschiedlicher Verknüpfung:
+// Filter-Chips oben im Picker. Drei Gruppen mit unterschiedlicher Verknüpfung:
 //
 //   diet (Fleisch/Fisch/Vegetarisch): OR — mindestens eine der aktiven muss
 //     matchen. Sind alle drei aktiv oder keine, wirkt die Gruppe wie "alle".
 //     Die drei sind sich gegenseitig ausschließende Kategorien.
 //
+//   cuisine (Asiatisch/Mediterran/Nahost/Amerikanisch): OR — analog Diät.
+//     Mehrere aktive Küchen ergänzen sich additiv, keine aktive = alle.
+//
 //   attr (Schnell/Wenig Zutaten): AND — jede aktive muss matchen. Das sind
 //     unabhängige Zusatz-Constraints, die man kumulativ enger schneidet.
 //
-// Kombiniert:  dietOk && attrOk
+// Kombiniert:  dietOk && cuisineOk && attrOk
 const FILTERS = [
-  { key: 'meat',   label: 'Fleisch',       group: 'diet', test: (d) => d.tags.includes('contains-meat') },
-  { key: 'fish',   label: 'Fisch',         group: 'diet', test: (d) => d.tags.includes('contains-fish') },
-  { key: 'veg',    label: 'Vegetarisch',   group: 'diet', test: (d) => !d.tags.includes('contains-meat') && !d.tags.includes('contains-fish') },
-  { key: 'fast',   label: 'Schnell',       group: 'attr', test: (d) => d.cooktime <= 30 },
-  { key: 'simple', label: 'Wenig Zutaten', group: 'attr', test: (d) => d.ingredients.length <= 8 },
+  { key: 'meat',   label: 'Fleisch',       group: 'diet',    test: (d) => d.tags.includes('contains-meat') },
+  { key: 'fish',   label: 'Fisch',         group: 'diet',    test: (d) => d.tags.includes('contains-fish') },
+  { key: 'veg',    label: 'Vegetarisch',   group: 'diet',    test: (d) => !d.tags.includes('contains-meat') && !d.tags.includes('contains-fish') },
+  { key: 'asian',         label: 'Asiatisch',   group: 'cuisine', test: (d) => d.cuisineGroup === 'asian' },
+  { key: 'mediterranean', label: 'Mediterran',  group: 'cuisine', test: (d) => d.cuisineGroup === 'mediterranean' },
+  { key: 'middleEast',    label: 'Nahost',      group: 'cuisine', test: (d) => d.cuisineGroup === 'middleEast' },
+  { key: 'americas',      label: 'Amerikanisch', group: 'cuisine', test: (d) => d.cuisineGroup === 'americas' },
+  { key: 'fast',   label: 'Schnell',       group: 'attr',    test: (d) => d.cooktime <= 30 },
+  { key: 'simple', label: 'Wenig Zutaten', group: 'attr',    test: (d) => d.ingredients.length <= 8 },
 ];
 
 const TRANSITION_MS = 250;
@@ -31,6 +38,10 @@ let rootEl = null;
 let onExternalPick = null;
 let currentDay = null;
 let activeFilters = new Set();
+// Collapse-State der Filter-Section — modul-lokal (transient, verliert sich
+// beim App-Restart, überlebt aber Sheet-Close/Reopen weil das Modul lebt).
+// Konsistent mit dem Muster im Settings-Sheet.
+let filtersCollapsed = false;
 
 export function mountDishPicker(el, { onPick } = {}) {
   rootEl = el;
@@ -43,6 +54,9 @@ export function openDishPicker(day) {
   if (!rootEl) throw new Error('Dish-Picker nicht gemountet.');
   currentDay = day;
   activeFilters = deriveInitialFilters();
+  // Frisch öffnen → Filter-Section standardmäßig aufgeklappt zeigen. Der User
+  // muss die aktiven Chips sehen bevor er weiter interagiert.
+  filtersCollapsed = false;
   renderShell();
   rootEl.hidden = false;
   // Doppel-rAF für Slide-up-Animation (initial translateY(100%) → 0).
@@ -71,14 +85,19 @@ function handleEsc(ev) {
 }
 
 // Leitet aus den globalen Settings die vor-aktivierten Picker-Filter ab.
-// Settings-Chips mappen 1:1 auf die Picker-Chips (meat/fish/veg). User kann
-// im Picker jederzeit deaktivieren.
+// Settings-Chips mappen 1:1 auf die Picker-Chips (Diät + Küche). User kann
+// im Picker jederzeit deaktivieren, ohne die globalen Settings zu ändern.
 function deriveInitialFilters() {
   const set = new Set();
   const p = state.settings.preferences || {};
   if (p.meat) set.add('meat');
   if (p.fish) set.add('fish');
   if (p.vegetarian) set.add('veg');
+  const c = state.settings.cuisines || {};
+  if (c.asian)         set.add('asian');
+  if (c.mediterranean) set.add('mediterranean');
+  if (c.middleEast)    set.add('middleEast');
+  if (c.americas)      set.add('americas');
   if ((state.settings.maxCookTime ?? 999) <= 30) set.add('fast');
   return set;
 }
@@ -94,10 +113,49 @@ function chipHtml(f) {
   `;
 }
 
+// Filter-Section-Header ist klickbar und togglet den Collapse-State. Zeigt
+// gleichzeitig einen "aktiv/gesamt"-Zähler (positive Framing), damit der User
+// im eingeklappten Zustand sieht, wie viele Filter gerade wirken.
+//
+// FLACHE Struktur: Header und Body als Geschwister direkt im picker-body —
+// kein <section>-Wrapper. Nur so bleibt der Header sticky, wenn er weit
+// hochgescrollt wird. Ein Wrapper würde den Header mit rausschieben, sobald
+// die Section komplett den scroll-Container verlässt (siehe shopping-list.css
+// / settings-sheet.css für dieselbe Falle).
+function renderFiltersSection() {
+  const total = FILTERS.length;
+  const active = FILTERS.filter((f) => activeFilters.has(f.key)).length;
+  const collapsed = filtersCollapsed;
+  const chevron = `<svg class="picker-filters__chevron" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>`;
+  return `
+    <button class="picker-filters__toggle ${collapsed ? 'picker-filters__toggle--collapsed' : ''}"
+            type="button"
+            data-action="toggle-filters"
+            aria-expanded="${!collapsed}"
+            aria-label="Filter">
+      <span class="picker-filters__title">Filter</span>
+      <span class="picker-filters__count" data-role="filter-count">${active}/${total}</span>
+      ${chevron}
+    </button>
+    <div class="picker-filters__body" ${collapsed ? 'hidden' : ''}>
+      <div class="picker-filter-row">
+        ${FILTERS.filter((f) => f.group === 'diet').map(chipHtml).join('')}
+      </div>
+      <div class="picker-filter-row">
+        ${FILTERS.filter((f) => f.group === 'cuisine').map(chipHtml).join('')}
+      </div>
+      <div class="picker-filter-row">
+        ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
+      </div>
+    </div>
+  `;
+}
+
 function filteredDishes() {
   const currentDishId = state.assignment[currentDay];
-  const activeDiet = FILTERS.filter((f) => f.group === 'diet' && activeFilters.has(f.key));
-  const activeAttr = FILTERS.filter((f) => f.group === 'attr' && activeFilters.has(f.key));
+  const activeDiet    = FILTERS.filter((f) => f.group === 'diet'    && activeFilters.has(f.key));
+  const activeCuisine = FILTERS.filter((f) => f.group === 'cuisine' && activeFilters.has(f.key));
+  const activeAttr    = FILTERS.filter((f) => f.group === 'attr'    && activeFilters.has(f.key));
 
   let result;
   if (activeFilters.size === 0) {
@@ -108,9 +166,10 @@ function filteredDishes() {
       // Filter nicht erfüllt. So sieht der User seinen Ausgangspunkt und kann
       // ihn mit dem gefilterten Vorschlag vergleichen.
       if (d.id === currentDishId) return true;
-      const dietOk = activeDiet.length === 0 || activeDiet.some((f) => f.test(d));
-      const attrOk = activeAttr.every((f) => f.test(d));
-      return dietOk && attrOk;
+      const dietOk    = activeDiet.length    === 0 || activeDiet.some((f) => f.test(d));
+      const cuisineOk = activeCuisine.length === 0 || activeCuisine.some((f) => f.test(d));
+      const attrOk    = activeAttr.every((f) => f.test(d));
+      return dietOk && cuisineOk && attrOk;
     });
   }
 
@@ -167,14 +226,7 @@ function renderShell() {
           <button class="picker-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="picker-body">
-          <div class="picker-filters" role="group" aria-label="Filter">
-            <div class="picker-filter-row">
-              ${FILTERS.filter((f) => f.group === 'diet').map(chipHtml).join('')}
-            </div>
-            <div class="picker-filter-row">
-              ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
-            </div>
-          </div>
+          ${renderFiltersSection()}
           ${dishes.length > 0
             ? `<div class="picker-grid">${dishes.map((d) => renderTile(d, d.id === currentDishId, used)).join('')}</div>`
             : '<p class="picker-empty">Keine Gerichte für diese Filter.</p>'}
@@ -264,6 +316,49 @@ function attachHandlers() {
     });
   });
 
+  // Filter-Section-Header: togglet Collapse. Body wird hidden gesetzt, Modifier-
+  // Klasse steuert Rotation des Chevrons + kompaktere Sticky-Höhe.
+  const toggleBtn = rootEl.querySelector('[data-action="toggle-filters"]');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      const bodyEl = rootEl.querySelector('.picker-filters__body');
+      const scrollRoot = rootEl.querySelector('.picker-body');
+      const sticky = isFilterHeaderSticky(toggleBtn, scrollRoot);
+      const bodyVisible = bodyEl && !bodyEl.hidden && isFilterBodyVisibleBelow(bodyEl, toggleBtn);
+
+      // Sticky UND unsichtbar → expand + scroll (analog Einstellungen: statt
+      // "aus dem Nichts einzuklappen" springen wir zur Section).
+      if (sticky && !bodyVisible) {
+        filtersCollapsed = false;
+        toggleBtn.classList.remove('picker-filters__toggle--collapsed');
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        if (bodyEl) bodyEl.hidden = false;
+        requestAnimationFrame(() => {
+          if (bodyEl) bodyEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return;
+      }
+
+      // Normal togglen. Beim Einklappen scrollTop-Kompensation um den bereits
+      // oben rausgescrollten Anteil des Bodys — Sicht bleibt stabil.
+      let compensation = 0;
+      if (!filtersCollapsed && bodyEl && scrollRoot) {
+        const bodyRect = bodyEl.getBoundingClientRect();
+        const bodySpace = bodyRect.height + (parseFloat(getComputedStyle(bodyEl).marginBottom) || 0);
+        const rootTop = scrollRoot.getBoundingClientRect().top;
+        const scrolledPast = rootTop - bodyRect.top;
+        compensation = Math.max(0, Math.min(scrolledPast, bodySpace));
+      }
+      filtersCollapsed = !filtersCollapsed;
+      toggleBtn.classList.toggle('picker-filters__toggle--collapsed', filtersCollapsed);
+      toggleBtn.setAttribute('aria-expanded', String(!filtersCollapsed));
+      if (bodyEl) bodyEl.hidden = filtersCollapsed;
+      if (compensation > 0 && scrollRoot) {
+        scrollRoot.scrollTop = Math.max(0, scrollRoot.scrollTop - compensation);
+      }
+    });
+  }
+
   // Scroll-Listener für Compact-Filter-Row: schaltet .picker-body--scrolled
   // beim Erreichen des Thresholds. Position: sticky auf .picker-filters hält
   // sie sichtbar; in Compact-Modus schrumpfen padding + Pills.
@@ -311,6 +406,13 @@ function updateFilters() {
   rootEl.querySelectorAll('[data-filter]').forEach((btn) => {
     btn.setAttribute('aria-pressed', activeFilters.has(btn.dataset.filter) ? 'true' : 'false');
   });
+  // Counter im Header aktualisieren — total ist konstant, active ändert sich
+  // mit jedem Chip-Klick. Nur textContent, kein Re-Render der Section.
+  const countEl = rootEl.querySelector('[data-role="filter-count"]');
+  if (countEl) {
+    const active = FILTERS.filter((f) => activeFilters.has(f.key)).length;
+    countEl.textContent = `${active}/${FILTERS.length}`;
+  }
 }
 
 function updateGrid() {
@@ -345,4 +447,21 @@ function updateGrid() {
   // beibehalten (visuelle Inkonsistenz gegenüber dem frischen Sheet-Open).
   body.scrollTop = 0;
   body.classList.remove('picker-body--scrolled');
+}
+
+// Ist der Filter-Toggle-Header aktuell im Sticky-Modus (top: 0 im scrollRoot)?
+// Analog isHeaderSticky in settings/render.js — hier gibts nur einen Header,
+// also kein stack-idx, sticky-Top ist immer 0.
+function isFilterHeaderSticky(btn, scrollRoot) {
+  if (!scrollRoot) return false;
+  const relTop = btn.getBoundingClientRect().top - scrollRoot.getBoundingClientRect().top;
+  return relTop <= 2;
+}
+
+// Ist der Filter-Body noch (mind. teilweise) unter dem Header sichtbar?
+function isFilterBodyVisibleBelow(body, btn) {
+  const bodyRect = body.getBoundingClientRect();
+  if (bodyRect.height === 0) return false;
+  const btnRect = btn.getBoundingClientRect();
+  return bodyRect.bottom > btnRect.bottom + 2;
 }

@@ -17,6 +17,11 @@ let onExternalChange = () => {};
 // Zugeklappte Sections (transient — verliert sich beim App-Restart, überlebt
 // aber Sheet-Close/Reopen weil das Modul lebt).
 const collapsedSections = new Set();
+// Zähler für sticky-Stack-Position der Section-Header. Wird bei jedem
+// renderShell() zurückgesetzt und pro section()-Aufruf inkrementiert.
+// Analog zu stackIdx in shopping-list/render.js — jeder Header klebt gestaffelt
+// unter den vorigen (stack-idx * header-height als top-Offset).
+let sectionStackIdx = 0;
 
 // --- Mount / Lifecycle ---
 
@@ -60,6 +65,13 @@ function renderShell() {
   const { defaultPortions, maxCookTime } = state.settings;
   const minusDisabled = defaultPortions <= PORTIONS_MIN;
   const plusDisabled = defaultPortions >= PORTIONS_MAX;
+  // Stack-Idx pro Render-Zyklus zurücksetzen. Jeder section()-Aufruf zählt hoch.
+  sectionStackIdx = 0;
+
+  // Expand/Collapse-Buttons sind IMMER im DOM. Sichtbarkeit wird direkt nach
+  // dem innerHTML-Set via syncHeaderActions() gesetzt — beim ersten Render sind
+  // die Sections noch nicht im DOM, deshalb können wir die Zählung nicht schon
+  // hier machen.
 
   rootEl.innerHTML = `
     <div class="settings-overlay" data-role="backdrop">
@@ -67,7 +79,23 @@ function renderShell() {
         <div class="settings-handle" aria-hidden="true"></div>
         <div class="settings-header">
           <h2 class="settings-header__title" id="settings-title">Einstellungen</h2>
-          <button class="settings-close" data-action="close" aria-label="Schließen">✕</button>
+          <div class="settings-header__actions">
+            <button class="settings-header__action"
+                    data-action="expand-all"
+                    aria-label="Alle Sections aufklappen"
+                    title="Alle aufklappen"
+                    hidden>
+              <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-120 300-300l56-56 124 124 124-124 56 56-180 180Zm-124-504-56-56 180-180 180 180-56 56-124-124-124 124Z"/></svg>
+            </button>
+            <button class="settings-header__action"
+                    data-action="collapse-all"
+                    aria-label="Alle Sections zuklappen"
+                    title="Alle zuklappen"
+                    hidden>
+              <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m296-88-56-56 240-240 240 240-56 56-184-183L296-88Zm184-544L240-872l56-56 184 183 184-183 56 56-240 240Z"/></svg>
+            </button>
+            <button class="settings-close" data-action="close" aria-label="Schließen">✕</button>
+          </div>
         </div>
         <div class="settings-body">
           ${section('portionen', 'Portionen', `
@@ -115,21 +143,21 @@ function renderShell() {
               ${renderCuisineChip('asian',         'Asiatisch')}
               ${renderCuisineChip('mediterranean', 'Mediterran')}
               ${renderCuisineChip('middleEast',    'Nahost')}
-              ${renderCuisineChip('americas',      'Amerika')}
+              ${renderCuisineChip('americas',      'Amerikanisch')}
             </div>
           `)}
 
           ${section('profil', 'Profil &amp; Kalorien', `
             <p class="settings-section__note">Kommt bald — Alter, Größe, Gewicht, Aktivität → Tageskalorien-Ziel</p>
-          `, 'settings-section--soon')}
+          `, 'settings-section-body--soon')}
 
           ${section('darstellung', 'Darstellung', `
             <p class="settings-section__note">Kommt bald — Dark Mode, Akzentfarbe</p>
-          `, 'settings-section--soon')}
+          `, 'settings-section-body--soon')}
 
           ${section('daten', 'Daten', `
             <p class="settings-section__note">Kommt bald — Backup exportieren/importieren, Alle Daten zurücksetzen</p>
-          `, 'settings-section--soon')}
+          `, 'settings-section-body--soon')}
 
           ${section('ueber', 'Über', `
             <div class="settings-row">
@@ -153,32 +181,97 @@ function renderShell() {
   `;
 
   attachHandlers();
+  // Initial-Sync jetzt, wo die Sections im DOM sind. Sonst wären die Header-
+  // Buttons falsch versteckt beim Sheet-Reopen mit persistierten collapsedSections.
+  syncHeaderActions();
+  updateStickyState();
 }
 
 function formatCookTime(min) {
   return min >= COOKTIME_MAX ? 'unbegrenzt' : `${min} Min`;
 }
 
-// Sektions-Wrapper mit klickbarem Header (Chevron rotiert), Body per hidden-
-// Attribut aus-/eingeblendet. State liegt modul-lokal in collapsedSections und
-// überlebt Sheet-Reopens.
+// Header + Body als FLACHE Geschwister direkt im .settings-body — kein
+// <section>-Wrapper. Nur so bleibt der sticky-Header sichtbar, wenn er weit
+// hochgescrollt ist; ein Wrapper würde den Header mit rausschieben, sobald
+// seine section über den Body-Rand rutscht (siehe shopping-list.css Kommentar
+// zur gleichen Falle). --stack-idx staffelt die top-Position pro Section,
+// sodass sich bereits weggescrollte Header oben stapeln.
+// extraCls wird auf den Body angewendet (nicht auf einen Wrapper) — z. B.
+// "settings-section-body--soon" für die dimmed "Kommt bald"-Sections.
 function section(key, title, contentHtml, extraCls = '') {
   const collapsed = collapsedSections.has(key);
+  const stackIdx = sectionStackIdx++;
   const chevron = `<svg class="settings-section__chevron" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-344 240-584l56-56 184 184 184-184 56 56-240 240Z"/></svg>`;
+  const summary = summaryFor(key);
   return `
-    <section class="settings-section ${extraCls}" data-section="${key}">
-      <button class="settings-section__toggle"
-              type="button"
-              data-section-toggle="${key}"
-              aria-expanded="${!collapsed}">
-        <span class="settings-section__title">${title}</span>
-        ${chevron}
-      </button>
-      <div class="settings-section__body" ${collapsed ? 'hidden' : ''}>
-        ${contentHtml}
-      </div>
-    </section>
+    <button class="settings-section__toggle ${collapsed ? 'settings-section__toggle--collapsed' : ''}"
+            type="button"
+            data-section-toggle="${key}"
+            data-stack-idx="${stackIdx}"
+            aria-expanded="${!collapsed}"
+            style="--stack-idx: ${stackIdx};">
+      <span class="settings-section__title">${title}</span>
+      <span class="settings-section__summary" data-section-summary="${key}">${summary}</span>
+      ${chevron}
+    </button>
+    <div class="settings-section__body ${extraCls}"
+         data-section-body="${key}"
+         style="--stack-idx: ${stackIdx};"
+         ${collapsed ? 'hidden' : ''}>
+      ${contentHtml}
+    </div>
   `;
+}
+
+// Kurzfassung der wichtigsten Info pro Section — wird im Toggle-Header rechts
+// angezeigt (nur bei collapsed sichtbar via CSS), damit der User beim eingeklappten
+// Sheet auf einen Blick den aktuellen Wert sieht ohne aufklappen zu müssen.
+// Filter-Sections: positives Framing "aktiv/gesamt" wie in der Einkaufsliste.
+function summaryFor(key) {
+  const s = state.settings;
+  if (key === 'portionen') return String(s.defaultPortions);
+  if (key === 'kochzeit')  return formatCookTime(s.maxCookTime);
+  if (key === 'praeferenzen') {
+    const total = 3;
+    const active = ['meat', 'fish', 'vegetarian'].filter((k) => s.preferences?.[k]).length;
+    return `${active}/${total}`;
+  }
+  if (key === 'kuechen') {
+    const total = 4;
+    const active = ['asian', 'mediterranean', 'middleEast', 'americas'].filter((k) => s.cuisines?.[k]).length;
+    return `${active}/${total}`;
+  }
+  return '';
+}
+
+// Aktualisiert die Summary im Section-Header, ohne den Section neu zu rendern.
+// Wird nach jeder State-Änderung aufgerufen, die die Summary betrifft.
+function updateSectionSummary(key) {
+  const el = rootEl?.querySelector(`[data-section-summary="${key}"]`);
+  if (!el) return;
+  el.textContent = summaryFor(key);
+}
+
+// Setzt/entfernt die --sticky-Modifier-Klasse pro Section-Toggle. Die CSS-Regel
+// zeigt die Summary nur wenn --sticky aktiv ist. Wird beim Scrollen der
+// Settings-Body und nach Layout-Änderungen (Toggle, Expand/Collapse-All) gerufen.
+//
+// Bedingung ist identisch zum smart Klick-Handler: sticky UND Body nicht mehr
+// unter dem Header sichtbar. Damit erscheint die Summary erst, wenn der Body
+// echt rausgescrollt ist — solange der Body noch (mind. teilweise) unter dem
+// Header hängt, zeigt der Body die Info selbst, Summary wäre redundant.
+function updateStickyState() {
+  if (!rootEl) return;
+  const scrollRoot = rootEl.querySelector('.settings-body');
+  if (!scrollRoot) return;
+  rootEl.querySelectorAll('[data-section-toggle]').forEach((btn) => {
+    const key = btn.dataset.sectionToggle;
+    const body = rootEl.querySelector(`[data-section-body="${key}"]`);
+    const sticky = isHeaderSticky(btn, scrollRoot);
+    const bodyVisible = body && !body.hidden && isBodyVisibleBelow(body, btn);
+    btn.classList.toggle('settings-section__toggle--sticky', sticky && !bodyVisible);
+  });
 }
 
 function renderPrefChip(key, label) {
@@ -212,6 +305,54 @@ function attachHandlers() {
   });
   rootEl.querySelector('[data-action="close"]').addEventListener('click', closeSettingsSheet);
 
+  // Scroll-Listener am Body: aktualisiert die --sticky-Klasse an allen
+  // Section-Toggles. Die Summary-Pille wird per CSS nur bei --sticky sichtbar,
+  // sodass die Wichtigste-Info-Anzeige erst greift, wenn der Header oben
+  // festgeklebt ist (Body oben rausgescrollt).
+  const bodyEl = rootEl.querySelector('.settings-body');
+  if (bodyEl) {
+    bodyEl.addEventListener('scroll', updateStickyState, { passive: true });
+  }
+
+  // Expand-All / Collapse-All: inline mutieren (kein renderShell(), weil das
+  // den Overlay-DOM ersetzen würde inkl. .is-open-Klasse → Slide-out).
+  const expandAllBtn = rootEl.querySelector('[data-action="expand-all"]');
+  if (expandAllBtn) {
+    expandAllBtn.addEventListener('click', () => {
+      collapsedSections.clear();
+      rootEl.querySelectorAll('[data-section-toggle]').forEach((toggleBtn) => {
+        toggleBtn.setAttribute('aria-expanded', 'true');
+        toggleBtn.classList.remove('settings-section__toggle--collapsed');
+      });
+      rootEl.querySelectorAll('[data-section-body]').forEach((body) => {
+        body.hidden = false;
+      });
+      syncHeaderActions();
+      updateStickyState();
+    });
+  }
+  const collapseAllBtn = rootEl.querySelector('[data-action="collapse-all"]');
+  if (collapseAllBtn) {
+    collapseAllBtn.addEventListener('click', () => {
+      rootEl.querySelectorAll('[data-section-toggle]').forEach((toggleBtn) => {
+        const key = toggleBtn.dataset.sectionToggle;
+        collapsedSections.add(key);
+        toggleBtn.setAttribute('aria-expanded', 'false');
+        toggleBtn.classList.add('settings-section__toggle--collapsed');
+      });
+      rootEl.querySelectorAll('[data-section-body]').forEach((body) => {
+        body.hidden = true;
+      });
+      // Nach dem Zuklappen: an den Sheet-Anfang scrollen, sonst könnte die
+      // Sicht plötzlich weit unterhalb der Sections landen (wenn User weit
+      // unten war).
+      const bodyEl = rootEl.querySelector('.settings-body');
+      if (bodyEl) bodyEl.scrollTop = 0;
+      syncHeaderActions();
+      updateStickyState();
+    });
+  }
+
   rootEl.querySelector('[data-action="portions-minus"]').addEventListener('click', () => handlePortions(-1));
   rootEl.querySelector('[data-action="portions-plus"]').addEventListener('click', () => handlePortions(1));
 
@@ -222,48 +363,98 @@ function attachHandlers() {
     const v = parseInt(slider.value, 10);
     state.settings.maxCookTime = v;
     valueEl.textContent = formatCookTime(v);
+    updateSectionSummary('kochzeit');
   });
   // change: nach Loslassen — jetzt persistieren + externes Refresh triggern.
-  slider.addEventListener('change', () => onExternalChange());
+  // Kochzeit ändert eligible pool → Bag invalidieren, damit nächster Reroll
+  // frisch mit neuer Grenze zieht.
+  slider.addEventListener('change', () => {
+    state.dishBag = {};
+    onExternalChange();
+  });
 
   // Ernährungs-Chips togglen ihren State + triggern refresh (Reroll-Pool ändert sich).
+  // Bag invalidieren, damit die neue Präferenz sofort beim nächsten Reroll wirkt
+  // (sonst würde der bereits vor-geshuffelte Bag noch alte Kandidaten liefern).
   rootEl.querySelectorAll('.pref-chip[data-pref]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.pref;
       const next = !state.settings.preferences[key];
       state.settings.preferences[key] = next;
       btn.setAttribute('aria-pressed', String(next));
+      state.dishBag = {};
+      updateSectionSummary('praeferenzen');
       onExternalChange();
     });
   });
 
-  // Küchen-Chips: analog Diät-Chips, wirkt sich auf Weighted-Reroll aus
-  // (kein Hard-Filter — bevorzugte Gruppe bekommt Faktor 3 beim nächsten Reroll).
+  // Küchen-Chips: Hard-Filter (mit Fallback bei zu wenig Kandidaten) — bewusst
+  // sichtbare Wirkung, siehe eligibleDishIds() in reroll.js. Bag invalidieren
+  // aus dem gleichen Grund wie bei Diät-Chips.
   rootEl.querySelectorAll('.pref-chip[data-cuisine]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.cuisine;
       const next = !state.settings.cuisines[key];
       state.settings.cuisines[key] = next;
       btn.setAttribute('aria-pressed', String(next));
+      state.dishBag = {};
+      updateSectionSummary('kuechen');
       onExternalChange();
     });
   });
 
-  // Section-Header togglet Collapse-State (aria-expanded + hidden auf Body).
+  // Section-Header-Klick — identisches Muster wie Einkaufslisten-Kategorien:
+  //   - Header sticky UND Body nicht mehr sichtbar unter ihm → expand + Scroll
+  //     zur Body-Position (statt "aus dem Nichts eingeklappt zu werden").
+  //   - Sonst → togglen, mit scrollTop-Kompensation nach dem Einklappen, damit
+  //     die Sicht des Users stabil bleibt (der Content unterhalb rutscht nicht
+  //     plötzlich nach oben, wenn eine oben rausgescrollte Section einklappt).
+  const bodyScroll = rootEl.querySelector('.settings-body');
   rootEl.querySelectorAll('[data-section-toggle]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.sectionToggle;
-      const body = btn.parentElement.querySelector('.settings-section__body');
-      const wasExpanded = btn.getAttribute('aria-expanded') === 'true';
-      const nextExpanded = !wasExpanded;
-      btn.setAttribute('aria-expanded', String(nextExpanded));
-      if (nextExpanded) {
+      const body = rootEl.querySelector(`[data-section-body="${key}"]`);
+      const wasCollapsed = collapsedSections.has(key);
+      const sticky = isHeaderSticky(btn, bodyScroll);
+      const bodyVisible = body && !body.hidden && isBodyVisibleBelow(body, btn);
+
+      // Sticky UND unsichtbar → expand + scroll (auch wenn schon expanded, wenn
+      // wir weit weg gescrollt sind ist es UX-freundlicher zur Section zu springen).
+      if (sticky && !bodyVisible) {
         collapsedSections.delete(key);
-        body.hidden = false;
-      } else {
-        collapsedSections.add(key);
-        body.hidden = true;
+        btn.setAttribute('aria-expanded', 'true');
+        btn.classList.remove('settings-section__toggle--collapsed');
+        if (body) body.hidden = false;
+        syncHeaderActions();
+        updateStickyState();
+        requestAnimationFrame(() => {
+          const target = rootEl.querySelector(`[data-section-body="${key}"]`);
+          if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        return;
       }
+
+      // Normal togglen. Wenn wir einklappen, kompensieren wir scrollTop nur um
+      // den Anteil des Bodys, der bereits oben rausgescrollt ist.
+      let compensation = 0;
+      if (!wasCollapsed && body && bodyScroll) {
+        const bodyRectSpace = measureBodySpace(body);
+        const rootTop = bodyScroll.getBoundingClientRect().top;
+        const bodyTop = body.getBoundingClientRect().top;
+        const scrolledPast = rootTop - bodyTop;
+        compensation = Math.max(0, Math.min(scrolledPast, bodyRectSpace));
+      }
+      const nextCollapsed = !wasCollapsed;
+      if (nextCollapsed) collapsedSections.add(key);
+      else collapsedSections.delete(key);
+      btn.setAttribute('aria-expanded', String(!nextCollapsed));
+      btn.classList.toggle('settings-section__toggle--collapsed', nextCollapsed);
+      if (body) body.hidden = nextCollapsed;
+      if (compensation > 0 && bodyScroll) {
+        bodyScroll.scrollTop = Math.max(0, bodyScroll.scrollTop - compensation);
+      }
+      syncHeaderActions();
+      updateStickyState();
     });
   });
 
@@ -305,6 +496,51 @@ function attachCloseSwipe() {
   sheet.addEventListener('pointercancel', () => { s.tracking = false; });
 }
 
+// Zeigt genau EINEN der zwei Header-Buttons an, je nach Zustand:
+//   - mind. eine Section eingeklappt → Expand (die Aktion mit dem größten Nutzen)
+//   - alle expanded → Collapse
+// Nie beide gleichzeitig — konsistent mit der Progress-Zeile in der Einkaufsliste.
+function syncHeaderActions() {
+  if (!rootEl) return;
+  const collapsed = collapsedSections.size;
+  const showExpand = collapsed > 0;
+  const expandBtn = rootEl.querySelector('[data-action="expand-all"]');
+  const collapseBtn = rootEl.querySelector('[data-action="collapse-all"]');
+  if (expandBtn) expandBtn.hidden = !showExpand;
+  if (collapseBtn) collapseBtn.hidden = showExpand;
+}
+
+// Ist der Header aktuell im Sticky-Modus (an seiner berechneten sticky-top-
+// Position festgeklebt)? Vergleicht die relative Position mit stackIdx *
+// headerHeight (Body scrollt selbst, es gibt keine sticky-Progress-Bar wie in
+// der Shopping-View).
+function isHeaderSticky(btn, scrollRoot) {
+  if (!scrollRoot) return false;
+  const stackIdx = parseInt(btn.dataset.stackIdx, 10) || 0;
+  const styles = getComputedStyle(scrollRoot);
+  const headerH = parseFloat(styles.getPropertyValue('--settings-section-header-height')) || 44;
+  const stickyTop = stackIdx * headerH;
+  const relTop = btn.getBoundingClientRect().top - scrollRoot.getBoundingClientRect().top;
+  return relTop <= stickyTop + 2;
+}
+
+// Ist der Body noch (mindestens teilweise) unter seinem sticky Header sichtbar?
+// Wenn hidden oder height 0 → false (dann ist der Body ohnehin nicht sichtbar).
+function isBodyVisibleBelow(body, btn) {
+  const bodyRect = body.getBoundingClientRect();
+  if (bodyRect.height === 0) return false;
+  const btnRect = btn.getBoundingClientRect();
+  return bodyRect.bottom > btnRect.bottom + 2;
+}
+
+// Vertikaler Platz des Bodys im Layout (Höhe + margin-bottom). Genutzt für die
+// scrollTop-Kompensation beim Einklappen.
+function measureBodySpace(body) {
+  const h = body.getBoundingClientRect().height;
+  const mb = parseFloat(getComputedStyle(body).marginBottom) || 0;
+  return h + mb;
+}
+
 function handlePortions(delta) {
   changeDefaultPortions(delta);
   const { defaultPortions } = state.settings;
@@ -314,5 +550,6 @@ function handlePortions(delta) {
   if (valueEl) valueEl.textContent = defaultPortions;
   if (minusBtn) minusBtn.disabled = defaultPortions <= PORTIONS_MIN;
   if (plusBtn) plusBtn.disabled = defaultPortions >= PORTIONS_MAX;
+  updateSectionSummary('portionen');
   onExternalChange();
 }
