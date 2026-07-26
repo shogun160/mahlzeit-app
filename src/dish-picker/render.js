@@ -38,9 +38,9 @@ const FILTERS = [
   { key: 'simple', label: 'Wenig Zutaten', group: 'attr',    test: (d) => openIngredientCount(d) <= 8 },
   { key: 'kcal_low',  label: 'Kalorienarm',   group: 'kcal', test: (d) => d.kcal < KCAL_MEDIAN },
   { key: 'kcal_high', label: 'Kalorienreich', group: 'kcal', test: (d) => d.kcal > KCAL_MEDIAN },
-  { key: 'macro_protein', label: 'P-reich',      group: 'macro', test: (d) => macroPct(d).p > 35 },
-  { key: 'macro_lowcarb', label: 'KH-arm',       group: 'macro', test: (d) => macroPct(d).kh < 30 },
-  { key: 'macro_lowfat',  label: 'F-arm',        group: 'macro', test: (d) => macroPct(d).f < 25 },
+  { key: 'macro_protein', label: 'Proteinreich',    group: 'macro', test: (d) => macroPct(d).p > 35 },
+  { key: 'macro_lowcarb', label: 'Kohlenhydratarm', group: 'macro', test: (d) => macroPct(d).kh < 30 },
+  { key: 'macro_lowfat',  label: 'Fettarm',         group: 'macro', test: (d) => macroPct(d).f < 25 },
   { key: 'macro_balanced', label: 'Ausgewogen',  group: 'macro', test: (d) => {
     const m = macroPct(d);
     return m.p >= 22 && m.p <= 42 && m.kh >= 22 && m.kh <= 42 && m.f >= 22 && m.f <= 42;

@@ -154,12 +154,21 @@ export function renderStep2(draft) {
 }
 
 // Step 3: Filter — Ernährungspräferenzen (Fleisch/Fisch/Vegetarisch) +
-// Küchen-Präferenzen (Asiatisch/Mediterran/Nahost/Amerikanisch). Toggle-Chips
-// analog Settings-Sheet. Anders als profile-Slots kein Draft — Booleans
-// starten auf false und ändern sich direkt im State beim Klick.
+// Küchen-Präferenzen (Asiatisch/Mediterran/Nahost/Amerikanisch) + Makro-
+// Verteilung (Ausgewogen/Proteinreich/Kohlenhydratarm/Fettarm). Toggle-Chips
+// analog Settings-Sheet. Anders als profile-Slots kein Draft — Booleans und
+// macroPreset ändern sich direkt im State beim Klick.
 export function renderStep3(settings) {
   const prefs = settings.preferences ?? {};
   const cuisines = settings.cuisines ?? {};
+  const macroPreset = settings.profile?.macroPreset ?? 'balanced';
+  const isCustomMacros = settings.profile?.macroTargets != null;
+  // Presets exklusiv im Wizard; wenn User im Makro-Popup einen Custom-Override
+  // gesetzt hat, ist kein Chip aktiv (aria-pressed=false auf allen).
+  const activePreset = isCustomMacros ? null : macroPreset;
+  const macroChip = (key, label) => `
+    <button class="pref-chip" type="button" data-action="macro-preset" data-value="${key}" aria-pressed="${activePreset === key}">${label}</button>
+  `;
   return `
     <h3 class="onboarding-step__title">Filter</h3>
     <p class="onboarding-step__desc">Optional — was soll bei den Vorschlägen berücksichtigt werden?</p>
@@ -180,6 +189,16 @@ export function renderStep3(settings) {
         <button class="pref-chip" type="button" data-action="cuisine-toggle" data-value="mediterranean" aria-pressed="${!!cuisines.mediterranean}">Mediterran</button>
         <button class="pref-chip" type="button" data-action="cuisine-toggle" data-value="middleEast" aria-pressed="${!!cuisines.middleEast}">Nahost</button>
         <button class="pref-chip" type="button" data-action="cuisine-toggle" data-value="americas" aria-pressed="${!!cuisines.americas}">Amerikanisch</button>
+      </div>
+    </div>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__label">Makro-Verteilung</div>
+      <div class="onboarding-chips" role="group" aria-label="Makro-Verteilung">
+        ${macroChip('balanced', 'Ausgewogen')}
+        ${macroChip('protein',  'Proteinreich')}
+        ${macroChip('lowcarb',  'Kohlenhydratarm')}
+        ${macroChip('lowfat',   'Fettarm')}
       </div>
     </div>
   `;

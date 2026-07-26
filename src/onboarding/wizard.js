@@ -269,12 +269,14 @@ function attachStep2Handlers() {
   bindSlider('lunch-change', 'lunch-value', 'lunchKcal', fmt);
 }
 
-// Step 3 (Filter) — Ernährungs- + Küchen-Präferenzen als Toggle-Chips.
-// Ändern direkt state.settings.preferences/cuisines (kein Draft), analog
-// zum Settings-Sheet. saveState wird beim Persistieren am Ende gerufen.
+// Step 3 (Filter) — Ernährungs- + Küchen-Präferenzen als Toggle-Chips +
+// Makro-Preset als exklusive Auswahl. Alle ändern direkt state.settings
+// (kein Draft), analog zum Settings-Sheet. saveState wird beim Persistieren
+// am Ende gerufen.
 function attachStep3Handlers() {
   bindToggleChips('pref-toggle', 'preferences');
   bindToggleChips('cuisine-toggle', 'cuisines');
+  bindMacroPresetChips();
 }
 
 function bindToggleChips(action, bucketKey) {
@@ -285,6 +287,21 @@ function bindToggleChips(action, bucketKey) {
       if (!bucket) return;
       bucket[key] = !bucket[key];
       btn.setAttribute('aria-pressed', String(!!bucket[key]));
+    });
+  });
+}
+
+// Makro-Preset: exklusive Chip-Gruppe. Klick setzt profile.macroPreset,
+// löscht profile.macroTargets (Custom-Override aus Makro-Popup vergessen).
+function bindMacroPresetChips() {
+  rootEl.querySelectorAll('[data-action="macro-preset"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.value;
+      state.settings.profile.macroPreset = key;
+      state.settings.profile.macroTargets = null;
+      rootEl.querySelectorAll('[data-action="macro-preset"]').forEach((other) => {
+        other.setAttribute('aria-pressed', String(other.dataset.value === key));
+      });
     });
   });
 }

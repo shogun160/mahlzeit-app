@@ -83,7 +83,7 @@ export const state = {
       breakfastKcal: null,
       lunchKcal: null,
       showCalorieBar: true,
-      // Makro-Verteilung: entweder Preset (Ausgewogen/P-reich/KH-arm/F-arm)
+      // Makro-Verteilung: entweder Preset (Ausgewogen/Proteinreich/Kohlenhydratarm/Fettarm)
       // ODER expliziter Gramm-Override via macroTargets. Slider ziehen setzt
       // macroTargets und macroPreset = null (Custom). Refresh setzt beides
       // zurück auf {'balanced', null}. Siehe effectiveMacroTargets in target.js.

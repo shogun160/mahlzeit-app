@@ -147,10 +147,10 @@ export function kcalRange(value, factor = 1) {
 //   KH-arm     — 30/25/45, moderate Low-Carb (nicht Keto).
 //   F-arm      — 30/50/20, F an AMDR-Untergrenze — Ausdauer-lastig.
 export const MACRO_PRESETS = [
-  { key: 'balanced', label: 'Ausgewogen', p: 30, kh: 40, f: 30 },
-  { key: 'protein',  label: 'P-reich',    p: 40, kh: 30, f: 30 },
-  { key: 'lowcarb',  label: 'KH-arm',     p: 30, kh: 25, f: 45 },
-  { key: 'lowfat',   label: 'F-arm',      p: 30, kh: 50, f: 20 },
+  { key: 'balanced', label: 'Ausgewogen',      p: 30, kh: 40, f: 30 },
+  { key: 'protein',  label: 'Proteinreich',    p: 40, kh: 30, f: 30 },
+  { key: 'lowcarb',  label: 'Kohlenhydratarm', p: 30, kh: 25, f: 45 },
+  { key: 'lowfat',   label: 'Fettarm',         p: 30, kh: 50, f: 20 },
 ];
 export const MACRO_PRESET_DEFAULT = 'balanced';
 
