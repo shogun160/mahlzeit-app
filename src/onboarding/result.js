@@ -121,10 +121,11 @@ function formatDinnerRange(dinner) {
   return `${lo.toLocaleString('de-DE')}&thinsp;–&thinsp;${hi.toLocaleString('de-DE')} kcal`;
 }
 
-// Horseshoe (halbkreisförmiges Segment-Chart) für die Makro-Verteilung.
-// Segmente proportional zu den kcal-Anteilen von P/KH/F (nicht Gramm — sonst
-// wäre Fett trotz 9 kcal/g visuell zu klein). Anordnung: KH (größte Fläche)
-// links, P mitte, F rechts. Farben aus tokens.css --chart-color-*.
+// Voller Donut-Ring für die Makro-Verteilung — M3-Circular-Progress-Style
+// mit stroke-linecap=round und kleinen Gaps zwischen den Segmenten. Segmente
+// proportional zu den kcal-Anteilen von P/KH/F (nicht Gramm — sonst wäre
+// Fett trotz 9 kcal/g visuell zu klein). Reihenfolge KH → P → F, Start oben
+// (12 Uhr) via transform rotate(-90 auf gemeinsame Gruppe).
 function renderHorseshoe(macros) {
   const pKcal = macros.p * 4;
   const khKcal = macros.kh * 4;
@@ -135,22 +136,27 @@ function renderHorseshoe(macros) {
   const khPct = khKcal / total;
   const fPct = fKcal / total;
 
-  // SVG-Halbkreis: viewBox 100×55, Radius 45, Path von (5,50) nach (95,50).
-  // Segmente-Reihenfolge KH → P → F (KH als größte Fläche zuerst links, F
-  // als kleinste rechts). stroke-dasharray legt Länge, dashoffset schiebt
-  // jedes Segment um die kumulative Länge davor.
-  const R = 45;
-  const CIRC = Math.PI * R;
+  const R = 42;
+  const CIRC = 2 * Math.PI * R;
   const strokeW = 10;
-  const khLen = khPct * CIRC;
-  const pLen = pPct * CIRC;
-  const fLen = fPct * CIRC;
+  // Gap in Umfangs-Einheiten (~3 units bei CIRC ≈ 264 → ca. 1.1% pro Gap).
+  // Wird von jedem Segment abgezogen, dashoffset schiebt den Segmentstart um
+  // die kumulative Länge davor.
+  const GAP = 3;
+  const khLen = Math.max(0, khPct * CIRC - GAP);
+  const pLen  = Math.max(0, pPct  * CIRC - GAP);
+  const fLen  = Math.max(0, fPct  * CIRC - GAP);
+  const khOffset = 0;
+  const pOffset  = -(khPct * CIRC);
+  const fOffset  = -((khPct + pPct) * CIRC);
   return `
-    <svg class="onboarding-horseshoe" viewBox="0 0 100 55" role="img" aria-label="Makro-Verteilung: Kohlenhydrate ${Math.round(khPct*100)}%, Protein ${Math.round(pPct*100)}%, Fett ${Math.round(fPct*100)}%">
-      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--md-sys-color-surface-container)" stroke-width="${strokeW}" stroke-linecap="butt" />
-      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--chart-color-kh)" stroke-width="${strokeW}" stroke-linecap="butt" stroke-dasharray="${khLen} ${CIRC - khLen}" />
-      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--chart-color-p)"  stroke-width="${strokeW}" stroke-linecap="butt" stroke-dasharray="${pLen} ${CIRC - pLen}"   stroke-dashoffset="${-khLen}" />
-      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--chart-color-f)"  stroke-width="${strokeW}" stroke-linecap="butt" stroke-dasharray="${fLen} ${CIRC - fLen}"   stroke-dashoffset="${-(khLen + pLen)}" />
+    <svg class="onboarding-macro-ring" viewBox="0 0 100 100" role="img" aria-label="Makro-Verteilung: Kohlenhydrate ${Math.round(khPct*100)}%, Protein ${Math.round(pPct*100)}%, Fett ${Math.round(fPct*100)}%">
+      <g transform="rotate(-90 50 50)">
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--md-sys-color-surface-container)" stroke-width="${strokeW}" />
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-kh)" stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${khLen} ${CIRC - khLen}" stroke-dashoffset="${khOffset}" />
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-p)"  stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${pLen} ${CIRC - pLen}"   stroke-dashoffset="${pOffset}" />
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-f)"  stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${fLen} ${CIRC - fLen}"   stroke-dashoffset="${fOffset}" />
+      </g>
     </svg>
   `;
 }
