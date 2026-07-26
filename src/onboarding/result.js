@@ -11,6 +11,27 @@ import { DEFAULTS } from './steps.js';
 
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
 
+// Icons fuer den Theme-Cycle-Button auf Step 4 — 1:1 uebernommen aus
+// settings/render.js, damit Auto/Hell/Dunkel visuell identisch wirken.
+const ICON_CONTRAST   = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q83 0 156 31.5T763-763q54 54 85.5 127T880-480q0 83-31.5 156T763-197q-54 54-127 85.5T480-80Zm40-82q100-15 170-92.5T760-480q0-108-70-185.5T520-758v596Z"/></svg>`;
+const ICON_LIGHT_MODE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-360q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Zm0 80q-83 0-141.5-58.5T280-480q0-83 58.5-141.5T480-680q83 0 141.5 58.5T680-480q0 83-58.5 141.5T480-280ZM200-440H40v-80h160v80Zm720 0H760v-80h160v80ZM440-760v-160h80v160h-80Zm0 720v-160h80v160h-80ZM256-650l-101-97 57-59 96 100-52 56Zm492 496-97-101 53-55 101 97-57 59Zm-98-550 97-101 59 57-100 96-56-52ZM154-212l101-97 55 53-97 101-59-57Z"/></svg>`;
+const ICON_DARK_MODE  = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-120q-150 0-255-105T120-480q0-150 105-255t255-105q14 0 27.5 1t26.5 3q-41 29-65.5 75.5T444-660q0 90 63 153t153 63q55 0 101-24.5t75-65.5q2 13 3 26.5t1 27.5q0 150-105 255T480-120Z"/></svg>`;
+
+// Reihenfolge des Theme-Cycles: Auto -> Hell -> Dunkel -> Auto ...
+export const THEME_CYCLE = ['auto', 'light', 'dark'];
+
+export function themeIconFor(theme) {
+  if (theme === 'light') return ICON_LIGHT_MODE;
+  if (theme === 'dark')  return ICON_DARK_MODE;
+  return ICON_CONTRAST;
+}
+
+export function themeLabelFor(theme) {
+  if (theme === 'light') return 'Hell';
+  if (theme === 'dark')  return 'Dunkel';
+  return 'Automatisch';
+}
+
 // Baut ein temporäres Profile-Object aus draft (mit Defaults für nicht-touched
 // Felder), damit dailyTarget()/dinnerTarget() rechnen können auch wenn der
 // User vorherige Steps übersprungen hat. Fallbacks aus DEFAULTS greifen für
@@ -54,9 +75,21 @@ export function renderStep5(draft) {
   const nameGreeting = draft.name ? `, ${draft.name}` : '';
   const fmt = (n) => n == null ? '—' : n.toLocaleString('de-DE');
   const sliderVal = effective ?? 2000;
+  const theme = state.settings.theme || 'auto';
   return `
-    <h3 class="onboarding-step__title">Fertig${nameGreeting}.</h3>
-    <p class="onboarding-step__desc">Mahlzeit, lass es dir schmecken!</p>
+    <div class="onboarding-result__intro">
+      <div class="onboarding-result__intro-text">
+        <h3 class="onboarding-step__title">Fertig${nameGreeting}.</h3>
+        <p class="onboarding-step__desc">Mahlzeit, lass es dir schmecken!</p>
+      </div>
+      <button class="onboarding-theme-cycle"
+              type="button"
+              data-action="theme-cycle"
+              data-theme="${theme}"
+              aria-label="Erscheinungsbild: ${themeLabelFor(theme)} — antippen zum Wechseln">
+        ${themeIconFor(theme)}
+      </button>
+    </div>
 
     <div class="onboarding-result__card onboarding-result__card--primary">
       <div class="onboarding-result__card-header">

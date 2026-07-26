@@ -233,6 +233,73 @@
   display: none;
 }
 
+/* Ergebnis-Header (Step 4) — Titel + Untertitel links, Theme-Cycle-Button
+   rechts als eigene kleine "Card". Icon-Kachel ist vertikal zentriert
+   relativ zu den beiden Text-Zeilen (align-items: center), Text bleibt
+   linksbündig. Der 24-px-Abstand nach unten sitzt auf dem Row-Container,
+   weil .onboarding-step__desc innen auf margin: 0 überschrieben wird. */
+.onboarding-result__intro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.onboarding-result__intro-text {
+  flex: 1;
+  min-width: 0;
+}
+.onboarding-result__intro-text .onboarding-step__title {
+  margin-bottom: 4px;
+}
+.onboarding-result__intro-text .onboarding-step__desc {
+  margin-bottom: 0;
+}
+/* Theme-Cycle-Button: kompakte 56x56-Kachel mit Card-Radius, oberhalb der
+   Ergebnis-Karten. Bewusst NICHT surface-container-low wie die Karten
+   darunter — bei einem so kleinen Element ist der 5-Einheiten-Delta zum
+   Sheet-Surface im Light-Mode kaum lesbar. surface-container-high gibt
+   ausreichend Kontrast (~16 Einheiten Light, ~23 Dark), damit die Kachel
+   klar als tippbares Element wirkt.
+   Zustaende ueber data-theme:
+   - auto  = off (surface-container-high + on-surface-variant)
+   - hell  = on  (primary + on-primary, analog aktive Theme-Chip in Settings)
+   - dunkel = on (primary + on-primary) */
+.onboarding-theme-cycle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card, 16px);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.onboarding-theme-cycle:hover {
+  color: var(--md-sys-color-on-surface);
+}
+.onboarding-theme-cycle[data-theme="light"],
+.onboarding-theme-cycle[data-theme="dark"] {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-theme-cycle[data-theme="light"]:hover,
+.onboarding-theme-cycle[data-theme="dark"]:hover {
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-theme-cycle:active {
+  transform: scale(0.97);
+}
+.onboarding-theme-cycle svg {
+  width: 24px;
+  height: 24px;
+}
+
 /* Ergebnis-Karten (Step 5) — Filled-Style (M3) analog Dashboard-Cards:
    surface-container-low als leicht angehobener Grund, kein Border. Akzent
    nur über die primary-Zahl bei den hervorgehobenen Karten (Tagesbedarf +

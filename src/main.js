@@ -145,7 +145,13 @@ mountMacroPopup(macroPopupRoot, {
   onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),
   onChange: refresh,
 });
-mountOnboardingWizard(onboardingRoot, { onChange: refresh });
+mountOnboardingWizard(onboardingRoot, {
+  onChange: refresh,
+  onThemeChange: () => {
+    applyTheme();
+    saveState();
+  },
+});
 
 // Dish-Picker: onPick mutiert das Assignment für den gewählten Tag und würfelt
 // alle anderen Tage, die dasselbe Gericht hatten, automatisch neu — sonst wäre

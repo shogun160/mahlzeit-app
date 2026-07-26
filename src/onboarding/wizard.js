@@ -1,13 +1,14 @@
 import { state, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
-import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile, macrosForKcal, renderMacrosPills } from './result.js';
+import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile, macrosForKcal, renderMacrosPills, THEME_CYCLE, themeIconFor, themeLabelFor } from './result.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 4;
 
 let rootEl = null;
 let onExternalChange = () => {};
+let onExternalThemeChange = () => {};
 let currentStep = 1;
 // Trackt ob das Sheet gerade offen ist — wichtig, damit renderShell() bei
 // Re-Renders (goNext/goBack) die .is-open-Klasse direkt ins HTML nimmt und
@@ -21,9 +22,10 @@ let isOpen = false;
 let draft = {};
 let touched = {};
 
-export function mountOnboardingWizard(el, { onChange } = {}) {
+export function mountOnboardingWizard(el, { onChange, onThemeChange } = {}) {
   rootEl = el;
   onExternalChange = onChange || (() => {});
+  onExternalThemeChange = onThemeChange || (() => {});
   rootEl.innerHTML = '';
   rootEl.hidden = true;
 }
@@ -356,8 +358,25 @@ function bindMacroPresetChips() {
   });
 }
 
-// Step 4 (Ergebnis) — Tagesbedarf-Slider + Refresh.
+// Step 4 (Ergebnis) — Tagesbedarf-Slider + Refresh + Theme-Cycle.
 function attachStep4Handlers() {
+  // Theme-Cycle-Button oben rechts: Auto -> Hell -> Dunkel -> Auto ...
+  // Mutiert state.settings.theme direkt und ruft onExternalThemeChange
+  // (das applyTheme + saveState triggert), analog zum Settings-Sheet.
+  const themeBtn = rootEl.querySelector('[data-action="theme-cycle"]');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const current = state.settings.theme || 'auto';
+      const idx = THEME_CYCLE.indexOf(current);
+      const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
+      state.settings.theme = next;
+      themeBtn.dataset.theme = next;
+      themeBtn.innerHTML = themeIconFor(next);
+      themeBtn.setAttribute('aria-label', `Erscheinungsbild: ${themeLabelFor(next)} — antippen zum Wechseln`);
+      onExternalThemeChange();
+    });
+  }
+
   const slider = rootEl.querySelector('[data-action="target-change"]');
   if (slider) {
     slider.addEventListener('input', () => {
