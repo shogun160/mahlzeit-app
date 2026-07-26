@@ -26,8 +26,16 @@ const FILTERS = [
   { key: 'middleEast',    label: 'Nahost',      group: 'cuisine', test: (d) => d.cuisineGroup === 'middleEast' },
   { key: 'americas',      label: 'Amerikanisch', group: 'cuisine', test: (d) => d.cuisineGroup === 'americas' },
   { key: 'fast',   label: 'Schnell',       group: 'attr',    test: (d) => d.cooktime <= 30 },
-  { key: 'simple', label: 'Wenig Zutaten', group: 'attr',    test: (d) => d.ingredients.length <= 8 },
+  { key: 'simple', label: 'Wenig Zutaten', group: 'attr',    test: (d) => openIngredientCount(d) <= 8 },
 ];
+
+// Anzahl noch nicht abgehakter Zutaten dieses Gerichts — identisch zur Pille
+// auf dem Picker-Tile und zum Card-Badge im Dashboard. Wird sowohl vom
+// "Wenig Zutaten"-Filter als auch vom Sort genutzt, damit Sichtbares (Pille)
+// und Ranking konsistent bleiben.
+function openIngredientCount(dish) {
+  return dish.ingredients.filter((i) => !state.checkedShopping.has(i.key)).length;
+}
 
 const TRANSITION_MS = 250;
 const SCROLL_COMPACT_THRESHOLD = 8; // px Scroll bis Filter-Row zusammenklappt
@@ -175,9 +183,11 @@ function filteredDishes() {
 
   // Sortierung nach aktivem Attribut-Filter (aufsteigend, weniger = besser):
   //   Schnell aktiv         → nach cooktime
-  //   Wenig Zutaten aktiv   → nach Zutatenanzahl
-  //   Beide aktiv           → cooktime primär, Zutaten sekundär
+  //   Wenig Zutaten aktiv   → nach noch offenen Zutaten (openIngredientCount)
+  //   Beide aktiv           → cooktime primär, offene Zutaten sekundär
   //   Keiner aktiv          → natürliche Reihenfolge (nach id)
+  // "Wenig Zutaten" sortiert bewusst nach offenen (nicht abgehakten) Zutaten,
+  // damit Ranking und die auf jedem Tile sichtbare Pille denselben Wert zeigen.
   const sortFast = activeFilters.has('fast');
   const sortSimple = activeFilters.has('simple');
   if (sortFast || sortSimple) {
@@ -187,7 +197,7 @@ function filteredDishes() {
         if (d !== 0) return d;
       }
       if (sortSimple) {
-        const d = a.ingredients.length - b.ingredients.length;
+        const d = openIngredientCount(a) - openIngredientCount(b);
         if (d !== 0) return d;
       }
       return a.id - b.id;
@@ -258,7 +268,7 @@ function renderTile(dish, isCurrent, usedMap) {
     : '';
   // Anzahl noch nicht abgehakter Zutaten dieses Gerichts — identische Semantik
   // wie beim Card-Badge im Dashboard ("so viele Zutaten stehen noch offen").
-  const openCount = dish.ingredients.filter((i) => !state.checkedShopping.has(i.key)).length;
+  const openCount = openIngredientCount(dish);
   const shopCls = 'picker-tile__shop' + (isCurrent ? ' picker-tile__shop--active' : '');
   const shopPill = openCount > 0
     ? `<span class="${shopCls}" aria-label="${openCount} offene Zutaten">
