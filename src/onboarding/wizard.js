@@ -1,4 +1,4 @@
-import { state, getActiveProfile, saveState } from '../state.js';
+import { state, getActiveProfile, getProfileById, addProfile, removeProfile, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
 import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile, macrosForKcal, renderMacrosPills, THEME_CYCLE, themeIconFor, themeLabelFor } from './result.js';
@@ -15,24 +15,41 @@ let currentStep = 1;
 // das Sheet nicht kurz weg-slidet.
 let isOpen = false;
 
+// Multi-Profile-Follow-up (Etappe 2):
+//   editingProfileId  null = erster Durchgang, editiert getActiveProfile()
+//                     sonst = Sub-Wizard fuer profiles[id] (neu angelegt beim
+//                             Klick auf "Ja, jetzt")
+//   personIndex       1 = User 1, 2 = zweiter Sub-Wizard, ... — zeigt sich
+//                     als "Person X von N"-Pille im Header ab Index > 1.
+//   showFollowup      true = statt normalem Step-Content wird die Zwischen-
+//                     Frage "Willst du weitere Profile anlegen?" gezeigt.
+let editingProfileId = null;
+let personIndex = 1;
+let showFollowup = false;
+
 // Draft hält die Werte, die der User im Wizard eingibt. Beim Öffnen aus dem
-// aktiven Profil (getActiveProfile()) pre-fillt. touched trackt pro Feld, ob
-// der User es aktiv angefasst hat — nur touched-Werte werden bei "Überspringen"
-// persistiert. "Fertig" committet alles inkl. stiller Defaults.
+// editierten Profil (getEditingProfile()) pre-fillt. touched trackt pro Feld,
+// ob der User es aktiv angefasst hat — nur touched-Werte werden bei
+// "Überspringen" persistiert. "Fertig" committet alles inkl. stiller Defaults.
 let draft = {};
 let touched = {};
 
-export function mountOnboardingWizard(el, { onChange, onThemeChange } = {}) {
-  rootEl = el;
-  onExternalChange = onChange || (() => {});
-  onExternalThemeChange = onThemeChange || (() => {});
-  rootEl.innerHTML = '';
-  rootEl.hidden = true;
+// Rueckgabe des Profils, das der Wizard aktuell editiert. Bei erstem Durchgang
+// = aktives Profil (User 1). Bei Sub-Wizards = neu angelegtes Profil per
+// editingProfileId. Fallback auf getActiveProfile() falls die id ins Leere zeigt
+// (defensiv — sollte nie greifen).
+function getEditingProfile() {
+  if (editingProfileId) {
+    const p = getProfileById(editingProfileId);
+    if (p) return p;
+  }
+  return getActiveProfile();
 }
 
-export function openOnboardingWizard() {
-  if (!rootEl) throw new Error('Onboarding-Wizard nicht gemountet.');
-  const p = getActiveProfile();
+// Setzt Draft + touched aus einem Profil. Bei Sub-Wizards (neu angelegt) sind
+// alle Slots noch null — der User startet mit den stillen DEFAULTS als
+// Anzeige, die nur bei aktivem Klicken/Ziehen als touched markiert werden.
+function initDraftFromProfile(p) {
   draft = {
     name: p.name,
     gender: p.gender,
@@ -41,7 +58,9 @@ export function openOnboardingWizard() {
     weightKg: p.weightKg,
     // Personen-Slider steht im Wizard-Step-1, das Feld sitzt aber global auf
     // state.settings.defaultPortions (nicht im profile) — der Wizard fuellt es
-    // im finishAndClose/persistAndClose separat zurueck.
+    // im finishAndClose/persistAndClose separat zurueck. Bei Sub-Wizards wird
+    // der Slider ausgeblendet (isSubProfile=true), das Feld hier bleibt aber
+    // synchron zum globalen Wert.
     defaultPortions: state.settings.defaultPortions,
     activityLevel: p.activityLevel,
     goal: p.goal,
@@ -55,7 +74,29 @@ export function openOnboardingWizard() {
     activityLevel: false, goal: false, breakfastKcal: false, lunchKcal: false,
     dailyTargetOverride: false,
   };
+}
+
+function isSubProfileWizard() {
+  return editingProfileId != null;
+}
+
+export function mountOnboardingWizard(el, { onChange, onThemeChange } = {}) {
+  rootEl = el;
+  onExternalChange = onChange || (() => {});
+  onExternalThemeChange = onThemeChange || (() => {});
+  rootEl.innerHTML = '';
+  rootEl.hidden = true;
+}
+
+export function openOnboardingWizard() {
+  if (!rootEl) throw new Error('Onboarding-Wizard nicht gemountet.');
+  // Reset Multi-Profile-State — jedes Oeffnen startet mit User 1.
+  editingProfileId = null;
+  personIndex = 1;
+  showFollowup = false;
   currentStep = 1;
+
+  initDraftFromProfile(getActiveProfile());
 
   // onboardingSeen SOFORT setzen — auch bei App-Crash während Wizard nicht wieder
   // auto-triggern. saveState() persistiert das direkt.
@@ -89,18 +130,37 @@ export function closeOnboardingWizard() {
 }
 
 function handleEsc(ev) {
-  if (ev.key === 'Escape') persistAndClose();
+  if (ev.key !== 'Escape') return;
+  // Im Follow-up = Spaeter (kein weiteres Profil), sonst persistAndClose.
+  if (showFollowup) closeOnboardingWizard();
+  else persistAndClose();
 }
 
-// Persistiert nur touched-Felder in das aktive Profil. Endroutine für
-// "Überspringen" und Backdrop-Klick — der User hat den Wizard nicht bewusst
+// Persistiert nur touched-Felder in das editierte Profil. Endroutine für
+// "Überspringen", Backdrop-Klick und X — der User hat den Wizard nicht bewusst
 // abgeschlossen, deshalb bleiben stille Defaults null (Placeholder-Pille zeigt
 // die unvollständige Einrichtung im Dashboard).
+//
+// Sub-Wizard-Sonderfall (Etappe 2): Wenn der User im 2..N-Wizard NICHTS
+// touched hat, wird das leere Profil wieder entfernt — sonst haetten wir einen
+// Zombie-Slot in state.settings.profiles.
 function persistAndClose() {
-  const p = getActiveProfile();
+  const anyTouched = Object.values(touched).some(Boolean);
+  if (isSubProfileWizard() && !anyTouched) {
+    removeProfile(editingProfileId);
+    editingProfileId = null;
+    saveState();
+    onExternalChange();
+    closeOnboardingWizard();
+    return;
+  }
+  const p = getEditingProfile();
   for (const key of Object.keys(touched)) {
     if (!touched[key]) continue;
-    // defaultPortions lebt global auf state.settings, nicht im profile.
+    // defaultPortions lebt global auf state.settings, nicht im profile. Bei
+    // Sub-Wizards wird der Slider ausgeblendet (touched.defaultPortions bleibt
+    // false), sodass die globale Personenzahl von hier nicht ungewollt
+    // ueberschrieben wird.
     if (key === 'defaultPortions') {
       state.settings.defaultPortions = draft[key];
     } else {
@@ -116,20 +176,54 @@ function persistAndClose() {
 // Wizard bewusst durchlaufen und die stillen Defaults durch Weiter-Klicken
 // bestätigt. Null-Slots werden aus DEFAULTS gefüllt. Name und
 // dailyTargetOverride bleiben optional (dürfen null sein).
+//
+// Nach dem Persist wird maybeShowFollowup() geprueft: reichen die vorhandenen
+// Profile fuer die eingestellte Personenzahl, oder brauchen wir noch weitere?
 function finishAndClose() {
-  const p = getActiveProfile();
+  const p = getEditingProfile();
   for (const key of Object.keys(draft)) {
     if (key === 'name' || key === 'dailyTargetOverride') {
       p[key] = draft[key];
     } else if (key === 'defaultPortions') {
-      state.settings.defaultPortions = draft[key] ?? DEFAULTS.defaultPortions;
+      // Sub-Wizards editieren die globale Personenzahl nicht (Slider ist da
+      // ausgeblendet, touched bleibt false). Fuer User 1 gilt der Draft-Wert.
+      if (!isSubProfileWizard()) {
+        state.settings.defaultPortions = draft[key] ?? DEFAULTS.defaultPortions;
+      }
     } else {
       p[key] = draft[key] ?? DEFAULTS[key];
     }
   }
   saveState();
   onExternalChange();
+  maybeShowFollowupOrClose();
+}
+
+// Nach Fertig-Klick: pruefen ob wir die Follow-up-Frage einblenden muessen.
+// Bedingung: eingestellte Personenzahl > vorhandene Profile UND wir sind
+// gerade nicht schon dabei. Sonst: Wizard schliessen.
+function maybeShowFollowupOrClose() {
+  const need = state.settings.defaultPortions;
+  const have = state.settings.profiles.length;
+  if (need > 1 && have < need) {
+    showFollowup = true;
+    personIndex = have + 1;
+    renderShell();
+    return;
+  }
   closeOnboardingWizard();
+}
+
+// User hat "Ja, jetzt" gewaehlt — neues Blank-Profil anlegen, Wizard fuer
+// diesen Slot neu starten. editingProfileId zeigt jetzt auf das neue Profil,
+// draft ist leer (der User startet frisch, mit stillen DEFAULTS in Step 1).
+function startSubProfileWizard() {
+  const p = addProfile({});
+  editingProfileId = p.id;
+  showFollowup = false;
+  currentStep = 1;
+  initDraftFromProfile(p);
+  renderShell();
 }
 
 function renderShell() {
@@ -137,6 +231,28 @@ function renderShell() {
   // isOpen ist true bei Re-Renders aus goNext/goBack — dann die Klasse direkt
   // ins HTML, sonst würde das Sheet zwischen den Steps weg-sliden.
   const openCls = isOpen ? ' is-open' : '';
+  const totalPersons = state.settings.defaultPortions;
+  // Personen-Pille nur ab Person 2 sichtbar — bei Solo-Einrichtung (User 1
+  // allein) waere sie visuell Rauschen. Als eigene Zeile unter dem Titel
+  // gerendert, damit das 3-Column-Grid der Header-Row (36|1fr|36) unangetastet
+  // bleibt.
+  const personPill = (personIndex > 1)
+    ? `<div class="onboarding-header__person"><span class="onboarding-header__person-pill" aria-label="Person ${personIndex} von ${totalPersons}">Person ${personIndex} von ${totalPersons}</span></div>`
+    : '';
+  // Progress-Bar wird nur im normalen Wizard gezeigt, nicht im Follow-up-Screen
+  // (dort gibt es keinen Step-Progress, nur die Ja/Spaeter-Entscheidung).
+  const progressBar = showFollowup ? '' : `
+    <div class="onboarding-progress">
+      <div class="onboarding-progress__label">Schritt ${currentStep} von ${TOTAL_STEPS}</div>
+      <div class="onboarding-progress__track"
+           role="progressbar"
+           aria-valuemin="1"
+           aria-valuemax="${TOTAL_STEPS}"
+           aria-valuenow="${currentStep}">
+        <div class="onboarding-progress__fill" style="width: ${progressPct}%"></div>
+      </div>
+    </div>
+  `;
   rootEl.innerHTML = `
     <div class="onboarding-overlay${openCls}" data-role="backdrop">
       <div class="onboarding-sheet" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
@@ -146,16 +262,8 @@ function renderShell() {
             <h2 class="onboarding-header__title" id="onboarding-title">Einrichtung</h2>
             <button class="onboarding-close" type="button" data-action="close" aria-label="Schließen — Entwurf speichern">✕</button>
           </div>
-          <div class="onboarding-progress">
-            <div class="onboarding-progress__label">Schritt ${currentStep} von ${TOTAL_STEPS}</div>
-            <div class="onboarding-progress__track"
-                 role="progressbar"
-                 aria-valuemin="1"
-                 aria-valuemax="${TOTAL_STEPS}"
-                 aria-valuenow="${currentStep}">
-              <div class="onboarding-progress__fill" style="width: ${progressPct}%"></div>
-            </div>
-          </div>
+          ${personPill}
+          ${progressBar}
         </div>
         <div class="onboarding-body" data-role="step-slot">
           ${renderStepContent()}
@@ -170,8 +278,9 @@ function renderShell() {
 }
 
 function renderStepContent() {
+  if (showFollowup) return renderFollowup();
   switch (currentStep) {
-    case 1: return renderStep1(draft);
+    case 1: return renderStep1(draft, { isSubProfile: isSubProfileWizard() });
     case 2: return renderStep2(draft);
     case 3: return renderStep3(state.settings);
     case 4: return renderStep4(draft);
@@ -179,7 +288,31 @@ function renderStepContent() {
   }
 }
 
+// Follow-up-Screen: nach "Fertig" von User X, wenn defaultPortions noch mehr
+// Personen erwartet als Profile vorhanden sind. Zwei explizite Wege — "Ja"
+// startet den naechsten Sub-Wizard, "Spaeter" schliesst den Wizard komplett.
+function renderFollowup() {
+  const total = state.settings.defaultPortions;
+  const have = state.settings.profiles.length;
+  const missing = total - have;
+  const missingLabel = missing === 1 ? 'noch eine Person' : `noch ${missing} weitere Personen`;
+  return `
+    <div class="onboarding-followup">
+      <h3 class="onboarding-step__title">Weitere Profile anlegen?</h3>
+      <p class="onboarding-step__desc">Du kochst für <strong>${total} Personen</strong>. Es ${missing === 1 ? 'fehlt' : 'fehlen'} ${missingLabel}. Ohne Profil rechnen wir mit einem DGE-Standardbedarf (2200 kcal).</p>
+    </div>
+  `;
+}
+
 function renderFooter() {
+  if (showFollowup) {
+    // Follow-up hat zwei Buttons: "Spaeter" (schliesst) + "Ja, jetzt" (naechster
+    // Sub-Wizard). Kein Zurueck/Ueberspringen — die Entscheidung ist binaer.
+    return `
+      <button class="onboarding-btn onboarding-btn--tertiary" type="button" data-action="followup-later">Später</button>
+      <button class="onboarding-btn onboarding-btn--primary" type="button" data-action="followup-yes">Ja, jetzt</button>
+    `;
+  }
   const isFirst = currentStep === 1;
   const isLast = currentStep === TOTAL_STEPS;
   const primaryLabel = isLast ? 'Fertig' : 'Weiter';
@@ -199,16 +332,24 @@ function renderFooter() {
 function attachShellHandlers() {
   const overlay = rootEl.querySelector('[data-role="backdrop"]');
   overlay.addEventListener('click', (ev) => {
-    if (ev.target === overlay) persistAndClose();
+    if (ev.target === overlay) {
+      // Follow-up: Backdrop-Klick = Spaeter (schliessen ohne weiteres Profil).
+      if (showFollowup) closeOnboardingWizard();
+      else persistAndClose();
+    }
   });
 
   const skipBtn = rootEl.querySelector('[data-action="skip"]');
   if (skipBtn) skipBtn.addEventListener('click', persistAndClose);
-  // X oben rechts — global auf allen Steps verfügbar. Speichert nur touched-
-  // Felder als Draft, Wizard bleibt im Status "nicht abgeschlossen"
-  // (Placeholder-Pille auf Dashboard bleibt sichtbar).
+  // X oben rechts — global auf allen Steps verfügbar. Im Follow-up bedeutet
+  // X das gleiche wie "Spaeter" (schliessen, kein weiteres Profil anlegen).
+  // Sonst: Draft persistieren, Wizard schliesst als "nicht abgeschlossen"
+  // (Placeholder-Pille bleibt sichtbar).
   const closeBtn = rootEl.querySelector('[data-action="close"]');
-  if (closeBtn) closeBtn.addEventListener('click', persistAndClose);
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    if (showFollowup) closeOnboardingWizard();
+    else persistAndClose();
+  });
   const nextBtn = rootEl.querySelector('[data-action="next"]');
   if (nextBtn) nextBtn.addEventListener('click', goNext);
   const backBtn = rootEl.querySelector('[data-action="back"]');
@@ -216,7 +357,15 @@ function attachShellHandlers() {
   const finishBtn = rootEl.querySelector('[data-action="finish"]');
   if (finishBtn) finishBtn.addEventListener('click', finishAndClose);
 
-  attachStepHandlers();
+  // Follow-up-Buttons: Ja startet naechsten Sub-Wizard, Spaeter schliesst.
+  const yesBtn = rootEl.querySelector('[data-action="followup-yes"]');
+  if (yesBtn) yesBtn.addEventListener('click', startSubProfileWizard);
+  const laterBtn = rootEl.querySelector('[data-action="followup-later"]');
+  if (laterBtn) laterBtn.addEventListener('click', closeOnboardingWizard);
+
+  // Step-Handler nur binden wenn wir gerade einen Step zeigen (Follow-up hat
+  // keine Step-Inputs).
+  if (!showFollowup) attachStepHandlers();
 }
 
 function goNext() {

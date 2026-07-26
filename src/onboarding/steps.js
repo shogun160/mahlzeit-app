@@ -20,7 +20,10 @@ export const DEFAULTS = {
 // Step 1: Über dich — Name (optional) + Geschlecht (Chips) + Alter (Stepper) +
 // Größe + Gewicht (Slider). Handler in wizard.js/attachStep1Handlers nutzen
 // bindSlider-Helper für die zwei Slider am Ende.
-export function renderStep1(draft) {
+//
+// options.isSubProfile blendet den Personen-Slider aus (defaultPortions ist
+// globales Setting, nicht per Profil — im 2..N-Wizard sinnlos).
+export function renderStep1(draft, { isSubProfile = false } = {}) {
   const nameVal = draft.name ?? '';
   const genderVal = draft.gender ?? DEFAULTS.gender;
   const ageVal = draft.age ?? DEFAULTS.age;
@@ -94,6 +97,7 @@ export function renderStep1(draft) {
              aria-label="Gewicht in Kilogramm" />
     </div>
 
+    ${isSubProfile ? '' : `
     <div class="onboarding-field">
       <div class="onboarding-field__row">
         <div class="onboarding-field__label">Für wie viele kochst du?</div>
@@ -108,6 +112,7 @@ export function renderStep1(draft) {
              data-action="portions-change"
              aria-label="Anzahl Personen im Haushalt" />
     </div>
+    `}
   `;
 }
 

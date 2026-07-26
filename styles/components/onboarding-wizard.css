@@ -94,6 +94,32 @@
   transform: scale(0.94);
 }
 
+/* Personen-Pille: sichtbar im Sub-Wizard (Person 2..N) unter dem Titel.
+   Zentriert wie der Titel, kleine Farbe-Betonung. Rendert nur im 2..N-Wizard,
+   sodass die Solo-Einrichtung visuell unveraendert bleibt. */
+.onboarding-header__person {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.onboarding-header__person-pill {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Follow-up-Screen (Etappe 2 Multi-Profile): nach Wizard-Fertig fuer User X,
+   wenn defaultPortions noch mehr Personen erwartet. Einfacher zentrierter
+   Prompt — Buttons kommen im footer wie ueblich. */
+.onboarding-followup {
+  padding: 8px 0;
+}
+
 /* Progress-Zeile — analog zu .shop-progress__track/__fill. */
 .onboarding-progress__label {
   font-size: 0.8125rem;
