@@ -384,18 +384,24 @@
   font-variant-numeric: tabular-nums;
 }
 
+.ingredient-sum__macros {
+  justify-content: center;
+}
 .ingredient-sum__macros > span {
   white-space: nowrap;
 }
 
-/* P/KH/F-Anteile in Chart-Farben — Durchgängigkeit zum Makro-Popup und den
-   Picker-Filter-Chips. Font-weight leicht angezogen, damit die Farbe wirkt. */
-.ingredient-sum__macro {
-  font-weight: 600;
+/* Nur die P/KH/F-Buchstaben in Chart-Farben — Werte + %-Klammern bleiben in
+   der neutralen Sum-Farbe. Etwas größer + fett, damit die farbigen Keys als
+   Etiketten wirken (analog Makro-Popup-Pillen). */
+.ingredient-sum__key {
+  font-weight: 700;
+  font-size: 1.05em;
+  margin: 0 1px;
 }
-.ingredient-sum__macro--p  { color: var(--chart-color-p); }
-.ingredient-sum__macro--kh { color: var(--chart-color-kh); }
-.ingredient-sum__macro--f  { color: var(--chart-color-f); }
+.ingredient-sum__key--p  { color: var(--chart-color-p); }
+.ingredient-sum__key--kh { color: var(--chart-color-kh); }
+.ingredient-sum__key--f  { color: var(--chart-color-f); }
 
 .ingredient-sum__sep {
   color: var(--md-sys-color-outline-variant);
