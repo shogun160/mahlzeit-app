@@ -15,7 +15,7 @@ function pickInitialAssignment() {
   return assignment;
 }
 
-export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker, onOpenMacroPopup) {
+export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker, onOpenMacroPopup, onOpenOnboarding) {
   // Erst-Initialisierung: falls noch kein Assignment vorliegt, würfeln.
   if (Object.keys(state.assignment).length === 0) {
     initState(pickInitialAssignment());
@@ -37,9 +37,13 @@ export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker, onOp
     // Klick auf die Bedarfs-Pille öffnet das Makro-Popup (Chart + Ø + Preset-
     // Einstellungen). Selector via data-action, damit die Bindung robust ist
     // wenn die Klasse mal wandert.
-    const trigger = barEl.matches('[data-action="open-macro-popup"]') ? barEl : barEl.querySelector('[data-action="open-macro-popup"]');
-    if (trigger && onOpenMacroPopup) {
-      trigger.addEventListener('click', () => onOpenMacroPopup());
+    const macroTrigger = barEl.matches('[data-action="open-macro-popup"]') ? barEl : barEl.querySelector('[data-action="open-macro-popup"]');
+    if (macroTrigger && onOpenMacroPopup) {
+      macroTrigger.addEventListener('click', () => onOpenMacroPopup());
+    }
+    const onboardingTrigger = barEl.matches('[data-action="open-onboarding"]') ? barEl : barEl.querySelector('[data-action="open-onboarding"]');
+    if (onboardingTrigger && onOpenOnboarding) {
+      onboardingTrigger.addEventListener('click', () => onOpenOnboarding());
     }
   }
 

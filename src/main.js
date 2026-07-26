@@ -51,7 +51,7 @@ function refresh() {
   });
 
   // Beide Views immer rendern: der Swipe braucht den Zielinhalt sofort sichtbar.
-  renderDashboard(dashboardRoot, refresh, openDetailSheet, openDishPicker, openMacroPopup);
+  renderDashboard(dashboardRoot, refresh, openDetailSheet, openDishPicker, openMacroPopup, openOnboardingWizard);
   renderShoppingList(shoppingRoot, { onChange: refresh });
 
   // Bottom-Nav: aktiver Tab + Badge sind state-abhängig, deshalb pro refresh() neu.

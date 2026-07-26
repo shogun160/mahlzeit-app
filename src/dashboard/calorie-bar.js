@@ -1,6 +1,6 @@
 import { state, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
-import { hasProfile, dinnerTarget, kcalRange } from '../nutrition/target.js';
+import { hasProfile, isProfileComplete, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { getScaleForDish } from '../nutrition/scale.js';
 
 // Kompakte Bedarfs-Bar zwischen Header und Card-Grid im Dashboard.
@@ -13,8 +13,20 @@ import { getScaleForDish } from '../nutrition/scale.js';
 // Ohne vollständiges Profil: leerer String (kein DOM-Element).
 export function renderCalorieBar() {
   const { profile } = state.settings;
-  if (!hasProfile(profile)) return '';
   if (profile.showCalorieBar === false) return '';
+
+  // Unvollständiges Profil: Placeholder-Pille als Wizard-Trigger.
+  // Ausnahme: showCalorieBar false (oben) → gar keine Pille.
+  if (!isProfileComplete(profile)) {
+    return `
+      <button class="calorie-bar calorie-bar--empty" type="button" data-action="open-onboarding" aria-label="Einrichtung starten — Bedarfs-Anzeige aktivieren">
+        <span class="calorie-bar__label">Bedarf</span>
+        <span class="calorie-bar__values">
+          <span class="calorie-bar__cta">Einrichtung starten</span>
+        </span>
+      </button>
+    `;
+  }
 
   const target = dinnerTarget(profile);
   if (target == null || target <= 0) return '';

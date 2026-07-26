@@ -82,3 +82,18 @@
 .calorie-bar--under .calorie-bar__intake {
   color: var(--md-sys-color-primary);
 }
+
+/* Placeholder-Pille für unvollständiges Profil — gleiche Basis-Geometrie wie
+   die normale Bedarfs-Pille, aber CTA-Text zentriert statt Werte. Klick öffnet
+   den Onboarding-Wizard. */
+.calorie-bar--empty {
+  justify-content: center;
+}
+.calorie-bar--empty .calorie-bar__values {
+  flex: 0 0 auto;
+}
+.calorie-bar__cta {
+  color: var(--md-sys-color-primary);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
