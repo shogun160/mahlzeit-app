@@ -1,6 +1,5 @@
 import { state, DAYS } from '../state.js';
 import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
-import { forgetCheckedForOldDish } from '../shopping-list/check.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
@@ -110,11 +109,15 @@ export function rerollDay(day) {
   }
   if (pick === null) return;
 
-  forgetCheckedForOldDish(day);
   state.assignment[day] = pick;
-  // Selection bewusst NICHT resetten — wenn der Tag schon für die Einkaufsliste
-  // angehakt war, bleibt er das auch beim Gericht-Wechsel. Nur rerollAll (kompletter
-  // Neustart) leert die Selection global.
+  // Tag auf inaktiv setzen: beim Reroll (unbewusste Änderung) will der User
+  // typisch nicht dass das neue Rezept sofort im Einkaufskorb landet. Wenn er
+  // das neue Gericht behalten möchte, kann er den Tag manuell anhaken oder
+  // gezielt via Picker wählen (der setzt selected = true automatisch).
+  // Wichtig: checkedShopping bleibt unangetastet — gekaufte Artikel bleiben
+  // gekauft. Nicht-abgehakte Zutaten des alten Rezepts verschwinden ohnehin,
+  // weil der Tag nicht mehr in der Consolidated-List zählt.
+  state.selected[day] = false;
 }
 
 export function rerollAll() {
@@ -127,11 +130,14 @@ export function rerollAll() {
     shuffledPool = weightedShuffle(pool, cuisineWeight);
   }
   DAYS.forEach((day, i) => {
-    forgetCheckedForOldDish(day);
     state.assignment[day] = shuffledPool[i];
     state.selected[day] = false;
     // Portionen springen auf den User-Standard (settings.defaultPortions).
     state.portions[day] = state.settings.defaultPortions;
   });
   state.dishBag = {};
+  // checkedShopping bleibt unangetastet — bereits gekaufte Artikel bleiben
+  // erhalten, auch wenn die neuen Gerichte sie evtl. nicht mehr enthalten
+  // (dann als Leftover sichtbar). Für einen echten Reset gibt es den
+  // separaten Reset-Button in der Einkaufsliste.
 }

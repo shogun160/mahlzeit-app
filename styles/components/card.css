@@ -63,7 +63,7 @@
   pointer-events: none;
 }
 
-/* M3 Small Icon-Button: 32 dp Container, kreisrund, 20 dp Icon.
+/* M3 Standard-Icon-Button: 40 dp Container, kreisrund, 24 dp Icon.
    Frosted-Glass bleibt (konsistent mit Portion-/Makro-Pillen), aber die Form
    ist bewusst kreisförmig statt pill — signalisiert Icon-Button statt Chip. */
 .edit-pill {
@@ -71,8 +71,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   padding: 0;
   border: none;
   border-radius: 50%;
@@ -86,8 +86,8 @@
 }
 
 .edit-pill svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: block;
   color: inherit;
 }
