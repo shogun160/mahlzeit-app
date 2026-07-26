@@ -102,6 +102,7 @@ function renderShell() {
           ${renderActivityRow()}
           ${renderGoalRow()}
           ${renderPreferencesRow()}
+          ${renderCuisinesRow()}
           ${renderDailyTargetRow()}
           ${renderMealRow('breakfast', 'Frühstück', currentProfile.breakfastKcal, BREAKFAST_MAX)}
           ${renderMealRow('lunch', 'Mittag', currentProfile.lunchKcal, LUNCH_MAX)}
@@ -276,6 +277,30 @@ function renderPreferencesRow() {
   `;
 }
 
+// Kuechen-Praeferenzen pro Profil: Toggle-Chips (Asiatisch/Mediterran/Nahost/
+// Amerikanisch). Im Dish-Picker wird die Union aller mitkochenden Profile
+// als Vorauswahl genutzt, Reihenfolge nach Voter-Anzahl absteigend.
+function renderCuisinesRow() {
+  const cuisines = currentProfile.cuisines ?? {};
+  const chip = (key, label) => `
+    <button class="pref-chip" type="button" data-cuisine-toggle="${key}" aria-pressed="${!!cuisines[key]}">${label}</button>
+  `;
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Küchen-Präferenz</div>
+        <div class="settings-row__label-secondary">Welche Küchen magst du?</div>
+      </div>
+      <div class="settings-prefs" role="group" aria-label="Küchen-Präferenz">
+        ${chip('asian', 'Asiatisch')}
+        ${chip('mediterranean', 'Mediterran')}
+        ${chip('middleEast', 'Nahost')}
+        ${chip('americas', 'Amerikanisch')}
+      </div>
+    </div>
+  `;
+}
+
 function renderDailyTargetRow() {
   const effective = effectiveDailyTarget(currentProfile);
   const suggestion = dailyTarget(currentProfile);
@@ -425,6 +450,17 @@ function attachHandlers() {
       if (!currentProfile.preferences) currentProfile.preferences = { meat: false, fish: false, vegetarian: false };
       currentProfile.preferences[key] = !currentProfile.preferences[key];
       btn.setAttribute('aria-pressed', String(!!currentProfile.preferences[key]));
+      onExternalChange();
+    });
+  });
+
+  // Cuisine-Chips (Kueche pro Profil)
+  rootEl.querySelectorAll('[data-cuisine-toggle]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.cuisineToggle;
+      if (!currentProfile.cuisines) currentProfile.cuisines = { asian: false, mediterranean: false, middleEast: false, americas: false };
+      currentProfile.cuisines[key] = !currentProfile.cuisines[key];
+      btn.setAttribute('aria-pressed', String(!!currentProfile.cuisines[key]));
       onExternalChange();
     });
   });

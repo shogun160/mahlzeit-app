@@ -1,5 +1,5 @@
 import { state, getActiveProfile, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
-import { getEffectivePreferences } from '../nutrition/preferences.js';
+import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount } from '../nutrition/preferences.js';
 import { allDishes } from '../data/dishes.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
@@ -160,7 +160,7 @@ function deriveInitialFilters() {
   if (p.meat) set.add('meat');
   if (p.fish) set.add('fish');
   if (p.vegetarian) set.add('veg');
-  const c = state.settings.cuisines || {};
+  const c = getEffectiveCuisines();
   if (c.asian)         set.add('asian');
   if (c.mediterranean) set.add('mediterranean');
   if (c.middleEast)    set.add('middleEast');
@@ -331,6 +331,12 @@ function filteredDishes() {
       const favA = isFavorite(a.id) ? 1 : 0;
       const favB = isFavorite(b.id) ? 1 : 0;
       if (favA !== favB) return favB - favA;
+      // Multi-User-Kuechen: Dishes deren Kueche mehr Diner unterstuetzen
+      // ranken hoeher. Bei Single-User oder ohne Kuechen-Prefs ist der Wert
+      // 0 fuer alle -> no-op.
+      const voteA = dishCuisineVoteCount(a);
+      const voteB = dishCuisineVoteCount(b);
+      if (voteA !== voteB) return voteB - voteA;
       if (sortFast) {
         const d = a.cooktime - b.cooktime;
         if (d !== 0) return d;
@@ -362,11 +368,15 @@ function filteredDishes() {
       return a.id - b.id;
     });
   } else {
-    // Ohne aktiven Sort trotzdem Favoriten nach oben ziehen, id als Tiebreaker.
+    // Ohne aktiven Sort: Favoriten nach oben, dann Kuechen-Voter-Anzahl
+    // (Multi-User: mehr Diner-Uebereinstimmung ranked hoeher), dann id.
     result.sort((a, b) => {
       const favA = isFavorite(a.id) ? 1 : 0;
       const favB = isFavorite(b.id) ? 1 : 0;
       if (favA !== favB) return favB - favA;
+      const voteA = dishCuisineVoteCount(a);
+      const voteB = dishCuisineVoteCount(b);
+      if (voteA !== voteB) return voteB - voteA;
       return a.id - b.id;
     });
   }

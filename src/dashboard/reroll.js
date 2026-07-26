@@ -1,22 +1,22 @@
 import { state, DAYS } from '../state.js';
 import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
-import { getEffectivePreferences } from '../nutrition/preferences.js';
+import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount } from '../nutrition/preferences.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
 // docs/redesign/2026-07-26-session-9-plan.md für die Entscheidung.
 const CUISINE_PREFERENCE_WEIGHT = 3;
 
-// Gewicht einer Dish-ID für den Weighted-Reroll: 3, wenn dish.cuisineGroup
-// einer aktiven Präferenz entspricht; sonst 1. Wenn keine Präferenz aktiv
-// ist, gibt sie für alle 1 zurück → Verhalten identisch zu shuffled().
+// Gewicht einer Dish-ID für den Weighted-Reroll bei Multi-User: proportional
+// zur Anzahl der mitkochenden Diner, die diese cuisineGroup als Praeferenz
+// gewaehlt haben. Basis 1, +CUISINE_PREFERENCE_WEIGHT pro Voter. Bei Solo /
+// keine Prefs -> 1 fuer alle (Verhalten identisch zu shuffled()).
 function cuisineWeight(id) {
   const dish = dishesById.get(id);
   if (!dish) return 1;
-  const prefs = state.settings.cuisines || {};
-  const anyActive = Object.values(prefs).some(Boolean);
-  if (!anyActive) return 1;
-  return prefs[dish.cuisineGroup] ? CUISINE_PREFERENCE_WEIGHT : 1;
+  const votes = dishCuisineVoteCount(dish);
+  if (votes === 0) return 1;
+  return 1 + votes * CUISINE_PREFERENCE_WEIGHT;
 }
 
 // Prüft, ob ein Dish alle aktiven Ernährungspräferenzen erfüllt.
@@ -56,7 +56,7 @@ function matchesPreferences(dish, prefs) {
 export function eligibleDishIds() {
   const maxTime = state.settings.maxCookTime;
   const prefs = getEffectivePreferences();
-  const cuisines = state.settings.cuisines || {};
+  const cuisines = getEffectiveCuisines();
   const activeCuisines = Object.keys(cuisines).filter((k) => cuisines[k]);
 
   const withoutCuisine = allDishIds.filter((id) => {

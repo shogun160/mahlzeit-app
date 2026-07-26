@@ -1,5 +1,13 @@
 import { state, getActiveProfile } from '../state.js';
 
+const CUISINE_KEYS = ['asian', 'mediterranean', 'middleEast', 'americas'];
+
+function activeDiners() {
+  const profiles = state.settings.profiles ?? [];
+  const n = Math.max(1, state.settings.defaultPortions ?? 1);
+  return profiles.slice(0, n);
+}
+
 // Ermittelt die effektiven Diaet-Prefs fuer den Dish-Picker + Reroll bei
 // Multi-User-Kochen. Regel:
 //   1) Schnittmenge der Diaet-Prefs aller mitkochenden Profile (erste N =
@@ -13,11 +21,7 @@ import { state, getActiveProfile } from '../state.js';
 //
 // Rueckgabe: { meat: boolean, fish: boolean, vegetarian: boolean }.
 export function getEffectivePreferences() {
-  const profiles = state.settings.profiles ?? [];
-  const n = Math.max(1, state.settings.defaultPortions ?? 1);
-  // Nur echte Profile, keine DEFAULT_USER-Fueller — Gaeste haben keine
-  // deklarierten Prefs, sollen die Auswahl nicht einschraenken.
-  const diners = profiles.slice(0, n);
+  const diners = activeDiners();
   const keys = ['meat', 'fish', 'vegetarian'];
 
   const anyDeclared = diners.some((p) => keys.some((k) => p.preferences?.[k]));
@@ -55,4 +59,30 @@ export function getEffectivePreferences() {
     fish: !!active.preferences?.fish,
     vegetarian: !!active.preferences?.vegetarian,
   };
+}
+
+// Kuechen-Prefs: Union aller mitkochenden Profile. Anders als bei Diaet-Prefs
+// KEIN Schnitt — wenn irgendein Diner eine Kueche moechte, ist sie im Filter
+// aktiviert. Reihenfolge im Picker: Dishes mit meisten Voter-Uebereinstimmungen
+// oben (siehe dishCuisineVoteCount).
+export function getEffectiveCuisines() {
+  const diners = activeDiners();
+  const union = {};
+  for (const k of CUISINE_KEYS) {
+    union[k] = diners.some((p) => !!p.cuisines?.[k]);
+  }
+  return union;
+}
+
+// Wie viele der mitkochenden Diner haben die cuisineGroup dieses Dishes als
+// Praeferenz selektiert? Basis fuer das Ranking im Dish-Picker (mehr Voter =
+// weiter oben). Return 0 wenn niemand die Kueche gewaehlt hat.
+export function dishCuisineVoteCount(dish) {
+  if (!dish?.cuisineGroup) return 0;
+  const diners = activeDiners();
+  let count = 0;
+  for (const p of diners) {
+    if (p.cuisines?.[dish.cuisineGroup]) count++;
+  }
+  return count;
 }

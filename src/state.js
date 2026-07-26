@@ -69,6 +69,14 @@ function blankProfile(id) {
       fish: false,
       vegetarian: false,
     },
+    // Kuechen-Praeferenzen pro Profil. Multi-User: Union aller mitkochenden
+    // Profile, Reihenfolge im Picker nach Voter-Anzahl absteigend.
+    cuisines: {
+      asian: false,
+      mediterranean: false,
+      middleEast: false,
+      americas: false,
+    },
   };
 }
 
@@ -270,8 +278,9 @@ export function saveState() {
     // gelesen — nur getActiveProfile() zaehlt.
     const active = getActiveProfile();
     state.settings.profile = { ...active };
-    // Prefs-Mirror analog: aeltere Versionen lesen settings.preferences global.
+    // Prefs- + Cuisines-Mirror analog: aeltere Versionen lesen sie global.
     state.settings.preferences = { ...active.preferences };
+    state.settings.cuisines = { ...active.cuisines };
     const snapshot = {
       assignment: state.assignment,
       selected: state.selected,
@@ -343,6 +352,12 @@ export function loadState() {
         fish:       raw.preferences?.fish ?? false,
         vegetarian: raw.preferences?.vegetarian ?? false,
       },
+      cuisines: {
+        asian:         raw.cuisines?.asian ?? false,
+        mediterranean: raw.cuisines?.mediterranean ?? false,
+        middleEast:    raw.cuisines?.middleEast ?? false,
+        americas:      raw.cuisines?.americas ?? false,
+      },
     });
 
     let profiles;
@@ -350,9 +365,9 @@ export function loadState() {
       // Neuer State — profiles[] direkt uebernehmen, aber jedes Element durch
       // normalizeProfile schicken damit fehlende Felder aufgefuellt sind.
       profiles = loadedSettings.profiles.map((p, i) => normalizeProfile(p || {}, p?.id || `u${i + 1}`));
-      // Migration Prefs pro Profil: wenn profiles[i].preferences leer sind
-      // (alter State ohne Diaet-Prefs pro User) UND globale Prefs vorhanden
-      // -> global in profiles[0] uebernehmen, andere Profile bleiben leer.
+      // Migration Prefs + Kuechen pro Profil: wenn profiles[i] die neuen
+      // Slots nicht deklariert hat, aus globalen settings uebernehmen (nur
+      // in profiles[0], andere Profile bleiben leer).
       const legacyGlobalPrefs = loadedSettings.preferences;
       const hasProfilePrefs = profiles.some((p) => p.preferences?.meat || p.preferences?.fish || p.preferences?.vegetarian);
       if (!hasProfilePrefs && legacyGlobalPrefs && (legacyGlobalPrefs.meat || legacyGlobalPrefs.fish || legacyGlobalPrefs.vegetarian)) {
@@ -362,17 +377,35 @@ export function loadState() {
           vegetarian: !!legacyGlobalPrefs.vegetarian,
         };
       }
+      const legacyGlobalCuisines = loadedSettings.cuisines;
+      const hasProfileCuisines = profiles.some((p) => p.cuisines?.asian || p.cuisines?.mediterranean || p.cuisines?.middleEast || p.cuisines?.americas);
+      if (!hasProfileCuisines && legacyGlobalCuisines && (legacyGlobalCuisines.asian || legacyGlobalCuisines.mediterranean || legacyGlobalCuisines.middleEast || legacyGlobalCuisines.americas)) {
+        profiles[0].cuisines = {
+          asian:         !!legacyGlobalCuisines.asian,
+          mediterranean: !!legacyGlobalCuisines.mediterranean,
+          middleEast:    !!legacyGlobalCuisines.middleEast,
+          americas:      !!legacyGlobalCuisines.americas,
+        };
+      }
     } else {
       // Legacy oder Fresh Install: aus altem profile-Slot bauen. Bei Fresh
       // Install ist loadedProfile leer -> normalizeProfile liefert Blank u1.
       profiles = [normalizeProfile(loadedProfile, 'u1')];
-      // Legacy globale Prefs uebernehmen wenn vorhanden.
       const legacyGlobalPrefs = loadedSettings.preferences;
       if (legacyGlobalPrefs) {
         profiles[0].preferences = {
           meat: !!legacyGlobalPrefs.meat,
           fish: !!legacyGlobalPrefs.fish,
           vegetarian: !!legacyGlobalPrefs.vegetarian,
+        };
+      }
+      const legacyGlobalCuisines = loadedSettings.cuisines;
+      if (legacyGlobalCuisines) {
+        profiles[0].cuisines = {
+          asian:         !!legacyGlobalCuisines.asian,
+          mediterranean: !!legacyGlobalCuisines.mediterranean,
+          middleEast:    !!legacyGlobalCuisines.middleEast,
+          americas:      !!legacyGlobalCuisines.americas,
         };
       }
     }

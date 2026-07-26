@@ -1,5 +1,5 @@
 import { PORTIONS_MIN, PORTIONS_MAX, isFavorite } from '../state.js';
-import { getScaleForDish } from '../nutrition/scale.js';
+import { avgScaleForDish } from '../nutrition/scale.js';
 
 // Material-Symbols-Icons für die Card-Actions (SVG, currentColor).
 // - format_list_bulleted für Zutaten (klare Listen-Metapher)
@@ -44,15 +44,15 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
   const plusDisabled = portions >= PORTIONS_MAX;
   const selectionLabel = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
 
-  // Makros werden mit portions (Haushalts-Menge) UND userScale (Portionsgröße
-  // für dich, aus dem Abendessen-Ziel abgeleitet) skaliert. Ohne Profil ist
-  // userScale = 1 → Verhalten identisch zum bisherigen.
-  const userScale = getScaleForDish(dish);
-  const totalFactor = portions * userScale;
-  const kcal = Math.round(dish.kcal * totalFactor);
-  const protein = Math.round(dish.p * totalFactor);
-  const carbs = Math.round(dish.kh * totalFactor);
-  const fat = Math.round(dish.f * totalFactor);
+  // Makros je Karte = Durchschnitt pro Person ueber alle mitkochenden Diner
+  // (Multi-Profile). User sieht was eine durchschnittliche Portion wiegt —
+  // nicht die kumulierte Gesamt-Kochmenge. Bei Solo = identisch zum aktiven
+  // User (avgScaleForDish reduziert sich auf getScaleForDish).
+  const avgScale = avgScaleForDish(dish, portions);
+  const kcal = Math.round(dish.kcal * avgScale);
+  const protein = Math.round(dish.p * avgScale);
+  const carbs = Math.round(dish.kh * avgScale);
+  const fat = Math.round(dish.f * avgScale);
 
   article.innerHTML = `
     <div class="day-card__image-wrap">

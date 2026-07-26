@@ -193,12 +193,15 @@ export function renderStep2(draft) {
 // Verteilung (Ausgewogen/Proteinreich/Kohlenhydratarm/Fettarm). Toggle-Chips
 // analog Settings-Sheet. Anders als profile-Slots kein Draft — Booleans und
 // macroPreset ändern sich direkt im State beim Klick.
-export function renderStep3(settings) {
-  const prefs = settings.preferences ?? {};
-  const cuisines = settings.cuisines ?? {};
-  const profile = getActiveProfile();
-  const macroPreset = profile?.macroPreset ?? 'balanced';
-  const isCustomMacros = profile?.macroTargets != null;
+export function renderStep3(profile) {
+  // Prefs + Cuisines liegen jetzt pro Profil. Der Wizard uebergibt das
+  // gerade editierte Profil — bei User 1 = getActiveProfile(), bei
+  // Sub-Wizards = das jeweils neu angelegte Profil.
+  const p = profile ?? getActiveProfile();
+  const prefs = p?.preferences ?? {};
+  const cuisines = p?.cuisines ?? {};
+  const macroPreset = p?.macroPreset ?? 'balanced';
+  const isCustomMacros = p?.macroTargets != null;
   // Presets exklusiv im Wizard; wenn User im Makro-Popup einen Custom-Override
   // gesetzt hat, ist kein Chip aktiv (aria-pressed=false auf allen).
   const activePreset = isCustomMacros ? null : macroPreset;

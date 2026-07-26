@@ -49,3 +49,12 @@ export function dinerScalesForDish(dish, portions) {
 export function scaledGramsForDay(ing, portions, dish) {
   return scaledGrams(ing, totalFactorForDish(dish, portions));
 }
+
+// Durchschnittlicher Skalierungsfaktor pro Person ueber alle mitkochenden
+// Diner. Fuer die Karten-Anzeige (kcal/Makros je Karte) — der User will
+// sehen was "eine durchschnittliche Portion" wiegt, nicht die kumulierte
+// Gesamt-Kochmenge. Bei Solo = identisch zu getScaleForDish.
+export function avgScaleForDish(dish, portions) {
+  const n = Math.max(1, portions | 0);
+  return totalFactorForDish(dish, n) / n;
+}

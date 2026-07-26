@@ -136,15 +136,6 @@ function renderShell() {
             </div>
           `)}
 
-          ${section('kuechen', 'Küchen-Präferenzen', `
-            <div class="settings-prefs" role="group" aria-label="Küchen-Präferenzen">
-              ${renderCuisineChip('asian',         'Asiatisch')}
-              ${renderCuisineChip('mediterranean', 'Mediterran')}
-              ${renderCuisineChip('middleEast',    'Nahost')}
-              ${renderCuisineChip('americas',      'Amerikanisch')}
-            </div>
-          `)}
-
           ${section('profile', 'Profile', renderProfileList())}
 
           ${section('darstellung', 'Darstellung', `
@@ -260,11 +251,6 @@ function section(key, title, contentHtml, extraCls = '') {
 function summaryFor(key) {
   const s = state.settings;
   if (key === 'kochzeit')  return formatCookTime(s.maxCookTime);
-  if (key === 'kuechen') {
-    const total = 4;
-    const active = ['asian', 'mediterranean', 'middleEast', 'americas'].filter((k) => s.cuisines?.[k]).length;
-    return `${active}/${total}`;
-  }
   if (key === 'profile') {
     // Anzahl Profile + Ziel-Personenzahl, wenn die abweichen (dann rechnen
     // wir mit DEFAULT_USER-Auffuellung). Detailwerte pro Profil sind im
@@ -305,18 +291,6 @@ function updateStickyState() {
     const bodyVisible = body && !body.hidden && isBodyVisibleBelow(body, btn);
     btn.classList.toggle('settings-section__toggle--sticky', sticky && !bodyVisible);
   });
-}
-
-function renderCuisineChip(key, label) {
-  const pressed = !!state.settings.cuisines?.[key];
-  return `
-    <button class="pref-chip"
-            type="button"
-            data-cuisine="${key}"
-            aria-pressed="${pressed}">
-      ${label}
-    </button>
-  `;
 }
 
 // Profile-Section: Liste aller Profile mit Meta + Aktiv-Marker, plus
@@ -530,21 +504,6 @@ function attachHandlers() {
   slider.addEventListener('change', () => {
     state.dishBag = {};
     onExternalChange();
-  });
-
-  // Küchen-Chips: Hard-Filter (mit Fallback bei zu wenig Kandidaten) — bewusst
-  // sichtbare Wirkung, siehe eligibleDishIds() in reroll.js. Bag invalidieren
-  // aus dem gleichen Grund wie bei Diät-Chips.
-  rootEl.querySelectorAll('.pref-chip[data-cuisine]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.cuisine;
-      const next = !state.settings.cuisines[key];
-      state.settings.cuisines[key] = next;
-      btn.setAttribute('aria-pressed', String(next));
-      state.dishBag = {};
-      updateSectionSummary('kuechen');
-      onExternalChange();
-    });
   });
 
   attachProfileListHandlers();

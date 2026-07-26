@@ -301,7 +301,7 @@ function renderStepContent() {
   switch (currentStep) {
     case 1: return renderStep1(draft, { isSubProfile: isSubProfileWizard() });
     case 2: return renderStep2(draft);
-    case 3: return renderStep3(state.settings);
+    case 3: return renderStep3(getEditingProfile());
     case 4: return renderStep4(draft);
     default: return `<p class="onboarding-placeholder">Step ${currentStep}</p>`;
   }
@@ -487,7 +487,7 @@ function attachStep2Handlers() {
 // Kuechen-Prefs weiter global (Etappe steht noch aus).
 function attachStep3Handlers() {
   bindProfilePrefChips();
-  bindToggleChips('cuisine-toggle', 'cuisines');
+  bindProfileCuisineChips();
   bindMacroPresetChips();
 
   // Live-Vorschau der Makro-Verteilung (Donut + Legende). Wird beim initialen
@@ -533,6 +533,21 @@ function bindProfilePrefChips() {
     btn.addEventListener('click', () => {
       const key = btn.dataset.value;
       const bucket = getEditingProfile().preferences;
+      if (!bucket) return;
+      bucket[key] = !bucket[key];
+      btn.setAttribute('aria-pressed', String(!!bucket[key]));
+    });
+  });
+}
+
+// Kuechen-Prefs pro Profil — analog bindProfilePrefChips, aber auf
+// getEditingProfile().cuisines. Multi-User-Semantik ist Union (nicht Schnitt
+// wie bei Diaet).
+function bindProfileCuisineChips() {
+  rootEl.querySelectorAll('[data-action="cuisine-toggle"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.value;
+      const bucket = getEditingProfile().cuisines;
       if (!bucket) return;
       bucket[key] = !bucket[key];
       btn.setAttribute('aria-pressed', String(!!bucket[key]));
