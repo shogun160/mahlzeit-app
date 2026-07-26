@@ -446,6 +446,35 @@
   color: var(--md-sys-color-outline-variant);
 }
 
+/* Multi-Profile-Aufteilung (Etappe 4): bei portions > 1 eine kompakte Zeile
+   pro teilnehmender Person unter der Gesamt-Summe. Zeigt wer wieviel bekommt
+   basierend auf individuellem Abendessen-Ziel. Zweizeilig auf schmalen
+   Screens (Label oben, Werte darunter), einzeilig sonst. */
+.ingredient-sum__diners {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--md-sys-color-outline-variant);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ingredient-sum__diner-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+  flex-wrap: wrap;
+}
+.ingredient-sum__diner-label {
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  flex-shrink: 0;
+}
+.ingredient-sum__diner-values {
+  text-align: right;
+}
+
 /* Rezept-Schritte: <ol> mit CSS-Counter für runde Nummern-Badges.
    Divider zwischen den Schritten (analog Zutaten-Liste) — statt gap. */
 .recipe-list {

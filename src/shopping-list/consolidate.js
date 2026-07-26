@@ -1,7 +1,7 @@
 import { state, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { ingredientRegistry } from '../data/ingredient-registry.js';
-import { getScaleForDish } from '../nutrition/scale.js';
+import { totalFactorForDish } from '../nutrition/scale.js';
 
 // Aggregiert alle Zutaten der ausgewählten Tage in eine flache Map.
 // Rückgabe: { [key]: { key, label, cat, unit, size, note, sum, isLeftover } }
@@ -18,11 +18,13 @@ export function buildConsolidatedList() {
     const dishId = state.assignment[day];
     const dish = dishesById.get(dishId);
     if (!dish) return;
-    // Gesamtfaktor pro Tag = portions (Haushalts-Menge) × userScale (Portionsgröße
-    // aus Abendessen-Ziel). Beide zusammen wandern in die Einkaufsmenge. Die
-    // finale Rundung auf ganze Stück/Bund passiert in formatQuantity — hier nur
-    // die aggregierte Gramm-Summe.
-    const dayFactor = (state.portions[day] || 1) * getScaleForDish(dish);
+    // Gesamtfaktor pro Tag = Summe der Diner-Skalierungen. Multi-Profile:
+    // erste N Profile werden benutzt, Rest mit DEFAULT_USER aufgefuellt. Damit
+    // bekommen 3 Personen mit unterschiedlichem Bedarf ihre individuellen
+    // Portionsanteile in die Einkaufsmenge. Die finale Rundung auf ganze
+    // Stueck/Bund passiert in formatQuantity — hier nur die aggregierte
+    // Gramm-Summe.
+    const dayFactor = totalFactorForDish(dish, state.portions[day] || 1);
     dish.ingredients.forEach((ing) => {
       if (!consolidated[ing.key]) {
         consolidated[ing.key] = {
