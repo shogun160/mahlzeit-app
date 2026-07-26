@@ -935,6 +935,15 @@
   border-radius: 8px;
   transition: background 120ms ease;
 }
+/* Icon-Reihenfolge im DOM: [icon] [text] — visuell umkehren, damit Icon
+   rechts sitzt (Text bleibt lesbar links). */
+.settings-profile-info svg {
+  order: 2;
+  margin-left: auto;
+}
+.settings-profile-info span {
+  order: 1;
+}
 .settings-profile-info:hover {
   background: color-mix(in srgb, var(--md-sys-color-primary) 6%, transparent);
 }
