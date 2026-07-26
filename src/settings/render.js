@@ -123,14 +123,14 @@ function renderShell() {
           <div class="settings-header__actions">
             <button class="settings-header__action"
                     data-action="expand-all"
-                    aria-label="Alle Sections aufklappen"
+                    aria-label="Alle Abschnitte aufklappen"
                     title="Alle aufklappen"
                     hidden>
               <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-120 300-300l56-56 124 124 124-124 56 56-180 180Zm-124-504-56-56 180-180 180 180-56 56-124-124-124 124Z"/></svg>
             </button>
             <button class="settings-header__action"
                     data-action="collapse-all"
-                    aria-label="Alle Sections zuklappen"
+                    aria-label="Alle Abschnitte zuklappen"
                     title="Alle zuklappen"
                     hidden>
               <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m296-88-56-56 240-240 240 240-56 56-184-183L296-88Zm184-544L240-872l56-56 184 183 184-183 56 56-240 240Z"/></svg>
@@ -463,7 +463,7 @@ function renderProfileSection() {
 
     ${renderDailyTargetRow()}
     ${renderMealRow('breakfast', 'Frühstück', p.breakfastKcal, BREAKFAST_MAX)}
-    ${renderMealRow('lunch', 'Mittagessen', p.lunchKcal, LUNCH_MAX)}
+    ${renderMealRow('lunch', 'Mittag', p.lunchKcal, LUNCH_MAX)}
     ${renderDinnerTargetRow()}
     ${renderShowBarRow(p.showCalorieBar !== false)}
   `;

@@ -122,7 +122,7 @@
       ],
       "steps": [
         "Hähnchen würfeln, mit Gewürzmischung, Knoblauch, Ingwer, halbem Skyr marinieren (mind. 20 Min.).",
-        "Blumenkohl im Blitzhacker zu „Reis\" verarbeiten.",
+        "Blumenkohl im Blitzhacker zu „Reis“ verarbeiten.",
         "Basmatireis kochen.",
         "Hähnchen in Öl anbraten, restlichen Skyr + Spritzer Wasser zugeben, 8–10 Min. köcheln.",
         "Blumenkohlreis kurz andünsten, Spinat unterheben bis zusammengefallen.",
@@ -618,7 +618,7 @@
     },
     {
       "id": 12,
-      "name": "Schweine-Zigeunerspieße",
+      "name": "Schweine-Paprikaspieße",
       "cuisine": "Deutsch-Balkan",
       "cooktime": 45,
       "kcal": 865,
@@ -847,7 +847,7 @@
     },
     {
       "id": 16,
-      "name": "Wildlachs Miso Bok Choy",
+      "name": "Wildlachs Miso Pak Choi",
       "cuisine": "Japanisch",
       "cooktime": 30,
       "kcal": 887,
@@ -1157,7 +1157,7 @@
         "Dukkah rösten (Haselnüsse, Sesam, Koriandersamen, Kreuzkümmel).",
         "Granatapfel entkernen, Kräuter waschen.",
         "Freekeh in Gemüsebrühe garen.",
-        "Karotten mit Öl und Kreuzkümmel bei 200 °C ~25-30 min rösten.",
+        "Karotten mit Öl und Kreuzkümmel bei 200 °C ~25–30 Min. rösten.",
         "Tahini-Dressing und Kräuter-Joghurt anrühren.",
         "Lachs Haut-Seite zuerst kross braten, wenden, Za'atar nur auf Fleischseite.",
         "Lachs auf Kräuter-Freekeh mit Joghurt, Pinienkernen, Granatapfel und Sumach anrichten."
@@ -1431,13 +1431,13 @@
         "Kichererbsen mit Knoblauch crispy braten (6–8 Min.).",
         "Paprika und Zucchini mit Salz und Oregano braten.",
         "Dressing als Basis, Rucola, Gemüse, Kichererbsen, Zwiebel, Kapern, Hähnchen und Ei-Viertel darauf schichten.",
-        "Mit Petersilie und Sumach finishen."
+        "Mit Petersilie und Sumach vollenden."
       ],
       "cuisineGroup": "mediterranean"
     },
     {
       "id": 23,
-      "name": "Linsen-Curry Tempeh & Austernpilze",
+      "name": "Linsen-Curry Tempeh und Austernpilze",
       "cuisine": "Indisch-vegetarisch",
       "cooktime": 45,
       "kcal": 985,
@@ -1530,10 +1530,10 @@
         }
       ],
       "steps": [
-        "Zwiebel, Karotte, Sellerie und Lauch in Öl 5-7 min anschwitzen.",
-        "Ingwer, Kurkuma, Knoblauch, Chili und Trockengewürze 1 min mitrösten.",
-        "Tomaten und ~200 ml Wasser mit Linsen 15-20 min köcheln.",
-        "Paprika dazu, weitere ~8 min köcheln.",
+        "Zwiebel, Karotte, Sellerie und Lauch in Öl 5–7 Min. anschwitzen.",
+        "Ingwer, Kurkuma, Knoblauch, Chili und Trockengewürze 1 Min. mitrösten.",
+        "Tomaten und ~200 ml Wasser mit Linsen 15–20 Min. köcheln.",
+        "Paprika dazu, weitere ~8 Min. köcheln.",
         "Austernpilze und Tempeh parallel scharf anbraten, unter das Curry heben.",
         "Babyspinat einrühren, mit Zitrone abschmecken.",
         "Skyr-Raita (Skyr, Salz, Zitronenabrieb) obendrauf, Minze zum Finish."
@@ -1720,19 +1720,19 @@
         }
       ],
       "steps": [
-        "Tofu 15 min in Küchenpapier pressen, würfeln.",
+        "Tofu 15 Min. in Küchenpapier pressen, würfeln.",
         "Reis kochen.",
         "Glaze anrühren (Sojasauce, Reisessig, Honig, Ingwer, Knoblauch, Chili, Limettensaft).",
-        "Tofu und Tempeh im Wok 6-8 min goldbraun braten.",
-        "Karotten, Paprika und Pak Choi 2-3 min stir-fry.",
+        "Tofu und Tempeh im Wok 6–8 Min. goldbraun braten.",
+        "Karotten, Paprika und Pak Choi 2–3 Min. im Wok schwenken.",
         "Edamame und Glaze unterheben, kurz schwenken.",
-        "Auf Reis anrichten, mit Sesamöl, Sesamsamen und Frühlingszwiebeln finishen."
+        "Auf Reis anrichten, mit Sesamöl, Sesamsamen und Frühlingszwiebeln vollenden."
       ],
       "cuisineGroup": "asian"
     },
     {
       "id": 26,
-      "name": "Putenbrust Tzatziki & Choriatiki",
+      "name": "Putenbrust Tzatziki und Choriatiki",
       "cuisine": "Griechisch",
       "cooktime": 40,
       "kcal": 894,
@@ -1812,11 +1812,11 @@
       ],
       "steps": [
         "Tzatziki (Skyr, geraspelte Gurke, Knoblauch, Zitrone, Minze, Salz) anrühren, kalt stellen.",
-        "2 EL als Puten-Marinade abnehmen (Knoblauch, Zitronenabrieb, Oregano), 15-30 min ziehen lassen.",
+        "2 EL als Puten-Marinade abnehmen (Knoblauch, Zitronenabrieb, Oregano), 15–30 Min. ziehen lassen.",
         "Gemüse in Scheiben mit Öl, Salz und Oregano wenden.",
-        "Grillpfanne heiß: Gemüse 3-4 min pro Seite, dann Pute 4-5 min pro Seite.",
+        "Grillpfanne heiß: Gemüse 3–4 Min. pro Seite, dann Pute 4–5 Min. pro Seite.",
         "Choriatiki mischen (Tomaten, Gurke, Zwiebel, Oliven, Öl, Zitrone, Oregano), Feta obenauf.",
-        "Brot rösten, alles anrichten, mit Sumach und Minze finishen."
+        "Brot rösten, alles anrichten, mit Sumach und Minze vollenden."
       ],
       "cuisineGroup": "mediterranean"
     },
@@ -1928,7 +1928,7 @@
         "Blumenkohl, Buschbohnen, Karotte und Paprika 2–3 Min. stir-fry, Pak Choi zuletzt dazu.",
         "Garnelen zurück, Zhacai dazu, Sauce angießen und kurz binden.",
         "Mit Sesamöl, weißem Pfeffer und Zitronensaft abschmecken.",
-        "Mit Frühlingszwiebel-Grün, Sesam und Thai-Basilikum finishen, mit Reis und Ei servieren."
+        "Mit Frühlingszwiebel-Grün, Sesam und Thai-Basilikum vollenden, mit Reis und Ei servieren."
       ],
       "cuisineGroup": "asian"
     },
@@ -2024,7 +2024,7 @@
     },
     {
       "id": 29,
-      "name": "Wildlachs-Bohnen-Salat Feta & Ei",
+      "name": "Wildlachs-Bohnen-Salat Feta und Ei",
       "cuisine": "Mediterran",
       "cooktime": 20,
       "kcal": 602,
@@ -2159,13 +2159,13 @@
         }
       ],
       "steps": [
-        "Quinoa in Salzwasser 12-15 min garen, abtropfen, auskühlen.",
+        "Quinoa in Salzwasser 12–15 Min. garen, abtropfen, auskühlen.",
         "Thunfisch trocken tupfen, in Sesam wälzen (alle Seiten).",
-        "Sesamöl stark erhitzen, Thunfisch von allen Seiten je ~20-30 Sek. scharf anbraten (Kern bleibt rosa).",
+        "Sesamöl stark erhitzen, Thunfisch von allen Seiten je ~20–30 Sek. scharf anbraten (Kern bleibt rosa).",
         "Kurz ruhen lassen, in dünne Scheiben schneiden.",
         "Gurke und Radieschen in feine Scheiben, Avocado in Spalten.",
         "Ponzu verrühren (Sojasauce, Limettensaft, Reisessig, Wasser, Ingwer).",
-        "Quinoa als Basis, Thunfisch fächern, Gemüse und Avocado anrichten, Ponzu darüber, Frühlingszwiebel finishen."
+        "Quinoa als Basis, Thunfisch fächern, Gemüse und Avocado anrichten, Ponzu darüber, mit Frühlingszwiebel vollenden."
       ],
       "cuisineGroup": "asian"
     },
@@ -2243,9 +2243,9 @@
       "steps": [
         "Kichererbsen mindestens 12 h einweichen (roh verarbeiten, nicht kochen).",
         "Mit Zwiebel, Knoblauch, Petersilie und Gewürzen im Food Processor grob zerkleinern.",
-        "Backpulver unterheben, 15 min ruhen lassen, zu Pattys formen.",
-        "Mit Öl bestreichen, im Ofen bei 200 °C ~25 min backen, halbzeitig wenden.",
-        "Bulgur in Salzwasser 10-12 min quellen lassen.",
+        "Backpulver unterheben, 15 Min. ruhen lassen, zu Pattys formen.",
+        "Mit Öl bestreichen, im Ofen bei 200 °C ~25 Min. backen, auf halber Backzeit wenden.",
+        "Bulgur in Salzwasser 10–12 Min. quellen lassen.",
         "Tahini, Skyr, Zitronensaft und etwas Wasser glattrühren.",
         "Bulgur, Rucola, Falafel und Granatapfelkerne anrichten, Sauce darüber."
       ],
@@ -2321,8 +2321,8 @@
       "steps": [
         "Chilis, Schalotten, Knoblauch, Galangal und Zitronengras zu Paste verarbeiten.",
         "Buschbohnen blanchieren, Reis kochen.",
-        "Öl erhitzen, Paste 5-7 min anbraten bis sie intensiv duftet.",
-        "Garnelen und Fischsauce dazu, 2-3 min garen.",
+        "Öl erhitzen, Paste 5–7 Min. anbraten, bis sie intensiv duftet.",
+        "Garnelen und Fischsauce dazu, 2–3 Min. garen.",
         "Buschbohnen unterheben.",
         "Hitze runter, Skyr und Limettensaft einrühren (nicht mehr kochen).",
         "Honig am Ende unterrühren, mit Reis servieren."

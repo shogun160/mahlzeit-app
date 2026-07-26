@@ -337,7 +337,7 @@
       }
     },
     "joghurt_griech": {
-      "label": "Griechischer Joghurt 2%",
+      "label": "Griechischer Joghurt 2 %",
       "cat": "kuehlung",
       "unit": "g",
       "note": "Becher à 500 g",
@@ -946,7 +946,7 @@
       }
     },
     "kurkuma_frisch": {
-      "label": "Kurkuma frisch",
+      "label": "Kurkuma, frisch",
       "cat": "frisch",
       "unit": "g",
       "per100g": {
@@ -1405,7 +1405,7 @@
       }
     },
     "gewuerz_kurkuma": {
-      "label": "Kurkuma gemahlen",
+      "label": "Kurkuma, gemahlen",
       "cat": "gewuerze",
       "unit": "g",
       "displayUnit": "tl",
@@ -1444,7 +1444,7 @@
       }
     },
     "chili_frisch": {
-      "label": "Chili frisch (mit Kernen)",
+      "label": "Chili, frisch (mit Kernen)",
       "cat": "frisch",
       "unit": "stueck",
       "size": 6,
@@ -1456,7 +1456,7 @@
       }
     },
     "curryblatt": {
-      "label": "Curryblätter frisch",
+      "label": "Curryblätter, frisch",
       "cat": "frisch",
       "unit": "g",
       "per100g": {
@@ -1467,7 +1467,7 @@
       }
     },
     "minze": {
-      "label": "Minze frisch",
+      "label": "Minze, frisch",
       "cat": "frisch",
       "unit": "g",
       "per100g": {

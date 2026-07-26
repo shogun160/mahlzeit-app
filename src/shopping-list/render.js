@@ -283,7 +283,7 @@ function renderDoneBanner() {
   // die neutrale Duz-Variante. escapeHtml() nicht noetig — der Name laeuft
   // schon durch den Wizard-Trim, kein HTML zugelassen.
   const name = state.settings.profile?.name;
-  const greeting = name ? `Sauber ${name}, du hast` : 'Sauber, du hast';
+  const greeting = name ? `Sauber, ${name}, du hast` : 'Sauber, du hast';
   return `
     <div class="shop-done-banner" role="status">
       ${greeting} alles besorgt – Mahlzeit!
