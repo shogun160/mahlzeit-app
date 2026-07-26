@@ -156,3 +156,44 @@ Makro-Verteilung: Standard 30/40/30 (P/KH/F) oder Custom Slider (Summe = 100 %).
 ## Datenverwaltung
 
 Export/Import des kompletten State als JSON. Backup ohne Cloud, Transfer zwischen Geräten. Separater "Alle Daten löschen"-Button mit Bestätigung.
+
+## Kochmodus über Claude-App
+
+**Idee:** Im Rezept-Tab des Detail-Sheets ein "Kochen"-Button. Klick kopiert einen vorformulierten Prompt in die Zwischenablage. User wechselt zur Claude-App, pastet — Claude führt dann interaktiv durch den Kochvorgang (Schritt-für-Schritt, Zeit-Hinweise, Nachfragen bei Unklarheiten, ggf. Anpassungen wenn eine Zutat fehlt).
+
+**UX-Flow:**
+1. User öffnet Rezept-Tab in der Mahlzeit-App.
+2. Tap auf **"Mit Claude kochen"** (Button unten oder in der Rezept-Toolbar).
+3. Toast-Feedback: *"Prompt kopiert — jetzt in Claude einfügen"*.
+4. User wechselt zur Claude-App, pastet, sendet — Claude ist im Kochmodus.
+
+**Prompt-Template (Entwurf):**
+
+```
+Du bist mein Koch-Assistent. Ich koche jetzt "{DISH NAME}" für {PORTIONS}
+Personen. Führe mich Schritt für Schritt durch die Zubereitung.
+
+Rezept:
+{STEPS als nummerierte Liste}
+
+Zutaten (bereits skaliert auf {PORTIONS} Portionen):
+{INGREDIENTS als Liste mit Menge und Einheit}
+
+Bitte:
+- Nenne jeden Schritt einzeln, warte auf mein "fertig" bevor du weitergehst.
+- Gib bei Garzeiten Timer-Hinweise ("Timer auf 8 Minuten").
+- Wenn ich frage, was ich statt einer Zutat nehmen kann, schlag was Ähnliches vor.
+- Wenn ich sage "wieviel", meine ich die im Rezept genannte Menge.
+- Halte die Antworten kurz — ich hab die Hände am Herd.
+```
+
+**Prompt wird zur Laufzeit gefüllt** mit dem aktuellen Gericht, den skalierten Zutatenmengen und den Rezept-Schritten aus `dishes.json`.
+
+**Technische Anmerkungen:**
+- Clipboard-API: `navigator.clipboard.writeText(prompt)` — funktioniert im Android WebView (via Capacitor), aber am besten mit `@capacitor/clipboard` Plugin für zuverlässiges Verhalten und iOS-Kompatibilität.
+- Fallback: wenn Clipboard-API blockiert, Textbereich mit Selektion + `document.execCommand('copy')`.
+- Toast/Snackbar für Feedback ("Prompt kopiert") — kann als Mini-Component im Sheet gebaut werden.
+
+**Optional / später:**
+- **Direkt-Link zu Claude** — falls die Claude-Android-App Deep-Links unterstützt (z. B. `anthropic-claude://message?text=...`), könnte man den Prompt direkt übergeben statt Copy-Paste-Zwischenschritt. Aktuell (Ende 2026) nicht dokumentiert — muss recherchiert werden.
+- **Kochmodus-Toggle in Settings**: User schaltet ein/aus, welche Info der Prompt enthalten soll (z. B. mit oder ohne Makros, mit oder ohne Substitutions-Vorschläge).
