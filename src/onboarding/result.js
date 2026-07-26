@@ -15,7 +15,7 @@ const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hid
 // Felder), damit dailyTarget()/dinnerTarget() rechnen können auch wenn der
 // User vorherige Steps übersprungen hat. Fallbacks aus DEFAULTS greifen für
 // Slots die noch null sind.
-function resolvedProfile(draft) {
+export function resolvedProfile(draft) {
   const p = state.settings.profile;
   return {
     gender:               draft.gender        ?? p.gender        ?? DEFAULTS.gender,

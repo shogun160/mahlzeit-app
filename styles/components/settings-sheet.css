@@ -622,9 +622,8 @@
   opacity: 0.6;
 }
 
-/* Theme-Toggle im Settings-Sheet: 3-Chip-Row, Icons oben, Label darunter.
-   Aktiver Chip hat primary-container-Background + on-primary-container-Text
-   analog M3 Segmented Button. */
+/* Theme-Toggle im Settings-Sheet: 3 Pill-Buttons, Icon links + Label rechts.
+   Aktiver Pill in primary-container-Farben analog Präferenz-Chips. */
 .theme-toggle {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -632,26 +631,26 @@
   margin-top: 8px;
 }
 .theme-toggle__chip {
-  display: flex;
-  flex-direction: column;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  min-height: 72px;
-  padding: 12px 8px;
+  min-height: var(--touch-target-min);
+  padding: 8px 16px;
   border: 1px solid var(--md-sys-color-outline);
-  border-radius: 12px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   font-weight: 600;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
 }
 .theme-toggle__chip svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 .theme-toggle__chip[aria-pressed="true"] {
   background: var(--md-sys-color-primary-container);
@@ -660,4 +659,11 @@
 }
 .theme-toggle__chip:active {
   transform: scale(0.98);
+}
+
+/* Read-only-Variante: Slider zeigt seinen Wert an, blockiert aber User-Eingabe.
+   Anders als [disabled] behält der Slider seine volle Farb-Intensität — im
+   Makro-Popup dienen die 3 Slider nur zur Veranschaulichung des Presets. */
+.settings-slider--readonly {
+  pointer-events: none;
 }

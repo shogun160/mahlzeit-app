@@ -1,7 +1,7 @@
 import { state, saveState } from '../state.js';
-import { AGE_MIN, AGE_MAX, dailyTarget } from '../nutrition/target.js';
+import { AGE_MIN, AGE_MAX, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
-import { renderStep5 as renderStep4, refreshResultDynamic } from './result.js';
+import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile } from './result.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 4;
@@ -268,13 +268,45 @@ function attachStep1Handlers() {
   bindSlider('weight-change', 'weight-value', 'weightKg', (v) => `${v} kg`);
 }
 
-// Step 2 (Alltag) — Aktivität + Ziel + Frühstück + Mittag.
+// Step 2 (Alltag) — Aktivität + Ziel + Frühstück + Mittag + Live-Preview
+// des berechneten Abendessen-Kontingents.
 function attachStep2Handlers() {
   bindChipGroup('activity-pick', 'activityLevel', (v) => parseInt(v, 10));
   bindChipGroup('goal-pick', 'goal', (v) => v);
   const fmt = (v) => `${v.toLocaleString('de-DE')} kcal`;
   bindSlider('breakfast-change', 'breakfast-value', 'breakfastKcal', fmt);
   bindSlider('lunch-change', 'lunch-value', 'lunchKcal', fmt);
+
+  // Live-Preview der Abendessen-kcal (Tagesziel − Frühstück − Mittag). Wird
+  // beim initialen Render sofort gesetzt und nach jedem Slider-/Chip-Change
+  // aktualisiert. Wenn essentielle Daten aus Step 1 fehlen, greifen die
+  // Defaults aus resolvedProfile — dann rechnet die Vorschau mit Standard-
+  // Biometrie, gibt trotzdem einen sinnvollen Startwert.
+  const updateDinnerPreview = () => {
+    const el = rootEl.querySelector('[data-role="dinner-preview-value"]');
+    if (!el) return;
+    const p = resolvedProfile(draft);
+    const dinner = dinnerTarget(p);
+    if (dinner == null) {
+      el.textContent = '—';
+      return;
+    }
+    const range = kcalRange(dinner);
+    if (!range) {
+      el.textContent = `${dinner.toLocaleString('de-DE')} kcal`;
+      return;
+    }
+    const round10 = (n) => Math.round(n / 10) * 10;
+    el.innerHTML = `${round10(range[0]).toLocaleString('de-DE')}&thinsp;–&thinsp;${round10(range[1]).toLocaleString('de-DE')} kcal`;
+  };
+  updateDinnerPreview();
+  // Bei allen Chip- und Slider-Interaktionen mit-triggern (nach draft-Update).
+  rootEl.querySelectorAll('[data-action="activity-pick"], [data-action="goal-pick"]').forEach((btn) => {
+    btn.addEventListener('click', updateDinnerPreview);
+  });
+  rootEl.querySelectorAll('[data-action="breakfast-change"], [data-action="lunch-change"]').forEach((slider) => {
+    slider.addEventListener('input', updateDinnerPreview);
+  });
 }
 
 // Step 3 (Filter) — Ernährungs- + Küchen-Präferenzen als Toggle-Chips +

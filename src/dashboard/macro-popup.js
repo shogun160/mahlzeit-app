@@ -503,9 +503,11 @@ function renderControls() {
 }
 
 function renderMacroSlider(key, label, value) {
-  // Slider sind bewusst disabled — sie veranschaulichen nur den gewählten
-  // Preset, keine User-Eingabe. Custom-Overrides via Slider-Zug sind
-  // entfernt; Preset-Wechsel ist der einzige Änderungsweg.
+  // Slider blockieren User-Eingabe (pointer-events + tabindex), sehen aber
+  // visuell normal aus (kein disabled-graut, das würde die Farb-Codierung
+  // schlucken). aria-disabled=true damit Screen-Reader die Read-only-Rolle
+  // erkennen. Custom-Overrides via Slider-Zug sind entfernt; Preset-Wechsel
+  // ist der einzige Änderungsweg.
   return `
     <div class="settings-field">
       <div class="settings-row">
@@ -515,13 +517,14 @@ function renderMacroSlider(key, label, value) {
         <div class="settings-row__value" data-role="macro-${key}-value">${value.toLocaleString('de-DE')} g</div>
       </div>
       <input type="range"
-             class="settings-slider"
+             class="settings-slider settings-slider--readonly"
              data-action="macro-${key}-change"
              min="${MACRO_MIN}"
              max="${MACRO_MAX}"
              step="${MACRO_STEP}"
              value="${value}"
-             disabled
+             tabindex="-1"
+             aria-disabled="true"
              aria-label="${label} in Gramm pro Tag (Anzeige)" />
     </div>
   `;

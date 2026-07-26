@@ -150,6 +150,10 @@ export function renderStep2(draft) {
              data-action="lunch-change"
              aria-label="Mittag-Kalorien" />
     </div>
+
+    <div class="onboarding-preview" data-role="dinner-preview">
+      Dein Abendessenkontingent: <span data-role="dinner-preview-value">—</span>
+    </div>
   `;
 }
 
