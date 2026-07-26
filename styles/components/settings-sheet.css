@@ -575,7 +575,9 @@
 }
 
 /* External-Link-Row im Settings-Sheet — z. B. GitHub-Repo. Filled Tonal
-   Button-Style, mit "öffnen in neuem Fenster"-Icon rechts. */
+   Button-Style. Default nimmt volle Breite (space-between fuer Icon rechts);
+   .settings-link--compact ist eine selbst-groessige Pille mit Icon LINKS und
+   Text daneben — genutzt fuer die GitHub-Pille in der 'Ueber'-Section. */
 .settings-link {
   display: flex;
   align-items: center;
@@ -609,6 +611,21 @@
   height: 20px;
   flex-shrink: 0;
   color: inherit;
+}
+
+/* Kompakte Variante fuer die GitHub-Pille: self-sized (inline-flex), Icon
+   links, Text 'GitHub' daneben — kein Full-Width-Bar. */
+.settings-link--compact {
+  display: inline-flex;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 0;
+  padding-left: 14px;
+  padding-right: 18px;
+}
+.settings-link--compact svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* Aktions-Button in der Daten-Section — analog zu Settings-Link, aber als
