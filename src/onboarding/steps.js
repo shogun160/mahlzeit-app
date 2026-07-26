@@ -149,7 +149,7 @@ export function renderStep4(draft) {
              type="range"
              min="100"
              max="1000"
-             step="50"
+             step="10"
              value="${breakfastVal}"
              data-action="breakfast-change"
              aria-label="Frühstück-Kalorien" />
@@ -164,7 +164,7 @@ export function renderStep4(draft) {
              type="range"
              min="100"
              max="1000"
-             step="50"
+             step="10"
              value="${lunchVal}"
              data-action="lunch-change"
              aria-label="Mittag-Kalorien" />

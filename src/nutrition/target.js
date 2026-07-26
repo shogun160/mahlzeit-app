@@ -44,7 +44,7 @@ export const WEIGHT_DEFAULT = 80;
 export const DAILY_TARGET_MIN = 1000;
 export const DAILY_TARGET_MAX = 4500;
 export const DAILY_TARGET_STEP = 50;
-export const MEAL_KCAL_STEP = 25;
+export const MEAL_KCAL_STEP = 10;
 export const BREAKFAST_MAX = 1500;
 export const LUNCH_MAX = 2000;
 
