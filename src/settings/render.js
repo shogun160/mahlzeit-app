@@ -26,8 +26,9 @@ let onExternalChange = () => {};
 let onExternalOpenOnboarding = () => {};
 let onExternalThemeChange = () => {};
 // Zugeklappte Sections (transient — verliert sich beim App-Restart, überlebt
-// aber Sheet-Close/Reopen weil das Modul lebt).
-const collapsedSections = new Set();
+// aber Sheet-Close/Reopen weil das Modul lebt). "ueber" ist per Default
+// zugeklappt — der GitHub-Link ist eher Rand-Info als tägliche Nutzung.
+const collapsedSections = new Set(['ueber']);
 // Zähler für sticky-Stack-Position der Section-Header. Wird bei jedem
 // renderShell() zurückgesetzt und pro section()-Aufruf inkrementiert.
 // Analog zu stackIdx in shopping-list/render.js — jeder Header klebt gestaffelt
@@ -252,6 +253,12 @@ function section(key, title, contentHtml, extraCls = '') {
 function summaryFor(key) {
   const s = state.settings;
   if (key === 'kochzeit')  return formatCookTime(s.maxCookTime);
+  if (key === 'darstellung') {
+    const t = s.theme || 'auto';
+    if (t === 'light') return 'Hell';
+    if (t === 'dark')  return 'Dunkel';
+    return 'System';
+  }
   if (key === 'profile') {
     // Summary zeigt den Namen des aktiven Profils (profiles[0]) — sichtbar
     // im Sticky-Header + bei eingeklappter Section. Bei mehreren Profilen
@@ -438,6 +445,7 @@ function attachHandlers() {
       rootEl.querySelectorAll('[data-action="theme-pick"]').forEach((other) => {
         other.setAttribute('aria-pressed', String(other.dataset.value === val));
       });
+      updateSectionSummary('darstellung');
       onExternalThemeChange();
     });
   });
