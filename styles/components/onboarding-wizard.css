@@ -223,21 +223,17 @@
   display: none;
 }
 
-/* Ergebnis-Karten (Step 5). Große Zahlen für Tagesbedarf und Abendessen,
-   kleinere für Frühstück/Mittag. Makro-Row klein und kompakt am Ende. */
+/* Ergebnis-Karten (Step 5). Gleicher Karten-Look wie im Dashboard
+   (surface-container-lowest + outline-variant), damit sich der Ergebnis-Screen
+   in die App-Palette einreiht. Akzent nur über die primary-Zahl bei den
+   hervorgehobenen Karten (Tages-Bedarf + Abendessen). */
 .onboarding-result__card {
-  background: var(--md-sys-color-surface-container);
-  border-radius: 16px;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--radius-card, 16px);
   padding: 16px;
   margin-bottom: 12px;
-}
-.onboarding-result__card--primary {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-}
-.onboarding-result__card--accent {
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-on-surface);
 }
 .onboarding-result__card-header {
   display: flex;
@@ -248,24 +244,23 @@
 .onboarding-result__label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: currentColor;
-  opacity: 0.85;
+  color: var(--md-sys-color-on-surface-variant);
 }
 .onboarding-result__value {
   font-size: 1rem;
   font-weight: 600;
-  color: currentColor;
+  color: var(--md-sys-color-on-surface);
   font-variant-numeric: tabular-nums;
 }
 .onboarding-result__value--big {
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 4px;
+  color: var(--md-sys-color-primary);
 }
 .onboarding-result__suggestion {
   font-size: 0.8125rem;
-  color: currentColor;
-  opacity: 0.7;
+  color: var(--md-sys-color-on-surface-variant);
   margin-top: 6px;
 }
 .onboarding-result__row {

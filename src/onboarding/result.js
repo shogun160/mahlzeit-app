@@ -2,6 +2,7 @@ import {
   dailyTarget,
   effectiveDailyTarget,
   dinnerTarget,
+  kcalRange,
   MACRO_PRESETS,
   MACRO_PRESET_DEFAULT,
 } from '../nutrition/target.js';
@@ -96,7 +97,7 @@ export function renderStep5(draft) {
 
     <div class="onboarding-result__card onboarding-result__card--accent">
       <div class="onboarding-result__label">Abendessen</div>
-      <div class="onboarding-result__value onboarding-result__value--big" data-role="dinner-value">${fmt(dinner)} kcal</div>
+      <div class="onboarding-result__value onboarding-result__value--big" data-role="dinner-value">${formatDinnerRange(dinner)}</div>
     </div>
 
     ${macros ? `
@@ -107,6 +108,17 @@ export function renderStep5(draft) {
 
     <p class="onboarding-result__note">Du kannst alle Werte später in den Einstellungen anpassen.</p>
   `;
+}
+
+// Zeigt Abendessen als Zielkorridor "887 – 1.137 kcal" statt harter Zahl —
+// analog zu formatRange in settings/render.js und zur Bedarfs-Pille im
+// Dashboard. Zeigt "—" wenn kein dinner-Wert.
+function formatDinnerRange(dinner) {
+  if (dinner == null) return '—';
+  const range = kcalRange(dinner);
+  if (!range) return `${dinner.toLocaleString('de-DE')} kcal`;
+  const [lo, hi] = range;
+  return `${lo.toLocaleString('de-DE')}&thinsp;–&thinsp;${hi.toLocaleString('de-DE')} kcal`;
 }
 
 function renderMacros(macros) {
@@ -134,7 +146,8 @@ export function refreshResultDynamic(rootEl, draft) {
   if (targetValEl) targetValEl.textContent = `${fmt(effective)} kcal`;
 
   const dinnerValEl = rootEl.querySelector('[data-role="dinner-value"]');
-  if (dinnerValEl) dinnerValEl.textContent = `${fmt(dinner)} kcal`;
+  // innerHTML statt textContent, weil formatDinnerRange &thinsp; enthält
+  if (dinnerValEl) dinnerValEl.innerHTML = formatDinnerRange(dinner);
 
   const suggestionEl = rootEl.querySelector('[data-role="target-suggestion"]');
   if (suggestionEl) {
