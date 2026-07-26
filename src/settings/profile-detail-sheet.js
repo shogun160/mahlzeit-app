@@ -9,7 +9,7 @@
 // statt shared Helper — die Fields sind stabil, die Semantik-Doppelung ist
 // akzeptabel; ein spaetere Konsolidierung waere ein Refactor eigener Session.
 
-import { state, removeProfile } from '../state.js';
+import { state, removeProfile, setActiveProfileId } from '../state.js';
 import {
   ACTIVITY_LEVELS,
   GOALS,
@@ -80,9 +80,9 @@ function handleEsc(ev) {
 
 function renderShell() {
   const isFirst = state.settings.profiles[0]?.id === currentProfile.id;
-  const activeId = state.settings.activeProfileId;
-  const isActive = activeId === currentProfile.id;
-  const title = currentProfile.name ? currentProfile.name : (isFirst ? 'Profil' : 'Weiteres Profil');
+  const isActive = isFirst; // aktives Profil = profiles[0]
+  const isOnlyProfile = state.settings.profiles.length <= 1;
+  const title = currentProfile.name ? currentProfile.name : (isActive ? 'Profil' : 'Weiteres Profil');
 
   rootEl.innerHTML = `
     <div class="profile-detail-overlay" data-role="backdrop">
@@ -106,7 +106,7 @@ function renderShell() {
           ${renderMealRow('lunch', 'Mittag', currentProfile.lunchKcal, LUNCH_MAX)}
           ${renderDinnerRow()}
           ${renderShowBarRow()}
-          ${renderDeleteRow(isFirst)}
+          ${renderDeleteRow(isOnlyProfile)}
         </div>
       </div>
     </div>
@@ -115,24 +115,32 @@ function renderShell() {
   attachHandlers();
 }
 
-// Zeile ganz oben im Body: Aktiv-Setter fuer dieses Profil. Nutzt einen
-// Material-3-Switch — genau ein Profil ist aktiv, Bedarfs-Pille + Nährwert-
-// Balken hängen daran. Aktives Profil kann nicht "deaktiviert" werden
-// (Switch ist dann disabled), stattdessen muss der User ein anderes aktiv
-// setzen.
+// Aktiv-Zeile: aktives Profil ist immer profiles[0]. Fuer nicht-aktive Profile
+// ein Shortcut-Button "Als aktiv setzen" — schiebt das Profil an Position 0
+// und macht es damit zum aktiven (Bedarfs-Anzeige folgt). Alternativ kann in
+// der Settings-Liste per Drag&Drop umsortiert werden. Fuer bereits aktive
+// Profile: Info-Zeile "Aktuell aktiv" statt Button.
 function renderActiveRow(isActive) {
+  if (isActive) {
+    return `
+      <div class="settings-row">
+        <div class="settings-row__label">
+          <div class="settings-row__label-primary">Aktuell aktives Profil</div>
+          <div class="settings-row__label-secondary">Bedarfs-Anzeige im Dashboard folgt diesem User</div>
+        </div>
+      </div>
+    `;
+  }
   return `
     <div class="settings-row">
       <div class="settings-row__label">
-        <div class="settings-row__label-primary">Aktives Profil</div>
-        <div class="settings-row__label-secondary">Bedarfs-Anzeige folgt diesem User</div>
+        <div class="settings-row__label-primary">Nicht aktiv</div>
+        <div class="settings-row__label-secondary">Bedarfs-Anzeige folgt aktuell einem anderen User</div>
       </div>
-      <button class="m3-switch" type="button" role="switch"
-              data-action="set-active"
-              aria-checked="${isActive}"
-              aria-label="Aktives Profil"
-              ${isActive ? 'disabled' : ''}>
-        <span class="m3-switch__thumb" aria-hidden="true"></span>
+      <button class="settings-action-btn"
+              type="button"
+              data-action="set-active">
+        Als aktiv setzen
       </button>
     </div>
   `;
@@ -325,12 +333,13 @@ function renderShowBarRow() {
   `;
 }
 
-// Loeschen-Button ganz unten. Fuer profiles[0] (User 1) deaktiviert —
-// Mindestens-ein-Profil-Regel. Sonst: rot, mit Confirm-Popup.
-function renderDeleteRow(isFirst) {
-  const disabled = isFirst;
-  const hint = isFirst
-    ? 'User 1 ist das Standard-Profil und kann nicht gelöscht werden.'
+// Loeschen-Button ganz unten. Verweigert wenn nur ein einziges Profil uebrig
+// waere. Sonst: rot, mit Confirm-Popup. Beim Loeschen des aktuell aktiven
+// Profils rueckt das naechste in profiles[] auf und wird aktiv.
+function renderDeleteRow(isOnlyProfile) {
+  const disabled = isOnlyProfile;
+  const hint = isOnlyProfile
+    ? 'Mindestens ein Profil muss bestehen bleiben.'
     : 'Das Profil wird entfernt. Favoriten und individuelle Werte gehen verloren.';
   return `
     <div class="profile-detail-delete">
@@ -352,12 +361,12 @@ function attachHandlers() {
   });
   rootEl.querySelector('[data-action="close"]').addEventListener('click', closeProfileDetailSheet);
 
-  // Aktiv-Switch: setzt activeProfileId auf currentProfile, refresh, re-render
-  // damit die aria-disabled-Logik greift (dieses Profil ist jetzt aktiv).
+  // Als-aktiv-setzen-Button: verschiebt das Profil an profiles[0]. Damit ist
+  // es aktiv (Bedarfs-Anzeige folgt). Re-render, damit die Info-Zeile
+  // "Aktuell aktives Profil" erscheint.
   const activeBtn = rootEl.querySelector('[data-action="set-active"]');
   if (activeBtn) activeBtn.addEventListener('click', () => {
-    if (activeBtn.disabled) return;
-    state.settings.activeProfileId = currentProfile.id;
+    setActiveProfileId(currentProfile.id);
     onExternalChange();
     renderShell();
   });

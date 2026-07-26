@@ -1,5 +1,6 @@
 import {
   state,
+  moveProfileToIndex,
   PORTIONS_MIN,
   PORTIONS_MAX,
   COOKTIME_MIN,
@@ -376,18 +377,29 @@ function renderProfileRow(profile, isActive) {
   const activeBadge = isActive
     ? `<span class="settings-profile-row__badge" aria-label="Aktives Profil">Aktiv</span>`
     : '';
+  // Row als DIV (nicht button), damit der Drag-Handle-Button innen HTML-valid
+  // ist. Klick auf DIV oeffnet Detail (Handler mit role=button + tabindex).
   return `
-    <button class="settings-profile-row"
-            type="button"
-            data-action="open-profile-detail"
-            data-profile-id="${profile.id}">
+    <div class="settings-profile-row"
+         role="button"
+         tabindex="0"
+         data-action="open-profile-detail"
+         data-profile-id="${profile.id}">
+      <button class="settings-profile-row__drag"
+              type="button"
+              data-action="drag-handle"
+              data-profile-id="${profile.id}"
+              aria-label="Reihenfolge ändern"
+              title="Ziehen zum Umsortieren">
+        <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg>
+      </button>
       <span class="settings-profile-row__label">
         <span class="settings-profile-row__name">${escapeHtml(name)}</span>
         <span class="settings-profile-row__meta">${escapeHtml(profileMetaLine(profile))}</span>
       </span>
       ${activeBadge}
       <svg class="settings-profile-row__chevron" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
-    </button>
+    </div>
   `;
 }
 
@@ -617,9 +629,18 @@ function attachHandlers() {
 // der Add-Button startet den Wizard im add-Modus. Alle detaillierten Slider-/
 // Chip-Handler leben jetzt im Detail-Sheet — die Liste ist nur Uebersicht.
 function attachProfileListHandlers() {
-  rootEl.querySelectorAll('[data-action="open-profile-detail"]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const id = btn.dataset.profileId;
+  rootEl.querySelectorAll('[data-action="open-profile-detail"]').forEach((row) => {
+    row.addEventListener('click', (ev) => {
+      // Klick auf Drag-Handle darf NICHT das Detail oeffnen.
+      if (ev.target.closest('[data-action="drag-handle"]')) return;
+      const id = row.dataset.profileId;
+      if (id) onExternalOpenProfileDetail(id);
+    });
+    // Keyboard-Support (weil Row ein DIV mit role=button ist).
+    row.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+      ev.preventDefault();
+      const id = row.dataset.profileId;
       if (id) onExternalOpenProfileDetail(id);
     });
   });
@@ -640,6 +661,137 @@ function attachProfileListHandlers() {
   const plusBtn = rootEl.querySelector('[data-action="portions-plus"]');
   if (minusBtn) minusBtn.addEventListener('click', () => handlePortions(-1));
   if (plusBtn) plusBtn.addEventListener('click', () => handlePortions(1));
+
+  attachProfileDragHandlers();
+}
+
+// Drag&Drop-Reordering per pointer-events (funktioniert Maus + Touch), nach
+// Material-3-Guidelines fuer "Reorder-Handle":
+// - Long-Press (500ms) auf dem Drag-Handle startet den Drag — vor Ablauf
+//   kann der User frei scrollen oder loslassen ohne dass etwas passiert.
+// - Bei Bewegung vor Timer-Ablauf wird der Timer abgebrochen (User scrollt).
+// - Haptic feedback (Vibration) beim Drag-Start wenn verfuegbar.
+// - Waehrend Drag: Row wird visuell "gehoben" (elevation shadow), am Ziel-
+//   Slot erscheint eine dezente Highlight-Kante.
+// - pointerup commited via moveProfileToIndex.
+const DRAG_HOLD_MS = 500;
+const DRAG_CANCEL_PX = 8;
+function attachProfileDragHandlers() {
+  const listEl = rootEl.querySelector('.settings-profile-list');
+  if (!listEl) return;
+  const handles = rootEl.querySelectorAll('[data-action="drag-handle"]');
+  let drag = null; // { id, startX, startY, sourceRow, active, holdTimer }
+
+  const clearIndicators = () => {
+    listEl.querySelectorAll('.settings-profile-row').forEach((r) => {
+      r.classList.remove('is-drop-above', 'is-drop-below', 'is-dragging');
+    });
+  };
+
+  const findTargetRow = (clientX, clientY) => {
+    const el = document.elementFromPoint(clientX, clientY);
+    return el?.closest?.('.settings-profile-row');
+  };
+
+  const cancelHold = () => {
+    if (drag?.holdTimer) {
+      clearTimeout(drag.holdTimer);
+      drag.holdTimer = null;
+    }
+  };
+
+  handles.forEach((handle) => {
+    handle.addEventListener('pointerdown', (ev) => {
+      if (ev.button != null && ev.button !== 0) return;
+      const row = handle.closest('.settings-profile-row');
+      const id = handle.dataset.profileId;
+      if (!row || !id) return;
+      // Kein preventDefault hier — User soll waehrend der 500ms Long-Press-
+      // Wartezeit noch scrollen koennen. Erst wenn drag aktiv wird,
+      // verhindern wir die Standard-Interaktion.
+      drag = { id, startX: ev.clientX, startY: ev.clientY, sourceRow: row, active: false, holdTimer: null };
+      drag.holdTimer = setTimeout(() => {
+        if (!drag) return;
+        drag.active = true;
+        drag.holdTimer = null;
+        drag.sourceRow.classList.add('is-dragging');
+        try { handle.setPointerCapture(ev.pointerId); } catch (_) {}
+        // Haptic feedback (nur Android/Chromium unterstuetzt navigator.vibrate).
+        try { navigator.vibrate?.(10); } catch (_) {}
+      }, DRAG_HOLD_MS);
+    });
+
+    handle.addEventListener('pointermove', (ev) => {
+      if (!drag) return;
+      const dx = ev.clientX - drag.startX;
+      const dy = ev.clientY - drag.startY;
+      const dist = Math.hypot(dx, dy);
+      if (!drag.active) {
+        // Vor Long-Press-Ablauf: nur wenn User deutlich bewegt, brechen wir
+        // den Hold ab (User will scrollen, kein Drag).
+        if (dist > DRAG_CANCEL_PX) {
+          cancelHold();
+          drag = null;
+        }
+        return;
+      }
+      // Drag ist aktiv — Bewegung verfolgen + Ziel-Slot markieren.
+      ev.preventDefault();
+      clearIndicators();
+      drag.sourceRow.classList.add('is-dragging');
+      const target = findTargetRow(ev.clientX, ev.clientY);
+      if (!target || target === drag.sourceRow) return;
+      const rect = target.getBoundingClientRect();
+      const isAbove = ev.clientY < rect.top + rect.height / 2;
+      target.classList.add(isAbove ? 'is-drop-above' : 'is-drop-below');
+    });
+
+    const finish = (ev) => {
+      if (!drag) return;
+      const wasActive = drag.active;
+      const sourceId = drag.id;
+      cancelHold();
+      if (!wasActive) {
+        drag = null;
+        return;
+      }
+      try { handle.releasePointerCapture(ev.pointerId); } catch (_) {}
+      const target = findTargetRow(ev.clientX, ev.clientY);
+      clearIndicators();
+      drag = null;
+      if (!target || target.dataset.profileId === sourceId) return;
+      const profiles = state.settings.profiles;
+      const targetIdx = profiles.findIndex((p) => p.id === target.dataset.profileId);
+      const rect = target.getBoundingClientRect();
+      const isAbove = ev.clientY < rect.top + rect.height / 2;
+      const newIdx = isAbove ? targetIdx : targetIdx + 1;
+      // Wenn source vor target lag, verschiebt der splice-remove den target-
+      // index um 1 nach vorne — Kompensation:
+      const sourceIdx = profiles.findIndex((p) => p.id === sourceId);
+      let finalIdx = newIdx;
+      if (sourceIdx < newIdx) finalIdx = newIdx - 1;
+      moveProfileToIndex(sourceId, finalIdx);
+      onExternalChange();
+      refreshProfileListInOpenSheet();
+    };
+
+    handle.addEventListener('pointerup', finish);
+    handle.addEventListener('pointercancel', (ev) => {
+      if (!drag) return;
+      cancelHold();
+      try { handle.releasePointerCapture(ev.pointerId); } catch (_) {}
+      clearIndicators();
+      drag = null;
+    });
+    // Beim Verlassen der Handle-Region (z. B. Scroll auslösend) den Timer
+    // ebenfalls abbrechen — sonst startet Drag auch wenn der Finger schon weg ist.
+    handle.addEventListener('pointerleave', () => {
+      if (drag && !drag.active) {
+        cancelHold();
+        drag = null;
+      }
+    });
+  });
 }
 
 // Runter-Swipe auf Handle oder Header schließt das Sheet — identisches Muster

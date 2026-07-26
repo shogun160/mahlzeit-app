@@ -137,26 +137,15 @@ export function setView(next) {
 
 // --- Profile-Helper ------------------------------------------------------
 
-// Liefert das aktive Profil per activeProfileId. Fallback-Kaskade:
-//   1) Match auf activeProfileId
-//   2) profiles[0] wenn Liste nicht leer (Bug-State: activeProfileId zeigt ins Leere)
-//   3) neu angelegtes Blank-Profil (Notfall — sollte in der Praxis nie greifen)
-// Rueckgabe ist immer eine gueltige Reference; Consumer duerfen an ihr mutieren.
+// Liefert das aktive Profil = profiles[0]. Die Reihenfolge in profiles[]
+// bestimmt die Aktivierung: erstes Profil ist aktiv. User kann via
+// Drag&Drop in der Settings-Liste (oder "Als aktiv setzen" im Detail-Sheet)
+// die Reihenfolge aendern. activeProfileId bleibt als State-Slot gemirrort
+// auf profiles[0].id fuer Rollback-Kompatibilitaet und Storage-Konsistenz.
+// Notfall (leere Liste): Blank-Profil anlegen — sollte praktisch nie passieren.
 export function getActiveProfile() {
   const profiles = state.settings.profiles;
-  const activeId = state.settings.activeProfileId;
-  if (Array.isArray(profiles) && profiles.length > 0) {
-    const hit = profiles.find((p) => p && p.id === activeId);
-    if (hit) return hit;
-    // Bug-State: activeId zeigt ins Leere. Auf profiles[0] zuruecksetzen und
-    // repariert weitergeben. Persistenz passiert beim naechsten saveState().
-    console.warn('[state] activeProfileId "%s" ohne Match — fallback auf profiles[0].id "%s"', activeId, profiles[0].id);
-    state.settings.activeProfileId = profiles[0].id;
-    return profiles[0];
-  }
-  // Notfall: profiles-Liste leer. Fresh Blank anlegen — sollte praktisch nie
-  // passieren (Migration + Add/Remove-Guard verhindern das). Loud, damit der
-  // Bug in DevTools sofort sichtbar wird.
+  if (Array.isArray(profiles) && profiles.length > 0) return profiles[0];
   console.warn('[state] settings.profiles ist leer — Notfall-Profil u1 angelegt.');
   const fresh = blankProfile('u1');
   state.settings.profiles = [fresh];
@@ -191,20 +180,20 @@ export function addProfile(patch = {}) {
   return p;
 }
 
-// Loescht ein Profil per ID. Verweigert wenn es der erste Eintrag ist
-// (Mindestens-ein-Profil-Regel), rueckgabe true bei Erfolg, false wenn
-// abgelehnt oder unbekannte ID.
+// Loescht ein Profil per ID. Verweigert wenn nur ein einziges Profil uebrig
+// waere (Mindestens-ein-Profil-Regel). Ansonsten kann jedes Profil geloescht
+// werden — beim Loeschen von profiles[0] rueckt das naechste automatisch nach
+// und wird aktiv (activeProfileId wird gemirrort). Rueckgabe true bei Erfolg,
+// false wenn abgelehnt oder unbekannte ID.
 export function removeProfile(id) {
   const profiles = state.settings.profiles;
-  if (!Array.isArray(profiles) || profiles.length === 0) return false;
-  if (profiles[0]?.id === id) return false; // User 1 bleibt geschuetzt
+  if (!Array.isArray(profiles) || profiles.length <= 1) return false;
   const idx = profiles.findIndex((p) => p && p.id === id);
   if (idx === -1) return false;
   profiles.splice(idx, 1);
-  // Falls das geloeschte Profil aktiv war -> Fallback auf profiles[0].
-  if (state.settings.activeProfileId === id) {
-    state.settings.activeProfileId = profiles[0].id;
-  }
+  // activeProfileId immer aus profiles[0] mirroren — bei Loeschen von
+  // profiles[0] rueckt das naechste Profil nach und uebernimmt die Aktivitaet.
+  state.settings.activeProfileId = profiles[0].id;
   return true;
 }
 
@@ -221,8 +210,31 @@ export function updateProfile(id, patch) {
   return p;
 }
 
+// Setzt ein Profil auf Position 0 (= aktiv). Die Reihenfolge der anderen
+// Profile bleibt stabil (Insertion an neuer Position ohne shuffle).
+// activeProfileId wird gemirrort auf die neue profiles[0].id.
 export function setActiveProfileId(id) {
-  if (getProfileById(id)) state.settings.activeProfileId = id;
+  const profiles = state.settings.profiles;
+  if (!Array.isArray(profiles) || profiles.length === 0) return;
+  const idx = profiles.findIndex((p) => p && p.id === id);
+  if (idx <= 0) return; // schon aktiv oder unbekannt
+  const [p] = profiles.splice(idx, 1);
+  profiles.unshift(p);
+  state.settings.activeProfileId = profiles[0].id;
+}
+
+// Reordering per Drag&Drop: verschiebt Profil an neuen Index. Sorgt fuer
+// stabile Reihenfolge der uebrigen und mirrort activeProfileId.
+export function moveProfileToIndex(id, newIndex) {
+  const profiles = state.settings.profiles;
+  if (!Array.isArray(profiles) || profiles.length === 0) return;
+  const idx = profiles.findIndex((p) => p && p.id === id);
+  if (idx === -1) return;
+  const target = Math.max(0, Math.min(profiles.length - 1, newIndex));
+  if (idx === target) return;
+  const [p] = profiles.splice(idx, 1);
+  profiles.splice(target, 0, p);
+  state.settings.activeProfileId = profiles[0].id;
 }
 
 // Favoriten-Helper. isFavorite ist ein reiner Getter (auch fuer Filter/Sort im
@@ -327,9 +339,18 @@ export function loadState() {
       // Install ist loadedProfile leer -> normalizeProfile liefert Blank u1.
       profiles = [normalizeProfile(loadedProfile, 'u1')];
     }
-    const activeProfileId = (loadedSettings.activeProfileId && profiles.some((p) => p.id === loadedSettings.activeProfileId))
-      ? loadedSettings.activeProfileId
-      : profiles[0].id;
+    // Aktives Profil = profiles[0]. Wenn ein alter State activeProfileId auf
+    // ein anderes Profil zeigt, verschieben wir dieses an Position 0 damit
+    // die neue Reihenfolgen-Semantik konsistent bleibt.
+    const legacyActive = loadedSettings.activeProfileId;
+    if (legacyActive && profiles[0]?.id !== legacyActive) {
+      const idx = profiles.findIndex((p) => p.id === legacyActive);
+      if (idx > 0) {
+        const [p] = profiles.splice(idx, 1);
+        profiles.unshift(p);
+      }
+    }
+    const activeProfileId = profiles[0].id;
 
     state.settings = {
       defaultPortions: loadedSettings.defaultPortions ?? legacyGlobalPortions ?? 1,
