@@ -1,10 +1,16 @@
 import { state, getActiveProfile } from '../state.js';
 import { buildConsolidatedList } from './consolidate.js';
-import { toggleChecked } from './check.js';
+import { toggleChecked, resetChecked, checkAll } from './check.js';
 import { toggleCollapsed, expandCategory, isCollapsed } from './collapse.js';
 import { renderProgress } from './progress.js';
 import { CAT_ORDER, CAT_LABELS } from './categories.js';
 import { formatQuantity } from '../util/format.js';
+
+// Material-Symbols fuer die per-Kategorie-Aktionen im Header:
+// - refresh:  Reset (haekchen dieser Kategorie zuruecksetzen)
+// - done_all: Check-All (alle offenen Zutaten dieser Kategorie abhaken)
+const ICON_CAT_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
+const ICON_CAT_DONE_ALL = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m268-240-208-208 51-51 157 157 12 12-51 90Zm198 0L258-448l51-51 158 158 356-356 51 51-407 406Zm-1-199-52-51 205-205 51 51-204 205Z"/></svg>`;
 
 const FLIP_DURATION_MS = 380;
 const FLIP_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
@@ -85,8 +91,41 @@ export function renderShoppingList(root, { onChange }) {
     });
   }
 
+  // Per-Kategorie-Aktionen: Reset + Check-All. stopPropagation, damit der
+  // umschliessende Header-Klick nicht das Collapse-Toggle mit ausfuehrt.
+  // Nach Check-All auch die Kategorie collapsen (analog zum manuellen
+  // Abhaken der letzten offenen Zutat via syncAutoCollapse).
+  root.querySelectorAll('[data-action="cat-reset"]').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const cat = btn.dataset.cat;
+      const keys = items.filter((i) => i.cat === cat).map((i) => i.key);
+      resetChecked(keys);
+      state.collapsedCategories.delete(cat);
+      onChange();
+    });
+  });
+  root.querySelectorAll('[data-action="cat-check-all"]').forEach((btn) => {
+    btn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const cat = btn.dataset.cat;
+      const keys = items.filter((i) => i.cat === cat).map((i) => i.key);
+      checkAll(keys);
+      state.collapsedCategories.add(cat);
+      onChange();
+    });
+  });
+
   root.querySelectorAll('.shop-group__header').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    // Keyboard-Toggle fuer div[role=button] (Enter/Space).
+    btn.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+      ev.preventDefault();
+      btn.click();
+    });
+    btn.addEventListener('click', (ev) => {
+      // Klick auf einen Icon-Button in der Row darf den Toggle nicht triggern.
+      if (ev.target.closest('.shop-group__action')) return;
       const cat = btn.dataset.cat;
       const list = root.querySelector(`ul.shop-list[data-cat="${cat}"]`);
       // Springen nur wenn der Header sticky ist UND seine ul nicht mehr sichtbar
@@ -227,13 +266,38 @@ function renderGroup(cat, groupItems, stackIdx) {
   // .shop-groups-Container — das ist der Sticky-Scope. Nur so bleiben alle
   // Header sticky, wenn sie hochscrollen, und sammeln sich unter der Progress-
   // Bar. --stack-idx staffelt die top-Position pro Kategorie.
+  //
+  // Header ist DIV mit role="button" (nicht <button>), damit die Icon-Buttons
+  // rechts (Reset + Check-All pro Kategorie) HTML-valid als eigene <button>-
+  // Kinder existieren koennen. Icons sind nur sichtbar wenn die Kategorie
+  // ausgeklappt ist — bei collapsed keinen zusaetzlichen Content.
+  const checkedCount = total - openCount;
+  const hasChecked = checkedCount > 0;
+  const hasOpen = openCount > 0;
+  const iconsHtml = collapsed ? '' : `
+    <div class="shop-group__actions">
+      ${hasChecked ? `<button type="button"
+              class="shop-group__action"
+              data-action="cat-reset"
+              data-cat="${cat}"
+              aria-label="${CAT_LABELS[cat]}: Häkchen zurücksetzen"
+              title="Häkchen zurücksetzen">${ICON_CAT_REFRESH}</button>` : ''}
+      ${hasOpen ? `<button type="button"
+              class="shop-group__action"
+              data-action="cat-check-all"
+              data-cat="${cat}"
+              aria-label="${CAT_LABELS[cat]}: alle abhaken"
+              title="Alle abhaken">${ICON_CAT_DONE_ALL}</button>` : ''}
+    </div>
+  `;
   return `
-    <button type="button"
-            class="shop-group__header ${collapsed ? 'shop-group__header--collapsed' : ''}"
-            data-cat="${cat}"
-            data-stack-idx="${stackIdx}"
-            style="--stack-idx: ${stackIdx};"
-            aria-expanded="${!collapsed}">
+    <div class="shop-group__header ${collapsed ? 'shop-group__header--collapsed' : ''}"
+         role="button"
+         tabindex="0"
+         data-cat="${cat}"
+         data-stack-idx="${stackIdx}"
+         style="--stack-idx: ${stackIdx};"
+         aria-expanded="${!collapsed}">
       <span class="shop-group__chevron" aria-hidden="true">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="6 8 10 12 14 8"></polyline>
@@ -241,7 +305,8 @@ function renderGroup(cat, groupItems, stackIdx) {
       </span>
       <span class="shop-group__title">${CAT_LABELS[cat]}</span>
       <span class="shop-group__count" aria-label="${openCount} von ${total} offen">${openCount}/${total}</span>
-    </button>
+      ${iconsHtml}
+    </div>
     <ul class="shop-list ${collapsed ? 'shop-list--collapsed' : ''}" data-cat="${cat}" style="--stack-idx: ${stackIdx};">${rows}</ul>
   `;
 }

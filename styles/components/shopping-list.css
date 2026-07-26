@@ -176,7 +176,6 @@
 }
 
 .shop-group__title {
-  flex: 1 1 auto;
   min-width: 0;
   font-size: 0.75rem;
   font-weight: 700;
@@ -191,6 +190,42 @@
   font-weight: 700;
   color: var(--md-sys-color-on-surface-variant);
   font-variant-numeric: tabular-nums;
+}
+
+/* Per-Kategorie-Aktionen (Reset + Check-All): ganz rechts im Header,
+   sichtbar nur wenn Kategorie ausgeklappt (Rendering-seitig entschieden). */
+.shop-group__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.shop-group__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease;
+}
+.shop-group__action:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  color: var(--md-sys-color-primary);
+}
+.shop-group__action:active {
+  transform: scale(0.94);
+}
+.shop-group__action svg {
+  width: 18px;
+  height: 18px;
 }
 
 .shop-list {

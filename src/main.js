@@ -3,7 +3,7 @@ import { renderDashboard } from './dashboard/render.js';
 import { rerollAll, rerollDay } from './dashboard/reroll.js';
 import { toggleAllSelected } from './dashboard/selection.js';
 import { renderShoppingList } from './shopping-list/render.js';
-import { resetChecked } from './shopping-list/check.js';
+import { resetChecked, checkAll } from './shopping-list/check.js';
 import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
 import { mountSettingsSheet, openSettingsSheet, refreshProfileListInOpenSheet } from './settings/render.js';
 import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
@@ -113,6 +113,14 @@ function refresh() {
     },
     onResetChecked: () => {
       resetChecked();
+      refresh();
+    },
+    onCheckAll: (keys) => {
+      checkAll(keys);
+      refresh();
+    },
+    onGoDashboard: () => {
+      setView('dashboard');
       refresh();
     },
   });
