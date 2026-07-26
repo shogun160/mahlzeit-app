@@ -290,7 +290,6 @@ function renderPreferencesRow() {
     <div class="settings-row settings-row--stacked">
       <div class="settings-row__label">
         <div class="settings-row__label-primary">Ernährungspräferenz</div>
-        <div class="settings-row__label-secondary">Was darf auf deinen Teller?</div>
       </div>
       <div class="settings-prefs settings-prefs--inline" role="group" aria-label="Ernährungspräferenz">
         ${chip('meat', 'Fleisch')}
@@ -313,7 +312,6 @@ function renderCuisinesRow() {
     <div class="settings-row settings-row--stacked">
       <div class="settings-row__label">
         <div class="settings-row__label-primary">Küchen-Präferenz</div>
-        <div class="settings-row__label-secondary">Welche Küchen magst du?</div>
       </div>
       <div class="settings-prefs settings-prefs--inline" role="group" aria-label="Küchen-Präferenz">
         ${chip('asian', 'Asiatisch')}
