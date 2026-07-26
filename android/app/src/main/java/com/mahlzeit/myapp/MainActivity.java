@@ -9,6 +9,7 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        registerPlugin(ThemePlugin.class);
         super.onCreate(savedInstanceState);
         applySystemBarAppearance();
     }
@@ -16,24 +17,21 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        // Fängt System-Dark-Mode-Wechsel während App läuft ab (User dreht in
-        // Android-Settings um). Bar-Icons aktualisieren sich damit ohne Restart.
+        // Wird sowohl bei System-Dark-Mode-Wechsel als auch bei App-Theme-Toggle
+        // via AppCompatDelegate.setDefaultNightMode (ThemePlugin) getriggert.
         applySystemBarAppearance();
     }
 
-    // Setzt Status- und Navigation-Bar-Icons je nach System-Dark-Mode. Bei
-    // hellem Modus dunkle Icons, bei dunklem Modus helle Icons.
-    // Trade-off (Session 14): folgt dem System, nicht dem App-Theme-Toggle. Wenn
-    // User in der App "Hell" aber System auf "Dark" ist, bekommen wir helle
-    // Icons auf hellem Bar — Mismatch. Akzeptiert für v1; ein späteres
-    // @capacitor/status-bar Plugin könnte das dynamisch aus JS setzen.
+    // Setzt Status- und Navigation-Bar-Icons je nach effektivem uiMode. Weil
+    // AppCompatDelegate.setDefaultNightMode die Activity-Configuration kippt,
+    // spiegelt uiMode hier immer das aktive App-Theme (Auto folgt System).
     private void applySystemBarAppearance() {
         int nightModeFlags = getResources().getConfiguration().uiMode
             & Configuration.UI_MODE_NIGHT_MASK;
-        boolean isSystemDark = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
+        boolean isDark = (nightModeFlags == Configuration.UI_MODE_NIGHT_YES);
         WindowInsetsControllerCompat controller =
             WindowCompat.getInsetsController(getWindow(), getWindow().getDecorView());
-        controller.setAppearanceLightStatusBars(!isSystemDark);
-        controller.setAppearanceLightNavigationBars(!isSystemDark);
+        controller.setAppearanceLightStatusBars(!isDark);
+        controller.setAppearanceLightNavigationBars(!isDark);
     }
 }

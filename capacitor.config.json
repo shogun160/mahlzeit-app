@@ -3,10 +3,6 @@
   "appName": "Mahlzeit Beta",
   "webDir": "www",
   "plugins": {
-    "SystemBars": {
-      "insetsHandling": "disable",
-      "style": "LIGHT"
-    },
     "EdgeToEdge": {
       "backgroundColor": "#f7f8f7"
     }

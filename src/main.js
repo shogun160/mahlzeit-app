@@ -12,6 +12,9 @@ import { mountOnboardingWizard, openOnboardingWizard } from './onboarding/wizard
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
+import { setNativeNightMode } from './native/theme-plugin.js';
+import { Capacitor } from '@capacitor/core';
+import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support';
 
 const headerRoot = document.getElementById('app-header');
 const mainEl = document.getElementById('app');
@@ -29,20 +32,60 @@ const bottomNavRoot = document.getElementById('bottom-nav');
 // renderDashboard() beim ersten Render ein frisches Assignment.
 loadState();
 
-// Setzt data-theme am <html>-Element je nach state.settings.theme:
-// - 'auto' → Attribut entfernen (Media-Query prefers-color-scheme greift)
-// - 'light' → data-theme="light" (überschreibt Dark-Media-Query)
-// - 'dark' → data-theme="dark" (aktiviert Dark-Tokens explizit)
+// Setzt data-theme am <html>-Element auf das *effektive* Theme (light|dark):
+// - 'light'/'dark' → direkt uebernehmen
+// - 'auto' → aus prefers-color-scheme aufloesen
+// Dadurch reicht ein einziger [data-theme="dark"]-Palette-Block in tokens.css;
+// der frueher noetige @media-Zweig entfaellt.
+// Zusaetzlich auf Android: AppCompatDelegate-NightMode via ThemePlugin kippen
+// (damit Bar-Icons folgen) und Bar-Hintergrund via EdgeToEdge auf das aktuelle
+// Surface-Token setzen.
 // Wird beim App-Start und nach jedem Theme-Toggle in Settings aufgerufen.
+const darkMedia = window.matchMedia('(prefers-color-scheme: dark)');
+
+function resolveEffectiveTheme(theme) {
+  if (theme === 'light' || theme === 'dark') return theme;
+  return darkMedia.matches ? 'dark' : 'light';
+}
+
 export function applyTheme() {
   const theme = state.settings.theme;
-  const root = document.documentElement;
-  if (theme === 'light' || theme === 'dark') {
-    root.setAttribute('data-theme', theme);
-  } else {
-    root.removeAttribute('data-theme');
-  }
+  const effective = resolveEffectiveTheme(theme);
+  document.documentElement.setAttribute('data-theme', effective);
+  syncNativeTheme(theme);
 }
+
+async function syncNativeTheme(theme) {
+  if (!Capacitor.isNativePlatform()) return;
+
+  await setNativeNightMode(
+    theme === 'dark' ? 'yes' :
+    theme === 'light' ? 'no' :
+    'follow_system'
+  );
+
+  // Ein Frame warten, damit CSS-Media-Query bzw. data-theme umgestellt ist
+  // und getComputedStyle die korrekte Surface-Farbe liefert.
+  requestAnimationFrame(() => {
+    const surface = getComputedStyle(document.documentElement)
+      .getPropertyValue('--md-sys-color-surface')
+      .trim();
+    if (!surface) return;
+    try {
+      EdgeToEdge.setStatusBarColor({ color: surface });
+      EdgeToEdge.setNavigationBarColor({ color: surface });
+    } catch (e) {
+      console.warn('[theme] edge-to-edge color update failed', e);
+    }
+  });
+}
+
+// Bei "Auto" bei System-Wechsel neu triggern, damit Bar-Farben live folgen.
+// Bei explizitem Light/Dark ignorieren.
+darkMedia.addEventListener?.('change', () => {
+  if (state.settings.theme === 'auto') applyTheme();
+});
+
 applyTheme();
 
 function refresh() {

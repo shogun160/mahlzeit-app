@@ -83,48 +83,9 @@
 
 
 /* Dark Mode — Farbwerte: WCAG-geprüfte Kontraste gegen jeweils typische
-   Hintergründe. Aktivierung entweder via @media prefers-color-scheme: dark
-   (System-Auto) ODER via html[data-theme="dark"] (User-Override). Der Toggle
-   in Settings überschreibt das System-Preference. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --md-sys-color-primary: #2DD4BF;
-    --md-sys-color-on-primary: #042F2E;
-    --md-sys-color-primary-container: #115E59;
-    --md-sys-color-on-primary-container: #99F6E4;
-    --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
-
-    --md-sys-color-surface: #1B1D1F;
-    --md-sys-color-surface-container-lowest: #131517;
-    --md-sys-color-surface-container-low: #22262A;
-    --md-sys-color-surface-container: #2A2E32;
-    --md-sys-color-surface-container-high: #32363A;
-    --md-sys-color-surface-container-highest: #3A3E42;
-
-    --md-sys-color-on-surface: #E3E6E4;
-    --md-sys-color-on-surface-variant: #A9B0AC;
-    --md-sys-color-outline: #5B625E;
-    --md-sys-color-outline-variant: #3A3F3D;
-
-    --chart-color-kh: #FBBF24;
-    --chart-color-p:  #F87171;
-    --chart-color-f:  #60A5FA;
-    --chart-color-ok: #4ADE80;
-
-    --frosted-glass: rgba(0, 0, 0, 0.4);
-    --frosted-glass-strong: rgba(0, 0, 0, 0.55);
-    --overlay-backdrop: rgba(0, 0, 0, 0.6);
-    --semantic-warn: #FB923C;
-
-    /* On-Glass wird im Dark auf on-surface umgeleitet — die Foto-Overlays
-       haben jetzt dunklen Background (rgba(0,0,0,X)), Text muss hell sein.
-       Damit heben sich die Pills im Dark klar vom Foto ab statt zu leuchten. */
-    --md-sys-color-on-glass: var(--md-sys-color-on-surface);
-  }
-}
-
-/* Manuelles Dark-Override — User hat in Settings "Dunkel" gewählt. Gleiche
-   Werte wie oben, greift unabhängig vom System-Preference. */
+   Hintergründe. Aktivierung ausschliesslich ueber html[data-theme="dark"];
+   applyTheme() in main.js loest bei 'auto' das effektive Theme aus
+   prefers-color-scheme auf und setzt data-theme entsprechend. */
 :root[data-theme="dark"] {
   --md-sys-color-primary: #2DD4BF;
   --md-sys-color-on-primary: #042F2E;
@@ -132,12 +93,12 @@
   --md-sys-color-on-primary-container: #99F6E4;
   --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
 
-  --md-sys-color-surface: #121412;
-  --md-sys-color-surface-container-lowest: #0D0F0E;
-  --md-sys-color-surface-container-low: #1A1D1C;
-  --md-sys-color-surface-container: #1E2221;
-  --md-sys-color-surface-container-high: #282C2B;
-  --md-sys-color-surface-container-highest: #333736;
+  --md-sys-color-surface: #1B1D1F;
+  --md-sys-color-surface-container-lowest: #131517;
+  --md-sys-color-surface-container-low: #22262A;
+  --md-sys-color-surface-container: #2A2E32;
+  --md-sys-color-surface-container-high: #32363A;
+  --md-sys-color-surface-container-highest: #3A3E42;
 
   --md-sys-color-on-surface: #E3E6E4;
   --md-sys-color-on-surface-variant: #A9B0AC;
