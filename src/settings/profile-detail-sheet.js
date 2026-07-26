@@ -243,7 +243,7 @@ function renderGoalRow() {
     <button class="pref-chip" type="button" data-goal="${key}" aria-pressed="${currentProfile.goal === key}">${label}</button>
   `;
   return `
-    <div class="settings-row">
+    <div class="settings-row settings-row--stacked">
       <div class="settings-row__label">
         <div class="settings-row__label-primary">Ziel</div>
       </div>
@@ -263,12 +263,12 @@ function renderPreferencesRow() {
     <button class="pref-chip" type="button" data-pref-toggle="${key}" aria-pressed="${!!prefs[key]}">${label}</button>
   `;
   return `
-    <div class="settings-row">
+    <div class="settings-row settings-row--stacked">
       <div class="settings-row__label">
         <div class="settings-row__label-primary">Ernährungspräferenz</div>
-        <div class="settings-row__label-secondary">Was darf auf deinem Teller?</div>
+        <div class="settings-row__label-secondary">Was darf auf deinen Teller?</div>
       </div>
-      <div class="settings-prefs" role="group" aria-label="Ernährungspräferenz">
+      <div class="settings-prefs settings-prefs--inline" role="group" aria-label="Ernährungspräferenz">
         ${chip('meat', 'Fleisch')}
         ${chip('fish', 'Fisch')}
         ${chip('vegetarian', 'Vegetarisch')}
@@ -286,12 +286,12 @@ function renderCuisinesRow() {
     <button class="pref-chip" type="button" data-cuisine-toggle="${key}" aria-pressed="${!!cuisines[key]}">${label}</button>
   `;
   return `
-    <div class="settings-row">
+    <div class="settings-row settings-row--stacked">
       <div class="settings-row__label">
         <div class="settings-row__label-primary">Küchen-Präferenz</div>
         <div class="settings-row__label-secondary">Welche Küchen magst du?</div>
       </div>
-      <div class="settings-prefs" role="group" aria-label="Küchen-Präferenz">
+      <div class="settings-prefs settings-prefs--inline" role="group" aria-label="Küchen-Präferenz">
         ${chip('asian', 'Asiatisch')}
         ${chip('mediterranean', 'Mediterran')}
         ${chip('middleEast', 'Nahost')}
