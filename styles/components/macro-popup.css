@@ -42,12 +42,29 @@
   transform: translateY(0);
 }
 
+/* Handle-Zone analog Detail-/Settings-Sheet: 28dp hoher Wrapper mit dem
+   40×5-Balken drin — größere Grab-Fläche fürs Swipe-to-Close. */
 .macro-handle {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+.macro-handle:active {
+  cursor: grabbing;
+}
+.macro-handle::before {
+  content: '';
+  display: block;
   width: 40px;
-  height: 4px;
-  border-radius: 2px;
+  height: 5px;
+  border-radius: 99px;
   background: var(--md-sys-color-outline-variant);
-  margin: 8px auto 4px;
 }
 
 .macro-header {

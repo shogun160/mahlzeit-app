@@ -503,6 +503,9 @@ function renderControls() {
 }
 
 function renderMacroSlider(key, label, value) {
+  // Slider sind bewusst disabled — sie veranschaulichen nur den gewählten
+  // Preset, keine User-Eingabe. Custom-Overrides via Slider-Zug sind
+  // entfernt; Preset-Wechsel ist der einzige Änderungsweg.
   return `
     <div class="settings-field">
       <div class="settings-row">
@@ -518,7 +521,8 @@ function renderMacroSlider(key, label, value) {
              max="${MACRO_MAX}"
              step="${MACRO_STEP}"
              value="${value}"
-             aria-label="${label} in Gramm pro Tag" />
+             disabled
+             aria-label="${label} in Gramm pro Tag (Anzeige)" />
     </div>
   `;
 }
@@ -670,7 +674,12 @@ function attachCloseSwipe() {
 
   sheet.addEventListener('pointerdown', (ev) => {
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-    if (ev.target.closest('button, .macro-chart__bar-hit')) return;
+    // Swipe nur über Handle + Header — Body scrollt (auch wenn hier nichts
+    // Scrollbares drin ist, hält's die Semantik konsistent mit Detail-/
+    // Settings-Sheet). Buttons, Slider und Chart-Bars werden ausgeschlossen
+    // damit deren Interaktion nicht als Swipe-Start missdeutet wird.
+    if (ev.target.closest('button, input, .macro-chart__bar-hit')) return;
+    if (ev.target.closest('.macro-body')) return;
     s.startX = ev.clientX;
     s.startY = ev.clientY;
     s.tracking = true;
