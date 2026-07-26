@@ -516,13 +516,20 @@ function renderDailyTargetRow() {
 }
 
 function renderMealRow(key, label, value, max) {
+  // Nach Task 1 (Session 13) kann breakfastKcal/lunchKcal null sein, wenn der
+  // User im Wizard "Später" geklickt hat ohne diese Felder anzufassen. Anzeige
+  // dann "—"; der Slider bekommt einen Range-Mitte-Fallback als visuelle
+  // Startposition, ohne den State zu berühren.
+  const isEmpty = value == null;
+  const displayValue = isEmpty ? '—' : `${format(value)} kcal`;
+  const sliderVal = value ?? Math.round(max / 2);
   return `
     <div class="settings-field">
       <div class="settings-row">
         <div class="settings-row__label">
           <div class="settings-row__label-primary">${label}</div>
         </div>
-        <div class="settings-row__value" data-role="${key}-value">${format(value)} kcal</div>
+        <div class="settings-row__value" data-role="${key}-value">${displayValue}</div>
       </div>
       <input type="range"
              class="settings-slider"
@@ -530,7 +537,7 @@ function renderMealRow(key, label, value, max) {
              min="0"
              max="${max}"
              step="${MEAL_KCAL_STEP}"
-             value="${value}"
+             value="${sliderVal}"
              aria-label="${label} in Kilokalorien" />
     </div>
   `;
