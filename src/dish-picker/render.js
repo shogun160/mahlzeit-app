@@ -4,7 +4,7 @@ import { allDishes } from '../data/dishes.js';
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
 const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
 
-// Filter-Chips oben im Picker. Drei Gruppen mit unterschiedlicher Verknüpfung:
+// Filter-Chips oben im Picker. Vier Gruppen mit unterschiedlicher Verknüpfung:
 //
 //   diet (Fleisch/Fisch/Vegetarisch): OR — mindestens eine der aktiven muss
 //     matchen. Sind alle drei aktiv oder keine, wirkt die Gruppe wie "alle".
@@ -16,7 +16,14 @@ const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hi
 //   attr (Schnell/Wenig Zutaten): AND — jede aktive muss matchen. Das sind
 //     unabhängige Zusatz-Constraints, die man kumulativ enger schneidet.
 //
-// Kombiniert:  dietOk && cuisineOk && attrOk
+//   kcal (Kalorienarm/Kalorienreich): OR — hilft dem User die Wochenbilanz
+//     aktiv zu steuern. Gemessen an der Rezept-Basis (dish.kcal, ungeskaliert)
+//     gegen den Median der Basis-Range (800-1100 kcal → 950): "Arm" = kleiner
+//     als 950, "Reich" = größer als 950. Bewusst NICHT gegen das skalierte
+//     kcal + Abendessen-Ziel — die Skalierung bringt alle Gerichte nahe ans
+//     Ziel, sodass "arm/reich" dort keine Aussagekraft mehr hat.
+//
+// Kombiniert:  dietOk && cuisineOk && attrOk && kcalOk
 const FILTERS = [
   { key: 'meat',   label: 'Fleisch',       group: 'diet',    test: (d) => d.tags.includes('contains-meat') },
   { key: 'fish',   label: 'Fisch',         group: 'diet',    test: (d) => d.tags.includes('contains-fish') },
@@ -27,7 +34,13 @@ const FILTERS = [
   { key: 'americas',      label: 'Amerikanisch', group: 'cuisine', test: (d) => d.cuisineGroup === 'americas' },
   { key: 'fast',   label: 'Schnell',       group: 'attr',    test: (d) => d.cooktime <= 30 },
   { key: 'simple', label: 'Wenig Zutaten', group: 'attr',    test: (d) => openIngredientCount(d) <= 8 },
+  { key: 'kcal_low',  label: 'Kalorienarm',   group: 'kcal', test: (d) => d.kcal < KCAL_MEDIAN },
+  { key: 'kcal_high', label: 'Kalorienreich', group: 'kcal', test: (d) => d.kcal > KCAL_MEDIAN },
 ];
+
+// Median der Rezept-Basis-Range (Rezepte sind auf 800-1100 kcal abgestimmt,
+// siehe CLAUDE.md-Kontext). Grenze für Kalorien-Filter im Picker.
+const KCAL_MEDIAN = 950;
 
 // Anzahl noch nicht abgehakter Zutaten dieses Gerichts — identisch zur Pille
 // auf dem Picker-Tile und zum Card-Badge im Dashboard. Wird sowohl vom
@@ -155,6 +168,9 @@ function renderFiltersSection() {
       <div class="picker-filter-row">
         ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
       </div>
+      <div class="picker-filter-row">
+        ${FILTERS.filter((f) => f.group === 'kcal').map(chipHtml).join('')}
+      </div>
     </div>
   `;
 }
@@ -164,6 +180,7 @@ function filteredDishes() {
   const activeDiet    = FILTERS.filter((f) => f.group === 'diet'    && activeFilters.has(f.key));
   const activeCuisine = FILTERS.filter((f) => f.group === 'cuisine' && activeFilters.has(f.key));
   const activeAttr    = FILTERS.filter((f) => f.group === 'attr'    && activeFilters.has(f.key));
+  const activeKcal    = FILTERS.filter((f) => f.group === 'kcal'    && activeFilters.has(f.key));
 
   let result;
   if (activeFilters.size === 0) {
@@ -177,20 +194,28 @@ function filteredDishes() {
       const dietOk    = activeDiet.length    === 0 || activeDiet.some((f) => f.test(d));
       const cuisineOk = activeCuisine.length === 0 || activeCuisine.some((f) => f.test(d));
       const attrOk    = activeAttr.every((f) => f.test(d));
-      return dietOk && cuisineOk && attrOk;
+      const kcalOk    = activeKcal.length    === 0 || activeKcal.some((f) => f.test(d));
+      return dietOk && cuisineOk && attrOk && kcalOk;
     });
   }
 
-  // Sortierung nach aktivem Attribut-Filter (aufsteigend, weniger = besser):
-  //   Schnell aktiv         → nach cooktime
-  //   Wenig Zutaten aktiv   → nach noch offenen Zutaten (openIngredientCount)
-  //   Beide aktiv           → cooktime primär, offene Zutaten sekundär
-  //   Keiner aktiv          → natürliche Reihenfolge (nach id)
+  // Sortierung nach aktiven Filtern (Kette: erste Position gewinnt):
+  //   Schnell aktiv       → nach cooktime (aufsteigend)
+  //   Wenig Zutaten aktiv → nach offenen Zutaten (aufsteigend)
+  //   Kalorienarm aktiv   → nach dish.kcal (aufsteigend, wenigste oben)
+  //   Kalorienreich aktiv → nach dish.kcal (absteigend, höchste oben)
+  //   Nichts davon        → natürliche Reihenfolge (nach id)
   // "Wenig Zutaten" sortiert bewusst nach offenen (nicht abgehakten) Zutaten,
   // damit Ranking und die auf jedem Tile sichtbare Pille denselben Wert zeigen.
   const sortFast = activeFilters.has('fast');
   const sortSimple = activeFilters.has('simple');
-  if (sortFast || sortSimple) {
+  const kcalLow = activeFilters.has('kcal_low');
+  const kcalHigh = activeFilters.has('kcal_high');
+  // Beide kcal-Filter aktiv = OR umfasst alle Gerichte → kein wirksamer
+  // Filter, also auch keine kcal-Sortierung (fällt auf id zurück).
+  const sortKcalLow = kcalLow && !kcalHigh;
+  const sortKcalHigh = kcalHigh && !kcalLow;
+  if (sortFast || sortSimple || sortKcalLow || sortKcalHigh) {
     result.sort((a, b) => {
       if (sortFast) {
         const d = a.cooktime - b.cooktime;
@@ -200,11 +225,35 @@ function filteredDishes() {
         const d = openIngredientCount(a) - openIngredientCount(b);
         if (d !== 0) return d;
       }
+      if (sortKcalLow) {
+        const d = a.kcal - b.kcal;
+        if (d !== 0) return d;
+      }
+      if (sortKcalHigh) {
+        const d = b.kcal - a.kcal;
+        if (d !== 0) return d;
+      }
       return a.id - b.id;
     });
   }
 
-  return result;
+  // Reihenfolge im Grid:
+  //   1. aktuelles Gericht ganz oben (Ausgangspunkt, sichtbar in Bezug zum Filter)
+  //   2. wählbare Gerichte in ihrer Sortier-Reihenfolge
+  //   3. nicht wählbare (bereits an anderen Tagen zugewiesen) nach Wochentag-
+  //      Reihenfolge Mo..So — sonst würden sie zwischen wählbare eingestreut
+  //      und den Blick auf die freien Optionen erschweren.
+  const used = usedElsewhereMap();
+  const current = [];
+  const selectable = [];
+  const blocked = [];
+  for (const d of result) {
+    if (d.id === currentDishId) current.push(d);
+    else if (used.has(d.id)) blocked.push(d);
+    else selectable.push(d);
+  }
+  blocked.sort((a, b) => DAYS.indexOf(used.get(a.id)) - DAYS.indexOf(used.get(b.id)));
+  return [...current, ...selectable, ...blocked];
 }
 
 // Map dishId → Wochentag (nicht der currentDay), an dem dieses Gericht bereits
