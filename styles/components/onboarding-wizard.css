@@ -252,10 +252,14 @@
   margin-bottom: 4px;
   color: var(--md-sys-color-primary);
 }
+/* Inline neben "Tagesbedarf" im Card-Header, nur sichtbar wenn Override
+   aktiv. Dezent (on-surface-variant), damit der Titel im Vordergrund bleibt.
+   Kein Block-Element mehr — spart die Höhen-Änderung der Card wenn der
+   Override-State wechselt. */
 .onboarding-result__suggestion {
-  font-size: 0.8125rem;
+  margin-left: 4px;
+  font-weight: 400;
   color: var(--md-sys-color-on-surface-variant);
-  margin-top: 6px;
 }
 .onboarding-result__row {
   display: grid;

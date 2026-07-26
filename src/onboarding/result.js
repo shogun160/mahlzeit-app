@@ -60,7 +60,10 @@ export function renderStep5(draft) {
 
     <div class="onboarding-result__card onboarding-result__card--primary">
       <div class="onboarding-result__card-header">
-        <span class="onboarding-result__label">Tages-Bedarf</span>
+        <span class="onboarding-result__label">
+          Tagesbedarf
+          <span class="onboarding-result__suggestion" data-role="target-suggestion" ${isOverride ? '' : 'hidden'}>· Vorschlag: ${fmt(suggestion)} kcal</span>
+        </span>
         <button class="settings-refresh"
                 type="button"
                 data-action="target-reset"
@@ -79,9 +82,6 @@ export function renderStep5(draft) {
              value="${sliderVal}"
              data-action="target-change"
              aria-label="Tageskalorien-Ziel" />
-      <div class="onboarding-result__suggestion" data-role="target-suggestion" ${isOverride ? '' : 'hidden'}>
-        Vorschlag: ${fmt(suggestion)} kcal
-      </div>
     </div>
 
     <div class="onboarding-result__row">
@@ -197,7 +197,7 @@ export function refreshResultDynamic(rootEl, draft) {
 
   const suggestionEl = rootEl.querySelector('[data-role="target-suggestion"]');
   if (suggestionEl) {
-    suggestionEl.textContent = `Vorschlag: ${fmt(suggestion)} kcal`;
+    suggestionEl.textContent = `· Vorschlag: ${fmt(suggestion)} kcal`;
     suggestionEl.hidden = !isOverride;
   }
 
