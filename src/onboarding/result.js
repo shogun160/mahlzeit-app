@@ -140,22 +140,21 @@ function renderHorseshoe(macros) {
   const CIRC = 2 * Math.PI * R;
   const strokeW = 10;
   // Gap in Umfangs-Einheiten (~3 units bei CIRC ≈ 264 → ca. 1.1% pro Gap).
-  // Wird von jedem Segment abgezogen, dashoffset schiebt den Segmentstart um
-  // die kumulative Länge davor.
+  // Segmente-Reihenfolge F → P → KH (matcht Legende von oben nach unten).
   const GAP = 3;
-  const khLen = Math.max(0, khPct * CIRC - GAP);
-  const pLen  = Math.max(0, pPct  * CIRC - GAP);
   const fLen  = Math.max(0, fPct  * CIRC - GAP);
-  const khOffset = 0;
-  const pOffset  = -(khPct * CIRC);
-  const fOffset  = -((khPct + pPct) * CIRC);
+  const pLen  = Math.max(0, pPct  * CIRC - GAP);
+  const khLen = Math.max(0, khPct * CIRC - GAP);
+  const fOffset  = 0;
+  const pOffset  = -(fPct * CIRC);
+  const khOffset = -((fPct + pPct) * CIRC);
   return `
-    <svg class="onboarding-macro-ring" viewBox="0 0 100 100" role="img" aria-label="Makro-Verteilung: Kohlenhydrate ${Math.round(khPct*100)}%, Protein ${Math.round(pPct*100)}%, Fett ${Math.round(fPct*100)}%">
+    <svg class="onboarding-macro-ring" viewBox="0 0 100 100" role="img" aria-label="Makro-Verteilung: Fett ${Math.round(fPct*100)}%, Protein ${Math.round(pPct*100)}%, Kohlenhydrate ${Math.round(khPct*100)}%">
       <g transform="rotate(-90 50 50)">
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--md-sys-color-surface-container)" stroke-width="${strokeW}" />
-        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-kh)" stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${khLen} ${CIRC - khLen}" stroke-dashoffset="${khOffset}" />
-        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-p)"  stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${pLen} ${CIRC - pLen}"   stroke-dashoffset="${pOffset}" />
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-f)"  stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${fLen} ${CIRC - fLen}"   stroke-dashoffset="${fOffset}" />
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-p)"  stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${pLen} ${CIRC - pLen}"   stroke-dashoffset="${pOffset}" />
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-kh)" stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${khLen} ${CIRC - khLen}" stroke-dashoffset="${khOffset}" />
       </g>
     </svg>
   `;
@@ -167,9 +166,9 @@ function renderMacros(macros) {
     <div class="onboarding-macro-row">
       ${renderHorseshoe(macros)}
       <div class="onboarding-macro-legend">
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--kh">Kohlenhydrate</span><span class="onboarding-macro-legend__value">${macros.kh}&thinsp;g</span></div>
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--p">Protein</span><span class="onboarding-macro-legend__value">${macros.p}&thinsp;g</span></div>
         <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--f">Fett</span><span class="onboarding-macro-legend__value">${macros.f}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--p">Protein</span><span class="onboarding-macro-legend__value">${macros.p}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--kh">Kohlenhydrate</span><span class="onboarding-macro-legend__value">${macros.kh}&thinsp;g</span></div>
       </div>
     </div>
   `;
