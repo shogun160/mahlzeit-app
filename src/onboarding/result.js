@@ -167,9 +167,9 @@ function renderMacros(macros) {
     <div class="onboarding-macro-row">
       ${renderHorseshoe(macros)}
       <div class="onboarding-macro-legend">
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--kh">KH</span><span class="onboarding-macro-legend__value">${macros.kh}&thinsp;g</span></div>
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--p">P</span><span class="onboarding-macro-legend__value">${macros.p}&thinsp;g</span></div>
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--f">F</span><span class="onboarding-macro-legend__value">${macros.f}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--kh">Kohlenhydrate</span><span class="onboarding-macro-legend__value">${macros.kh}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--p">Protein</span><span class="onboarding-macro-legend__value">${macros.p}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--f">Fett</span><span class="onboarding-macro-legend__value">${macros.f}&thinsp;g</span></div>
       </div>
     </div>
   `;
