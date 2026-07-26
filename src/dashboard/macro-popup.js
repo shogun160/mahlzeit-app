@@ -63,6 +63,11 @@ function topRoundedRectPath(x, y, w, h, r) {
 let rootEl = null;
 let onExternalOpenDetail = null;
 let onExternalChange = null;
+// Trackt ob das Popup gerade offen ist. Wichtig fuer Re-Renders nach Pill-
+// Klick: renderShell() muss die is-open-Klasse direkt ins HTML nehmen, sonst
+// startet die CSS-Fade-Transition beim neuen Overlay bei opacity 0 und das
+// Popup schliesst sich sichtbar.
+let isOpen = false;
 
 // Popup-lokale Auswahl fuer Multi-User-Anzeige (bewusst nicht im state — die
 // Auswahl ist eine reine Anzeige-Praeferenz im Popup und soll nicht persistieren,
@@ -131,13 +136,18 @@ export function openMacroPopup() {
   renderShell();
   rootEl.hidden = false;
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => rootEl.querySelector('.macro-overlay').classList.add('is-open'));
+    requestAnimationFrame(() => {
+      isOpen = true;
+      const overlay = rootEl.querySelector('.macro-overlay');
+      if (overlay) overlay.classList.add('is-open');
+    });
   });
   document.addEventListener('keydown', handleEsc);
 }
 
 export function closeMacroPopup() {
   if (!rootEl || rootEl.hidden) return;
+  isOpen = false;
   const overlay = rootEl.querySelector('.macro-overlay');
   if (overlay) overlay.classList.remove('is-open');
   document.removeEventListener('keydown', handleEsc);
@@ -234,7 +244,7 @@ function renderShell() {
   const targets = avgMacroTargetsOfSelected();
 
   rootEl.innerHTML = `
-    <div class="macro-overlay" data-role="backdrop">
+    <div class="macro-overlay${isOpen ? ' is-open' : ''}" data-role="backdrop">
       <div class="macro-sheet" role="dialog" aria-modal="true" aria-labelledby="macro-title">
         <div class="macro-handle" aria-hidden="true"></div>
         <div class="macro-header">
