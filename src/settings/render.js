@@ -253,13 +253,17 @@ function summaryFor(key) {
   const s = state.settings;
   if (key === 'kochzeit')  return formatCookTime(s.maxCookTime);
   if (key === 'profile') {
-    // Anzahl Profile + Ziel-Personenzahl, wenn die abweichen (dann rechnen
-    // wir mit DEFAULT_USER-Auffuellung). Detailwerte pro Profil sind im
-    // Detail-Sheet.
-    const count = state.settings.profiles?.length ?? 0;
+    // Summary zeigt den Namen des aktiven Profils (profiles[0]) — sichtbar
+    // im Sticky-Header + bei eingeklappter Section. Bei mehreren Profilen
+    // die Gesamt-Zahl dahinter. Fallback wenn Name nicht gesetzt: "Aktives
+    // Profil".
+    const profiles = state.settings.profiles ?? [];
+    const count = profiles.length;
+    const activeName = profiles[0]?.name || 'Aktives Profil';
     const target = state.settings.defaultPortions ?? 1;
-    const label = count === 1 ? '1 Profil' : `${count} Profile`;
-    if (target > count) return `${label} · für ${target}`;
+    let label = activeName;
+    if (count > 1) label += ` · ${count} Profile`;
+    if (target > count) label += ` · für ${target}`;
     return label;
   }
   return '';
