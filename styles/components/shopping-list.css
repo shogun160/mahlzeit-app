@@ -10,7 +10,10 @@
   top: 0;
   z-index: 5;
   margin-inline: -16px;
-  padding: 14px 16px;
+  /* Padding-Top absichtlich klein, damit die Progress-Zeile buendig ans
+     App-Header-Padding-Bottom anschliesst und keine Surface-'Spalt'-Optik
+     entsteht. Padding-Bottom bleibt grosszuegig fuer den Track-Abstand. */
+  padding: 4px 16px 14px;
   /* Opak, damit vorherige Kategorie-Header beim Wegscrollen sauber verdeckt
      werden — frosted-glass würde sie durchschimmern lassen. */
   background: var(--md-sys-color-surface);
