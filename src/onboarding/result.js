@@ -62,7 +62,7 @@ export function renderStep5(draft) {
       <div class="onboarding-result__card-header">
         <span class="onboarding-result__label">
           Tagesbedarf
-          <span class="onboarding-result__suggestion" data-role="target-suggestion" ${isOverride ? '' : 'hidden'}>· Vorschlag: ${formatKcalRange(suggestion)}</span>
+          <span class="onboarding-result__suggestion" data-role="target-suggestion" ${isOverride ? '' : 'hidden'}>· ${formatKcalRange(suggestion)}</span>
         </span>
         <button class="settings-refresh"
                 type="button"
@@ -198,7 +198,7 @@ export function refreshResultDynamic(rootEl, draft) {
   const suggestionEl = rootEl.querySelector('[data-role="target-suggestion"]');
   if (suggestionEl) {
     // innerHTML statt textContent — formatKcalRange enthält &thinsp;.
-    suggestionEl.innerHTML = `· Vorschlag: ${formatKcalRange(suggestion)}`;
+    suggestionEl.innerHTML = `· ${formatKcalRange(suggestion)}`;
     suggestionEl.hidden = !isOverride;
   }
 
