@@ -101,7 +101,7 @@ export function renderStep5(draft) {
     </div>
 
     ${macros ? `
-      <div class="onboarding-result__macros" data-role="macros-slot">
+      <div class="onboarding-result__card" data-role="macros-slot">
         ${renderMacros(macros)}
       </div>
     ` : ''}
@@ -121,12 +121,51 @@ function formatDinnerRange(dinner) {
   return `${lo.toLocaleString('de-DE')}&thinsp;–&thinsp;${hi.toLocaleString('de-DE')} kcal`;
 }
 
+// Horseshoe (halbkreisförmiges Segment-Chart) für die Makro-Verteilung.
+// Segmente proportional zu den kcal-Anteilen von P/KH/F (nicht Gramm — sonst
+// wäre Fett trotz 9 kcal/g visuell zu klein). Anordnung: KH (größte Fläche)
+// links, P mitte, F rechts. Farben aus tokens.css --chart-color-*.
+function renderHorseshoe(macros) {
+  const pKcal = macros.p * 4;
+  const khKcal = macros.kh * 4;
+  const fKcal = macros.f * 9;
+  const total = pKcal + khKcal + fKcal;
+  if (total <= 0) return '';
+  const pPct = pKcal / total;
+  const khPct = khKcal / total;
+  const fPct = fKcal / total;
+
+  // SVG-Halbkreis: viewBox 100×55, Radius 45, Path von (5,50) nach (95,50).
+  // Segmente-Reihenfolge KH → P → F (KH als größte Fläche zuerst links, F
+  // als kleinste rechts). stroke-dasharray legt Länge, dashoffset schiebt
+  // jedes Segment um die kumulative Länge davor.
+  const R = 45;
+  const CIRC = Math.PI * R;
+  const strokeW = 10;
+  const khLen = khPct * CIRC;
+  const pLen = pPct * CIRC;
+  const fLen = fPct * CIRC;
+  return `
+    <svg class="onboarding-horseshoe" viewBox="0 0 100 55" role="img" aria-label="Makro-Verteilung: Kohlenhydrate ${Math.round(khPct*100)}%, Protein ${Math.round(pPct*100)}%, Fett ${Math.round(fPct*100)}%">
+      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--md-sys-color-surface-container)" stroke-width="${strokeW}" stroke-linecap="butt" />
+      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--chart-color-kh)" stroke-width="${strokeW}" stroke-linecap="butt" stroke-dasharray="${khLen} ${CIRC - khLen}" />
+      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--chart-color-p)"  stroke-width="${strokeW}" stroke-linecap="butt" stroke-dasharray="${pLen} ${CIRC - pLen}"   stroke-dashoffset="${-khLen}" />
+      <path d="M 5 50 A ${R} ${R} 0 0 1 95 50" fill="none" stroke="var(--chart-color-f)"  stroke-width="${strokeW}" stroke-linecap="butt" stroke-dasharray="${fLen} ${CIRC - fLen}"   stroke-dashoffset="${-(khLen + pLen)}" />
+    </svg>
+  `;
+}
+
 function renderMacros(macros) {
   return `
-    <div class="onboarding-macro"><span class="onboarding-macro__key onboarding-macro__key--p">P</span><span>${macros.p} g</span></div>
-    <div class="onboarding-macro"><span class="onboarding-macro__key onboarding-macro__key--kh">KH</span><span>${macros.kh} g</span></div>
-    <div class="onboarding-macro"><span class="onboarding-macro__key onboarding-macro__key--f">F</span><span>${macros.f} g</span></div>
-    <div class="onboarding-macro onboarding-macro--kcal">${macros.kcal.toLocaleString('de-DE')} kcal</div>
+    <div class="onboarding-result__label">Makro-Verteilung</div>
+    <div class="onboarding-macro-row">
+      ${renderHorseshoe(macros)}
+      <div class="onboarding-macro-legend">
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--kh">KH</span><span class="onboarding-macro-legend__value">${macros.kh}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--p">P</span><span class="onboarding-macro-legend__value">${macros.p}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--f">F</span><span class="onboarding-macro-legend__value">${macros.f}&thinsp;g</span></div>
+      </div>
+    </div>
   `;
 }
 
