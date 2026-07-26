@@ -9,9 +9,6 @@ const ICON_CLOSE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidde
 // Genutzt in Tile-Badge, Filter-Chip und Empty-State.
 const ICON_FAV_OUTLINE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q57 0 105.5 27t84.5 78q42-54 89-79.5T670-854q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Zm0-79q101.24-93.15 166.62-159.58Q712-426 750.5-476t54-89.13q15.5-39.13 15.5-77.87 0-65-42.5-107.5T670-793q-51.63 0-95.31 31.5Q531-730 504-660h-49q-26-69-70-101t-95-32q-65 0-107.5 42.5T140-643q0 38.74 15.5 77.87Q171-526 209.5-476t104 116.42Q378.87-293.15 480-200Zm0-296Z"/></svg>`;
 const ICON_FAV_FILL    = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q52 0 98.5 22t81.5 62q35-40 81.5-62t98.5-22q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Z"/></svg>`;
-// Material Symbols timer + inventory_2 — Icon-only Chips fuer Schnell + Wenig Zutaten.
-const ICON_TIMER = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-840v-80h240v80H360Zm80 440h80v-240h-80v240Zm40 320q-74 0-139.5-28.5T226-186q-49-49-77.5-114.5T120-440q0-74 28.5-139.5T226-694q49-49 114.5-77.5T480-800q62 0 119 20t107 58l56-56 56 56-56 56q38 50 58 107t20 119q0 74-28.5 139.5T734-186q-49 49-114.5 77.5T480-80Zm0-80q116 0 198-82t82-198q0-116-82-198t-198-82q-116 0-198 82t-82 198q0 116 82 198t198 82Zm0-280Z"/></svg>`;
-const ICON_INVENTORY = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M160-120q-33 0-56.5-23.5T80-200v-440q-14-8-22-21.5t-8-31.5v-107q0-33 23.5-56.5T130-880h700q33 0 56.5 23.5T910-800v107q0 18-8 31.5T880-640v440q0 33-23.5 56.5T800-120H160Zm0-480v400h640v-400H160Zm-30-80h700v-120H130v120Zm230 280h240v-80H360v80ZM160-200v-400 400Z"/></svg>`;
 
 // Filter-Chips oben im Picker. Vier Gruppen mit unterschiedlicher Verknüpfung:
 //
@@ -41,9 +38,9 @@ const FILTERS = [
   { key: 'mediterranean', label: 'Mediterran',  group: 'cuisine', test: (d) => d.cuisineGroup === 'mediterranean' },
   { key: 'middleEast',    label: 'Nahost',      group: 'cuisine', test: (d) => d.cuisineGroup === 'middleEast' },
   { key: 'americas',      label: 'Amerikanisch', group: 'cuisine', test: (d) => d.cuisineGroup === 'americas' },
-  { key: 'fast',      label: 'Schnell',       group: 'attr', icon: ICON_TIMER,       test: (d) => d.cooktime <= 30 },
-  { key: 'simple',    label: 'Wenig Zutaten', group: 'attr', icon: ICON_INVENTORY,   test: (d) => openIngredientCount(d) <= 8 },
-  { key: 'favorite',  label: 'Favoriten',     group: 'attr', icon: ICON_FAV_FILL,    test: (d) => isFavorite(d.id) },
+  { key: 'fast',      label: 'Schnell',       group: 'attr', test: (d) => d.cooktime <= 30 },
+  { key: 'simple',    label: 'Wenig Zutaten', group: 'attr', test: (d) => openIngredientCount(d) <= 8 },
+  { key: 'favorite',  label: 'Favoriten',     group: 'attr', icon: ICON_FAV_FILL, test: (d) => isFavorite(d.id) },
   { key: 'kcal_low',  label: 'Kalorienarm',   group: 'kcal', test: (d) => d.kcal < KCAL_MEDIAN },
   { key: 'kcal_high', label: 'Kalorienreich', group: 'kcal', test: (d) => d.kcal > KCAL_MEDIAN },
   { key: 'macro_protein', label: 'Proteinreich',    group: 'macro', test: (d) => macroPct(d).p > 35 },
