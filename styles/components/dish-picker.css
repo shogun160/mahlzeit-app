@@ -546,7 +546,7 @@
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-glass);
 }
 
 .picker-tile__day-badge--active {
@@ -571,7 +571,7 @@
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-glass);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   font-size: 0.6875rem;
   font-weight: 700;

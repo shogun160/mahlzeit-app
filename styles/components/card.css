@@ -79,7 +79,7 @@
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-on-glass);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   transition: background 160ms ease, color 160ms ease, transform 120ms ease;
@@ -108,7 +108,7 @@
   background: rgba(255, 255, 255, 0.88);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-on-glass);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
@@ -147,7 +147,7 @@
   background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  color: var(--md-sys-color-on-primary-container);
+  color: var(--md-sys-color-on-glass);
   font-size: 0.75rem;
   font-weight: 700;
   padding: 4px 9px;
