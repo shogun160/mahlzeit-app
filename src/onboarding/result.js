@@ -70,7 +70,7 @@ export function renderStep5(draft) {
           ${ICON_REFRESH}
         </button>
       </div>
-      <div class="onboarding-result__value onboarding-result__value--big" data-role="target-value">${fmt(effective)} kcal</div>
+      <div class="onboarding-result__value onboarding-result__value--big" data-role="target-value">${formatKcalRange(effective)}</div>
       <input class="settings-slider"
              type="range"
              min="1000"
@@ -97,7 +97,7 @@ export function renderStep5(draft) {
 
     <div class="onboarding-result__card onboarding-result__card--accent">
       <div class="onboarding-result__label">Abendessen</div>
-      <div class="onboarding-result__value onboarding-result__value--big" data-role="dinner-value">${formatDinnerRange(dinner)}</div>
+      <div class="onboarding-result__value onboarding-result__value--big" data-role="dinner-value">${formatKcalRange(dinner)}</div>
     </div>
 
     ${macros ? `
@@ -110,15 +110,17 @@ export function renderStep5(draft) {
   `;
 }
 
-// Zeigt Abendessen als Zielkorridor "887 – 1.137 kcal" statt harter Zahl —
-// analog zu formatRange in settings/render.js und zur Bedarfs-Pille im
-// Dashboard. Zeigt "—" wenn kein dinner-Wert.
-function formatDinnerRange(dinner) {
-  if (dinner == null) return '—';
-  const range = kcalRange(dinner);
-  if (!range) return `${dinner.toLocaleString('de-DE')} kcal`;
+// Zeigt einen kcal-Wert als Zielkorridor "890 – 1.140 kcal" — analog zu
+// formatRange in settings/render.js und zur Bedarfs-Pille im Dashboard.
+// Grenzen werden auf 10 kcal gerundet, damit die Zahl im Ergebnis-Screen
+// nicht willkürlich präzise wirkt. Genutzt für Tages-Bedarf und Abendessen.
+function formatKcalRange(val) {
+  if (val == null) return '—';
+  const range = kcalRange(val);
+  if (!range) return `${val.toLocaleString('de-DE')} kcal`;
   const [lo, hi] = range;
-  return `${lo.toLocaleString('de-DE')}&thinsp;–&thinsp;${hi.toLocaleString('de-DE')} kcal`;
+  const round10 = (n) => Math.round(n / 10) * 10;
+  return `${round10(lo).toLocaleString('de-DE')}&thinsp;–&thinsp;${round10(hi).toLocaleString('de-DE')} kcal`;
 }
 
 // Voller Donut-Ring für die Makro-Verteilung — M3-Circular-Progress-Style
@@ -186,12 +188,12 @@ export function refreshResultDynamic(rootEl, draft) {
   const macros = dinner != null ? macrosForKcal(dinner, p.macroPreset) : null;
   const fmt = (n) => n == null ? '—' : n.toLocaleString('de-DE');
 
+  // innerHTML statt textContent, weil formatKcalRange &thinsp; enthält.
   const targetValEl = rootEl.querySelector('[data-role="target-value"]');
-  if (targetValEl) targetValEl.textContent = `${fmt(effective)} kcal`;
+  if (targetValEl) targetValEl.innerHTML = formatKcalRange(effective);
 
   const dinnerValEl = rootEl.querySelector('[data-role="dinner-value"]');
-  // innerHTML statt textContent, weil formatDinnerRange &thinsp; enthält
-  if (dinnerValEl) dinnerValEl.innerHTML = formatDinnerRange(dinner);
+  if (dinnerValEl) dinnerValEl.innerHTML = formatKcalRange(dinner);
 
   const suggestionEl = rootEl.querySelector('[data-role="target-suggestion"]');
   if (suggestionEl) {
