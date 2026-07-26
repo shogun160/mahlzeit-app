@@ -8,6 +8,7 @@ import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
 import { mountSettingsSheet, openSettingsSheet } from './settings/render.js';
 import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
 import { mountMacroPopup, openMacroPopup } from './dashboard/macro-popup.js';
+import { mountOnboardingWizard, openOnboardingWizard } from './onboarding/wizard.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
@@ -21,6 +22,7 @@ const sheetRoot = document.getElementById('detail-sheet-root');
 const settingsRoot = document.getElementById('settings-sheet-root');
 const pickerRoot = document.getElementById('dish-picker-root');
 const macroPopupRoot = document.getElementById('macro-popup-root');
+const onboardingRoot = document.getElementById('onboarding-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
@@ -79,6 +81,10 @@ mountMacroPopup(macroPopupRoot, {
   onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),
   onChange: refresh,
 });
+mountOnboardingWizard(onboardingRoot, { onChange: refresh });
+
+// TEMP: manueller Test-Trigger für Wizard-Gerüst — in Task 12 durch Auto-Open ersetzt
+window.__testWizard = openOnboardingWizard;
 
 // Dish-Picker: onPick mutiert das Assignment für den gewählten Tag und würfelt
 // alle anderen Tage, die dasselbe Gericht hatten, automatisch neu — sonst wäre
