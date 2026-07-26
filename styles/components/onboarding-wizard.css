@@ -129,3 +129,32 @@
 .onboarding-footer:empty {
   display: none;
 }
+
+.onboarding-btn {
+  min-height: var(--touch-target-min);
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.onboarding-btn--primary {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  margin-left: auto;
+}
+.onboarding-btn--tertiary {
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.onboarding-btn--tertiary:active {
+  background: var(--md-sys-color-surface-container);
+}
+.onboarding-btn:active {
+  transform: scale(0.98);
+}
+.onboarding-footer__spacer {
+  flex: 0 0 auto;
+  visibility: hidden;
+}

@@ -113,14 +113,34 @@ function renderShell() {
           </div>
         </div>
         <div class="onboarding-body" data-role="step-slot">
-          <p class="onboarding-placeholder">Step ${currentStep}</p>
+          ${renderStepContent()}
         </div>
         <div class="onboarding-footer" data-role="footer-slot">
+          ${renderFooter()}
         </div>
       </div>
     </div>
   `;
   attachShellHandlers();
+}
+
+function renderStepContent() {
+  // Steps 1–5 werden in späteren Tasks eingebunden; hier Placeholder.
+  return `<p class="onboarding-placeholder">Step ${currentStep} — Content folgt.</p>`;
+}
+
+function renderFooter() {
+  const isFirst = currentStep === 1;
+  const isLast = currentStep === TOTAL_STEPS;
+  const primaryLabel = isLast ? 'Fertig' : 'Weiter';
+  const primaryAction = isLast ? 'finish' : 'next';
+  const back = isFirst
+    ? '<span class="onboarding-footer__spacer" aria-hidden="true"></span>'
+    : `<button class="onboarding-btn onboarding-btn--tertiary" type="button" data-action="back">Zurück</button>`;
+  return `
+    ${back}
+    <button class="onboarding-btn onboarding-btn--primary" type="button" data-action="${primaryAction}">${primaryLabel}</button>
+  `;
 }
 
 function attachShellHandlers() {
@@ -129,4 +149,32 @@ function attachShellHandlers() {
     if (ev.target === overlay) persistAndClose();
   });
   rootEl.querySelector('[data-action="later"]').addEventListener('click', persistAndClose);
+
+  const nextBtn = rootEl.querySelector('[data-action="next"]');
+  if (nextBtn) nextBtn.addEventListener('click', goNext);
+  const backBtn = rootEl.querySelector('[data-action="back"]');
+  if (backBtn) backBtn.addEventListener('click', goBack);
+  const finishBtn = rootEl.querySelector('[data-action="finish"]');
+  if (finishBtn) finishBtn.addEventListener('click', persistAndClose);
+
+  attachStepHandlers();
+}
+
+function goNext() {
+  if (currentStep < TOTAL_STEPS) {
+    currentStep++;
+    renderShell();
+  }
+}
+
+function goBack() {
+  if (currentStep > 1) {
+    currentStep--;
+    renderShell();
+  }
+}
+
+// Placeholder — pro Step werden in Tasks 5–9 die Field-Handler ergänzt.
+function attachStepHandlers() {
+  // wird in späteren Tasks pro Step gefüllt
 }
