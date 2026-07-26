@@ -268,10 +268,8 @@ function attachStep1Handlers() {
   bindSlider('weight-change', 'weight-value', 'weightKg', (v) => `${v} kg`);
 }
 
-// Step 2 (Alltag) — Aktivität + Ziel + Frühstück + Mittag. Vorschau des
-// Abendessen-Kontingents wird nur beim initialen Render einmal berechnet
-// (kein Live-Update während Slider-Bewegung — sonst zappelt der Wert unter
-// dem Finger). User sieht den finalen Wert wenn er auf Step 3 klickt.
+// Step 2 (Alltag) — Aktivität + Ziel + Frühstück + Mittag + Live-Preview
+// des berechneten Abendessen-Kontingents.
 function attachStep2Handlers() {
   bindChipGroup('activity-pick', 'activityLevel', (v) => parseInt(v, 10));
   bindChipGroup('goal-pick', 'goal', (v) => v);
@@ -279,21 +277,24 @@ function attachStep2Handlers() {
   bindSlider('breakfast-change', 'breakfast-value', 'breakfastKcal', fmt);
   bindSlider('lunch-change', 'lunch-value', 'lunchKcal', fmt);
 
-  const el = rootEl.querySelector('[data-role="dinner-preview-value"]');
-  if (!el) return;
-  const p = resolvedProfile(draft);
-  const dinner = dinnerTarget(p);
-  if (dinner == null) {
-    el.textContent = '—';
-    return;
-  }
-  const range = kcalRange(dinner);
-  if (!range) {
-    el.textContent = `${dinner.toLocaleString('de-DE')} kcal`;
-    return;
-  }
-  const round10 = (n) => Math.round(n / 10) * 10;
-  el.innerHTML = `${round10(range[0]).toLocaleString('de-DE')}&thinsp;–&thinsp;${round10(range[1]).toLocaleString('de-DE')} kcal`;
+  const updateDinnerPreview = () => {
+    const el = rootEl.querySelector('[data-role="dinner-preview-value"]');
+    if (!el) return;
+    const p = resolvedProfile(draft);
+    const dinner = dinnerTarget(p);
+    if (dinner == null) { el.textContent = '—'; return; }
+    const range = kcalRange(dinner);
+    if (!range) { el.textContent = `${dinner.toLocaleString('de-DE')} kcal`; return; }
+    const round10 = (n) => Math.round(n / 10) * 10;
+    el.innerHTML = `${round10(range[0]).toLocaleString('de-DE')}&thinsp;–&thinsp;${round10(range[1]).toLocaleString('de-DE')} kcal`;
+  };
+  updateDinnerPreview();
+  rootEl.querySelectorAll('[data-action="activity-pick"], [data-action="goal-pick"]').forEach((btn) => {
+    btn.addEventListener('click', updateDinnerPreview);
+  });
+  rootEl.querySelectorAll('[data-action="breakfast-change"], [data-action="lunch-change"]').forEach((slider) => {
+    slider.addEventListener('input', updateDinnerPreview);
+  });
 }
 
 // Step 3 (Filter) — Ernährungs- + Küchen-Präferenzen als Toggle-Chips +
