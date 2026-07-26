@@ -141,10 +141,10 @@ function renderHorseshoe(macros) {
   const R = 42;
   const CIRC = 2 * Math.PI * R;
   const strokeW = 10;
-  // Größerer Gap (~7 units bei CIRC ≈ 264 → ca. 2.6% pro Trennung) macht die
-  // weißen Unterbrechungen zwischen den Segmenten deutlich sichtbar.
+  // Deutliche weiße Unterbrechungen (~25 units bei CIRC ≈ 264 → ca. 9.5% pro Gap),
+  // damit die drei Segmente klar als separate Blöcke lesbar sind.
   // Segmente-Reihenfolge F → P → KH (matcht Legende von oben nach unten).
-  const GAP = 7;
+  const GAP = 25;
   const fLen  = Math.max(0, fPct  * CIRC - GAP);
   const pLen  = Math.max(0, pPct  * CIRC - GAP);
   const khLen = Math.max(0, khPct * CIRC - GAP);
