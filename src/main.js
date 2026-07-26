@@ -76,6 +76,7 @@ mountDetailSheet(sheetRoot, { onChange: refresh });
 mountSettingsSheet(settingsRoot, {
   onChange: refresh,
   onOpenMacro: () => openMacroPopup(),
+  onOpenOnboarding: () => openOnboardingWizard(),
 });
 mountMacroPopup(macroPopupRoot, {
   onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),

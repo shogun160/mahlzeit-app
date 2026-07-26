@@ -43,6 +43,7 @@ const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hid
 let rootEl = null;
 let onExternalChange = () => {};
 let onExternalOpenMacro = () => {};
+let onExternalOpenOnboarding = () => {};
 // Zugeklappte Sections (transient — verliert sich beim App-Restart, überlebt
 // aber Sheet-Close/Reopen weil das Modul lebt).
 const collapsedSections = new Set();
@@ -54,10 +55,11 @@ let sectionStackIdx = 0;
 
 // --- Mount / Lifecycle ---
 
-export function mountSettingsSheet(el, { onChange, onOpenMacro } = {}) {
+export function mountSettingsSheet(el, { onChange, onOpenMacro, onOpenOnboarding } = {}) {
   rootEl = el;
   onExternalChange = onChange || (() => {});
   onExternalOpenMacro = onOpenMacro || (() => {});
+  onExternalOpenOnboarding = onOpenOnboarding || (() => {});
   rootEl.innerHTML = '';
   rootEl.hidden = true;
 }
@@ -186,8 +188,15 @@ function renderShell() {
           `, 'settings-section-body--soon')}
 
           ${section('daten', 'Daten', `
-            <p class="settings-section__note">Kommt bald — Backup exportieren/importieren, Alle Daten zurücksetzen</p>
-          `, 'settings-section-body--soon')}
+            <div class="settings-row">
+              <div class="settings-row__label">
+                <div class="settings-row__label-primary">Einrichtung</div>
+                <div class="settings-row__label-secondary">Profil-Werte über den Wizard neu setzen</div>
+              </div>
+              <button class="settings-action-btn" type="button" data-action="open-onboarding">Starten</button>
+            </div>
+            <p class="settings-section__note settings-section__note--soft">Kommt bald — Backup exportieren/importieren, Alle Daten zurücksetzen</p>
+          `)}
 
           ${section('ueber', 'Über', `
             <div class="settings-row">
@@ -594,6 +603,16 @@ function attachHandlers() {
     if (ev.target === overlay) closeSettingsSheet();
   });
   rootEl.querySelector('[data-action="close"]').addEventListener('click', closeSettingsSheet);
+
+  // Onboarding-Trigger in der Daten-Section — schließt Settings-Sheet und
+  // öffnet den Wizard direkt danach (kurze Verzögerung für die Slide-out-
+  // Animation, damit die Sheets nicht übereinander stapeln).
+  rootEl.querySelectorAll('[data-action="open-onboarding"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      closeSettingsSheet();
+      setTimeout(() => onExternalOpenOnboarding(), TRANSITION_MS);
+    });
+  });
 
   // Scroll-Listener am Body: aktualisiert die --sticky-Klasse an allen
   // Section-Toggles. Die Summary-Pille wird per CSS nur bei --sticky sichtbar,

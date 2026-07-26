@@ -599,3 +599,25 @@
   flex-shrink: 0;
   color: inherit;
 }
+
+/* Aktions-Button in der Daten-Section — analog zu Settings-Link, aber als
+   Trigger für den Onboarding-Wizard. */
+.settings-action-btn {
+  min-height: var(--touch-target-min);
+  padding: 8px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--md-sys-color-outline);
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.settings-action-btn:active {
+  background: var(--md-sys-color-surface-container);
+  transform: scale(0.98);
+}
+.settings-section__note--soft {
+  margin-top: 12px;
+  opacity: 0.6;
+}
