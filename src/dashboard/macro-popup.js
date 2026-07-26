@@ -248,7 +248,7 @@ function renderShell() {
       <div class="macro-sheet" role="dialog" aria-modal="true" aria-labelledby="macro-title">
         <div class="macro-handle" aria-hidden="true"></div>
         <div class="macro-header">
-          <h2 class="macro-title" id="macro-title">Makro-Verlauf</h2>
+          <h2 class="macro-title" id="macro-title">Nährstoff-Details</h2>
           <button class="macro-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="macro-body">
@@ -484,7 +484,7 @@ function renderChart(target, rangeLow, rangeHigh, avg) {
          viewBox="0 0 ${CHART_W} ${CHART_H}"
          preserveAspectRatio="xMidYMid meet"
          role="img"
-         aria-label="Makro-Verlauf der Woche">
+         aria-label="Nährstoff-Details der Woche">
       ${targetBand}
       ${yAxis}
       ${barsSvg.join('')}
