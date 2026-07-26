@@ -209,3 +209,77 @@ Ideal in derselben Iterations-Sequenz wie **Rezept-Import** — beide erweitern 
 - Bild-Prompt-Template-Pflege (bei neuen Rezepten von Custom-Import: passt der Foodblog-Stil noch, oder darf der User frei stylen?)
 
 Ideal in derselben Session wie **Datenverwaltung / Iteration 7** (Export/Import JSON + Reset) — der Import-Flow überschneidet sich am Datei-Handling und Validation-Framework.
+
+## Profil teilen / importieren
+
+**Idee:** Ein Profil (z. B. das eigene) als Datei oder Deep-Link teilen, damit ein anderer Mahlzeit-Nutzer es bei sich importieren kann. Kein Cloud-Sync, sondern manueller Peer-to-Peer-Transport (WhatsApp/Signal/Mail/AirDrop).
+
+**Auslöser:** Multi-Profile (Session 18) macht es reizvoll: „Mein Partner nutzt die App neu — ich schicke ihm mein Profil damit er nicht alles neu einrichten muss." Oder Tausch von Ernährungs-/Küchen-Präferenzen zwischen Freunden.
+
+### Export
+
+**Format:** JSON — dasselbe Schema wie ein Profil-Objekt aus `state.settings.profiles[i]`. Wrapper mit Meta:
+
+```json
+{
+  "type": "mahlzeit-profile",
+  "version": 1,
+  "exportedAt": "2026-07-27T…",
+  "profile": {
+    "name": "Oliver",
+    "gender": "male",
+    "age": 38,
+    "heightCm": 180,
+    "weightKg": 78,
+    "activityLevel": 3,
+    "goal": "maintain",
+    "dailyTargetOverride": 2200,
+    "breakfastKcal": 400,
+    "lunchKcal": 700,
+    "macroPreset": "balanced",
+    "macroTargets": null,
+    "showCalorieBar": true,
+    "preferences": { "meat": true, "fish": true, "vegetarian": false },
+    "cuisines": { "asian": true, "mediterranean": false, "middleEast": false, "americas": false },
+    "favorites": { "3": true, "12": true }
+  }
+}
+```
+
+- `id` NICHT mitschicken (wird beim Import neu vergeben, sonst Kollision mit existierenden `u1`/`u2`).
+- `favorites` = Map von dish-IDs. Nur sinnvoll wenn Empfänger dieselbe/neuere `dishes.json` hat — bei fehlender ID ignorieren beim Import.
+
+### Transport-Varianten (in Reihenfolge einfachste zuerst)
+
+1. **Web Share API** (Android via Capacitor): `navigator.share({ text: base64(json) })` oder als Datei-Attachment. User-Flow: „Teilen" → Ziel-App wählen (WhatsApp, Mail, …). Empfänger bekommt Text/File → tippt „In Mahlzeit öffnen".
+2. **Copy-to-Clipboard**: JSON als Base64-String kopieren, per Chat schicken. Empfänger paste in ein „Profil importieren"-Feld.
+3. **QR-Code**: JSON als QR (funktioniert nur für kleine Profile ohne viele Favoriten — Base64-JSON von ~500 Bytes passt in QR Level M). Empfänger scannt mit Kamera. Braucht QR-Generator + Scanner-Lib.
+4. **Deep-Link**: `mahlzeit://profile/import?data=<base64>` → wenn App installiert, öffnet sich Import-Dialog. Braucht Intent-Filter in `AndroidManifest.xml` + `Capacitor.App.addListener('appUrlOpen', …)`.
+5. **Datei-Export/Import**: `.mahlzeit-profile.json` als File-Download (Web) bzw. Capacitor-Filesystem-Share (Android).
+
+**Empfehlung MVP:** Kombination aus **1 + 2** — Share-API auf Android (öffnet nativen Share-Sheet), Clipboard-Fallback im Browser. Klein, keine neuen Libs, kein Deep-Link-Setup.
+
+### Import-Flow
+
+- **Trigger:** Settings > Profile > „Profil importieren"-Button (oder Klick auf empfangenen Link/Text).
+- **Input:** Textfeld für JSON-Paste ODER Datei-Picker ODER Deep-Link-Handler.
+- **Validation:**
+  1. `type === "mahlzeit-profile"` und `version === 1`
+  2. Pflichtfelder da (name als Fallback, sonst „Import"): gender+age+heightCm+weightKg für die Rechnung
+  3. Enum-Checks: goal, macroPreset, gender
+  4. `favorites`: unbekannte dish-IDs vor Import filtern + im UI melden („2 Favoriten übersprungen — Rezepte fehlen bei dir")
+- **Preview:** Vor dem Anlegen: Ansicht was importiert wird (Name, Bio-Daten, Anzahl Favoriten, Prefs). Buttons „Importieren" / „Abbrechen".
+- **Anlegen:** `addProfile(patch)` mit den importierten Feldern. Neues Profil wird ans Ende von `profiles[]` angehängt (nicht aktiv).
+
+### Sicherheit
+
+- Kein Auto-Import ohne Bestätigung — sonst Malware-Potenzial über Deep-Link.
+- Import ist nie destruktiv: legt immer NEUES Profil an, überschreibt kein existierendes. Wenn User Duplikate hat, kann er sie manuell im Detail-Sheet löschen.
+- Size-Limit auf JSON (~10 KB) um DoS-Attacken über riesige favorites-Maps zu verhindern.
+
+### Warum später
+
+- Braucht Share-API-Integration + Import-Sheet-UI (nicht trivial).
+- Deep-Link erfordert Änderungen an Android-Manifest (Intent-Filter).
+- Erst wenn Multi-Profile stabil ist und Nutzer echten Bedarf haben („mein Partner will meine Werte übernehmen"). Aktuell reicht: „Werte manuell abtippen" — 5 Slider, in 30 Sekunden gemacht.
+- Ideal in einer Session zusammen mit **Rezept-Import** — beide brauchen JSON-Validation-Framework + Share-Sheet-Integration.
