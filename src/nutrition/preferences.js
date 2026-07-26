@@ -86,3 +86,24 @@ export function dishCuisineVoteCount(dish) {
   }
   return count;
 }
+
+// Favoriten-Union: true wenn IRGENDEIN mitkochender Diner dieses Dish als
+// Favorit markiert hat. Genutzt als Filter-Test im Dish-Picker (Chip
+// "Favoriten"). Herz-Icon auf Karten/Sheets zeigt weiter isFavorite() —
+// das ist die persoenliche Markierung des aktiven Users.
+export function isFavoriteAnyDiner(dishId) {
+  const diners = activeDiners();
+  return diners.some((p) => !!p.favorites?.[dishId]);
+}
+
+// Anzahl der mitkochenden Diner, die dieses Dish favorisieren. Basis fuer
+// das Ranking im Dish-Picker: mehr Likes -> weiter oben. Return 0 wenn
+// niemand.
+export function favoriteLikesCount(dishId) {
+  const diners = activeDiners();
+  let count = 0;
+  for (const p of diners) {
+    if (p.favorites?.[dishId]) count++;
+  }
+  return count;
+}

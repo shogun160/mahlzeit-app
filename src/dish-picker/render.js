@@ -1,5 +1,5 @@
-import { state, getActiveProfile, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
-import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount } from '../nutrition/preferences.js';
+import { state, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
+import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount, isFavoriteAnyDiner, favoriteLikesCount } from '../nutrition/preferences.js';
 import { allDishes } from '../data/dishes.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
@@ -41,7 +41,7 @@ const FILTERS = [
   { key: 'americas',      label: 'Amerikanisch', group: 'cuisine', test: (d) => d.cuisineGroup === 'americas' },
   { key: 'fast',      label: 'Schnell',       group: 'attr', test: (d) => d.cooktime <= 30 },
   { key: 'simple',    label: 'Wenig Zutaten', group: 'attr', test: (d) => openIngredientCount(d) <= 8 },
-  { key: 'favorite',  label: 'Favoriten',     group: 'attr', icon: ICON_FAV_FILL, test: (d) => isFavorite(d.id) },
+  { key: 'favorite',  label: 'Favoriten',     group: 'attr', icon: ICON_FAV_FILL, test: (d) => isFavoriteAnyDiner(d.id) },
   { key: 'kcal_low',  label: 'Kalorienarm',   group: 'kcal', test: (d) => d.kcal < KCAL_MEDIAN },
   { key: 'kcal_high', label: 'Kalorienreich', group: 'kcal', test: (d) => d.kcal > KCAL_MEDIAN },
   { key: 'macro_protein', label: 'Proteinreich',    group: 'macro', test: (d) => macroPct(d).p > 35 },
@@ -328,8 +328,10 @@ function filteredDishes() {
   const anySort = sortFast || sortSimple || sortKcalLow || sortKcalHigh || sortProtein || sortLowCarb || sortLowFat;
   if (anySort) {
     result.sort((a, b) => {
-      const favA = isFavorite(a.id) ? 1 : 0;
-      const favB = isFavorite(b.id) ? 1 : 0;
+      // Favoriten-Ranking: Dishes mit mehr Likes (Diner die favorisiert haben)
+      // stehen zuerst. Aktiver User zaehlt einfach mit; kein Extra-Boost.
+      const favA = favoriteLikesCount(a.id);
+      const favB = favoriteLikesCount(b.id);
       if (favA !== favB) return favB - favA;
       // Multi-User-Kuechen: Dishes deren Kueche mehr Diner unterstuetzen
       // ranken hoeher. Bei Single-User oder ohne Kuechen-Prefs ist der Wert
@@ -371,8 +373,10 @@ function filteredDishes() {
     // Ohne aktiven Sort: Favoriten nach oben, dann Kuechen-Voter-Anzahl
     // (Multi-User: mehr Diner-Uebereinstimmung ranked hoeher), dann id.
     result.sort((a, b) => {
-      const favA = isFavorite(a.id) ? 1 : 0;
-      const favB = isFavorite(b.id) ? 1 : 0;
+      // Favoriten-Ranking: Dishes mit mehr Likes (Diner die favorisiert haben)
+      // stehen zuerst. Aktiver User zaehlt einfach mit; kein Extra-Boost.
+      const favA = favoriteLikesCount(a.id);
+      const favB = favoriteLikesCount(b.id);
       if (favA !== favB) return favB - favA;
       const voteA = dishCuisineVoteCount(a);
       const voteB = dishCuisineVoteCount(b);
@@ -482,8 +486,11 @@ function renderResults(main, overflow, currentDishId, used) {
   // Gerichte". Filter darf allein aktiv sein oder in Kombination — Hauptsache
   // 'favorite' ist der Grund fuer's Leere-sein (keine Gerichte matchen).
   const favActive = activeFilters.has('favorite');
-  const hasAnyFav = Object.keys(getActiveProfile().favorites || {}).length > 0;
-  const emptyMsg = (favActive && !hasAnyFav)
+  // Multi-User: pruefen ob IRGENDEIN mitkochender Diner Favoriten hat.
+  // Wenn niemand favorisiert hat -> freundliche Copy statt generisches Empty.
+  const diners = state.settings.profiles.slice(0, state.settings.defaultPortions || 1);
+  const anyFav = diners.some((p) => Object.keys(p.favorites || {}).length > 0);
+  const emptyMsg = (favActive && !anyFav)
     ? `<p class="picker-empty">Noch keine Favoriten — Nimm dir ein Herz ${ICON_FAV_FILL}</p>`
     : '<p class="picker-empty">Keine Gerichte für diese Filter.</p>';
   const mainHtml = main.length > 0
