@@ -318,10 +318,7 @@ function renderProfileList() {
   const plusDisabled = defaultPortions >= PORTIONS_MAX;
   // Hinweis-Text: informiert wenn portions > profiles.length ist, damit klar
   // ist dass die fehlenden Personen ueber das Standard-Profil gerechnet werden.
-  const missing = Math.max(0, defaultPortions - profiles.length);
-  const hint = missing > 0
-    ? `+ ${missing} × Standard-Profil`
-    : 'Für alle Tage der Woche';
+  const hint = 'Für alle Tage der Woche';
   // Standard-Profil-Row: separater Marker, nicht loeschbar. Editierbar ueber
   // dasselbe Detail-Sheet (id '_default' erkennt der Sheet). Optisch abgesetzt
   // via .settings-profile-row--default (dashed border in primary).
@@ -875,13 +872,7 @@ function handlePortions(delta) {
   if (valueEl) valueEl.textContent = defaultPortions;
   if (minusBtn) minusBtn.disabled = defaultPortions <= PORTIONS_MIN;
   if (plusBtn) plusBtn.disabled = defaultPortions >= PORTIONS_MAX;
-  if (hintEl) {
-    const profilesCount = state.settings.profiles?.length ?? 0;
-    const missing = Math.max(0, defaultPortions - profilesCount);
-    hintEl.textContent = missing > 0
-      ? `+ ${missing} × Standard-Profil`
-      : 'Für alle Tage der Woche';
-  }
+  if (hintEl) hintEl.textContent = 'Für alle Tage der Woche';
   updateSectionSummary('profile');
   onExternalChange();
 }
