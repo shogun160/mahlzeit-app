@@ -115,8 +115,13 @@ function refresh() {
       resetChecked();
       refresh();
     },
-    onCheckAll: (keys) => {
+    onCheckAll: (keys, cats) => {
       checkAll(keys);
+      // Alle betroffenen Kategorien collapsen — die Liste ist erledigt,
+      // eingeklappt spart Scrollflaeche und signalisiert den Zustand klar.
+      if (Array.isArray(cats)) {
+        for (const c of cats) state.collapsedCategories.add(c);
+      }
       refresh();
     },
     onGoDashboard: () => {
