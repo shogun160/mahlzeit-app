@@ -23,9 +23,13 @@ let isOpen = false;
 //                     als "Person X von N"-Pille im Header ab Index > 1.
 //   showFollowup      true = statt normalem Step-Content wird die Zwischen-
 //                     Frage "Willst du weitere Profile anlegen?" gezeigt.
+//   suppressFollowup  true = maybeShowFollowupOrClose zeigt keine Frage
+//                     an — genutzt beim Add-Profile-Modus aus Settings, wo
+//                     der User bewusst genau ein neues Profil anlegen will.
 let editingProfileId = null;
 let personIndex = 1;
 let showFollowup = false;
+let suppressFollowup = false;
 
 // Draft hält die Werte, die der User im Wizard eingibt. Beim Öffnen aus dem
 // editierten Profil (getEditingProfile()) pre-fillt. touched trackt pro Feld,
@@ -88,15 +92,26 @@ export function mountOnboardingWizard(el, { onChange, onThemeChange } = {}) {
   rootEl.hidden = true;
 }
 
-export function openOnboardingWizard() {
+export function openOnboardingWizard(opts = {}) {
   if (!rootEl) throw new Error('Onboarding-Wizard nicht gemountet.');
-  // Reset Multi-Profile-State — jedes Oeffnen startet mit User 1.
+  // Reset Multi-Profile-State — jedes Oeffnen startet neu.
   editingProfileId = null;
   personIndex = 1;
   showFollowup = false;
+  suppressFollowup = false;
   currentStep = 1;
 
-  initDraftFromProfile(getActiveProfile());
+  if (opts.addProfile) {
+    // Add-Modus aus Settings: neues Blank-Profil sofort anlegen, Wizard fuer
+    // dieses Profil starten. Kein Follow-up am Ende — der User will bewusst
+    // genau EIN Profil hinzufuegen, nicht die Personen-Zahl vollmachen.
+    const p = addProfile({});
+    editingProfileId = p.id;
+    suppressFollowup = true;
+    initDraftFromProfile(p);
+  } else {
+    initDraftFromProfile(getActiveProfile());
+  }
 
   // onboardingSeen SOFORT setzen — auch bei App-Crash während Wizard nicht wieder
   // auto-triggern. saveState() persistiert das direkt.
@@ -203,6 +218,10 @@ function finishAndClose() {
 // Bedingung: eingestellte Personenzahl > vorhandene Profile UND wir sind
 // gerade nicht schon dabei. Sonst: Wizard schliessen.
 function maybeShowFollowupOrClose() {
+  if (suppressFollowup) {
+    closeOnboardingWizard();
+    return;
+  }
   const need = state.settings.defaultPortions;
   const have = state.settings.profiles.length;
   if (need > 1 && have < need) {
