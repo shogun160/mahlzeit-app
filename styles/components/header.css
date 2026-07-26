@@ -30,6 +30,71 @@
   min-height: var(--touch-target-min);
 }
 
+/* Selection-Widget im Header: kompakter Chip mit Progress-Ring + Count-Text.
+   Klick togglet die Wochenauswahl (Master-Selection). Aktiv-Zustand ist am
+   Ring sichtbar (gefüllte Segmente), also braucht der Chip selbst keinen
+   Farbwechsel. */
+.app-header__selection {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--touch-target-min);
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--md-sys-color-on-surface);
+  transition: background 120ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-header__selection:hover {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.app-header__selection:active {
+  transform: scale(0.96);
+}
+
+/* Read-only Variante (Shopping-Chip): kein Hover, kein Klick-Feedback,
+   kein Cursor pointer — es ist ein Statusfeld, kein Button. */
+.app-header__selection--readonly {
+  cursor: default;
+}
+
+.app-header__selection--readonly:hover {
+  background: transparent;
+}
+
+.app-header__selection--readonly:active {
+  transform: none;
+}
+
+.app-header__selection-ring {
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.app-header__selection-ring svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.app-header__selection-count {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
 .icon-btn {
   width: var(--touch-target-min);
   height: var(--touch-target-min);

@@ -55,7 +55,8 @@ export function renderSelectionToolbar(root, { onChange }) {
 // Der Overlay hat n Segmente + einen "closing gap", der den Rest des Umfangs
 // komplett überspringt — dadurch bleibt die Segmentierung sauber synchron
 // mit dem Base-Ring.
-function renderProgressRing(n, total) {
+// Export weil auch das Header-Selection-Widget diesen Ring nutzt.
+export function renderProgressRing(n, total) {
   const R = 8;
   const circumference = 2 * Math.PI * R; // ≈ 50.265
   const gap = 2;

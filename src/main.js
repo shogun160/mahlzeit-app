@@ -1,10 +1,11 @@
 import { renderHeader } from './dashboard/header.js';
 import { renderDashboard } from './dashboard/render.js';
 import { rerollAll } from './dashboard/reroll.js';
-import { changeGlobalPortion } from './dashboard/portions.js';
+import { toggleAllSelected } from './dashboard/selection.js';
 import { renderShoppingList } from './shopping-list/render.js';
 import { resetChecked } from './shopping-list/check.js';
 import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
+import { mountSettingsSheet, openSettingsSheet } from './settings/render.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, setView, loadState, saveState } from './state.js';
@@ -15,23 +16,27 @@ const viewTrack = document.getElementById('view-track');
 const dashboardRoot = document.getElementById('view-dashboard');
 const shoppingRoot = document.getElementById('view-shopping');
 const sheetRoot = document.getElementById('detail-sheet-root');
+const settingsRoot = document.getElementById('settings-sheet-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
-// renderDashboard() beim ersten Render ein frisches Assignment (siehe pickInitialAssignment()).
+// renderDashboard() beim ersten Render ein frisches Assignment.
 loadState();
 
 function refresh() {
   // Header ist view-abhängig — Dashboard-Actions vs. Shopping-Reset.
   renderHeader(headerRoot, {
     view: state.view,
-    onGlobalPortionChange: (delta) => {
-      changeGlobalPortion(delta);
-      refresh();
-    },
     onRerollAll: () => {
       rerollAll();
       refresh();
+    },
+    onToggleAllSelected: () => {
+      toggleAllSelected();
+      refresh();
+    },
+    onOpenSettings: () => {
+      openSettingsSheet();
     },
     onResetChecked: () => {
       resetChecked();
@@ -54,13 +59,15 @@ function refresh() {
   // Track slidet per CSS-Attribut-Selektor auf `data-view`.
   viewTrack.dataset.view = state.view;
 
-  // Auto-Save nach jedem Render — zentraler Punkt, kein Streuen von saveState-Aufrufen.
+  // Auto-Save nach jedem Render — zentraler Punkt.
   saveState();
 }
 
-// Sheet einmalig mounten; interne Portion-Änderungen triggern refresh() damit Cards
-// und Shopping-Mengen mitgezogen werden.
+// Sheets einmalig mounten. Detail-Sheet triggert bei internen Änderungen ein
+// refresh() (Card-Badges, Shopping-Mengen). Settings-Sheet auch — Änderungen
+// dort (Standard-Portionen, Kochzeit) sollen mindestens saveState triggern.
 mountDetailSheet(sheetRoot, { onChange: refresh });
+mountSettingsSheet(settingsRoot, { onChange: refresh });
 
 // Screen-Swipe einmalig mounten — nutzt state.view aus dem Modul.
 attachViewSwipe(mainEl, {

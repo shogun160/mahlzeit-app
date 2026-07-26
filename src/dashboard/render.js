@@ -1,13 +1,12 @@
 import { createDayCard } from './card.js';
 import { state, DAYS, initState } from '../state.js';
-import { dishesById, allDishIds, shuffled } from '../data/dishes.js';
-import { rerollDay } from './reroll.js';
+import { dishesById, shuffled } from '../data/dishes.js';
+import { rerollDay, eligibleDishIds } from './reroll.js';
 import { changePortion } from './portions.js';
 import { toggleSelected } from './selection.js';
-import { renderSelectionToolbar } from './selection-toolbar.js';
 
 function pickInitialAssignment() {
-  const picks = shuffled(allDishIds).slice(0, DAYS.length);
+  const picks = shuffled(eligibleDishIds()).slice(0, DAYS.length);
   const assignment = {};
   DAYS.forEach((day, i) => {
     assignment[day] = picks[i];
@@ -23,11 +22,8 @@ export function renderDashboard(root, onChange, onOpenDetail) {
 
   root.innerHTML = '';
 
-  // Selection-Toolbar über der ersten Card. Sitzt im Content-Flow und scrollt
-  // mit — kein sticky, kein permanenter Platzverlust bei tiefem Scroll.
-  const toolbarRoot = document.createElement('div');
-  root.appendChild(toolbarRoot);
-  renderSelectionToolbar(toolbarRoot, { onChange });
+  // Selection-Toolbar früherer Iteration ist in den App-Header umgezogen
+  // (Progress-Ring + Count-Text, siehe dashboard/header.js).
 
   for (const day of DAYS) {
     const dishId = state.assignment[day];

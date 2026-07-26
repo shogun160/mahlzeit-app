@@ -1,11 +1,25 @@
 import { state, DAYS } from '../state.js';
-import { allDishIds, shuffled } from '../data/dishes.js';
+import { allDishIds, dishesById, shuffled } from '../data/dishes.js';
+
+// Gerichte, die den Filter des Users passieren (Kochzeit ≤ maxCookTime).
+// Falls die Filter-Regel zu wenige Kandidaten für 7 Tage lässt, fallen wir auf
+// das komplette Dish-Set zurück — sonst könnte der User sich in einen Zustand
+// klicken, in dem gar kein Reroll mehr möglich ist.
+// Export weil auch beim Erst-Auslosen (pickInitialAssignment) genutzt.
+export function eligibleDishIds() {
+  const maxTime = state.settings.maxCookTime;
+  const filtered = allDishIds.filter((id) => {
+    const dish = dishesById.get(id);
+    return dish && dish.cooktime <= maxTime;
+  });
+  return filtered.length >= DAYS.length ? filtered : allDishIds;
+}
 
 // Baut den Card-spezifischen Bag neu: alle IDs außer der aktuell auf DIESER Karte gezeigten,
-// zufällig geordnet. Wird sowohl bei leerem Bag als auch nach "Alle wechseln" gerufen.
+// zufällig geordnet — nur aus dem eligible Pool (Kochzeit-Filter greift auch beim Reroll).
 function refillBag(day) {
   const currentId = state.assignment[day];
-  state.dishBag[day] = shuffled(allDishIds).filter((id) => id !== currentId);
+  state.dishBag[day] = shuffled(eligibleDishIds()).filter((id) => id !== currentId);
 }
 
 export function rerollDay(day) {
@@ -17,8 +31,6 @@ export function rerollDay(day) {
     refillBag(day);
   }
 
-  // Max zwei Anläufe: findet der erste keinen freien Kandidaten (weil alle noch
-  // in usedElsewhere sind), Bag refillen und nochmal versuchen.
   let pick = null;
   for (let attempt = 0; attempt < 2 && pick === null; attempt++) {
     while (state.dishBag[day].length > 0) {
@@ -27,31 +39,30 @@ export function rerollDay(day) {
         pick = candidate;
         break;
       }
-      // candidate wird gerade auf einem anderen Tag gezeigt — verwerfen
     }
     if (pick === null) {
       refillBag(day);
     }
   }
-  if (pick === null) return; // wirklich kein Gericht verfügbar (17 Dishes → sollte nie passieren)
+  if (pick === null) return;
 
   state.assignment[day] = pick;
-  state.selected[day] = false; // neue Zutaten → alte Auswahl ungültig
+  state.selected[day] = false;
 }
 
 export function rerollAll() {
   const previousIds = new Set(Object.values(state.assignment));
-  let pool = shuffled(allDishIds).filter((id) => !previousIds.has(id));
-  if (pool.length < DAYS.length) {
-    // Fallback falls die Dish-Datenbank je unter 2x Anzahl Tage schrumpft
-    pool = shuffled(allDishIds);
+  const pool = eligibleDishIds();
+  let shuffledPool = shuffled(pool).filter((id) => !previousIds.has(id));
+  if (shuffledPool.length < DAYS.length) {
+    // Fallback: nimm auch bekannte Gerichte, damit wir 7 zusammenbekommen.
+    shuffledPool = shuffled(pool);
   }
   DAYS.forEach((day, i) => {
-    state.assignment[day] = pool[i];
+    state.assignment[day] = shuffledPool[i];
     state.selected[day] = false;
-    // "Alle wechseln" ist ein globaler Reset — Portionen fallen auf den globalen
-    // Header-Wert zurück. Einzelnes rerollDay lässt Portionen bewusst unverändert.
-    state.portions[day] = state.globalPortions;
+    // Portionen springen auf den User-Standard (settings.defaultPortions).
+    state.portions[day] = state.settings.defaultPortions;
   });
-  state.dishBag = {}; // Karten-spezifische Bags starten nach "Alle wechseln" neu
+  state.dishBag = {};
 }
