@@ -1,4 +1,5 @@
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, GOALS } from '../nutrition/target.js';
+import { PORTIONS_MIN, PORTIONS_MAX } from '../state.js';
 
 // Stille Defaults — werden im Wizard angezeigt wenn Draft-Wert null ist. Der
 // User sieht sinnvolle Startwerte, muss aber aktiv klicken/ziehen, damit das
@@ -9,6 +10,7 @@ export const DEFAULTS = {
   age: 40,
   heightCm: 180,
   weightKg: 80,
+  defaultPortions: 1,
   activityLevel: 3,
   goal: 'maintain',
   breakfastKcal: 400,
@@ -26,6 +28,8 @@ export function renderStep1(draft) {
   const agePlusDisabled = ageVal >= AGE_MAX;
   const heightVal = draft.heightCm ?? DEFAULTS.heightCm;
   const weightVal = draft.weightKg ?? DEFAULTS.weightKg;
+  const portionsVal = draft.defaultPortions ?? DEFAULTS.defaultPortions;
+  const portionsLabel = `${portionsVal} ${portionsVal === 1 ? 'Person' : 'Personen'}`;
   return `
     <h3 class="onboarding-step__title">Über dich</h3>
     <p class="onboarding-step__desc">Damit wir deinen täglichen Kalorienbedarf berechnen können.</p>
@@ -88,6 +92,21 @@ export function renderStep1(draft) {
              value="${weightVal}"
              data-action="weight-change"
              aria-label="Gewicht in Kilogramm" />
+    </div>
+
+    <div class="onboarding-field">
+      <div class="onboarding-field__row">
+        <div class="onboarding-field__label">Für wie viele kochst du?</div>
+        <div class="onboarding-field__value" data-role="portions-value">${portionsLabel}</div>
+      </div>
+      <input class="settings-slider"
+             type="range"
+             min="${PORTIONS_MIN}"
+             max="${PORTIONS_MAX}"
+             step="1"
+             value="${portionsVal}"
+             data-action="portions-change"
+             aria-label="Anzahl Personen im Haushalt" />
     </div>
   `;
 }

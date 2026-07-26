@@ -39,6 +39,10 @@ export function openOnboardingWizard() {
     age: p.age,
     heightCm: p.heightCm,
     weightKg: p.weightKg,
+    // Personen-Slider steht im Wizard-Step-1, das Feld sitzt aber global auf
+    // state.settings.defaultPortions (nicht im profile) — der Wizard fuellt es
+    // im finishAndClose/persistAndClose separat zurueck.
+    defaultPortions: state.settings.defaultPortions,
     activityLevel: p.activityLevel,
     goal: p.goal,
     breakfastKcal: p.breakfastKcal,
@@ -47,6 +51,7 @@ export function openOnboardingWizard() {
   };
   touched = {
     name: false, gender: false, age: false, heightCm: false, weightKg: false,
+    defaultPortions: false,
     activityLevel: false, goal: false, breakfastKcal: false, lunchKcal: false,
     dailyTargetOverride: false,
   };
@@ -94,7 +99,11 @@ function handleEsc(ev) {
 function persistAndClose() {
   const p = state.settings.profile;
   for (const key of Object.keys(touched)) {
-    if (touched[key]) {
+    if (!touched[key]) continue;
+    // defaultPortions lebt global auf state.settings, nicht im profile.
+    if (key === 'defaultPortions') {
+      state.settings.defaultPortions = draft[key];
+    } else {
       p[key] = draft[key];
     }
   }
@@ -112,6 +121,8 @@ function finishAndClose() {
   for (const key of Object.keys(draft)) {
     if (key === 'name' || key === 'dailyTargetOverride') {
       p[key] = draft[key];
+    } else if (key === 'defaultPortions') {
+      state.settings.defaultPortions = draft[key] ?? DEFAULTS.defaultPortions;
     } else {
       p[key] = draft[key] ?? DEFAULTS[key];
     }
@@ -268,6 +279,8 @@ function attachStep1Handlers() {
 
   bindSlider('height-change', 'height-value', 'heightCm', (v) => `${v} cm`);
   bindSlider('weight-change', 'weight-value', 'weightKg', (v) => `${v} kg`);
+  bindSlider('portions-change', 'portions-value', 'defaultPortions',
+    (v) => `${v} ${v === 1 ? 'Person' : 'Personen'}`);
 }
 
 // Step 2 (Alltag) — Aktivität + Ziel + Frühstück + Mittag + Live-Preview
