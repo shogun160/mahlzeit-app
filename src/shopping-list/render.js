@@ -274,20 +274,26 @@ function renderGroup(cat, groupItems, stackIdx) {
   const checkedCount = total - openCount;
   const hasChecked = checkedCount > 0;
   const hasOpen = openCount > 0;
+  // Beide Icons immer sichtbar (wenn Kategorie ausgeklappt) — Reihenfolge
+  // [Reset] [CheckAll]. Deaktiviert wenn kein sinnvoller Effekt: Reset ist
+  // grau wenn nichts abgehakt, CheckAll ist grau wenn nichts mehr offen ist.
+  // Damit bleiben die Positionen stabil, das Auge lernt die Icons.
   const iconsHtml = collapsed ? '' : `
     <div class="shop-group__actions">
-      ${hasChecked ? `<button type="button"
-              class="shop-group__action"
+      <button type="button"
+              class="shop-group__action ${hasChecked ? '' : 'shop-group__action--disabled'}"
               data-action="cat-reset"
               data-cat="${cat}"
+              ${hasChecked ? '' : 'disabled aria-disabled="true"'}
               aria-label="${CAT_LABELS[cat]}: Häkchen zurücksetzen"
-              title="Häkchen zurücksetzen">${ICON_CAT_REFRESH}</button>` : ''}
-      ${hasOpen ? `<button type="button"
-              class="shop-group__action"
+              title="Häkchen zurücksetzen">${ICON_CAT_REFRESH}</button>
+      <button type="button"
+              class="shop-group__action ${hasOpen ? '' : 'shop-group__action--disabled'}"
               data-action="cat-check-all"
               data-cat="${cat}"
+              ${hasOpen ? '' : 'disabled aria-disabled="true"'}
               aria-label="${CAT_LABELS[cat]}: alle abhaken"
-              title="Alle abhaken">${ICON_CAT_DONE_ALL}</button>` : ''}
+              title="Alle abhaken">${ICON_CAT_DONE_ALL}</button>
     </div>
   `;
   return `
