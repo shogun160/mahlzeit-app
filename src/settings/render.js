@@ -560,7 +560,7 @@ function renderDinnerTargetRow() {
         <span class="settings-row__label-primary">Abendessen</span>
         <button class="settings-row__label-link"
                 type="button"
-                data-action="open-macro-details">Details</button>
+                data-action="open-macro-details">Makros</button>
       </div>
       <div class="settings-row__value settings-row__value--pill" data-role="dinner-value">${display}</div>
     </div>
