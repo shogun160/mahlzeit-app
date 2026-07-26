@@ -9,6 +9,10 @@ const TOTAL_STEPS = 5;
 let rootEl = null;
 let onExternalChange = () => {};
 let currentStep = 1;
+// Trackt ob das Sheet gerade offen ist — wichtig, damit renderShell() bei
+// Re-Renders (goNext/goBack) die .is-open-Klasse direkt ins HTML nimmt und
+// das Sheet nicht kurz weg-slidet.
+let isOpen = false;
 
 // Draft hält die Werte, die der User im Wizard eingibt. Beim Öffnen aus dem
 // aktuellen state.settings.profile pre-fillt. touched trackt pro Feld, ob der
@@ -55,13 +59,18 @@ export function openOnboardingWizard() {
   renderShell();
   rootEl.hidden = false;
   requestAnimationFrame(() => {
-    requestAnimationFrame(() => rootEl.querySelector('.onboarding-overlay').classList.add('is-open'));
+    requestAnimationFrame(() => {
+      isOpen = true;
+      const overlay = rootEl.querySelector('.onboarding-overlay');
+      if (overlay) overlay.classList.add('is-open');
+    });
   });
   document.addEventListener('keydown', handleEsc);
 }
 
 export function closeOnboardingWizard() {
   if (!rootEl || rootEl.hidden) return;
+  isOpen = false;
   const overlay = rootEl.querySelector('.onboarding-overlay');
   if (overlay) overlay.classList.remove('is-open');
   document.removeEventListener('keydown', handleEsc);
@@ -94,8 +103,11 @@ function persistAndClose() {
 
 function renderShell() {
   const progressPct = (currentStep / TOTAL_STEPS) * 100;
+  // isOpen ist true bei Re-Renders aus goNext/goBack — dann die Klasse direkt
+  // ins HTML, sonst würde das Sheet zwischen den Steps weg-sliden.
+  const openCls = isOpen ? ' is-open' : '';
   rootEl.innerHTML = `
-    <div class="onboarding-overlay" data-role="backdrop">
+    <div class="onboarding-overlay${openCls}" data-role="backdrop">
       <div class="onboarding-sheet" role="dialog" aria-modal="true" aria-labelledby="onboarding-title">
         <div class="onboarding-handle" aria-hidden="true"></div>
         <div class="onboarding-header">
