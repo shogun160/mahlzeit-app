@@ -553,7 +553,10 @@ function renderControls() {
   const selected = getSelectedProfiles();
   const isMulti = selected.length > 1;
   const p = selected[0] ?? getActiveProfile();
-  const targets = effectiveMacroTargets(p) ?? { p: 0, kh: 0, f: 0 };
+  // Bei Multi-Select zeigen die Slider den Durchschnitt der effektiven Ziele
+  // aller selected Profile — nur Anzeige, weil die Controls in Multi-Modus
+  // disabled sind (Anpassungen nur bei Einzelauswahl moeglich).
+  const targets = (isMulti ? avgMacroTargetsOfSelected() : effectiveMacroTargets(p)) ?? { p: 0, kh: 0, f: 0 };
   const isCustom = p.macroTargets != null;
   const activePreset = isCustom ? null : (p.macroPreset ?? MACRO_PRESET_DEFAULT);
   const hint = isMulti
