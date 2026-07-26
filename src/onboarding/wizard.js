@@ -1,5 +1,5 @@
 import { state, saveState } from '../state.js';
-import { AGE_MIN, AGE_MAX, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
+import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
 import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile, macrosForKcal, renderMacrosPills } from './result.js';
 
@@ -271,7 +271,8 @@ function attachStep1Handlers() {
 // Step 2 (Alltag) — Aktivität + Ziel + Frühstück + Mittag + Live-Preview
 // des berechneten Abendessen-Kontingents.
 function attachStep2Handlers() {
-  bindChipGroup('activity-pick', 'activityLevel', (v) => parseInt(v, 10));
+  bindSlider('activity-change', 'activity-value', 'activityLevel',
+    (v) => ACTIVITY_LEVELS.find((a) => a.level === v)?.label ?? '—');
   bindChipGroup('goal-pick', 'goal', (v) => v);
   const fmt = (v) => `${v.toLocaleString('de-DE')} kcal`;
   bindSlider('breakfast-change', 'breakfast-value', 'breakfastKcal', fmt);
@@ -289,10 +290,10 @@ function attachStep2Handlers() {
     el.innerHTML = `${round10(range[0]).toLocaleString('de-DE')}&thinsp;–&thinsp;${round10(range[1]).toLocaleString('de-DE')} kcal`;
   };
   updateDinnerPreview();
-  rootEl.querySelectorAll('[data-action="activity-pick"], [data-action="goal-pick"]').forEach((btn) => {
+  rootEl.querySelectorAll('[data-action="goal-pick"]').forEach((btn) => {
     btn.addEventListener('click', updateDinnerPreview);
   });
-  rootEl.querySelectorAll('[data-action="breakfast-change"], [data-action="lunch-change"]').forEach((slider) => {
+  rootEl.querySelectorAll('[data-action="activity-change"], [data-action="breakfast-change"], [data-action="lunch-change"]').forEach((slider) => {
     slider.addEventListener('input', updateDinnerPreview);
   });
 }

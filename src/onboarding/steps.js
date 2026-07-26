@@ -96,6 +96,7 @@ export function renderStep1(draft) {
 // Handler in wizard.js/attachStep2Handlers nutzen bindChipGroup + bindSlider.
 export function renderStep2(draft) {
   const activityVal = draft.activityLevel ?? DEFAULTS.activityLevel;
+  const activityLabel = ACTIVITY_LEVELS.find((a) => a.level === activityVal)?.label ?? '—';
   const goalVal = draft.goal ?? DEFAULTS.goal;
   const breakfastVal = draft.breakfastKcal ?? DEFAULTS.breakfastKcal;
   const lunchVal = draft.lunchKcal ?? DEFAULTS.lunchKcal;
@@ -104,12 +105,18 @@ export function renderStep2(draft) {
     <p class="onboarding-step__desc">Wie aktiv bist du und wie verteilst du deine Mahlzeiten?</p>
 
     <div class="onboarding-field">
-      <div class="onboarding-field__label">Aktivität</div>
-      <div class="onboarding-chips onboarding-chips--nowrap" role="group" aria-label="Aktivitätslevel">
-        ${ACTIVITY_LEVELS.map((a) => `
-          <button class="pref-chip" type="button" data-action="activity-pick" data-value="${a.level}" aria-pressed="${activityVal === a.level}">${a.label}</button>
-        `).join('')}
+      <div class="onboarding-field__row">
+        <div class="onboarding-field__label">Aktivität</div>
+        <div class="onboarding-field__value" data-role="activity-value">${activityLabel}</div>
       </div>
+      <input class="settings-slider"
+             type="range"
+             min="1"
+             max="${ACTIVITY_LEVELS.length}"
+             step="1"
+             value="${activityVal}"
+             data-action="activity-change"
+             aria-label="Aktivitätslevel" />
     </div>
 
     <div class="onboarding-field">
