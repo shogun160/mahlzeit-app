@@ -128,6 +128,12 @@ function formatKcalRange(val) {
 // proportional zu den kcal-Anteilen von P/KH/F (nicht Gramm — sonst wäre
 // Fett trotz 9 kcal/g visuell zu klein). Reihenfolge KH → P → F, Start oben
 // (12 Uhr) via transform rotate(-90 auf gemeinsame Gruppe).
+//
+// Visuelle Verzerrung: Segmente werden mit dem Quadrat der kcal-Anteile
+// dimensioniert (nicht linear). Dadurch werden Unterschiede zwischen den
+// Presets deutlicher sichtbar — ein Preset mit KH=50% zieht optisch klarer
+// nach vorne als eines mit KH=40%. Die aria-label-Prozente bleiben echt,
+// damit Screenreader den korrekten Anteil vorlesen.
 function renderHorseshoe(macros) {
   const pKcal = macros.p * 4;
   const khKcal = macros.kh * 4;
@@ -138,6 +144,15 @@ function renderHorseshoe(macros) {
   const khPct = khKcal / total;
   const fPct = fKcal / total;
 
+  // Quadrierte Anteile fuer die Segment-Groessen — spreizt Unterschiede.
+  const pSq = pPct * pPct;
+  const khSq = khPct * khPct;
+  const fSq = fPct * fPct;
+  const sqTotal = pSq + khSq + fSq;
+  const pVis = pSq / sqTotal;
+  const khVis = khSq / sqTotal;
+  const fVis = fSq / sqTotal;
+
   const R = 42;
   const CIRC = 2 * Math.PI * R;
   const strokeW = 10;
@@ -145,12 +160,12 @@ function renderHorseshoe(macros) {
   // ca. 6.8% pro Gap), damit die drei F/P/KH-Segmente klar als separate
   // Blöcke lesbar sind. Segmente-Reihenfolge F → P → KH (matcht Legende).
   const GAP = 18;
-  const fLen  = Math.max(0, fPct  * CIRC - GAP);
-  const pLen  = Math.max(0, pPct  * CIRC - GAP);
-  const khLen = Math.max(0, khPct * CIRC - GAP);
+  const fLen  = Math.max(0, fVis  * CIRC - GAP);
+  const pLen  = Math.max(0, pVis  * CIRC - GAP);
+  const khLen = Math.max(0, khVis * CIRC - GAP);
   const fOffset  = 0;
-  const pOffset  = -(fPct * CIRC);
-  const khOffset = -((fPct + pPct) * CIRC);
+  const pOffset  = -(fVis * CIRC);
+  const khOffset = -((fVis + pVis) * CIRC);
   return `
     <svg class="onboarding-macro-ring" viewBox="0 0 100 100" role="img" aria-label="Makro-Verteilung: Fett ${Math.round(fPct*100)}%, Protein ${Math.round(pPct*100)}%, Kohlenhydrate ${Math.round(khPct*100)}%">
       <g transform="rotate(-90 50 50)">
