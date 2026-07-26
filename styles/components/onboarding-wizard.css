@@ -158,3 +158,57 @@
   flex: 0 0 auto;
   visibility: hidden;
 }
+
+/* Step-Content — großzügige Abstände, Titel und Beschreibung oben. */
+.onboarding-step__title {
+  margin: 0 0 8px 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+.onboarding-step__desc {
+  margin: 0 0 24px 0;
+  font-size: 0.9375rem;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.4;
+}
+
+.onboarding-field {
+  margin-bottom: 24px;
+}
+.onboarding-field__label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 10px;
+}
+.onboarding-field__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.onboarding-input {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: 10px 14px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 12px;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.onboarding-input:focus {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+.onboarding-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

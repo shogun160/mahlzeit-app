@@ -1,4 +1,6 @@
 import { state, saveState } from '../state.js';
+import { AGE_MIN, AGE_MAX } from '../nutrition/target.js';
+import { renderStep1, DEFAULTS } from './steps.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 5;
@@ -125,8 +127,11 @@ function renderShell() {
 }
 
 function renderStepContent() {
-  // Steps 1–5 werden in späteren Tasks eingebunden; hier Placeholder.
-  return `<p class="onboarding-placeholder">Step ${currentStep} — Content folgt.</p>`;
+  switch (currentStep) {
+    case 1: return renderStep1(draft);
+    // Steps 2–5 folgen in Tasks 6–9
+    default: return `<p class="onboarding-placeholder">Step ${currentStep} — Content folgt.</p>`;
+  }
 }
 
 function renderFooter() {
@@ -174,7 +179,47 @@ function goBack() {
   }
 }
 
-// Placeholder — pro Step werden in Tasks 5–9 die Field-Handler ergänzt.
 function attachStepHandlers() {
-  // wird in späteren Tasks pro Step gefüllt
+  if (currentStep === 1) attachStep1Handlers();
+  // Steps 2–5 folgen in Tasks 6–9
+}
+
+function attachStep1Handlers() {
+  // Name — touched sobald Input-Event feuert (auch bei leerem String).
+  const nameInput = rootEl.querySelector('[data-action="name-change"]');
+  if (nameInput) {
+    nameInput.addEventListener('input', () => {
+      const v = nameInput.value.trim();
+      draft.name = v === '' ? null : v;
+      touched.name = true;
+    });
+  }
+
+  // Geschlecht-Chips — touched sobald aktiver Klick.
+  rootEl.querySelectorAll('[data-action="gender-pick"]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const val = btn.dataset.value;
+      draft.gender = val;
+      touched.gender = true;
+      rootEl.querySelectorAll('[data-action="gender-pick"]').forEach((other) => {
+        other.setAttribute('aria-pressed', String(other.dataset.value === val));
+      });
+    });
+  });
+
+  // Alter-Stepper — touched sobald Klick, Draft aus Default seeden falls null.
+  const ageMinus = rootEl.querySelector('[data-action="age-minus"]');
+  const agePlus = rootEl.querySelector('[data-action="age-plus"]');
+  const ageValEl = rootEl.querySelector('[data-role="age-value"]');
+  const changeAge = (delta) => {
+    const current = draft.age ?? DEFAULTS.age;
+    const next = Math.max(AGE_MIN, Math.min(AGE_MAX, current + delta));
+    draft.age = next;
+    touched.age = true;
+    if (ageValEl) ageValEl.textContent = String(next);
+    if (ageMinus) ageMinus.disabled = next <= AGE_MIN;
+    if (agePlus) agePlus.disabled = next >= AGE_MAX;
+  };
+  if (ageMinus) ageMinus.addEventListener('click', () => changeAge(-1));
+  if (agePlus) agePlus.addEventListener('click', () => changeAge(+1));
 }
