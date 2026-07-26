@@ -17,6 +17,8 @@ export const ingredientRegistry = (() => {
           cat: ing.cat,
           unit: ing.unit,
           size: ing.size,
+          displayUnit: ing.displayUnit,
+          gramsPerUnit: ing.gramsPerUnit,
           note: ing.note,
         };
       }

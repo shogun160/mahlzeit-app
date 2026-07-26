@@ -61,31 +61,50 @@ function formatQuarterCount(n) {
 }
 
 // Formatiert eine konsolidierte Einkaufslisten-Zutat einheiten-aware.
-// item: { key, label, unit, size, note, sum } — sum ist die aggregierte Gramm-Menge
-// (portions-skaliert und über alle ausgewählten Tage aufsummiert), außer bei unit='vorrat'.
-// Aufrundung so, dass der User im Laden praktikable Mengen kauft (10 g, ganze Stück etc.).
+// item: { key, label, unit, displayUnit, gramsPerUnit, size, note, sum } —
+// sum ist die aggregierte Gramm-Menge (portions × userScale × grams, über alle
+// ausgewählten Tage aufsummiert), außer bei unit='vorrat' (sum=0).
+// Aufrundung so, dass der User im Laden praktikable Mengen kauft: 10 g,
+// ganze Stück, ganze Löffel. displayUnit hat Priorität für nicht-vorrat-
+// Zutaten — konsistent zum Detail-Sheet ("3 EL Tahini" statt "45 g").
 export function formatQuantity(item) {
   if (item.isLeftover) return 'Nicht mehr im Plan';
-  if (item.unit === 'vorrat') return 'Vorrat prüfen';
+  const noteSuffix = item.note ? ` — ${item.note}` : '';
+  // Vorrat ohne displayUnit: reines "Vorrat prüfen" (Gewürze, Sesam in Prisen).
+  // Vorrat mit displayUnit fällt in den displayUnit-Zweig unten und bekommt
+  // Menge + "Vorrat prüfen"-Hinweis (Öl, Sojasauce, Honig).
+  if (item.unit === 'vorrat' && !item.displayUnit) return 'Vorrat prüfen';
+  if (item.displayUnit && item.gramsPerUnit) {
+    const n = Math.max(1, Math.ceil(item.sum / item.gramsPerUnit));
+    const unit = item.displayUnit === 'el' ? 'EL' : 'TL';
+    // Bei Vorrat-Zutaten (Öl, Sauce, Honig): Menge zeigen damit der User weiß
+    // wieviel für die Woche gebraucht wird, Note "Vorrat prüfen" dahinter.
+    const suffix = item.unit === 'vorrat' ? ' — Vorrat prüfen' : noteSuffix;
+    return `${n} ${unit}${suffix}`;
+  }
   if (item.unit === 'g') {
     const g = Math.ceil(item.sum / 10) * 10;
-    return `${g} g` + (item.note ? ` — ${item.note}` : '');
+    return `${g} g${noteSuffix}`;
+  }
+  if (item.unit === 'ml') {
+    const ml = Math.ceil(item.sum / 10) * 10;
+    return `${ml} ml${noteSuffix}`;
   }
   if (item.unit === 'stueck') {
     const n = Math.max(1, Math.ceil(item.sum / item.size));
-    return `${n} Stück` + (item.note ? ` — ${item.note}` : '');
+    return `${n} Stück${noteSuffix}`;
   }
   if (item.unit === 'bund') {
     const n = Math.max(1, Math.ceil(item.sum / item.size));
-    return `${n} Bund`;
+    return `${n} Bund${noteSuffix}`;
   }
   if (item.unit === 'zehe') {
     const n = Math.max(1, Math.ceil(item.sum / item.size));
-    return `${n} Zehe(n)`;
+    return `${n} ${n === 1 ? 'Zehe' : 'Zehen'}${noteSuffix}`;
   }
   if (item.unit === 'ei') {
     const n = Math.max(1, Math.round(item.sum / item.size));
-    return `${n} Stück`;
+    return `${n} ${n === 1 ? 'Ei' : 'Eier'}${noteSuffix}`;
   }
   return '';
 }

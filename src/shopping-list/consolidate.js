@@ -31,12 +31,19 @@ export function buildConsolidatedList() {
           cat: ing.cat,
           unit: ing.unit,
           size: ing.size,
+          displayUnit: ing.displayUnit,
+          gramsPerUnit: ing.gramsPerUnit,
           note: ing.note,
           sum: 0,
           isLeftover: false,
         };
       }
-      consolidated[ing.key].sum += ing.unit === 'vorrat' ? 0 : ing.grams * dayFactor;
+      // Vorrat-Zutaten mit displayUnit (Öl, Sojasauce, Honig als EL/TL) sollen
+      // die konsolidierte Menge zeigen — der User will wissen wieviel er braucht,
+      // um den Vorrat prüfen zu können. Vorrat ohne displayUnit (Sesam, Gewürze
+      // in Prisen) bleibt bei sum=0 → reines "Vorrat prüfen".
+      const contributesSum = ing.unit !== 'vorrat' || ing.displayUnit;
+      consolidated[ing.key].sum += contributesSum ? ing.grams * dayFactor : 0;
     });
   });
 
