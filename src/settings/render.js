@@ -322,7 +322,7 @@ function renderProfileList() {
   // ist dass die fehlenden Personen ueber das Standard-Profil gerechnet werden.
   const missing = Math.max(0, defaultPortions - profiles.length);
   const hint = missing > 0
-    ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als Standard-Profil berechnet`
+    ? `${missing === 1 ? '1 Person wird' : `${missing} Personen werden`} mit Standard-Profil berechnet`
     : 'Wird sofort auf alle Tage angewendet';
   // Standard-Profil-Row: separater Marker, nicht loeschbar. Editierbar ueber
   // dasselbe Detail-Sheet (id '_default' erkennt der Sheet). Optisch abgesetzt
@@ -881,7 +881,7 @@ function handlePortions(delta) {
     const profilesCount = state.settings.profiles?.length ?? 0;
     const missing = Math.max(0, defaultPortions - profilesCount);
     hintEl.textContent = missing > 0
-      ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als Standard-Profil berechnet`
+      ? `${missing === 1 ? '1 Person wird' : `${missing} Personen werden`} mit Standard-Profil berechnet`
       : 'Wird sofort auf alle Tage angewendet';
   }
   updateSectionSummary('profile');
