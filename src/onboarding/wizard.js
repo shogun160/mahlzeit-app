@@ -1,7 +1,7 @@
 import { state, saveState } from '../state.js';
 import { AGE_MIN, AGE_MAX, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
-import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile } from './result.js';
+import { renderStep5 as renderStep4, refreshResultDynamic, resolvedProfile, macrosForKcal, renderMacros } from './result.js';
 
 const TRANSITION_MS = 250;
 const TOTAL_STEPS = 4;
@@ -310,13 +310,34 @@ function attachStep2Handlers() {
 }
 
 // Step 3 (Filter) — Ernährungs- + Küchen-Präferenzen als Toggle-Chips +
-// Makro-Preset als exklusive Auswahl. Alle ändern direkt state.settings
-// (kein Draft), analog zum Settings-Sheet. saveState wird beim Persistieren
-// am Ende gerufen.
+// Makro-Preset als exklusive Auswahl + Live-Vorschau der Verteilung.
+// Alle ändern direkt state.settings (kein Draft), analog zum Settings-Sheet.
 function attachStep3Handlers() {
   bindToggleChips('pref-toggle', 'preferences');
   bindToggleChips('cuisine-toggle', 'cuisines');
   bindMacroPresetChips();
+
+  // Live-Vorschau der Makro-Verteilung (Donut + Legende). Wird beim initialen
+  // Render gefüllt und nach jedem Preset-Klick refresht. Basis: dinnerTarget
+  // aus resolvedProfile(draft) — biometrische Daten aus Step 1+2 fließen ein,
+  // Fallbacks aus DEFAULTS wenn User Steps übersprungen hat.
+  const updateMacroPreview = () => {
+    const slot = rootEl.querySelector('[data-role="macro-preview-slot"]');
+    if (!slot) return;
+    const p = resolvedProfile(draft);
+    const dinner = dinnerTarget(p);
+    if (dinner == null) {
+      slot.innerHTML = '';
+      return;
+    }
+    const preset = state.settings.profile.macroPreset || 'balanced';
+    const macros = macrosForKcal(dinner, preset);
+    slot.innerHTML = renderMacros(macros);
+  };
+  updateMacroPreview();
+  rootEl.querySelectorAll('[data-action="macro-preset"]').forEach((btn) => {
+    btn.addEventListener('click', updateMacroPreview);
+  });
 }
 
 function bindToggleChips(action, bucketKey) {

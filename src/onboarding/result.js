@@ -34,7 +34,7 @@ export function resolvedProfile(draft) {
 
 // Skaliert Preset (P/KH/F Prozente) auf gegebene Dinner-kcal. Rundet auf
 // ganze Gramm für die Anzeige.
-function macrosForKcal(kcalTarget, presetKey) {
+export function macrosForKcal(kcalTarget, presetKey) {
   const preset = MACRO_PRESETS.find((m) => m.key === presetKey) ?? MACRO_PRESETS[0];
   return {
     p:  Math.round((kcalTarget * (preset.p  / 100)) / 4),
@@ -163,7 +163,7 @@ function renderHorseshoe(macros) {
   `;
 }
 
-function renderMacros(macros) {
+export function renderMacros(macros) {
   return `
     <div class="onboarding-result__label">Makro-Verteilung</div>
     <div class="onboarding-macro-row">
