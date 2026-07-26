@@ -403,6 +403,8 @@
   /* align-items: center bei flex-Container, damit die Chips nicht per
      default stretch auf die Container-Hoehe gezogen werden. */
   align-items: center;
+  /* Chips rechtsbuendig innerhalb der Row. */
+  justify-content: flex-end;
 }
 /* Alle Chips in stacked-Rows fest auf 40 px — vermeidet Groessen-Drift
    z. B. wenn Chips durch align-items: stretch des Parents gestreckt
