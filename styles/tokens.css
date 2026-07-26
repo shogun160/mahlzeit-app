@@ -60,7 +60,7 @@
      transparent damit der Content darunter durchschimmert. Dark-Mode
      überschreibt auf dunkles Glas. */
   --frosted-glass: rgba(255, 255, 255, 0.78);
-  --frosted-glass-strong: rgba(255, 255, 255, 0.9);
+  --frosted-glass-strong: rgba(255, 255, 255, 0.88);
 
   /* Backdrop hinter Modals — halbtransparenter Overlay-Ton für Sheets. */
   --overlay-backdrop: rgba(15, 23, 42, 0.42);
@@ -116,8 +116,10 @@
     --overlay-backdrop: rgba(0, 0, 0, 0.6);
     --semantic-warn: #FB923C;
 
-    /* On-Glass bleibt bewusst UNVERÄNDERT — die Foto-Overlays behalten
-       ihren weißen Background auch im Dark Mode. */
+    /* On-Glass wird im Dark auf on-surface umgeleitet — die Foto-Overlays
+       haben jetzt dunklen Background (rgba(0,0,0,X)), Text muss hell sein.
+       Damit heben sich die Pills im Dark klar vom Foto ab statt zu leuchten. */
+    --md-sys-color-on-glass: var(--md-sys-color-on-surface);
   }
 }
 
@@ -151,4 +153,8 @@
   --frosted-glass-strong: rgba(0, 0, 0, 0.55);
   --overlay-backdrop: rgba(0, 0, 0, 0.6);
   --semantic-warn: #FB923C;
+
+  /* On-Glass wird im Dark auf on-surface umgeleitet — die Foto-Overlays
+     haben jetzt dunklen Background, Text muss hell sein. */
+  --md-sys-color-on-glass: var(--md-sys-color-on-surface);
 }
