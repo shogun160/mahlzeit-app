@@ -45,6 +45,7 @@ export const state = {
   settings: {
     defaultPortions: 1,   // Default für neu ausgeloste Gerichte
     maxCookTime: COOKTIME_MAX, // in Minuten, Filter fürs Reroll
+    onboardingSeen: false,  // true sobald Onboarding-Wizard einmal geöffnet wurde
     preferences: {
       // Diät-Gruppe: OR-Verknüpfung wie im Picker. Wenn eine oder mehrere
       // aktiv sind, muss ein Dish mindestens eine erfüllen. Alle aus =
@@ -63,29 +64,31 @@ export const state = {
       americas: false,
     },
     profile: {
-      // Nutzer-Profil für Tageskalorien-Berechnung (Mifflin-St Jeor × PAL).
-      // Biometrische Felder null = noch nicht ausgefüllt → keine Wochen-Bar.
-      // activityLevel/goal haben immer sinnvolle Defaults, damit ein frisch
-      // ausgefülltes Profil nicht mit "kein Wert" startet.
-      gender: null,               // 'male' | 'female' | null (bewusst leer — User muss wählen)
-      age: 40,                    // pragmatische Defaults (siehe target.js AGE_DEFAULT etc.),
-      heightCm: 180,              // damit Slider beim ersten Öffnen sinnvoll starten.
-      weightKg: 80,
-      activityLevel: 3,           // Index 1..5 (siehe nutrition/target.js ACTIVITY_LEVELS)
-      goal: 'maintain',           // 'maintain' | 'lose' | 'gain'
+      // Alle Wizard-Slots starten null. Der Onboarding-Wizard ist die einzige
+      // Eingabequelle beim First-Run. hasProfile() bleibt der biometrische
+      // Check (Gender+Age+Height+Weight), isProfileComplete() ergänzt um
+      // activityLevel/goal/breakfastKcal/lunchKcal für die Placeholder-Pille-
+      // Entscheidung. Name ist optional und in beiden Checks nicht enthalten.
+      name: null,
+      gender: null,
+      age: null,
+      heightCm: null,
+      weightKg: null,
+      activityLevel: null,
+      goal: null,
       // Abendessen-Zielrechnung: Vorschlag aus Profil kann per Override gebrochen
       // werden. Frühstück/Mittag werden vom Tagesziel abgezogen — der Rest ist
       // das Abendessen-Ziel gegen das die Wochen-Bar rechnet.
-      dailyTargetOverride: null,  // number | null — null = nimm berechneten Wert
-      breakfastKcal: 400,         // Default-Aufteilung, User kann anpassen
-      lunchKcal: 700,
-      showCalorieBar: true,       // Sichtbarkeit der Bedarfs-Pille im Dashboard
+      dailyTargetOverride: null,
+      breakfastKcal: null,
+      lunchKcal: null,
+      showCalorieBar: true,
       // Makro-Verteilung: entweder Preset (Ausgewogen/P-reich/KH-arm/F-arm)
       // ODER expliziter Gramm-Override via macroTargets. Slider ziehen setzt
       // macroTargets und macroPreset = null (Custom). Refresh setzt beides
       // zurück auf {'balanced', null}. Siehe effectiveMacroTargets in target.js.
-      macroPreset: 'balanced',    // 'balanced' | 'protein' | 'lowcarb' | 'lowfat' | null
-      macroTargets: null,         // { p, kh, f } in Gramm | null
+      macroPreset: 'balanced',
+      macroTargets: null,
     },
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
@@ -152,9 +155,16 @@ export function loadState() {
     // Settings: mergen mit Defaults, damit neue Slots beim Migrate nicht undefined sind.
     const loadedSettings = parsed.settings && typeof parsed.settings === 'object' ? parsed.settings : {};
     const legacyGlobalPortions = typeof parsed.globalPortions === 'number' ? parsed.globalPortions : undefined;
+    // Beta-Reset (Session 13): alte Sessions ohne onboardingSeen-Flag werden
+    // komplett durch den neuen Wizard geführt. Alle Wizard-Slots werden auf null
+    // gezogen, unabhängig davon was drin steht. Nach dem ersten saveState() ist
+    // onboardingSeen: true und diese Migration greift nicht mehr.
+    const isLegacyPreOnboarding = !('onboardingSeen' in loadedSettings);
+    const loadedProfile = loadedSettings.profile ?? {};
     state.settings = {
       defaultPortions: loadedSettings.defaultPortions ?? legacyGlobalPortions ?? 1,
       maxCookTime: loadedSettings.maxCookTime ?? COOKTIME_MAX,
+      onboardingSeen: loadedSettings.onboardingSeen ?? false,
       preferences: {
         meat: loadedSettings.preferences?.meat ?? false,
         fish: loadedSettings.preferences?.fish ?? false,
@@ -167,18 +177,19 @@ export function loadState() {
         americas: loadedSettings.cuisines?.americas ?? false,
       },
       profile: {
-        gender: loadedSettings.profile?.gender ?? null,
-        age: loadedSettings.profile?.age ?? 40,
-        heightCm: loadedSettings.profile?.heightCm ?? 180,
-        weightKg: loadedSettings.profile?.weightKg ?? 80,
-        activityLevel: loadedSettings.profile?.activityLevel ?? 3,
-        goal: loadedSettings.profile?.goal ?? 'maintain',
-        dailyTargetOverride: loadedSettings.profile?.dailyTargetOverride ?? null,
-        breakfastKcal: loadedSettings.profile?.breakfastKcal ?? 400,
-        lunchKcal: loadedSettings.profile?.lunchKcal ?? 700,
-        showCalorieBar: loadedSettings.profile?.showCalorieBar ?? true,
-        macroPreset: loadedSettings.profile?.macroPreset ?? 'balanced',
-        macroTargets: loadedSettings.profile?.macroTargets ?? null,
+        name:                 isLegacyPreOnboarding ? null : (loadedProfile.name ?? null),
+        gender:               isLegacyPreOnboarding ? null : (loadedProfile.gender ?? null),
+        age:                  isLegacyPreOnboarding ? null : (loadedProfile.age ?? null),
+        heightCm:             isLegacyPreOnboarding ? null : (loadedProfile.heightCm ?? null),
+        weightKg:             isLegacyPreOnboarding ? null : (loadedProfile.weightKg ?? null),
+        activityLevel:        isLegacyPreOnboarding ? null : (loadedProfile.activityLevel ?? null),
+        goal:                 isLegacyPreOnboarding ? null : (loadedProfile.goal ?? null),
+        dailyTargetOverride:  loadedProfile.dailyTargetOverride ?? null,
+        breakfastKcal:        isLegacyPreOnboarding ? null : (loadedProfile.breakfastKcal ?? null),
+        lunchKcal:            isLegacyPreOnboarding ? null : (loadedProfile.lunchKcal ?? null),
+        showCalorieBar:       loadedProfile.showCalorieBar ?? true,
+        macroPreset:          loadedProfile.macroPreset ?? 'balanced',
+        macroTargets:         loadedProfile.macroTargets ?? null,
       },
       theme: loadedSettings.theme ?? 'auto',
     };

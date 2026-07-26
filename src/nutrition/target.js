@@ -61,6 +61,21 @@ export function hasProfile(profile) {
   );
 }
 
+// True, wenn ALLE Onboarding-Wizard-Felder gesetzt sind (Biometrie + Alltag +
+// Mahlzeiten). Ergänzt hasProfile() um activityLevel, goal, breakfastKcal,
+// lunchKcal. Name ist nicht Teil — er ist optional (leerer Name → Copy fällt
+// auf unpersönlichen Ton zurück). Steuert die Placeholder-Pille-Entscheidung
+// im Dashboard.
+export function isProfileComplete(profile) {
+  if (!hasProfile(profile)) return false;
+  return (
+    typeof profile.activityLevel === 'number' &&
+    (profile.goal === 'maintain' || profile.goal === 'lose' || profile.goal === 'gain') &&
+    typeof profile.breakfastKcal === 'number' &&
+    typeof profile.lunchKcal === 'number'
+  );
+}
+
 // Mifflin-St Jeor Grundumsatz (BMR, 1990). Genauer als Harris-Benedict für
 // die heutige Bevölkerung, Standard in Ernährungsberatung.
 //   Männlich: 10×kg + 6.25×cm − 5×Alter + 5
