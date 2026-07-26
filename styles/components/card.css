@@ -1,14 +1,14 @@
-/* Elevated Card (mit Border als optischem Rahmen, kombiniertes Feature des
-   Rebuilds): surface-container-lowest als Grund, 1 px outline-variant,
-   Elevation 1. Beim Selected verschiebt sich der Grund in einen leichten
-   primary-Tint, der Border wird transparent (Farbfläche übernimmt die Absetzung). */
+/* Filled Card (M3): surface-container-low als leicht angehobener Grund gegen
+   die Base-Surface, kein Border. Elevation-Shadow bleibt fürs Light-Theme
+   dezent, im Dark sowieso unsichtbar. Beim Selected verschiebt sich der Grund
+   auf einen leichten primary-Tint. */
 .day-card {
-  background: var(--md-sys-color-surface-container-lowest);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-low);
+  border: 0;
   border-radius: var(--radius-card);
   overflow: hidden;
   box-shadow: var(--md-elevation-1);
-  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+  transition: transform 150ms ease, box-shadow 150ms ease;
 }
 
 .day-card:active {
@@ -17,8 +17,7 @@
 }
 
 .day-card--selected {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-lowest));
-  border-color: transparent;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-low));
 }
 
 /* In einer ausgewählten Card behält die Portion-Pille den Aktiv-Ton.

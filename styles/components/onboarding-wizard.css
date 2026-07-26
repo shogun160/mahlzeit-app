@@ -200,13 +200,13 @@
   display: none;
 }
 
-/* Ergebnis-Karten (Step 5). Gleicher Karten-Look wie im Dashboard
-   (surface-container-lowest + outline-variant), damit sich der Ergebnis-Screen
-   in die App-Palette einreiht. Akzent nur über die primary-Zahl bei den
-   hervorgehobenen Karten (Tages-Bedarf + Abendessen). */
+/* Ergebnis-Karten (Step 5) — Filled-Style (M3) analog Dashboard-Cards:
+   surface-container-low als leicht angehobener Grund, kein Border. Akzent
+   nur über die primary-Zahl bei den hervorgehobenen Karten (Tagesbedarf +
+   Abendessen). */
 .onboarding-result__card {
-  background: var(--md-sys-color-surface-container-lowest);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-low);
+  border: 0;
   border-radius: var(--radius-card, 16px);
   padding: 16px;
   margin-bottom: 12px;
