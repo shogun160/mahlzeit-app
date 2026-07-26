@@ -39,7 +39,7 @@
 .shop-progress__track {
   height: 6px;
   border-radius: 999px;
-  background: var(--md-sys-color-primary-container);
+  background: var(--md-sys-color-primary-track);
   overflow: hidden;
 }
 

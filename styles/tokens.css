@@ -11,6 +11,11 @@
   --md-sys-color-primary-tint: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-surface-container-lowest));
   --md-sys-color-primary-tint-hover: color-mix(in srgb, var(--md-sys-color-primary) 35%, var(--md-sys-color-surface-container-lowest));
 
+  /* Primary Track — inaktive Spur eines Progress-Indikators (Ring, lineare Bar).
+     Deutlich kräftiger als primary-container, damit sie auf surface klar sichtbar
+     bleibt. Leicht teal-getönt, um den Bezug zum aktiven primary-Segment zu halten. */
+  --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
+
   /* Surface (matcht Statusbar-Farbe der App). Volle M3-Tonal-Skala für Elevation:
      lowest (Karten-Boden) < low (Card-Hover) < surface (Base) < container (Nav) < high < highest */
   --md-sys-color-surface: #F7F8F7;

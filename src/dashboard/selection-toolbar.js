@@ -89,7 +89,7 @@ export function renderProgressRing(n, total) {
   return `
     <svg viewBox="0 0 20 20">
       <circle cx="10" cy="10" r="${R}" fill="none"
-              stroke="var(--md-sys-color-primary-container)" stroke-width="3"
+              stroke="var(--md-sys-color-primary-track)" stroke-width="3"
               stroke-linecap="butt"
               stroke-dasharray="${baseDash}"
               transform="rotate(-90 10 10)" />

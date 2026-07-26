@@ -80,8 +80,10 @@
    (surface), damit der Badge sauber vom Nav-Background abgesetzt bleibt. */
 .bottom-nav__badge {
   position: absolute;
-  top: -6px;
-  right: -10px;
+  /* M3 NavigationBar Badge: Zentrum liegt auf der oberen rechten Ecke des
+     24 dp Icon-Wraps. Bei 18 dp Badge-Größe → top/right jeweils -9 px. */
+  top: -9px;
+  right: -9px;
   min-width: 18px;
   height: 18px;
   padding: 0 5px;

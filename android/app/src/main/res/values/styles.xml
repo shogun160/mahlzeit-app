@@ -13,6 +13,11 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- App-Content ist immer hell (kein Dark Mode implementiert). Erzwingen,
+             dass Status-Bar- und Nav-Bar-Icons dunkel gerendert werden, damit sie
+             auch bei System-Darkmode sichtbar bleiben. -->
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
 
