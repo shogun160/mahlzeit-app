@@ -4,7 +4,7 @@
 
 Meal-Planner für die Woche: verteilt Gerichte auf 7 Tage, zeigt Rezepte/Zutaten, führt eine Einkaufsliste. Umgesetzt als Web-App, per Capacitor 8 als Android-APK verpackt. Solo-Projekt, primär für Android (iOS technisch möglich, aktuell nicht gebaut).
 
-**Aktueller Status:** Rebuild geplant. Details siehe [`docs/redesign/2026-07-25-rebuild-design.md`](docs/redesign/2026-07-25-rebuild-design.md). Umsetzung auf Branch `redesign`, `main` bleibt bis zum Merge auf dem aktuellen (funktionierenden) Stand.
+**Aktueller Status:** Rebuild abgeschlossen (PR #1, gemerged am 2026-07-26). `main` läuft auf der modularen Vite-Struktur (v2). Session-Handoffs unter [`docs/redesign/handoffs/`](docs/redesign/handoffs/) dokumentieren den Umbau, das ursprüngliche Rebuild-Design steht in [`docs/redesign/2026-07-25-rebuild-design.md`](docs/redesign/2026-07-25-rebuild-design.md).
 
 ## Nutzer
 
@@ -24,75 +24,87 @@ Meal-Planner für die Woche: verteilt Gerichte auf 7 Tage, zeigt Rezepte/Zutaten
 
 ## Landkarte
 
-### Aktueller Code (`main`)
-
 ```
-www/                        ← Web-Sourcen (Single Source of Truth)
-  index.html                ← komplette App (HTML + CSS + JS), ~88 KB
-  assets/logo.png
-  assets/icons/*.png        ← 5 UI-Icons
-  assets/dishes/dish-*.jpg  ← 17 Gerichte-Bilder
+src/                        ← ES-Module (Single Source of Truth)
+  main.js                   ← Bootstrap, App-Init
+  state.js                  ← State + Persistenz (localStorage v2)
+  data/                     ← dishes.json, ingredients.json, dishes.js
+  dashboard/                ← Wochen-Übersicht, Cards, Selection-Toolbar
+  dish-picker/              ← Gericht-Auswahl mit Filter-Chips + FLIP
+  detail-sheet/             ← Rezept-Sheet (Zutaten, Makros, Steps)
+  shopping-list/            ← Einkaufsliste, Progress, Done-Banner
+  onboarding/               ← Wizard (Personen, Aktivität, Ziel, Kalorien, Theme)
+  settings/                 ← Sheet mit Sections (Profil, Ziele, Erscheinungsbild…)
+  nutrition/                ← Makro-Berechnung, Bedarfs-Balken
+  nav/                      ← Header, View-Switch
+  native/                   ← Capacitor-Bridges (Statusbar, Theme)
+  util/                     ← Icons, DOM-Helper, etc.
+styles/                     ← CSS (Material-3-Palette, Themen, Komponenten)
+public/                     ← statische Assets (Icons, Logo, Dish-Bilder)
+index.html                  ← minimales Skelett, Views werden zur Laufzeit gerendert
+vite.config.js
+www/                        ← Vite-Build-Output (npm run build)
 android/                    ← Capacitor-generiert, meist nicht direkt editieren
-  app/src/main/res/         ← Icons, Splash, styles.xml
-capacitor.config.json       ← App-ID, Plugins-Config, Statusbar-Farbe
+  app/src/main/res/         ← Icons, Splash, styles.xml, strings.xml
+  app/build.gradle          ← App-ID, Signing, SDK-Versionen
+capacitor.config.json       ← App-ID, App-Name, Plugin-Config
 ```
 
-**Kernkonzepte im aktuellen Code:**
+**Kernkonzepte:**
 
-- `DATA.dishes` + `dishesById` — Gerichte-Datenbank, ID-Lookup
-- Icons via `iconSrc(name)` → liest aus `assets/icons/`
-- State-Variablen: `assignment` (day → dishId), `selected`, `portions`, `globalPortions`, `checkedShopping`
-- Persistenz: `saveState()` / `loadState()` mit localStorage-Key `mahlzeit-state-v1`, Auto-Save via Function-Wrapper und `visibilitychange`-Event
-
-### Neuer Code (`redesign`)
-
-Modulare Struktur mit Vite als Build-Tool. Detaillierte Ordner-Layout siehe Design-Doc, Section 3.
+- **State:** `state.js` hält Assignment (day → dishId), Selection, Portionen, Shopping-Progress, Profile (Kalorien-Ziele, Favoriten, Theme). Persistenz per localStorage-Key `mahlzeit-state-v2`, Auto-Save via Wrapper + `visibilitychange`.
+- **Daten:** `data/dishes.json` (Rezepte) + `data/ingredients.json` (Zutaten-Registry). Zutaten werden per Key referenziert — Guardrail 8 zur Duplikat-Vermeidung.
+- **Rendering:** Vanilla ES-Module, kein Framework. Views rendern per `render*()`-Funktion in ihren Container-DOMs, `main.js` orchestriert View-Switch.
+- **Theming:** Material-3-Palette in `styles/`, Dark/Light via CSS-Variablen, Statusbar-Sync via `native/`.
 
 ## Standard-Workflow
 
-### Aktuelle App (`main`)
+```
+Code in src/ oder styles/ ändern
+  → npm run dev              # lokaler Vite-Dev-Server mit Hot Reload (Browser)
+  → npm run build            # Vite baut nach www/
+  → npx cap sync             # kopiert www/ in android/app/src/main/assets/public
+  → APK bauen (siehe unten)
+  → auf Handy deinstallieren + neu installieren
+```
 
+**Debug-APK per CLI:**
+
+```bash
+cd android
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
+# Ergebnis: android/app/build/outputs/apk/debug/app-debug.apk
 ```
-HTML in www/index.html ändern
-  → npx cap sync
-  → Android Studio: Build → Generate App Bundles or APKs → Generate APKs
-  → alte APK vom Handy runter (sonst Signatur-Mismatch)
-  → neue APK drauf
-```
+
+Alternativ Android Studio: Build → Generate App Bundles or APKs → Generate APKs.
 
 **Config-Änderungen:**
 - App-Name: `android/app/src/main/res/values/strings.xml` + `capacitor.config.json`
-- Statusbar-Farbe, Plugins: `capacitor.config.json`
+- Statusbar/Plugins: `capacitor.config.json`
 - Splash / Theme: `android/app/src/main/res/values/styles.xml`
-
-### Nach Rebuild (`redesign`)
-
-```
-Code in src/ oder styles/ ändern
-  → npm run build (Vite baut nach www/)
-  → npx cap sync
-  → Android Studio: Build APK
-  → deinstallieren + neu installieren
-```
-
-Beim Entwickeln im Browser: `npm run dev` startet Vite-Dev-Server mit Hot Reload.
+- App-ID / SDK / Signing: `android/app/build.gradle`
 
 ## Guardrails
 
 Diese Regeln gelten übergreifend — nicht ändern ohne bewusste Rückfrage:
 
-1. **UI-Strings deutsch** — keine englischen Labels in der App-Oberfläche
-2. **State-Storage-Key nur mit Migration umbenennen** — sonst Datenverlust. Aktuell `mahlzeit-state-v1` (main), ab Rebuild `mahlzeit-state-v2` (redesign)
-3. **Bilder als externe Dateien** — kein Base64-Inline in HTML/JS. Alte App hatte 2 MB inline Base64, ist rausgezogen
+1. **UI-Strings deutsch, Du-Ansprache** — keine englischen Labels in der App-Oberfläche
+2. **State-Storage-Key `mahlzeit-state-v2` unveränderlich ohne Migration** — sonst Datenverlust. Neue Felder einfach ergänzen
+3. **Bilder als externe Dateien** — kein Base64-Inline in HTML/JS
 4. **Package-ID `com.mahlzeit.myapp` unverändert** — Änderung = komplette Neuinstallation für Nutzer
 5. **Kein Framework-Umbau** (Vue/React/Angular) ohne Rückfrage. Vanilla JS + Vite ist bewusste Wahl
-6. **Statusbar-Farbe `#F7F8F7` = `--md-sys-color-surface`** (bzw. aktuell `--bg`) — immer synchron ändern in `capacitor.config.json` und CSS
-7. **Nach Änderungen zwingend syncen** — `npx cap sync` (bzw. `npm run build && npx cap sync` nach Rebuild), sonst landet nichts im Android-Projekt
+6. **Statusbar-Farbe synchron halten** — `capacitor.config.json` (`EdgeToEdge.backgroundColor`) und CSS (`--md-sys-color-surface` bzw. aktives Theme) immer gemeinsam ändern
+7. **Nach Änderungen zwingend `npm run build && npx cap sync`** — sonst landet nichts im Android-Projekt
 8. **Zutaten-Wiederverwendung, keine Duplikate** — beim Anlegen/Ändern von Rezepten (`dishes.json`) IMMER prüfen, ob die Zutat bereits in `ingredients.json` existiert (auch unter leicht anderem Namen). Nur neuen Key anlegen, wenn es wirklich eine neue Zutat ist. Verhindert Drifts wie zwei Petersilie-Einträge (Bund vs. g), die die Einkaufsliste doppelt zeigt.
+9. **Touch-Targets ≥ 48 px** — bei Chip-Reihen über die Breite der ganzen Reihe erfüllt
+10. **Keine Tests** (Solo-Projekt) — Node-Simulation für Randfälle wenn nötig
 
 ## Referenz
 
-- **Design-Doc (Rebuild):** [`docs/redesign/2026-07-25-rebuild-design.md`](docs/redesign/2026-07-25-rebuild-design.md)
+- **Rebuild-Design-Doc:** [`docs/redesign/2026-07-25-rebuild-design.md`](docs/redesign/2026-07-25-rebuild-design.md)
+- **Session-Handoffs:** [`docs/redesign/handoffs/`](docs/redesign/handoffs/) — letzter: `session-17-to-18.md`
+- **Backlog:** [`docs/redesign/backlog.md`](docs/redesign/backlog.md)
+- **Feature-Design-Docs:** [`docs/redesign/2026-07-26-kalender-export-design.md`](docs/redesign/2026-07-26-kalender-export-design.md), [`docs/redesign/2026-07-26-onboarding-design.md`](docs/redesign/2026-07-26-onboarding-design.md)
 - **GitHub-Repo:** https://github.com/shogun160/mahlzeit-app
 - **Capacitor-Version:** 8.4.2 mit `@capawesome/capacitor-android-edge-to-edge-support@8.0.8`
 - **Android target SDK:** 36 (Android 16)
