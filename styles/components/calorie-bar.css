@@ -2,9 +2,9 @@
    Drei-Segment-Layout: Label links, Ist/Ziel mittig-prominent, Ø rechts.
    - Sticky-Header: klebt beim Scrollen oben an .view--dashboard, damit der
      User bedarf-vs-ist auch beim durchstöbern der Woche sehen kann.
-   - Optik wie die Makro-Pills auf der Card (Frosted-Glass mit halb-
-     transparentem Weiß + backdrop-blur), damit das kein zweiter Header-
-     Charakter bekommt sondern sich in die Pill-Sprache einreiht.
+   - Hintergrund wie die inaktive Day-Card (surface-container-low), damit die
+     Pille sich als Teil der Card-Sprache liest statt als Overlay. Blur bleibt
+     als visueller Puffer, wenn Content durchscrollt.
    - Nur sichtbar wenn Profil ausgefüllt (siehe dashboard/calorie-bar.js). */
 .calorie-bar {
   position: sticky;
@@ -16,7 +16,10 @@
   gap: 10px;
   padding: 10px 16px;
   border: none;
-  background: var(--frosted-glass);
+  /* Farbton der inaktiven Day-Card, aber semi-transparent, damit backdrop-blur
+     tatsaechlich etwas durchweichzeichnen kann (opake Farbe wuerde den Blur
+     unsichtbar machen). */
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-low) 80%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   border-radius: var(--radius-pill);
@@ -29,7 +32,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 .calorie-bar:hover {
-  background: var(--frosted-glass-strong);
+  background: color-mix(in srgb, var(--md-sys-color-surface-container) 80%, transparent);
 }
 
 .calorie-bar__label {
