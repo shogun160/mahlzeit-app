@@ -29,6 +29,22 @@ const bottomNavRoot = document.getElementById('bottom-nav');
 // renderDashboard() beim ersten Render ein frisches Assignment.
 loadState();
 
+// Setzt data-theme am <html>-Element je nach state.settings.theme:
+// - 'auto' → Attribut entfernen (Media-Query prefers-color-scheme greift)
+// - 'light' → data-theme="light" (überschreibt Dark-Media-Query)
+// - 'dark' → data-theme="dark" (aktiviert Dark-Tokens explizit)
+// Wird beim App-Start und nach jedem Theme-Toggle in Settings aufgerufen.
+export function applyTheme() {
+  const theme = state.settings.theme;
+  const root = document.documentElement;
+  if (theme === 'light' || theme === 'dark') {
+    root.setAttribute('data-theme', theme);
+  } else {
+    root.removeAttribute('data-theme');
+  }
+}
+applyTheme();
+
 function refresh() {
   // Header ist view-abhängig — Dashboard-Actions vs. Shopping-Reset.
   renderHeader(headerRoot, {
