@@ -56,7 +56,7 @@ export function renderStep5(draft) {
   const sliderVal = effective ?? 2000;
   return `
     <h3 class="onboarding-step__title">Fertig${nameGreeting}.</h3>
-    <p class="onboarding-step__desc">Dein Bedarf ist bereit.</p>
+    <p class="onboarding-step__desc">Mahlzeit, lass es dir schmecken!</p>
 
     <div class="onboarding-result__card onboarding-result__card--primary">
       <div class="onboarding-result__card-header">
