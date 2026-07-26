@@ -14,6 +14,7 @@ import { getScaleForDish } from '../nutrition/scale.js';
 export function renderCalorieBar() {
   const { profile } = state.settings;
   if (!hasProfile(profile)) return '';
+  if (profile.showCalorieBar === false) return '';
 
   const target = dinnerTarget(profile);
   if (target == null || target <= 0) return '';

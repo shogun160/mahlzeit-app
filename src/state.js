@@ -79,6 +79,7 @@ export const state = {
       dailyTargetOverride: null,  // number | null — null = nimm berechneten Wert
       breakfastKcal: 400,         // Default-Aufteilung, User kann anpassen
       lunchKcal: 700,
+      showCalorieBar: true,       // Sichtbarkeit der Bedarfs-Pille im Dashboard
     },
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
@@ -169,6 +170,7 @@ export function loadState() {
         dailyTargetOverride: loadedSettings.profile?.dailyTargetOverride ?? null,
         breakfastKcal: loadedSettings.profile?.breakfastKcal ?? 400,
         lunchKcal: loadedSettings.profile?.lunchKcal ?? 700,
+        showCalorieBar: loadedSettings.profile?.showCalorieBar ?? true,
       },
       theme: loadedSettings.theme ?? 'auto',
     };

@@ -421,6 +421,24 @@ function renderProfileSection() {
     ${renderMealRow('breakfast', 'Frühstück', p.breakfastKcal, BREAKFAST_MAX)}
     ${renderMealRow('lunch', 'Mittagessen', p.lunchKcal, LUNCH_MAX)}
     ${renderDinnerTargetRow()}
+    ${renderShowBarRow(p.showCalorieBar !== false)}
+  `;
+}
+
+// Ein-Klick-Toggle für die Sichtbarkeit der Bedarfs-Pille im Dashboard.
+// Aria-pressed-Chip statt Switch-Component — konsistent mit Diät-/Küchen-
+// Chips, kein neuer Widget-Typ.
+function renderShowBarRow(pressed) {
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Bedarfs-Anzeige im Dashboard</div>
+        <div class="settings-row__label-secondary">Pille mit Zielkorridor + Ø der ausgewählten Gerichte</div>
+      </div>
+      <button class="pref-chip" type="button" data-action="toggle-calorie-bar" aria-pressed="${pressed}">
+        ${pressed ? 'An' : 'Aus'}
+      </button>
+    </div>
   `;
 }
 
@@ -818,6 +836,18 @@ function attachProfileHandlers() {
 
   attachMealSlider('breakfast', 'breakfastKcal');
   attachMealSlider('lunch', 'lunchKcal');
+
+  // Bedarfs-Anzeige-Toggle: togglet Sichtbarkeit der Wochen-Pille im Dashboard.
+  const barToggle = rootEl.querySelector('[data-action="toggle-calorie-bar"]');
+  if (barToggle) {
+    barToggle.addEventListener('click', () => {
+      const next = state.settings.profile.showCalorieBar === false;
+      state.settings.profile.showCalorieBar = next;
+      barToggle.setAttribute('aria-pressed', String(next));
+      barToggle.textContent = next ? 'An' : 'Aus';
+      onExternalChange();
+    });
+  }
 }
 
 // Frühstück/Mittag-Slider — beide teilen dasselbe Muster (Live-Update + Dinner-

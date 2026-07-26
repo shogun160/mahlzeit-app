@@ -1,15 +1,24 @@
-/* Kompakte Wochen-Kalorien-Bar, sitzt im Dashboard über dem Card-Grid.
+/* Kompakte Wochen-Kalorien-Bar als Pill, sitzt im Dashboard über dem Card-Grid.
    Drei-Segment-Layout: Label links, Ist/Ziel mittig-prominent, Ø rechts.
-   Nur sichtbar wenn Profil ausgefüllt (siehe dashboard/calorie-bar.js). */
+   - Sticky-Header: klebt beim Scrollen oben an .view--dashboard, damit der
+     User bedarf-vs-ist auch beim durchstöbern der Woche sehen kann.
+   - Optik wie die Makro-Pills auf der Card (Frosted-Glass mit halb-
+     transparentem Weiß + backdrop-blur), damit das kein zweiter Header-
+     Charakter bekommt sondern sich in die Pill-Sprache einreiht.
+   - Nur sichtbar wenn Profil ausgefüllt (siehe dashboard/calorie-bar.js). */
 .calorie-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: baseline;
   gap: 10px;
-  padding: 10px 14px;
-  margin-bottom: 12px;
-  background: var(--md-sys-color-surface-container-lowest);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--radius-card);
+  padding: 10px 16px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   font-variant-numeric: tabular-nums;
 }
 
