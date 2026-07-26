@@ -251,10 +251,30 @@
    nicht auf dem Header, damit collapsed-Nachbarn dicht aufeinander sitzen).
    Untere Border trennt Sections optisch. */
 .settings-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
   padding: 12px 0 0;
   margin-bottom: 16px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   padding-bottom: 16px;
+}
+
+/* Label-Row + Slider werden im .settings-field gepaart. gap: 4px hält den
+   Slider unmittelbar an seinem Label — der Container-gap (16px) wirkt nur
+   zwischen den Feldern und den anderen Rows. Damit sind alle Abstände in
+   der Section einheitlich. */
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Row innerhalb eines Fields shrinkt auf Content-Höhe (statt --touch-target-min
+   zu erzwingen). Der Slider unten kompensiert das Touch-Target — dadurch klebt
+   der Slider unmittelbar unter der Label-Zeile, ohne verhabtenen Zwischenraum. */
+.settings-field .settings-row {
+  min-height: 0;
 }
 
 .settings-section__body[hidden] {
@@ -361,6 +381,13 @@
   min-height: var(--touch-target-min);
 }
 
+/* Nur bei Rows mit mehrzeiligem Label (z. B. Tagesziel mit "Vorschlag aus
+   Profil" als Zweitzeile) den Wert an der unteren Baseline ausrichten,
+   damit er zur Zweitzeile passt statt visuell in der Mitte zu schweben. */
+.settings-row:has(.settings-row__label-secondary) {
+  align-items: flex-end;
+}
+
 .settings-row__label {
   flex: 1 1 auto;
   min-width: 0;
@@ -380,6 +407,20 @@
   line-height: 1.35;
 }
 
+/* Inline-Variante: primary + secondary Text nebeneinander in einer Zeile
+   statt untereinander (z. B. bei Tagesziel: "Tagesziel  Vorschlag aus …").
+   Baseline-Alignment damit sekundäre Schrift auf der gleichen Grundlinie
+   sitzt. margin-top des secondary greift bei baseline nicht mehr. */
+.settings-row__label--inline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.settings-row__label--inline .settings-row__label-secondary {
+  margin-top: 0;
+}
+
 .settings-row__value {
   flex-shrink: 0;
   font-size: 0.9375rem;
@@ -388,13 +429,78 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Aktiv-Pill für berechnete Werte (Tagesziel-Range, Abendessen-Range) —
+   primary bg + on-primary Text, gleiche Optik wie kcal-Pille auf der Card.
+   Signalisiert: "das ist ein aktiver Wert der aus anderen Feldern folgt". */
+.settings-row__value--pill {
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
 /* Native range-input mit primary Akzentfarbe — Browser rendert Thumb + Track
    selbst, wir setzen nur die Farbe. Für konsistente Optik in Android WebView
    und Browser reicht das. */
 .settings-slider {
   width: 100%;
-  margin-top: 14px;
+  margin-top: 0;
   accent-color: var(--md-sys-color-primary);
+}
+
+/* Material 3 Switch: 52×32 dp Track mit gleitendem Thumb (16 dp inaktiv, 24 dp
+   aktiv), primary-Farbe im aktiven Zustand. Zustand kommt aus aria-checked,
+   damit kein JS die Optik pflegen muss. */
+.m3-switch {
+  --m3-switch-track-w: 52px;
+  --m3-switch-track-h: 32px;
+  --m3-switch-thumb-off: 16px;
+  --m3-switch-thumb-on: 24px;
+  --m3-switch-inset: 4px;
+  position: relative;
+  flex-shrink: 0;
+  width: var(--m3-switch-track-w);
+  height: var(--m3-switch-track-h);
+  padding: 0;
+  box-sizing: border-box;
+  border: 2px solid var(--md-sys-color-outline);
+  border-radius: 999px;
+  background: var(--md-sys-color-surface-container-highest);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.m3-switch__thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--m3-switch-inset);
+  width: var(--m3-switch-thumb-off);
+  height: var(--m3-switch-thumb-off);
+  border-radius: 50%;
+  background: var(--md-sys-color-outline);
+  transform: translateY(-50%);
+  transition: left 180ms cubic-bezier(0.2, 0, 0, 1),
+              width 180ms cubic-bezier(0.2, 0, 0, 1),
+              height 180ms cubic-bezier(0.2, 0, 0, 1),
+              background 180ms ease;
+  pointer-events: none;
+}
+
+.m3-switch[aria-checked="true"] {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+}
+
+.m3-switch[aria-checked="true"] .m3-switch__thumb {
+  left: calc(var(--m3-switch-track-w) - var(--m3-switch-thumb-on) - var(--m3-switch-inset) - 4px);
+  width: var(--m3-switch-thumb-on);
+  height: var(--m3-switch-thumb-on);
+  background: var(--md-sys-color-on-primary);
+}
+
+.m3-switch:active .m3-switch__thumb {
+  transform: translateY(-50%) scale(0.94);
 }
 
 /* External-Link-Row im Settings-Sheet — z. B. GitHub-Repo. Filled Tonal

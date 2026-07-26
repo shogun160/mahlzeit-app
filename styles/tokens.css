@@ -28,6 +28,10 @@
   /* Text */
   --md-sys-color-on-surface: #1F2937;
   --md-sys-color-on-surface-variant: #6B7280;
+  /* outline: mittel-grau, zwischen on-surface-variant (dunkel) und
+     outline-variant (fast weiß). M3-Rolle: sichtbare Umrisse und Trenner ohne
+     die Prominenz von on-surface-variant. */
+  --md-sys-color-outline: #8B95A2;
   --md-sys-color-outline-variant: #E1E3E2;
 
   /* Elevation */

@@ -136,21 +136,23 @@ function renderShell() {
           `)}
 
           ${section('kochzeit', 'Kochzeit', `
-            <div class="settings-row">
-              <div class="settings-row__label">
-                <div class="settings-row__label-primary">Maximale Kochzeit</div>
-                <div class="settings-row__label-secondary">Gerichte darüber werden nicht ausgelost</div>
+            <div class="settings-field">
+              <div class="settings-row">
+                <div class="settings-row__label">
+                  <div class="settings-row__label-primary">Maximale Kochzeit</div>
+                  <div class="settings-row__label-secondary">Gerichte darüber werden nicht ausgelost</div>
+                </div>
+                <div class="settings-row__value" data-role="cooktime-value">${formatCookTime(maxCookTime)}</div>
               </div>
-              <div class="settings-row__value" data-role="cooktime-value">${formatCookTime(maxCookTime)}</div>
+              <input type="range"
+                     class="settings-slider"
+                     data-action="cooktime-change"
+                     min="${COOKTIME_MIN}"
+                     max="${COOKTIME_MAX}"
+                     step="${COOKTIME_STEP}"
+                     value="${maxCookTime}"
+                     aria-label="Maximale Kochzeit in Minuten" />
             </div>
-            <input type="range"
-                   class="settings-slider"
-                   data-action="cooktime-change"
-                   min="${COOKTIME_MIN}"
-                   max="${COOKTIME_MAX}"
-                   step="${COOKTIME_STEP}"
-                   value="${maxCookTime}"
-                   aria-label="Maximale Kochzeit in Minuten" />
           `)}
 
           ${section('praeferenzen', 'Ernährungspräferenzen', `
@@ -363,50 +365,56 @@ function renderProfileSection() {
       </div>
     </div>
 
-    <div class="settings-row">
-      <div class="settings-row__label">
-        <div class="settings-row__label-primary">Größe</div>
+    <div class="settings-field">
+      <div class="settings-row">
+        <div class="settings-row__label">
+          <div class="settings-row__label-primary">Größe</div>
+        </div>
+        <div class="settings-row__value" data-role="height-value">${p.heightCm == null ? '—' : `${p.heightCm} cm`}</div>
       </div>
-      <div class="settings-row__value" data-role="height-value">${p.heightCm == null ? '—' : `${p.heightCm} cm`}</div>
+      <input type="range"
+             class="settings-slider"
+             data-action="height-change"
+             min="${HEIGHT_MIN}"
+             max="${HEIGHT_MAX}"
+             step="1"
+             value="${heightVal}"
+             aria-label="Größe in Zentimetern" />
     </div>
-    <input type="range"
-           class="settings-slider"
-           data-action="height-change"
-           min="${HEIGHT_MIN}"
-           max="${HEIGHT_MAX}"
-           step="1"
-           value="${heightVal}"
-           aria-label="Größe in Zentimetern" />
 
-    <div class="settings-row">
-      <div class="settings-row__label">
-        <div class="settings-row__label-primary">Gewicht</div>
+    <div class="settings-field">
+      <div class="settings-row">
+        <div class="settings-row__label">
+          <div class="settings-row__label-primary">Gewicht</div>
+        </div>
+        <div class="settings-row__value" data-role="weight-value">${p.weightKg == null ? '—' : `${p.weightKg} kg`}</div>
       </div>
-      <div class="settings-row__value" data-role="weight-value">${p.weightKg == null ? '—' : `${p.weightKg} kg`}</div>
+      <input type="range"
+             class="settings-slider"
+             data-action="weight-change"
+             min="${WEIGHT_MIN}"
+             max="${WEIGHT_MAX}"
+             step="1"
+             value="${weightVal}"
+             aria-label="Gewicht in Kilogramm" />
     </div>
-    <input type="range"
-           class="settings-slider"
-           data-action="weight-change"
-           min="${WEIGHT_MIN}"
-           max="${WEIGHT_MAX}"
-           step="1"
-           value="${weightVal}"
-           aria-label="Gewicht in Kilogramm" />
 
-    <div class="settings-row">
-      <div class="settings-row__label">
-        <div class="settings-row__label-primary">Aktivitätslevel</div>
+    <div class="settings-field">
+      <div class="settings-row">
+        <div class="settings-row__label">
+          <div class="settings-row__label-primary">Aktivitätslevel</div>
+        </div>
+        <div class="settings-row__value" data-role="activity-value">${activity.label}</div>
       </div>
-      <div class="settings-row__value" data-role="activity-value">${activity.label}</div>
+      <input type="range"
+             class="settings-slider"
+             data-action="activity-change"
+             min="1"
+             max="5"
+             step="1"
+             value="${activity.level}"
+             aria-label="Aktivitätslevel" />
     </div>
-    <input type="range"
-           class="settings-slider"
-           data-action="activity-change"
-           min="1"
-           max="5"
-           step="1"
-           value="${activity.level}"
-           aria-label="Aktivitätslevel" />
 
     <div class="settings-row">
       <div class="settings-row__label">
@@ -425,18 +433,21 @@ function renderProfileSection() {
   `;
 }
 
-// Ein-Klick-Toggle für die Sichtbarkeit der Bedarfs-Pille im Dashboard.
-// Aria-pressed-Chip statt Switch-Component — konsistent mit Diät-/Küchen-
-// Chips, kein neuer Widget-Typ.
+// Material-3-Switch für die Sichtbarkeit der Bedarfs-Pille im Dashboard.
+// Nutzt role="switch" + aria-checked (statt Chip mit aria-pressed) — semantisch
+// korrekter Widget-Typ für an/aus-Umschaltungen und die Standard-Optik der
+// Android-Einstellungen.
 function renderShowBarRow(pressed) {
   return `
     <div class="settings-row">
       <div class="settings-row__label">
         <div class="settings-row__label-primary">Bedarfs-Anzeige im Dashboard</div>
-        <div class="settings-row__label-secondary">Pille mit Zielkorridor + Ø der ausgewählten Gerichte</div>
+        <div class="settings-row__label-secondary">Zielkorridor + Ø der ausgewählten Gerichte</div>
       </div>
-      <button class="pref-chip" type="button" data-action="toggle-calorie-bar" aria-pressed="${pressed}">
-        ${pressed ? 'An' : 'Aus'}
+      <button class="m3-switch" type="button" role="switch" data-action="toggle-calorie-bar"
+              aria-checked="${pressed}"
+              aria-label="Bedarfs-Anzeige">
+        <span class="m3-switch__thumb" aria-hidden="true"></span>
       </button>
     </div>
   `;
@@ -453,42 +464,46 @@ function renderDailyTargetRow() {
   const val = effective ?? suggestion ?? Math.round((DAILY_TARGET_MIN + DAILY_TARGET_MAX) / 2);
   const hint = p.dailyTargetOverride != null
     ? 'Manuell überschrieben'
-    : (suggestion != null ? `Vorschlag aus Profil: ${format(suggestion)}` : 'Profil unvollständig');
+    : (suggestion != null ? `Vorschlag: ${format(suggestion)} kcal` : 'Profil unvollständig');
   return `
-    <div class="settings-row">
-      <div class="settings-row__label">
-        <div class="settings-row__label-primary">Tagesziel</div>
-        <div class="settings-row__label-secondary" data-role="daily-hint">${hint}</div>
+    <div class="settings-field">
+      <div class="settings-row">
+        <div class="settings-row__label settings-row__label--inline">
+          <span class="settings-row__label-primary">Tagesziel</span>
+          <span class="settings-row__label-secondary" data-role="daily-hint">${hint}</span>
+        </div>
+        <div class="settings-row__value" data-role="daily-value">${formatRange(val)}</div>
       </div>
-      <div class="settings-row__value" data-role="daily-value">${formatRange(val)}</div>
+      <input type="range"
+             class="settings-slider"
+             data-action="daily-change"
+             min="${DAILY_TARGET_MIN}"
+             max="${DAILY_TARGET_MAX}"
+             step="${DAILY_TARGET_STEP}"
+             value="${val}"
+             aria-label="Tagesziel in Kilokalorien" />
     </div>
-    <input type="range"
-           class="settings-slider"
-           data-action="daily-change"
-           min="${DAILY_TARGET_MIN}"
-           max="${DAILY_TARGET_MAX}"
-           step="${DAILY_TARGET_STEP}"
-           value="${val}"
-           aria-label="Tagesziel in Kilokalorien" />
   `;
 }
 
 function renderMealRow(key, label, value, max) {
   return `
-    <div class="settings-row">
-      <div class="settings-row__label">
-        <div class="settings-row__label-primary">${label}</div>
+    <div class="settings-field">
+      <div class="settings-row">
+        <div class="settings-row__label">
+          <div class="settings-row__label-primary">${label}</div>
+        </div>
+        <div class="settings-row__value" data-role="${key}-value">${format(value)} kcal</div>
       </div>
-      <div class="settings-row__value" data-role="${key}-value">${format(value)} kcal</div>
+      <input type="range"
+             class="settings-slider"
+             data-action="${key}-change"
+             min="0"
+             max="${max}"
+             step="${MEAL_KCAL_STEP}"
+             value="${value}"
+             aria-label="${label} in Kilokalorien" />
     </div>
-    <input type="range"
-           class="settings-slider"
-           data-action="${key}-change"
-           min="0"
-           max="${max}"
-           step="${MEAL_KCAL_STEP}"
-           value="${value}"
-           aria-label="${label} in Kilokalorien" />
   `;
 }
 
@@ -502,10 +517,9 @@ function renderDinnerTargetRow() {
   return `
     <div class="settings-row">
       <div class="settings-row__label">
-        <div class="settings-row__label-primary">Abendessen (Rest)</div>
-        <div class="settings-row__label-secondary">Zielkorridor für die Wochen-Bar</div>
+        <div class="settings-row__label-primary">Abendessen</div>
       </div>
-      <div class="settings-row__value settings-row__value--strong" data-role="dinner-value">${display}</div>
+      <div class="settings-row__value settings-row__value--pill" data-role="dinner-value">${display}</div>
     </div>
   `;
 }
@@ -838,13 +852,14 @@ function attachProfileHandlers() {
   attachMealSlider('lunch', 'lunchKcal');
 
   // Bedarfs-Anzeige-Toggle: togglet Sichtbarkeit der Wochen-Pille im Dashboard.
+  // M3-Switch: aria-checked steuert Anzeige, CSS reagiert per Selector auf den
+  // Wert — kein Text/Icon-Update im JS nötig.
   const barToggle = rootEl.querySelector('[data-action="toggle-calorie-bar"]');
   if (barToggle) {
     barToggle.addEventListener('click', () => {
       const next = state.settings.profile.showCalorieBar === false;
       state.settings.profile.showCalorieBar = next;
-      barToggle.setAttribute('aria-pressed', String(next));
-      barToggle.textContent = next ? 'An' : 'Aus';
+      barToggle.setAttribute('aria-checked', String(next));
       onExternalChange();
     });
   }
@@ -890,7 +905,7 @@ function updateDailyTargetFromProfile() {
   const hintEl = rootEl?.querySelector('[data-role="daily-hint"]');
   if (hintEl) {
     hintEl.textContent = suggestion != null
-      ? `Vorschlag aus Profil: ${suggestion.toLocaleString('de-DE')}`
+      ? `Vorschlag: ${suggestion.toLocaleString('de-DE')} kcal`
       : 'Profil unvollständig';
   }
   if (suggestion != null) {
