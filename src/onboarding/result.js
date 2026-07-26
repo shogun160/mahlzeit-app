@@ -141,9 +141,10 @@ function renderHorseshoe(macros) {
   const R = 42;
   const CIRC = 2 * Math.PI * R;
   const strokeW = 10;
-  // Gap in Umfangs-Einheiten (~3 units bei CIRC ≈ 264 → ca. 1.1% pro Gap).
+  // Größerer Gap (~7 units bei CIRC ≈ 264 → ca. 2.6% pro Trennung) macht die
+  // weißen Unterbrechungen zwischen den Segmenten deutlich sichtbar.
   // Segmente-Reihenfolge F → P → KH (matcht Legende von oben nach unten).
-  const GAP = 3;
+  const GAP = 7;
   const fLen  = Math.max(0, fPct  * CIRC - GAP);
   const pLen  = Math.max(0, pPct  * CIRC - GAP);
   const khLen = Math.max(0, khPct * CIRC - GAP);
@@ -153,7 +154,7 @@ function renderHorseshoe(macros) {
   return `
     <svg class="onboarding-macro-ring" viewBox="0 0 100 100" role="img" aria-label="Makro-Verteilung: Fett ${Math.round(fPct*100)}%, Protein ${Math.round(pPct*100)}%, Kohlenhydrate ${Math.round(khPct*100)}%">
       <g transform="rotate(-90 50 50)">
-        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--md-sys-color-surface-container)" stroke-width="${strokeW}" />
+        <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--md-sys-color-surface)" stroke-width="${strokeW}" />
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-f)"  stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${fLen} ${CIRC - fLen}"   stroke-dashoffset="${fOffset}" />
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-p)"  stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${pLen} ${CIRC - pLen}"   stroke-dashoffset="${pOffset}" />
         <circle cx="50" cy="50" r="${R}" fill="none" stroke="var(--chart-color-kh)" stroke-width="${strokeW}" stroke-linecap="round" stroke-dasharray="${khLen} ${CIRC - khLen}" stroke-dashoffset="${khOffset}" />
