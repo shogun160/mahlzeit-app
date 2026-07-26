@@ -117,9 +117,11 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-/* Footer: fix, mit Padding. Zurück / Weiter / Fertig kommen in Task 4. */
+/* Footer: fix, mit Padding. Zurück / Weiter / Fertig kommen in Task 4.
+   padding-bottom respektiert Android-Gesture-Bar / iOS-Home-Indicator via
+   safe-area-inset, sonst sitzen die Buttons auf der Systemleiste. */
 .onboarding-footer {
-  padding: 12px 16px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--md-sys-color-outline-variant);
   display: flex;
   justify-content: space-between;
