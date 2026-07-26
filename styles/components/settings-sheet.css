@@ -147,6 +147,55 @@
   margin: 0;
 }
 
+/* Ernährungspräferenzen als 2-spaltiges Grid von Toggle-Chips. Kompakter als
+   6 einzelne Rows, alle Optionen auf einen Blick sichtbar. */
+.settings-prefs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+/* Filter-Chip (Material 3 style): tonal ohne Rahmen, primary-Tint wenn aktiv.
+   aria-pressed=true statt :checked, weil wir <button> nutzen — visuell und
+   semantisch klarer als hidden <input type="checkbox">. Höhe knapp unter dem
+   48-dp-Touch-Target, aber immer noch komfortabel triffbar. */
+.pref-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.pref-chip:hover {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.pref-chip:active {
+  transform: scale(0.97);
+}
+
+.pref-chip[aria-pressed="true"] {
+  background: var(--md-sys-color-primary-tint);
+  border-color: transparent;
+  color: var(--md-sys-color-on-primary-container);
+  font-weight: 700;
+}
+
+.pref-chip[aria-pressed="true"]:hover {
+  background: var(--md-sys-color-primary-tint-hover);
+}
+
 .settings-row {
   display: flex;
   align-items: center;

@@ -1,16 +1,35 @@
 import { state, DAYS } from '../state.js';
 import { allDishIds, dishesById, shuffled } from '../data/dishes.js';
 
-// Gerichte, die den Filter des Users passieren (Kochzeit ≤ maxCookTime).
+// Prüft, ob ein Dish alle aktiven Ernährungspräferenzen erfüllt.
+// vegan/vegetarian sind stärkere Über-Filter (schließen mehrere contains-Tags
+// gleichzeitig aus), die einzelnen noMeat/noFish-Flags bleiben aber unabhängig
+// aktivierbar für User, die z. B. nur Fleisch weglassen wollen.
+function matchesPreferences(dish, prefs) {
+  const tags = dish.tags || [];
+  const has = (t) => tags.includes(t);
+  if (prefs.noMeat && has('contains-meat')) return false;
+  if (prefs.noFish && has('contains-fish')) return false;
+  if (prefs.lactoseFree && has('contains-lactose')) return false;
+  if (prefs.glutenFree && has('contains-gluten')) return false;
+  if (prefs.vegetarian && (has('contains-meat') || has('contains-fish'))) return false;
+  if (prefs.vegan && (has('contains-meat') || has('contains-fish') || has('contains-lactose') || has('contains-egg'))) return false;
+  return true;
+}
+
+// Gerichte, die den Filter des Users passieren (Kochzeit + Ernährungspräferenzen).
 // Falls die Filter-Regel zu wenige Kandidaten für 7 Tage lässt, fallen wir auf
 // das komplette Dish-Set zurück — sonst könnte der User sich in einen Zustand
 // klicken, in dem gar kein Reroll mehr möglich ist.
 // Export weil auch beim Erst-Auslosen (pickInitialAssignment) genutzt.
 export function eligibleDishIds() {
   const maxTime = state.settings.maxCookTime;
+  const prefs = state.settings.preferences || {};
   const filtered = allDishIds.filter((id) => {
     const dish = dishesById.get(id);
-    return dish && dish.cooktime <= maxTime;
+    if (!dish) return false;
+    if (dish.cooktime > maxTime) return false;
+    return matchesPreferences(dish, prefs);
   });
   return filtered.length >= DAYS.length ? filtered : allDishIds;
 }

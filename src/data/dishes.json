@@ -452,6 +452,10 @@
       "p": 74,
       "kh": 78,
       "f": 36,
+      "tags": [
+        "contains-fish",
+        "contains-gluten"
+      ],
       "ingredients": [
         {
           "key": "lachs_sockeye",
@@ -589,6 +593,10 @@
       "p": 84,
       "kh": 77,
       "f": 24,
+      "tags": [
+        "contains-meat",
+        "contains-lactose"
+      ],
       "ingredients": [
         {
           "key": "haehnchenbrust",
@@ -739,6 +747,11 @@
       "p": 76,
       "kh": 49,
       "f": 37,
+      "tags": [
+        "contains-fish",
+        "contains-gluten",
+        "contains-lactose"
+      ],
       "ingredients": [
         {
           "key": "garnelen",
@@ -875,6 +888,9 @@
       "p": 68,
       "kh": 62,
       "f": 42,
+      "tags": [
+        "contains-meat"
+      ],
       "ingredients": [
         {
           "key": "rinderfilet",
@@ -997,6 +1013,11 @@
       "p": 73,
       "kh": 84,
       "f": 27,
+      "tags": [
+        "contains-meat",
+        "contains-gluten",
+        "contains-lactose"
+      ],
       "ingredients": [
         {
           "key": "putenhack",
@@ -1107,6 +1128,9 @@
       "p": 71,
       "kh": 51,
       "f": 38,
+      "tags": [
+        "contains-fish"
+      ],
       "ingredients": [
         {
           "key": "lachs_sockeye",
@@ -1203,6 +1227,10 @@
       "p": 68,
       "kh": 78,
       "f": 29,
+      "tags": [
+        "contains-meat",
+        "contains-gluten"
+      ],
       "ingredients": [
         {
           "key": "rind_sirloin",
@@ -1325,6 +1353,10 @@
       "p": 72,
       "kh": 87,
       "f": 30,
+      "tags": [
+        "contains-meat",
+        "contains-gluten"
+      ],
       "ingredients": [
         {
           "key": "haehnchenbrust",
@@ -1435,6 +1467,9 @@
       "p": 69,
       "kh": 56,
       "f": 35,
+      "tags": [
+        "contains-fish"
+      ],
       "ingredients": [
         {
           "key": "garnelen",
@@ -1544,6 +1579,10 @@
       "p": 73,
       "kh": 74,
       "f": 23,
+      "tags": [
+        "contains-fish",
+        "contains-lactose"
+      ],
       "ingredients": [
         {
           "key": "kabeljau",
@@ -1626,6 +1665,10 @@
       "p": 70,
       "kh": 80,
       "f": 26,
+      "tags": [
+        "contains-meat",
+        "contains-gluten"
+      ],
       "ingredients": [
         {
           "key": "entenbrust",
@@ -1749,6 +1792,9 @@
       "p": 72,
       "kh": 81,
       "f": 28,
+      "tags": [
+        "contains-meat"
+      ],
       "ingredients": [
         {
           "key": "schweinefilet",
@@ -1846,6 +1892,10 @@
       "p": 77,
       "kh": 102,
       "f": 19,
+      "tags": [
+        "contains-fish",
+        "contains-lactose"
+      ],
       "ingredients": [
         {
           "key": "garnelen",
@@ -1969,6 +2019,10 @@
       "p": 72,
       "kh": 97,
       "f": 24,
+      "tags": [
+        "contains-meat",
+        "contains-fish"
+      ],
       "ingredients": [
         {
           "key": "haehnchenbrust",
@@ -2092,6 +2146,10 @@
       "p": 70,
       "kh": 96,
       "f": 34,
+      "tags": [
+        "contains-egg",
+        "contains-lactose"
+      ],
       "ingredients": [
         {
           "key": "linsen_rot",
@@ -2228,6 +2286,10 @@
       "p": 72,
       "kh": 96,
       "f": 24,
+      "tags": [
+        "contains-fish",
+        "contains-gluten"
+      ],
       "ingredients": [
         {
           "key": "lachs_keta",
@@ -2325,6 +2387,10 @@
       "p": 64,
       "kh": 89,
       "f": 32,
+      "tags": [
+        "contains-meat",
+        "contains-lactose"
+      ],
       "ingredients": [
         {
           "key": "rindergulasch",

@@ -101,9 +101,16 @@ function renderShell() {
                    aria-label="Maximale Kochzeit in Minuten" />
           </section>
 
-          <section class="settings-section settings-section--soon">
+          <section class="settings-section">
             <h3 class="settings-section__title">Ernährungspräferenzen</h3>
-            <p class="settings-section__note">Kommt bald — Vegetarisch, Vegan, Kein Fisch, Kein Fleisch, Laktosefrei, Glutenfrei</p>
+            <div class="settings-prefs" role="group" aria-label="Ernährungspräferenzen">
+              ${renderPrefChip('vegetarian', 'Vegetarisch')}
+              ${renderPrefChip('vegan', 'Vegan')}
+              ${renderPrefChip('noMeat', 'Kein Fleisch')}
+              ${renderPrefChip('noFish', 'Kein Fisch')}
+              ${renderPrefChip('lactoseFree', 'Laktosefrei')}
+              ${renderPrefChip('glutenFree', 'Glutenfrei')}
+            </div>
           </section>
 
           <section class="settings-section settings-section--soon">
@@ -155,6 +162,18 @@ function formatCookTime(min) {
   return min >= COOKTIME_MAX ? 'unbegrenzt' : `${min} Min`;
 }
 
+function renderPrefChip(key, label) {
+  const pressed = !!state.settings.preferences?.[key];
+  return `
+    <button class="pref-chip"
+            type="button"
+            data-pref="${key}"
+            aria-pressed="${pressed}">
+      ${label}
+    </button>
+  `;
+}
+
 function attachHandlers() {
   const overlay = rootEl.querySelector('[data-role="backdrop"]');
   overlay.addEventListener('click', (ev) => {
@@ -175,6 +194,17 @@ function attachHandlers() {
   });
   // change: nach Loslassen — jetzt persistieren + externes Refresh triggern.
   slider.addEventListener('change', () => onExternalChange());
+
+  // Ernährungs-Chips togglen ihren State + triggern refresh (Reroll-Pool ändert sich).
+  rootEl.querySelectorAll('.pref-chip[data-pref]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.pref;
+      const next = !state.settings.preferences[key];
+      state.settings.preferences[key] = next;
+      btn.setAttribute('aria-pressed', String(next));
+      onExternalChange();
+    });
+  });
 
   attachCloseSwipe();
 }
