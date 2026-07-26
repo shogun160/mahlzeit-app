@@ -96,7 +96,9 @@ function renderShoppingHeader(root, { onResetChecked, onCheckAll, onOpenSettings
   //   - keine Items ueberhaupt -> disabled Reset (Layout-Konsistenz mit
   //     Dashboard-View)
   const hasChecked = state.checkedShopping.size > 0;
-  const itemKeys = hasChecked ? [] : Object.keys(buildConsolidatedList());
+  const items = hasChecked ? [] : Object.values(buildConsolidatedList());
+  const itemKeys = items.map((i) => i.key);
+  const itemCats = [...new Set(items.map((i) => i.cat).filter(Boolean))];
   const hasItems = itemKeys.length > 0;
   const mode = hasChecked ? 'reset' : (hasItems ? 'check-all' : 'reset-disabled');
 
@@ -138,7 +140,7 @@ function renderShoppingHeader(root, { onResetChecked, onCheckAll, onOpenSettings
   const resetBtn = root.querySelector('[data-action="reset-checked"]');
   if (resetBtn && mode === 'reset') resetBtn.addEventListener('click', () => onResetChecked());
   const checkAllBtn = root.querySelector('[data-action="check-all"]');
-  if (checkAllBtn) checkAllBtn.addEventListener('click', () => onCheckAll(itemKeys));
+  if (checkAllBtn) checkAllBtn.addEventListener('click', () => onCheckAll(itemKeys, itemCats));
   const goDashBtn = root.querySelector('[data-action="go-dashboard"]');
   if (goDashBtn && onGoDashboard) goDashBtn.addEventListener('click', () => onGoDashboard());
   root.querySelector('[data-action="open-settings"]').addEventListener('click', () => onOpenSettings());
