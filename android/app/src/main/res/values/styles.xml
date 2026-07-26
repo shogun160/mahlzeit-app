@@ -13,6 +13,8 @@
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:background">@null</item>
+        <!-- Bar-Icon-Farben werden zur Laufzeit von MainActivity gesetzt (folgt
+             dem App-Theme via AppCompatDelegate.setDefaultNightMode). -->
     </style>
 
 

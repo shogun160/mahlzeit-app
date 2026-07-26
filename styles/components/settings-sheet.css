@@ -1,0 +1,708 @@
+/* Settings-Sheet — analog Detail-Sheet als Bottom-Sheet-Modal. Übernimmt die
+   gleiche Öffnen/Schließen-Choreografie (translateY, opacity, is-open Class).
+   z-index 100 = über allem (auch Bottom-Nav). */
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--overlay-backdrop);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.settings-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.settings-sheet {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 88vh;
+  background: var(--md-sys-color-surface-container-lowest);
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.settings-overlay.is-open .settings-sheet {
+  transform: translateY(0);
+}
+
+/* Handle oben, wie beim Detail-Sheet. touch-action: none damit der Browser
+   hier keine Scroll-Geste erkennt und den Pointer-Handler abbricht. */
+.settings-handle {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.settings-handle:active {
+  cursor: grabbing;
+}
+
+.settings-handle::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--md-sys-color-outline-variant);
+}
+
+.settings-header {
+  flex-shrink: 0;
+  padding: 6px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  /* touch-action: none damit swipe-down hier nicht als Scroll erkannt wird. */
+  touch-action: none;
+}
+
+.settings-header__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Action-Group rechts im Sheet-Header — hält Close plus optional weitere
+   Icon-Buttons (Expand-All, wenn Sections eingeklappt sind). */
+.settings-header__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Zusätzliche Icon-Button im Sheet-Header (Expand-All). Optisch abgestimmt
+   auf .settings-close: gleiche Größe + Form, aber neutralerer Hintergrund. */
+.settings-header__action {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.settings-header__action svg {
+  width: 20px;
+  height: 20px;
+}
+
+.settings-header__action:hover {
+  background: var(--md-sys-color-surface-container-high);
+}
+
+.settings-header__action:active {
+  transform: scale(0.94);
+}
+
+/* Muss explizit hier stehen, weil das display: inline-flex oben sonst gleiche
+   Spezifität hat wie der Browser-Default [hidden] { display: none } und die
+   Klasse (later declared) gewinnt — hidden hätte sonst keine Wirkung. */
+.settings-header__action[hidden] {
+  display: none;
+}
+
+.settings-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.settings-close:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-lowest));
+}
+
+.settings-close:active {
+  transform: scale(0.94);
+}
+
+/* Scrollbarer Body — FLACHER Sticky-Scope: Header und Bodies liegen direkt hier
+   als Geschwister (kein <section>-Wrapper pro Setting-Gruppe). Nur so bleibt
+   jeder Header sticky, wenn er weit nach oben scrollt — ein Wrapper würde den
+   Header mit sich rausschieben, sobald die Section oben den Body-Rand verlässt.
+   Siehe shopping-list.css für dieselbe Falle. Header-Höhen-Token als Basis für
+   den Sticky-Stack-Offset. */
+.settings-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 20px;
+  padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  --settings-section-header-height: 44px;
+}
+
+/* Klickbarer Section-Header: Titel + Chevron. Sticky mit gestaffeltem top-
+   Offset (--stack-idx wird inline pro Section gesetzt), sodass beim Scrollen
+   weggescrollte Section-Header oben stapeln. Negative Inline-Margins + volle
+   Breite kompensieren das .settings-body-Padding, damit der opake Header über
+   die volle Sheet-Breite geht. Padding kein Bottom-Margin — der Abstand zum
+   nächsten Header sitzt bewusst auf dem Body (padding-bottom), sodass zwei
+   aufeinanderfolgende Header (mit collapsed dazwischen) im sticky-Stapel
+   direkt aufeinander sitzen können, ohne unnötigen Zwischenraum. */
+.settings-section__toggle {
+  position: sticky;
+  top: calc(var(--stack-idx, 0) * var(--settings-section-header-height, 44px));
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  /* Titel links, Summary + Chevron rechts als Gruppe. Wird durch
+     margin-right: auto auf .settings-section__title erreicht — space-between
+     würde bei 3 sichtbaren Items summary in die Mitte drücken. */
+  gap: 8px;
+  width: calc(100% + 40px);
+  margin: 0 -20px;
+  padding: 10px 20px;
+  min-height: var(--settings-section-header-height, 44px);
+  border: none;
+  background: var(--md-sys-color-surface-container-lowest);
+  cursor: pointer;
+  font-family: inherit;
+  color: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.settings-section__title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 auto 0 0;
+}
+
+.settings-section__chevron {
+  width: 18px;
+  height: 18px;
+  color: var(--md-sys-color-on-surface-variant);
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+.settings-section__toggle[aria-expanded="false"] .settings-section__chevron {
+  transform: rotate(-90deg);
+}
+
+/* Section-Summary: kompakter Info-Chip rechts im Header, nur bei collapsed
+   sichtbar. Zeigt die wichtigste Info der Section auf einen Blick — Portionen
+   als Zahl, Kochzeit mit Einheit, Filter-Sections als "aktiv/gesamt". Bei
+   expanded überflüssig (Content ist ohnehin sichtbar). */
+.settings-section__summary {
+  display: none;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-primary);
+  background: transparent;
+  line-height: 1.2;
+}
+
+/* Sichtbar nur wenn der Header aktuell sticky ist (am oberen Rand klebt weil
+   der Body oben rausgescrollt ist) — dann kompensiert die Summary die
+   Information des jetzt unsichtbaren Bodies. Im natürlichen Flow ist der Body
+   entweder direkt sichtbar (expanded) oder trivial klein (collapsed), Summary
+   wäre redundant. Klasse wird per JS beim Scrollen gesetzt (updateStickyState). */
+.settings-section__toggle--sticky .settings-section__summary:not(:empty) {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Body: Content unter dem sticky Header. margin-bottom trennt Sections
+   voneinander (analog Shopping-Liste — Abstand liegt bewusst auf dem Body,
+   nicht auf dem Header, damit collapsed-Nachbarn dicht aufeinander sitzen).
+   Untere Border trennt Sections optisch. */
+.settings-section__body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 12px 0 0;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  padding-bottom: 16px;
+}
+
+/* Label-Row + Slider werden im .settings-field gepaart. gap: 4px hält den
+   Slider unmittelbar an seinem Label — der Container-gap (16px) wirkt nur
+   zwischen den Feldern und den anderen Rows. Damit sind alle Abstände in
+   der Section einheitlich. */
+.settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Row innerhalb eines Fields shrinkt auf Content-Höhe (statt --touch-target-min
+   zu erzwingen). Der Slider unten kompensiert das Touch-Target — dadurch klebt
+   der Slider unmittelbar unter der Label-Zeile, ohne verhabtenen Zwischenraum. */
+.settings-field .settings-row {
+  min-height: 0;
+}
+
+.settings-section__body[hidden] {
+  display: none;
+}
+
+.settings-section__body:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+/* scrollIntoView beim Klick auf einen sticky Header scrollt sonst den Body-Top
+   an Container-Top — der eigene sticky Header (und alle darüber gestapelten)
+   würden die ersten (stack-idx+1) * headerHeight Pixel überdecken. Analog zu
+   .shop-list in shopping-list.css. */
+.settings-section__body {
+  scroll-margin-top: calc((var(--stack-idx, 0) + 1) * var(--settings-section-header-height, 44px));
+}
+
+/* "Kommt bald"-Bodies dimmen, ersetzt die alte settings-section--soon-Klasse
+   auf dem entfernten <section>-Wrapper. */
+.settings-section-body--soon {
+  opacity: 0.55;
+}
+
+.settings-section__note {
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Ernährungspräferenzen als 2-spaltiges Grid von Toggle-Chips. Kompakter als
+   6 einzelne Rows, alle Optionen auf einen Blick sichtbar. */
+.settings-prefs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+/* Inline-Variante für kurze Chip-Gruppen im Row-Layout (Ziel, Gender-Chips
+   neben dem Label). Flex nowrap statt Grid, damit alle Chips auf einer Zeile
+   bleiben — wenn eng, scrollt horizontal. */
+.settings-prefs--inline {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.settings-prefs--inline::-webkit-scrollbar { display: none; }
+.settings-prefs--inline .pref-chip {
+  flex-shrink: 0;
+}
+
+/* Filter-Chip (Material 3 style): tonal ohne Rahmen, primary-Tint wenn aktiv.
+   aria-pressed=true statt :checked, weil wir <button> nutzen — visuell und
+   semantisch klarer als hidden <input type="checkbox">. Höhe knapp unter dem
+   48-dp-Touch-Target, aber immer noch komfortabel triffbar. */
+.pref-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease;
+}
+
+.pref-chip:hover {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.pref-chip:active {
+  transform: scale(0.97);
+}
+
+/* Aktiv-Look identisch zur kcal-Pille auf der Card und zur aktiven Portion-
+   Row im Detail-Sheet: primary bg + weißer Text. Kein Border. */
+.pref-chip[aria-pressed="true"] {
+  background: var(--md-sys-color-primary);
+  border-color: transparent;
+  color: var(--md-sys-color-on-primary);
+  font-weight: 700;
+}
+
+.pref-chip[aria-pressed="true"]:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 90%, black);
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: var(--touch-target-min);
+}
+
+/* Nur bei Rows mit mehrzeiligem Label (z. B. Tagesziel mit "Vorschlag aus
+   Profil" als Zweitzeile) den Wert an der unteren Baseline ausrichten,
+   damit er zur Zweitzeile passt statt visuell in der Mitte zu schweben. */
+.settings-row:has(.settings-row__label-secondary) {
+  align-items: flex-end;
+}
+
+.settings-row__label {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.settings-row__label-primary {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.3;
+}
+
+.settings-row__label-secondary {
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-top: 2px;
+  line-height: 1.35;
+}
+
+/* Inline-Variante: primary + secondary Text nebeneinander in einer Zeile
+   statt untereinander (z. B. bei Tagesziel: "Tagesziel  Vorschlag aus …").
+   Baseline-Alignment damit sekundäre Schrift auf der gleichen Grundlinie
+   sitzt. margin-top des secondary greift bei baseline nicht mehr. */
+.settings-row__label--inline {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.settings-row__label--inline .settings-row__label-secondary {
+  margin-top: 0;
+}
+
+/* Text-Link im Inline-Label (z. B. "Details" bei Abendessen — öffnet das
+   Makro-Popup). Optik bewusst identisch zu label-secondary ("Vorschlag: X"):
+   gleiche Schriftgröße, gleiche Farbe, kein Unterstrich, kein Fettdruck. Der
+   Kontext (Klick auf inline-Text) macht die Interaktivität klar. */
+.settings-row__label-link {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: inherit;
+  line-height: 1.35;
+  text-decoration: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.settings-row__label-link:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.settings-row__value {
+  flex-shrink: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Aktiv-Pill für berechnete Werte (Tagesziel-Range, Abendessen-Range) —
+   primary bg + on-primary Text, gleiche Optik wie kcal-Pille auf der Card.
+   Signalisiert: "das ist ein aktiver Wert der aus anderen Feldern folgt".
+   Hoehe an die restlichen Pills im Sheet angeglichen (min-height 40px). */
+.settings-row__value--pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Native range-input mit primary Akzentfarbe — Browser rendert Thumb + Track
+   selbst, wir setzen nur die Farbe. Für konsistente Optik in Android WebView
+   und Browser reicht das.
+   touch-action: pan-y sagt dem Browser: vertikales Panning ist fuer Scrollen
+   reserviert, Slider greift nur bei echter horizontaler Bewegung. Verhindert
+   dass beim Runterscrollen der Settings/Onboarding-Sheets ein Slider
+   versehentlich verstellt wird, wenn der Finger auf einem liegt. */
+.settings-slider {
+  width: 100%;
+  margin-top: 0;
+  accent-color: var(--md-sys-color-primary);
+  touch-action: pan-y;
+}
+
+/* Refresh-Icon-Button für Override-Reset (Tagesziel, Makros). Ghost-Style
+   ohne Background — analog zum X-Icon im Dish-Picker-Filter. 24 px Icon in
+   32-dp Klickfläche (kleiner als der 48-dp Standard, weil optional-Aktion —
+   Slider bleibt der Haupt-Klickbereich). */
+.settings-refresh {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease;
+}
+.settings-refresh svg {
+  width: 20px;
+  height: 20px;
+}
+.settings-refresh:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
+.settings-refresh[hidden] {
+  display: none;
+}
+
+/* Makro-Section: Header-Row + Preset-Chip-Zeile + 3 Slider. Gleicher gap wie
+   .settings-field, damit die Optik konsistent mit den anderen Slider-Feldern
+   in der Profil-Section bleibt. */
+.settings-macros {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Material 3 Switch: 52×32 dp Track mit gleitendem Thumb (16 dp inaktiv, 24 dp
+   aktiv), primary-Farbe im aktiven Zustand. Zustand kommt aus aria-checked,
+   damit kein JS die Optik pflegen muss. */
+.m3-switch {
+  --m3-switch-track-w: 52px;
+  --m3-switch-track-h: 32px;
+  --m3-switch-thumb-off: 16px;
+  --m3-switch-thumb-on: 24px;
+  --m3-switch-inset: 4px;
+  position: relative;
+  flex-shrink: 0;
+  width: var(--m3-switch-track-w);
+  height: var(--m3-switch-track-h);
+  padding: 0;
+  box-sizing: border-box;
+  border: 2px solid var(--md-sys-color-outline);
+  border-radius: 999px;
+  background: var(--md-sys-color-surface-container-highest);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.m3-switch__thumb {
+  position: absolute;
+  top: 50%;
+  left: var(--m3-switch-inset);
+  width: var(--m3-switch-thumb-off);
+  height: var(--m3-switch-thumb-off);
+  border-radius: 50%;
+  background: var(--md-sys-color-outline);
+  transform: translateY(-50%);
+  transition: left 180ms cubic-bezier(0.2, 0, 0, 1),
+              width 180ms cubic-bezier(0.2, 0, 0, 1),
+              height 180ms cubic-bezier(0.2, 0, 0, 1),
+              background 180ms ease;
+  pointer-events: none;
+}
+
+.m3-switch[aria-checked="true"] {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+}
+
+.m3-switch[aria-checked="true"] .m3-switch__thumb {
+  left: calc(var(--m3-switch-track-w) - var(--m3-switch-thumb-on) - var(--m3-switch-inset) - 4px);
+  width: var(--m3-switch-thumb-on);
+  height: var(--m3-switch-thumb-on);
+  background: var(--md-sys-color-on-primary);
+}
+
+.m3-switch:active .m3-switch__thumb {
+  transform: translateY(-50%) scale(0.94);
+}
+
+/* External-Link-Row im Settings-Sheet — z. B. GitHub-Repo. Filled Tonal
+   Button-Style. Default nimmt volle Breite (space-between fuer Icon rechts);
+   .settings-link--compact ist eine selbst-groessige Pille mit Icon LINKS und
+   Text daneben — genutzt fuer die GitHub-Pille in der 'Ueber'-Section. */
+.settings-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 6px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  /* Hoehe an .pref-chip angeglichen (Abnehmen etc.), damit alle Pills im
+     Settings-Sheet einheitlich wirken. */
+  min-height: 40px;
+  transition: background 120ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.settings-link:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, var(--md-sys-color-primary-container));
+}
+
+.settings-link:active {
+  transform: scale(0.98);
+}
+
+.settings-link svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+/* Kompakte Variante fuer die GitHub-Pille: self-sized (inline-flex), Icon
+   links, Text 'GitHub' daneben — kein Full-Width-Bar. */
+.settings-link--compact {
+  display: inline-flex;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-top: 0;
+  padding-left: 14px;
+  padding-right: 18px;
+}
+.settings-link--compact svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Aktions-Button in der Daten-Section — analog zu Settings-Link, aber als
+   Trigger für den Onboarding-Wizard. */
+.settings-action-btn {
+  /* Hoehe an .pref-chip angeglichen (Abnehmen etc.), damit alle Pills im
+     Settings-Sheet einheitlich wirken. */
+  min-height: 40px;
+  padding: 6px 20px;
+  border-radius: 999px;
+  border: 1px solid var(--md-sys-color-outline);
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.settings-action-btn:active {
+  background: var(--md-sys-color-surface-container);
+  transform: scale(0.98);
+}
+.settings-section__note--soft {
+  margin-top: 12px;
+  opacity: 0.6;
+}
+
+/* Theme-Toggle im Settings-Sheet: 3 Pill-Buttons, Icon links + Label rechts.
+   Layout inline (flex, kein grid) — sitzt in derselben .settings-row wie das
+   Label 'Erscheinungsbild', analog Ziel/Geschlecht-Zeilen. Kein margin-top,
+   Row-Gap regelt den Abstand. */
+.theme-toggle {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+}
+.theme-toggle__chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  /* Hoehe angepasst an .pref-chip (Abnehmen/Halten/Zunehmen), damit die
+     Chip-Reihen im Sheet einheitlich wirken. Touch-Target-Guardrail bleibt
+     ueber die volle Zeilenbreite (3 Chips im Grid) erfuellt. */
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+.theme-toggle__chip svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+/* Aktive Chip zieht in BEIDEN Modi die Optik der kcal-Pille (voller primary-
+   Grund mit on-primary-Text) — konsistent zur Selection-Chip im Header und
+   zum aktiven Wochentag-Badge im Picker. Im Light-Modus war primary-container
+   zu blass, im Dark-Modus wollte der User denselben kraeftigen Ton wie im
+   Light. Ergebnis: eine einzige Regel ohne Theme-Split. */
+.theme-toggle__chip[aria-pressed="true"] {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  border-color: transparent;
+}
+.theme-toggle__chip:active {
+  transform: scale(0.98);
+}
+
+/* Read-only-Variante: Slider zeigt seinen Wert an, blockiert aber User-Eingabe.
+   Anders als [disabled] behält der Slider seine volle Farb-Intensität — im
+   Makro-Popup dienen die 3 Slider nur zur Veranschaulichung des Presets. */
+.settings-slider--readonly {
+  pointer-events: none;
+}

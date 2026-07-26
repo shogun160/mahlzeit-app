@@ -1,0 +1,336 @@
+/* Sticky Progress oben in der Shopping-View. Deckt beim Scrollen die darunter
+   liegenden Kategorien-Header ab (die haben deutlich niedrigeren z-index).
+   - margin-inline: -16px kompensiert das .view padding-left/right, damit die
+     Frosted-Fläche über die volle Bildschirmbreite geht.
+   - Semi-transparenter Background + backdrop-filter: Content darunter schimmert
+     leicht durch beim Scrollen (frosted-glass Look).
+   - view--shopping hat padding-top: 0, damit der Progress bündig am Header klebt. */
+.shop-progress {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-inline: -16px;
+  /* Padding-Top absichtlich klein, damit die Progress-Zeile buendig ans
+     App-Header-Padding-Bottom anschliesst und keine Surface-'Spalt'-Optik
+     entsteht. Padding-Bottom bleibt grosszuegig fuer den Track-Abstand. */
+  padding: 4px 16px 14px;
+  /* Opak, damit vorherige Kategorie-Header beim Wegscrollen sauber verdeckt
+     werden — frosted-glass würde sie durchschimmern lassen. */
+  background: var(--md-sys-color-surface);
+  /* Text soll nicht selektiert werden, vertikales Scroll-Gesture soll durchrutschen. */
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: pan-y;
+}
+
+/* Label links, Expand/Collapse-Buttons rechts. Buttons sind vertikal gegen die
+   baseline des Labels ausgerichtet, damit die Progress-Bar darunter bündig
+   sitzt. */
+.shop-progress__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.shop-progress__label {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-progress__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Kompakter Icon-Button in der Progress-Zeile. Kleiner als der Header-icon-btn
+   (36 dp), damit die Progress-Zeile nicht ungewohnt hoch wird — 32 dp mit
+   20-px-Icon fühlt sich in dem Kontext richtig. */
+.shop-progress__action {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shop-progress__action svg {
+  width: 20px;
+  height: 20px;
+}
+
+.shop-progress__action:hover {
+  background: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+}
+
+.shop-progress__action:active {
+  transform: scale(0.94);
+}
+
+.shop-progress__of {
+  color: var(--md-sys-color-on-surface-variant);
+  font-weight: 600;
+}
+
+.shop-progress__track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary-track);
+  overflow: hidden;
+}
+
+.shop-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  transition: width 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Kategorie-Gruppen: FLACHER Container. Header und Listen liegen als Geschwister
+   direkt hier drin — nur so bleibt jeder Header sticky, wenn er weit nach oben
+   scrollt, und alle sichtbaren Header können sich unter der Progress-Bar stapeln.
+   Wären Header + Liste in eigenen <section>-Wrappern, würde jeder sticky-Header
+   verschwinden, sobald seine section oben rausscrollt. */
+.shop-groups {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Der Abstand zwischen den Kategorien liegt bewusst auf der ul (nicht auf dem
+   Header). So sind zwei aufeinanderfolgende Header-Zeilen — wenn die ul dazwischen
+   eingeklappt ist — genauso dicht aneinander wie im sticky-Stapel. */
+
+/* Kategorie-Header ist ein voll klickbarer Button (Chevron + Titel + Count).
+   Klick togglet den Collapse-State der Kategorie und scrollt bei Expand dort hin.
+   Sticky unter der Progress-Bar: bleibt beim Scrollen sichtbar, wird von der
+   nächsten Kategorie weggeschoben (carousel-artig). Frosted-Glass-Look, damit
+   Content dahinter beim Scrollen leicht durchscheint. */
+.shop-group__header {
+  position: sticky;
+  /* Gestaffelt: jede sichtbare Kategorie klebt unter der vorigen. --stack-idx
+     wird pro shop-group inline gesetzt (0 = erste sichtbare Kategorie). */
+  top: calc(var(--shop-progress-height, 64px) + var(--stack-idx, 0) * var(--shop-group-header-height));
+  z-index: 4;
+  /* Volle Viewport-Breite: 100 % des Containers + je 16 px pro Seite, damit die
+     negativen Margins nicht nur verschieben, sondern das Element auch verbreitern.
+     Sonst blitzen darunterliegende Karten am rechten Rand durch. */
+  width: calc(100% + 32px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 -16px;
+  padding: 8px 16px;
+  /* Opak, damit gestapelte Header saubere Kanten haben und der Content dahinter
+     nicht durchschimmert. */
+  background: var(--md-sys-color-surface);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  color: inherit;
+  min-height: var(--shop-group-header-height);
+  scroll-margin-top: calc(var(--shop-progress-height, 64px) + var(--stack-idx, 0) * var(--shop-group-header-height));
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Höhe des Kategorie-Headers als Token — Basis für sticky-Stapel-Offset. Muss
+   zur tatsächlichen Header-Höhe passen (min-height + padding-inklusive). */
+.view--shopping {
+  --shop-group-header-height: 48px;
+}
+
+.shop-group__chevron {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform 200ms ease;
+}
+
+.shop-group__chevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+.shop-group__header--collapsed .shop-group__chevron {
+  transform: rotate(-90deg);
+}
+
+.shop-group__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-sys-color-primary);
+}
+
+.shop-group__count {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-list {
+  list-style: none;
+  margin: 0 0 22px;
+  padding: 6px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  /* Beim Klick auf einen Kategorie-Header scrollen wir zur ul (nicht zum Header
+     selbst, der ist sticky und rührt sich optisch nicht). scroll-margin-top sorgt
+     dafür, dass die ul unter dem eigenen sticky-Header + Progress-Bar landet. */
+  scroll-margin-top: calc(var(--shop-progress-height, 64px) + (var(--stack-idx, 0) + 1) * var(--shop-group-header-height));
+}
+
+/* Eingeklappte Kategorie: Liste ausblenden. Doppelte Klasse → höhere Spezifität
+   als .shop-list mit display:flex (steht in dieser Datei später als Regel). */
+.shop-list.shop-list--collapsed {
+  display: none;
+}
+
+/* Eine Zutaten-Zeile: großes Touch-Target, Check-Zone links, Body rechts. */
+.shop-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--md-sys-color-surface-container-lowest);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 12px;
+  padding: 10px 14px;
+  min-height: var(--touch-target-min);
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, opacity 180ms ease;
+}
+
+.shop-item:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 6%, var(--md-sys-color-surface-container-lowest));
+}
+
+.shop-item:active {
+  transform: scale(0.995);
+}
+
+/* Check-Kreis: 24 px, Border wenn offen, gefüllt + Icon wenn checked. */
+.shop-item__check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.shop-item__check svg {
+  width: 16px;
+  height: 16px;
+}
+
+.shop-item__body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.shop-item__label {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.3;
+  transition: color 180ms ease, text-decoration-color 180ms ease;
+}
+
+.shop-item__qty {
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+  transition: color 180ms ease;
+}
+
+/* Checked-State: Check-Kreis füllt sich mit primary, Text ist durchgestrichen + gedimmt. */
+.shop-item--checked {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 5%, var(--md-sys-color-surface-container-lowest));
+  border-color: color-mix(in srgb, var(--md-sys-color-primary) 22%, var(--md-sys-color-outline-variant));
+}
+
+.shop-item--checked .shop-item__check {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.shop-item--checked .shop-item__label {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 60%, transparent);
+}
+
+.shop-item--checked .shop-item__qty {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 70%, transparent);
+  text-decoration: line-through;
+}
+
+/* Done-Banner: erscheint zwischen Progress und Groups, wenn alle Zutaten abgehakt
+   sind. Positiv-Framing, primary-tinted, ohne sticky-Verhalten — reiht sich einfach
+   in den Fluss ein und ist beim 100%-Fortschritt genau da, wo der User gerade tippt. */
+.shop-done-banner {
+  margin: 12px 0 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: var(--md-sys-color-primary-tint);
+  color: var(--md-sys-color-primary);
+  font-size: 0.9375rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Empty-State */
+.shop-empty {
+  padding: 64px 24px 40px;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.shop-empty__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  margin: 0 0 6px;
+}
+
+.shop-empty__sub {
+  font-size: 0.875rem;
+  margin: 0;
+  max-width: 300px;
+  margin-inline: auto;
+  line-height: 1.5;
+}

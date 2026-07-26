@@ -1,0 +1,121 @@
+:root {
+  /* Primary */
+  --md-sys-color-primary: #0F766E;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #CCFBF1;
+  --md-sys-color-on-primary-container: #115E59;
+
+  /* Primary Tint — die "aktive/selected"-Farbe. Genutzt für Card-Buttons wenn ein
+     Gericht auf der Einkaufsliste ist, für aktive Reset-/Nav-Buttons, für Rezept-
+     Nummern-Kreise usw. Wenn hier geändert wird, ziehen alle aktiv-Zustände nach. */
+  --md-sys-color-primary-tint: color-mix(in srgb, var(--md-sys-color-primary) 30%, var(--md-sys-color-surface-container-lowest));
+  --md-sys-color-primary-tint-hover: color-mix(in srgb, var(--md-sys-color-primary) 35%, var(--md-sys-color-surface-container-lowest));
+
+  /* Primary Track — inaktive Spur eines Progress-Indikators (Ring, lineare Bar).
+     Deutlich kräftiger als primary-container, damit sie auf surface klar sichtbar
+     bleibt. Leicht teal-getönt, um den Bezug zum aktiven primary-Segment zu halten. */
+  --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
+
+  /* Chart-Farben für Makro-Bars — klassisch aus Fitness-App-Konvention.
+     KH Amber (Getreide), P Rot (Muskel/Fleisch), F Blau (Öl). Bewusst
+     off-theme, weil Charts eigene visuelle Kategorien brauchen und die
+     App sonst nur Teal-Töne hat (keine klare Trennung möglich). */
+  --chart-color-kh: #D97706;
+  --chart-color-p:  #B91C1C;
+  --chart-color-f:  #2563EB;
+  /* Semantische Ok-Farbe für Ø-Anzeige (grün = im Zielkorridor).
+     "Off" nutzt on-surface-variant — bewusst leise, kein Alarm. */
+  --chart-color-ok: #15803D;
+
+  /* Surface (matcht Statusbar-Farbe der App). Volle M3-Tonal-Skala für Elevation:
+     lowest (Karten-Boden) < low (Card-Hover) < surface (Base) < container (Nav) < high < highest */
+  --md-sys-color-surface: #F7F8F7;
+  --md-sys-color-surface-container-lowest: #FFFFFF;
+  --md-sys-color-surface-container-low: #F2F4F3;
+  --md-sys-color-surface-container: #EDEFEE;
+  --md-sys-color-surface-container-high: #E7E9E8;
+  --md-sys-color-surface-container-highest: #E1E3E2;
+
+  /* Text */
+  --md-sys-color-on-surface: #1F2937;
+  --md-sys-color-on-surface-variant: #6B7280;
+  /* outline: mittel-grau, zwischen on-surface-variant (dunkel) und
+     outline-variant (fast weiß). M3-Rolle: sichtbare Umrisse und Trenner ohne
+     die Prominenz von on-surface-variant. */
+  --md-sys-color-outline: #8B95A2;
+  --md-sys-color-outline-variant: #E1E3E2;
+
+  /* Elevation */
+  --md-elevation-1: 0 1px 3px 1px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.08);
+  --md-elevation-2: 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  /* Ergonomie */
+  --radius-card: 16px;
+  --radius-pill: 9999px;
+  --touch-target-min: 48px;
+  --bottom-nav-height: 56px;
+
+  /* Frosted-Glass für schwebende Pillen auf Card-/Sheet-Backgrounds
+     (Bedarfs-Pille im Dashboard, Makro-Ø-Pille im Makro-Popup). Semi-
+     transparent damit der Content darunter durchschimmert. Dark-Mode
+     überschreibt auf dunkles Glas. */
+  --frosted-glass: rgba(255, 255, 255, 0.78);
+  --frosted-glass-strong: rgba(255, 255, 255, 0.88);
+
+  /* Backdrop hinter Modals — halbtransparenter Overlay-Ton für Sheets. */
+  --overlay-backdrop: rgba(15, 23, 42, 0.42);
+
+  /* Warnfarbe für "über Zielkorridor"-Zustand (Bedarfs-Pille). */
+  --semantic-warn: #b3541e;
+
+  /* On-Glass: Text-/Icon-Farbe für Foto-Overlay-Badges auf Dish-Bildern
+     (Day-Badge, Shop-Indikator, Makro-Ø-Pille auf Card, Picker-Tile-Overlays).
+     Diese Overlays behalten in BEIDEN Themes ihren weißen Background (weil
+     das Foto darunter variabel ist). Der Text-Vordergrund darf sich deshalb
+     nicht mit dem Theme mitverändern — sonst wird er im Dark Mode auf dem
+     weißen Overlay unlesbar (aufgehelltes primary vs. Weiß = 1.3:1 Kontrast).
+     Werte hier permanent = Light-Palette-Primary/Chart-Colors. */
+  --md-sys-color-on-glass: #0F766E;
+  --chart-color-kh-on-glass: #D97706;
+  --chart-color-p-on-glass:  #B91C1C;
+  --chart-color-f-on-glass:  #2563EB;
+}
+
+
+/* Dark Mode — Farbwerte: WCAG-geprüfte Kontraste gegen jeweils typische
+   Hintergründe. Aktivierung ausschliesslich ueber html[data-theme="dark"];
+   applyTheme() in main.js loest bei 'auto' das effektive Theme aus
+   prefers-color-scheme auf und setzt data-theme entsprechend. */
+:root[data-theme="dark"] {
+  --md-sys-color-primary: #2DD4BF;
+  --md-sys-color-on-primary: #042F2E;
+  --md-sys-color-primary-container: #115E59;
+  --md-sys-color-on-primary-container: #99F6E4;
+  --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
+
+  --md-sys-color-surface: #1B1D1F;
+  --md-sys-color-surface-container-lowest: #131517;
+  --md-sys-color-surface-container-low: #22262A;
+  --md-sys-color-surface-container: #2A2E32;
+  --md-sys-color-surface-container-high: #32363A;
+  --md-sys-color-surface-container-highest: #3A3E42;
+
+  --md-sys-color-on-surface: #E3E6E4;
+  --md-sys-color-on-surface-variant: #A9B0AC;
+  --md-sys-color-outline: #5B625E;
+  --md-sys-color-outline-variant: #3A3F3D;
+
+  --chart-color-kh: #FBBF24;
+  --chart-color-p:  #F87171;
+  --chart-color-f:  #60A5FA;
+  --chart-color-ok: #4ADE80;
+
+  --frosted-glass: rgba(0, 0, 0, 0.4);
+  --frosted-glass-strong: rgba(0, 0, 0, 0.55);
+  --overlay-backdrop: rgba(0, 0, 0, 0.6);
+  --semantic-warn: #FB923C;
+
+  /* On-Glass wird im Dark auf on-surface umgeleitet — die Foto-Overlays
+     haben jetzt dunklen Background, Text muss hell sein. */
+  --md-sys-color-on-glass: var(--md-sys-color-on-surface);
+}

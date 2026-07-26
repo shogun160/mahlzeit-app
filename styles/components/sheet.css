@@ -1,0 +1,496 @@
+/* Overlay ist der Full-Screen-Backdrop, hält das Sheet unten am Rand. */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--overlay-backdrop);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.sheet-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Der Sheet selbst: 85vh, sitzt initial unten außerhalb (translateY 100%),
+   schiebt sich beim Öffnen hoch. Max-Breite matcht das Card-Layout.
+   position:relative ist Anker für die floating Portion-Pille. */
+.sheet {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 85vh;
+  background: var(--md-sys-color-surface-container-lowest);
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.14);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sheet-overlay.is-open .sheet {
+  transform: translateY(0);
+}
+
+/* Drag-Indikator-Pille oben — prominente Klick-Zone für Close-Swipe.
+   touch-action: none verhindert dass der Browser hier Scroll-Gesten erkennt und
+   den Pointer-Handler mit pointercancel abbricht. */
+.sheet-handle {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 10px;
+  flex-shrink: 0;
+  touch-action: none;
+  cursor: grab;
+}
+
+.sheet-handle::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--md-sys-color-outline-variant);
+}
+
+.sheet-handle:active {
+  cursor: grabbing;
+}
+
+.sheet-header {
+  flex-shrink: 0;
+  padding: 6px 20px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  /* touch-action: none damit swipe-down hier nicht als Scroll-Geste erkannt wird
+     (siehe attachCloseSwipe in render.js). */
+  touch-action: none;
+}
+
+.sheet-header__title-wrap {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.sheet-header__day {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-sys-color-primary);
+  margin-bottom: 2px;
+}
+
+/* Favoriten-Toggle in der Day-Zeile — Ghost-Style analog settings-refresh,
+   quadratischer Klickbereich, Herz-SVG 16 px zentriert. Off: neutrale
+   on-surface-variant; On: primary. Kein Hintergrund — die Day-Zeile ist
+   schon farbig, ein Pill-Look wuerde ueberladen wirken. */
+.sheet-header__fav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: -6px 0;
+  border: 0;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  border-radius: 999px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.sheet-header__fav svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+.sheet-header__fav:hover {
+  background: color-mix(in srgb, var(--md-sys-color-on-surface) 8%, transparent);
+}
+.sheet-header__fav.is-on {
+  color: var(--md-sys-color-primary);
+}
+.sheet-header__fav:active {
+  transform: scale(0.92);
+}
+
+.sheet-header__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.sheet-close {
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.sheet-close:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-lowest));
+}
+
+.sheet-close:active {
+  transform: scale(0.94);
+}
+
+/* Tab-Bar: zwei gleichbreite Buttons, Aktiver mit Unterstreichung. */
+.sheet-tabs {
+  flex-shrink: 0;
+  display: flex;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.sheet-tabs__btn {
+  flex: 1 1 0;
+  min-height: var(--touch-target-min);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 8px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 120ms ease, border-color 120ms ease;
+}
+
+.sheet-tabs__btn:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.sheet-tabs__btn--active {
+  color: var(--md-sys-color-primary);
+  border-bottom-color: var(--md-sys-color-primary);
+}
+
+/* Body ist der scroll-clip; Track hält beide Panels nebeneinander (200% breit)
+   und wird per translateX verschoben. Jedes Panel scrollt intern eigenständig. */
+.sheet-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.sheet-tabs__track {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  transition: transform 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.sheet-tabs__panel {
+  flex: 0 0 50%;
+  overflow-y: auto;
+  padding: 16px 20px;
+  /* Extra Bottom-Padding, damit die letzten Zeilen nicht unter der floating
+     Portion-Pille (unten rechts, ~40 px hoch) verschwinden. */
+  padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+}
+
+/* Floating Row unten rechts über dem Content: Toggle-Button für Einkaufsliste
+   + Portion-Pille nebeneinander. Beide "schweben" mit Shadow über den Panel-
+   Inhalten. Bei aktiver Selection wechseln sie in primary (kcal-Pill-Look). */
+.sheet-portion-row {
+  position: absolute;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  right: 16px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.sheet-portion-row .stepper--floating,
+.sheet-list-toggle,
+.sheet-reroll-toggle {
+  pointer-events: auto;
+  background: var(--md-sys-color-surface-container-lowest);
+  box-shadow: var(--md-elevation-2), 0 0 0 1px var(--md-sys-color-outline-variant);
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+}
+
+/* Einkaufslisten-Toggle- und Reroll-Button: gleicher Höhen-Rhythmus wie der
+   Stepper daneben, Icon zentriert. */
+.sheet-list-toggle,
+.sheet-reroll-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  min-height: 36px;
+  min-width: 44px;
+  padding: 6px 12px;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.sheet-list-toggle svg,
+.sheet-reroll-toggle svg {
+  width: 20px;
+  height: 20px;
+  display: block;
+  color: inherit;
+}
+
+.sheet-list-toggle:active,
+.sheet-reroll-toggle:active {
+  transform: scale(0.96);
+}
+
+/* Aktive Row: alle drei Elemente (Reroll-Pill, List-Toggle, Stepper) werden
+   primary (identisch zum kcal-Pill-Look auf der Card). Innere Stepper-Elemente
+   haben in stepper.css eigene Farben — hier explizit auf on-primary
+   überschreiben. Konsistenz siegt über die frühere Unterscheidung
+   "Aktion vs State-Anzeige". */
+.sheet-portion-row--active .sheet-reroll-toggle,
+.sheet-portion-row--active .sheet-list-toggle,
+.sheet-portion-row--active .stepper--floating {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  box-shadow: var(--md-elevation-2);
+}
+
+.sheet-portion-row--active .stepper__icon,
+.sheet-portion-row--active .stepper__btn,
+.sheet-portion-row--active .stepper__value {
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Zutaten-Liste */
+.ingredient-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ingredient {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.ingredient:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 4%, transparent);
+}
+
+.ingredient:last-child {
+  border-bottom: none;
+}
+
+/* Check-Kreis vor der Zutat — identische Optik zu shop-item__check in der
+   Einkaufsliste, damit "Zutaten abhaken" überall gleich aussieht. */
+.ingredient__check {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.ingredient__check svg {
+  width: 14px;
+  height: 14px;
+}
+
+.ingredient__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.9375rem;
+  transition: color 180ms ease, text-decoration-color 180ms ease;
+}
+
+.ingredient__qty {
+  flex-shrink: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: color 180ms ease;
+}
+
+/* Abgehakte Zutat: primary-gefüllter Check-Kreis + durchgestrichener Text. */
+.ingredient--checked .ingredient__check {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.ingredient--checked .ingredient__label {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 60%, transparent);
+}
+
+.ingredient--checked .ingredient__qty {
+  color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 70%, transparent);
+  text-decoration: line-through;
+}
+
+/* Sum-Row unter der Zutaten-Liste: Gesamt-kcal prominent, darunter g-Werte
+   und %-Anteile der Makros in einer Zeile. Divider in primary-tint hebt den
+   Bereich vom Listen-Ende ab, ohne die Liste selbst noch mit Zeilen zu füllen. */
+.ingredient-sum {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 2px solid var(--md-sys-color-primary-tint);
+}
+
+.ingredient-sum__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.ingredient-sum__label {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+}
+
+.ingredient-sum__kcal {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--md-sys-color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.ingredient-sum__macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.ingredient-sum__macros {
+  justify-content: center;
+}
+.ingredient-sum__macros > span {
+  white-space: nowrap;
+}
+
+/* Nur die P/KH/F-Buchstaben in Chart-Farben — Werte + %-Klammern bleiben in
+   der neutralen Sum-Farbe. Etwas größer + fett, damit die farbigen Keys als
+   Etiketten wirken (analog Makro-Popup-Pillen). */
+.ingredient-sum__key {
+  font-weight: 700;
+  font-size: 1.05em;
+  margin: 0 1px;
+}
+.ingredient-sum__key--p  { color: var(--chart-color-p); }
+.ingredient-sum__key--kh { color: var(--chart-color-kh); }
+.ingredient-sum__key--f  { color: var(--chart-color-f); }
+
+.ingredient-sum__sep {
+  color: var(--md-sys-color-outline-variant);
+}
+
+/* Rezept-Schritte: <ol> mit CSS-Counter für runde Nummern-Badges.
+   Divider zwischen den Schritten (analog Zutaten-Liste) — statt gap. */
+.recipe-list {
+  list-style: none;
+  counter-reset: recipe-step;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.recipe-step {
+  counter-increment: recipe-step;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  padding: 10px 4px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  /* Min-Höhe = 2 Textzeilen (2 × 1.5em Line-Height) + vertikales padding.
+     Damit haben kurze Einzeiler die gleiche Bauhöhe wie mehrzeilige Schritte —
+     die Nummern-Kreise stehen im gleichmäßigen Rhythmus, kein Zeilen-Zick-Zack.
+     align-items: center zentriert den Einzeiler-Text vertikal im Bereich. */
+  min-height: calc(2 * 1.5em + 20px);
+}
+
+.recipe-step:last-child {
+  border-bottom: none;
+}
+
+.recipe-step::before {
+  content: counter(recipe-step);
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  /* Farbig wie ein abgehakter Zutaten-Check-Kreis: primary voll, Zahl in on-primary. */
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-weight: 700;
+  font-size: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-variant-numeric: tabular-nums;
+}

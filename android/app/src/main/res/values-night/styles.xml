@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Dark-Variante des Splash-Themes (Android 12+ Splash-API). Ueberschreibt
+         nur den Splash-Background von #f7f8f7 (Light-Surface) auf #1B1D1F
+         (Dark-Surface, identisch zum Dark-Token md-sys-color-surface).
+         Wird von der System-Ressourcen-Auswahl automatisch gewaehlt wenn das
+         Geraet im Dark-Mode ist.
+
+         Trade-off: greift nur nach System-uiMode, nicht nach App-Override,
+         weil der Splash vor Activity/AppCompatDelegate laeuft. Wenn App auf
+         "Hell" gestellt ist waehrend System auf "Dark" steht (oder umgekehrt),
+         zeigt der Splash kurz die System-Variante. -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.SplashScreen">
+        <item name="android:background">@drawable/splash</item>
+        <item name="windowSplashScreenBackground">#1B1D1F</item>
+        <item name="postSplashScreenTheme">@style/AppTheme.NoActionBar</item>
+    </style>
+</resources>

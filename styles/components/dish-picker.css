@@ -1,0 +1,702 @@
+/* Dish-Picker: Bottom-Sheet-Overlay mit sticky Filter-Chip-Row und einem
+   scrollbaren Grid aller Gerichte. Öffnet sich per Edit-Pille oben-links
+   auf jeder Card. Ersetzt bei Klick auf ein Tile das Gericht des Tages
+   und schließt das Overlay. Struktur identisch zum Detail-/Settings-Sheet
+   (Overlay-Backdrop, sliding Sheet), z-index über Bottom-Nav. */
+.picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(0, 0, 0, 0);
+  transition: background 250ms ease;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  overscroll-behavior: contain;
+}
+
+.picker-overlay.is-open {
+  background: var(--overlay-backdrop);
+}
+
+.picker-sheet {
+  width: 100%;
+  max-width: 720px;
+  /* Feste Höhe (statt max-height) — das Sheet ist IMMER gleich hoch, unabhängig
+     davon wie viele Dishes das Filter-Ergebnis liefert. Sonst schrumpft es
+     bei wenigen Ergebnissen (z. B. Vegetarisch mit 4 Dishes) auf Content-Höhe. */
+  height: 88vh;
+  background: var(--md-sys-color-surface);
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
+  padding: 12px 0 0;
+  transform: translateY(100%);
+  transition: transform 250ms cubic-bezier(0.2, 0, 0, 1);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.picker-overlay.is-open .picker-sheet {
+  transform: translateY(0);
+}
+
+/* Handle-Bar analog zu Detail-/Settings-Sheet: 100 % breite Grab-Zone (28 px
+   hoch) mit einer 40×5 px Pille als Indikator. Große Klick-Zone ermöglicht
+   Swipe-Down-zum-Schließen bequem. */
+.picker-handle {
+  width: 100%;
+  height: 28px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  touch-action: none;
+  cursor: grab;
+}
+
+.picker-handle:active {
+  cursor: grabbing;
+}
+
+.picker-handle::before {
+  content: '';
+  display: block;
+  width: 40px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--md-sys-color-outline-variant);
+}
+
+/* Titel-Header liegt jetzt IM picker-body als sticky top-0 Element — analog
+   zum shop-progress-Header in shopping-list. So klebt er beim Scrollen an
+   derselben Kante wie Filter- und Grids-Header darunter (kein sichtbarer
+   Spalt zwischen den drei sticky-Schichten). FESTE Höhe 52 px (nicht min-
+   height, kein Border), damit die tatsächliche Höhe garantiert mit dem
+   --picker-header-h Wert übereinstimmt, an dem die anderen sticky-Headers
+   angesteckt sind. Selbst 1 px Abweichung würde einen sichtbaren Spalt
+   erzeugen. box-sizing: border-box global gesetzt. Volle Breite über
+   negatives Margin. */
+.picker-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 20px;
+  margin: 0 -20px;
+  width: calc(100% + 40px);
+  height: 52px;
+  background: var(--md-sys-color-surface);
+}
+
+.picker-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  margin: 0;
+}
+
+/* Close-Button analog zu Detail-/Settings-Sheet: 36 px rund, primary-Tint bg. */
+.picker-close {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.picker-close:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-lowest));
+}
+
+.picker-close:active {
+  transform: scale(0.94);
+}
+
+/* Scroll-Container: hält alle drei sticky-Ebenen (Titel-Header, Filter-Header,
+   Grids-Header) und den scrollbaren Content.
+   flex-basis: 0 (statt auto) zwingt den Body auf die exakt gleiche Höhe
+   unabhängig vom Content — sonst nimmt Flex bei wenigen Tiles die kürzere
+   Content-Höhe als Basis, was ein anderes visuelles Layout ergibt.
+   --picker-header-h / --picker-filter-h werden von den sticky-Kindern zum
+   top-Offset-Stack genutzt. --picker-filter-h shrinkt im scrolled-Mode auf
+   36 px (siehe .picker-body--scrolled), sodass Grids-Header nachrutscht. */
+.picker-body {
+  --picker-header-h: 52px;
+  --picker-filter-h: 44px;
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 20px calc(24px + env(safe-area-inset-bottom));
+}
+
+/* FLACHE Struktur: Header-Wrapper und Body als Geschwister direkt im .picker-body.
+   Der Wrapper ist sticky (nicht der Toggle-Button einzeln — ein Reset-Button
+   sitzt als Geschwister DANEBEN, nested <button> wäre invalides HTML), so
+   klebt er bis zum Ende des Scroll-Containers — analog Einstellungen und
+   Einkaufslisten-Kategorien. z-index: 10 sorgt dafür, dass er über den
+   Day-Badges der Tiles liegt. Volle Breite über negatives Margin, damit
+   der opake Hintergrund die Content-Kante rechts und links abdeckt. */
+/* Header ist selbst der Toggle-Button (kollaps). Innen sitzen in Reihenfolge:
+   Titel, Reset-Icon (span mit role=button, linksbündig direkt am Titel),
+   Spacer (flex-1), Counter, Chevron. Der Reset-span nutzt stopPropagation
+   im JS, damit sein Klick nicht den Kollaps mit auslöst. */
+.picker-filters__header {
+  position: sticky;
+  top: var(--picker-header-h, 52px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  margin: 0 -20px;
+  width: calc(100% + 40px);
+  height: var(--picker-filter-h, 44px);
+  border: none;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-family: inherit;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.picker-filters__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Nimmt den freien Raum zwischen Reset und Counter — schiebt Counter+Chevron
+   als Gruppe rechtsbündig. Reset klebt links am Titel. */
+.picker-filters__spacer {
+  flex: 1 1 auto;
+}
+
+/* Counter im Header: "aktiv/gesamt", positive Framing (Aktiv-Zahl vorne).
+   Transparent — reine Text-Info direkt links vom Chevron. */
+.picker-filters__count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-primary);
+  background: transparent;
+  line-height: 1.2;
+}
+
+.picker-filters__chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--md-sys-color-on-surface-variant);
+  transition: transform 160ms ease;
+}
+
+.picker-filters__header--collapsed .picker-filters__chevron {
+  transform: rotate(-90deg);
+}
+
+/* Reset-Icon: sitzt direkt links neben "FILTER" — kein Background, nur das
+   Icon in on-surface-variant-Farbe. Größe passt zu den anderen Header-Icons.
+   Nur sichtbar wenn mindestens ein Filter aktiv ist (hidden-Attribut).
+   Klick leert alle Filter, stopPropagation im Handler verhindert Kollaps. */
+.picker-filters__reset {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.picker-filters__reset[hidden] {
+  display: none;
+}
+
+.picker-filters__reset:active {
+  transform: scale(0.9);
+}
+
+.picker-filters__reset svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: inherit;
+}
+
+.picker-filters__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0 8px;
+  /* scrollIntoView beim Klick auf den sticky Header würde sonst den Body-Top
+     bündig an den Scroll-Container-Top setzen — der eigene sticky Header
+     überdeckt dann die ersten 44 px. Analog scroll-margin-top-Setup in
+     shopping-list.css und settings-sheet.css. */
+  scroll-margin-top: 44px;
+}
+
+/* Muss explizit stehen — display: flex oben hat gleiche Spezifität wie der
+   Browser-Default [hidden] { display: none } und die Klasse (later declared)
+   gewinnt sonst → hidden-Attribut hätte keine Wirkung. */
+.picker-filters__body[hidden] {
+  display: none;
+}
+
+/* Filter-Chips als Wolke: mittig zentriert und wrapend statt einzeilig
+   scrollbar. Die semantische Gruppierung (Diät / Küche / Attribute / kcal)
+   bleibt durch die Zeilen-Trennung im Filter-Panel erhalten, auch wenn eine
+   Gruppe visuell mehrzeilig wird. */
+.picker-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+}
+
+/* Modifier für Gruppen die IMMER einzeilig bleiben sollen (Küche mit 4 Chips —
+   sonst würde die Gruppe schnell auf 2 Zeilen brechen und die semantische
+   Zugehörigkeit "vier Küchen" wäre visuell zerteilt). Der JS-Fitter shrinkt
+   die Schriftgröße runter bis die Zeile in die Breite passt; center-Alignment
+   damit sie mittig sitzt sobald sie passt. Overflow als Fallback wenn selbst
+   das Minimum nicht reicht. */
+.picker-filter-row--nowrap {
+  flex-wrap: nowrap;
+  justify-content: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.picker-filter-row--nowrap::-webkit-scrollbar {
+  display: none;
+}
+.picker-filter-row--nowrap > .pref-chip {
+  flex-shrink: 0;
+}
+
+/* Dyn. Schriftgröße für Filter-Chips: der JS-Fitter setzt --picker-chip-font
+   auf rootEl basierend auf der engsten Zeile (Küche). Alle pref-chips im
+   Picker nutzen denselben Wert für konsistente Optik. */
+.picker-body .pref-chip {
+  font-size: var(--picker-chip-font, 0.875rem);
+}
+
+/* Compact-Mode beim Scrollen: Filter- und Grids-Header shrinken auf 36 px
+   Höhe (über den --picker-filter-h Var an .picker-body--scrolled weiter unten).
+   Reset-Button + Chips shrinken mit. Kein transition-Property auf Sticky-
+   Positionen — der Wechsel muss instant sein, sonst entsteht kurz eine
+   transparente Lücke zwischen den Ebenen, weil CSS-Vars nicht animierbar
+   sind. */
+
+.picker-body--scrolled .picker-filter-chip {
+  min-height: 30px;
+  padding: 4px 10px;
+  font-size: 0.8125rem;
+}
+
+/* M3 Filter-Chip — analog zu den Präferenz-Chips im Settings-Sheet. */
+.picker-filter-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 6px 14px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  border-radius: var(--radius-pill);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease, transform 120ms ease, min-height 160ms ease, padding 160ms ease, font-size 160ms ease;
+}
+
+.picker-filter-chip:hover {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.picker-filter-chip:active {
+  transform: scale(0.97);
+}
+
+/* Aktiv-Look identisch zur kcal-Pille auf der Card und zur aktiven Portion-
+   Row im Detail-Sheet: primary bg + weißer Text. Kein Border. */
+.picker-filter-chip[aria-pressed="true"] {
+  background: var(--md-sys-color-primary);
+  border-color: transparent;
+  color: var(--md-sys-color-on-primary);
+  font-weight: 700;
+}
+
+.picker-filter-chip[aria-pressed="true"]:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 90%, black);
+}
+
+/* Icon-Only-Variante fuer Schnell/Wenig Zutaten/Favoriten in der attr-Gruppe.
+   Quadratisch, Icon zentriert — Label sitzt nur als aria-label + title. Groesse
+   angepasst auf die 36-px-Chip-Hoehe der Text-Chips, damit die attr-Row nicht
+   in der Hoehe springt. Im scrolled-Modus schrumpft die Chip-Hoehe analog. */
+.picker-filter-chip--icon {
+  width: 36px;
+  padding: 0;
+}
+.picker-filter-chip--icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  color: currentColor;
+}
+.picker-body--scrolled .picker-filter-chip--icon {
+  width: 30px;
+  padding: 0;
+}
+
+/* Gerichte-Container: analog zum Filter-Wrapper — sticky Header + Body.
+   Kein Toggle/Chevron, nur ein visueller Titel. Header stapelt sich UNTER
+   dem Filter-Header (z-index 9 vs. 10), sticky-Top = aktuelle Filter-Header-
+   Höhe (44 normal, 36 im scrolled-Modus). Volle Breite über negatives Margin,
+   damit der opake Hintergrund die Tile-Kanten links/rechts abdeckt. */
+.picker-grids {
+  display: block;
+}
+
+.picker-grids__header {
+  position: sticky;
+  top: calc(var(--picker-header-h, 52px) + var(--picker-filter-h, 44px));
+  z-index: 9;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  margin: 0 -20px;
+  width: calc(100% + 40px);
+  border: none;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-family: inherit;
+  height: var(--picker-filter-h, 44px);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.picker-grids__header:active {
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.picker-grids__title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-sys-color-on-surface-variant);
+  /* Drückt Counter + Chevron als Gruppe nach rechts — analog Filter-Header. */
+  margin-right: auto;
+}
+
+/* Counter im Gerichte-Header: "verfügbar/gesamt" (positive Framing). */
+.picker-grids__count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-primary);
+  line-height: 1.2;
+}
+
+/* Chevron rein aus Optik-Konsistenz zum Filter-Header — kein Handler, kein
+   Kollaps. pointer-events: none stellt sicher, dass ein versehentlicher Klick
+   auch nicht als Fokus/Aktiv-State auf dem Icon landet. */
+.picker-grids__chevron {
+  width: 20px;
+  height: 20px;
+  color: var(--md-sys-color-on-surface-variant);
+  pointer-events: none;
+}
+
+/* Grids-Body: scroll-margin-top sorgt dafür, dass scrollIntoView() das Ziel
+   UNTER den gestapelten sticky Headers (picker + filter + grids) positioniert,
+   nicht dahinter. */
+.picker-grids__body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0 8px;
+  scroll-margin-top: calc(var(--picker-header-h, 52px) + var(--picker-filter-h, 44px) + 44px);
+}
+
+/* Compact-Modus (Body scrolled): Filter-Header shrinkt via --picker-filter-h;
+   Grids-Header shrinkt seine eigene min-height + padding und rutscht durch
+   den kleiner werdenden Var-Wert automatisch nach oben — die sticky-Kette
+   bleibt lückenlos. */
+.picker-body--scrolled {
+  --picker-filter-h: 36px;
+}
+
+/* Grid: 2-3 Spalten (auto-fill), gleichmäßiger Abstand. */
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.picker-empty {
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+  padding: 40px 0;
+  margin: 0;
+  font-size: 0.9375rem;
+}
+/* Herz-Icon inline im Favoriten-Empty-State — Groesse zur Copy-Zeilenhoehe,
+   Farbe primary damit's zum aktivierten Fav-Zustand passt. */
+.picker-empty svg {
+  display: inline-block;
+  vertical-align: -3px;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  color: var(--md-sys-color-primary);
+}
+
+/* Divider zwischen Filter-Treffern und "Bereits geplant"-Overflow-Bereich.
+   Horizontale Linie links + rechts, mittig sitzt das Label. So markiert der
+   Trenner semantisch: "was folgt, würde vom Filter nicht durchgelassen, ist
+   nur wegen der Wochenplanung sichtbar". */
+.picker-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 0 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.picker-divider::before,
+.picker-divider::after {
+  content: '';
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--md-sys-color-outline-variant);
+}
+
+.picker-divider__label {
+  flex: 0 0 auto;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* Einzelne Kachel im Grid: Bild oben, Titel + Meta unten. Button-Semantik
+   damit Enter/Space out-of-the-box triggern. position: relative + z-index: 0
+   erzeugt einen eigenen Stacking-Context, sodass der absolute Day-Badge
+   (z-index innerhalb des Tiles) beim Scrollen NICHT über die sticky Filter-
+   Row rutschen kann. */
+.picker-tile {
+  position: relative;
+  z-index: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-lowest);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.picker-tile:active {
+  transform: scale(0.98);
+}
+
+/* Aktuell zugewiesenes Dish: primary Border + Elevation + primary-Tint als
+   Body-Background (analog zum .day-card--selected Look im Dashboard —
+   25 % primary in surface-container-lowest gemischt). Nur die Tile-Fläche
+   ist getönt, das Bild überlagert seinen eigenen Hintergrund. */
+.picker-tile--current {
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 1px var(--md-sys-color-primary), var(--md-elevation-1);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-lowest));
+}
+
+/* An anderem Wochentag bereits geplantes Dish: M3 Disabled State
+   (Content 38 % opacity, kein Klick). Opacity NUR auf Bild + Body — der Day-
+   Badge oben links bleibt bei voller Opacity, damit der Wochentag klar lesbar
+   ist. Verhindert Doppelbelegung; der User müsste erst den anderen Tag ändern. */
+.picker-tile--disabled {
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.picker-tile--disabled .picker-tile__img,
+.picker-tile--disabled .picker-tile__body {
+  opacity: 0.38;
+  transition: opacity 160ms ease;
+}
+
+/* Wochentag-Badge oben links: Style analog zum Dashboard-Day-Label
+   (uppercase, letter-spacing). Standard-Variante (fremder Tag) = frosted-glass
+   mit primary Schrift. Active-Variante (currentDay) = kcal-Pill-Look:
+   primary bg + weiße Schrift. */
+.picker-tile__day-badge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  background: var(--frosted-glass-strong);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-glass);
+}
+
+.picker-tile__day-badge--active {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Shopping-Pille unten rechts auf dem Bild: Icon + Anzahl offener Zutaten.
+   Selbe Frosted-Glass-Optik wie der Day-Badge oben. Beim aktuell gewählten
+   Gericht (--current) → Aktiv-Look (primary bg, weiße Schrift), matcht den
+   aktiven Day-Badge und die kcal-Pill auf der Card. */
+.picker-tile__shop {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--frosted-glass-strong);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-glass);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.picker-tile__shop svg {
+  width: 12px;
+  height: 12px;
+  display: block;
+  color: inherit;
+}
+
+.picker-tile__shop-count {
+  color: inherit;
+}
+
+.picker-tile__shop--active {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Favoriten-Badge oben rechts im Tile-Bild — Style analog Day-Badge:
+   Off = frosted-glass mit primary Schrift, On = primary bg mit weisser
+   Schrift. Quadratischer Klickbereich, Herz-SVG 16 px zentriert. */
+.picker-tile__fav {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  background: var(--frosted-glass-strong);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-glass);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.picker-tile__fav svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: inherit;
+}
+.picker-tile__fav--active {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+.picker-tile__fav:active {
+  transform: scale(0.92);
+}
+
+/* Image-Wrapper: hält Bild + beide Overlay-Badges (Wochentag oben-links,
+   Shopping unten-rechts). Ohne diesen Wrapper würden absolut positionierte
+   Badges relativ zum ganzen Tile sitzen und im Body-Bereich landen. */
+.picker-tile__image-wrap {
+  position: relative;
+}
+
+.picker-tile__img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  display: block;
+  background: var(--md-sys-color-surface-container-low);
+}
+
+.picker-tile__body {
+  padding: 8px 10px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.picker-tile__title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.picker-tile__meta {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}

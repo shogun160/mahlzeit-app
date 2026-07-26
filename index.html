@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Mahlzeit</title>
+  <link rel="icon" type="image/png" href="/logo.png" />
+  <script>
+    // Anti-Flash: setzt data-theme SYNCHRON aus dem persistierten State, bevor
+    // Stylesheets angewendet werden. Sonst waere fuer ~100ms die Light-Palette
+    // aktiv, weil die JS-Bundle-Ausfuehrung erst nach dem ersten Paint startet.
+    // Bei "auto" oder fehlendem State wird prefers-color-scheme ausgewertet.
+    (function () {
+      try {
+        var raw = localStorage.getItem('mahlzeit-state-v2');
+        var theme = 'auto';
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          theme = (parsed && parsed.settings && parsed.settings.theme) || 'auto';
+        }
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        }
+        document.documentElement.setAttribute('data-theme', theme);
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/styles/tokens.css" />
+  <link rel="stylesheet" href="/styles/base.css" />
+  <link rel="stylesheet" href="/styles/components/header.css" />
+  <link rel="stylesheet" href="/styles/components/stepper.css" />
+  <link rel="stylesheet" href="/styles/components/card.css" />
+  <link rel="stylesheet" href="/styles/components/calorie-bar.css" />
+  <link rel="stylesheet" href="/styles/components/sheet.css" />
+  <link rel="stylesheet" href="/styles/components/view-track.css" />
+  <link rel="stylesheet" href="/styles/components/shopping-list.css" />
+  <link rel="stylesheet" href="/styles/components/bottom-nav.css" />
+  <link rel="stylesheet" href="/styles/components/selection-toolbar.css" />
+  <link rel="stylesheet" href="/styles/components/settings-sheet.css" />
+  <link rel="stylesheet" href="/styles/components/dish-picker.css" />
+  <link rel="stylesheet" href="/styles/components/macro-popup.css" />
+  <link rel="stylesheet" href="/styles/components/onboarding-wizard.css" />
+</head>
+<body>
+  <header id="app-header" class="app-header"></header>
+  <main id="app">
+    <div id="view-track" class="view-track" data-view="dashboard">
+      <section id="view-dashboard" class="view view--dashboard"></section>
+      <section id="view-shopping" class="view view--shopping"></section>
+    </div>
+  </main>
+  <nav id="bottom-nav" class="bottom-nav" aria-label="Hauptnavigation"></nav>
+  <div id="detail-sheet-root"></div>
+  <div id="settings-sheet-root"></div>
+  <div id="dish-picker-root"></div>
+  <div id="macro-popup-root"></div>
+  <div id="onboarding-root"></div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

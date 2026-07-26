@@ -1,0 +1,102 @@
+/* Kompakte Wochen-Kalorien-Bar als Pill, sitzt im Dashboard über dem Card-Grid.
+   Drei-Segment-Layout: Label links, Ist/Ziel mittig-prominent, Ø rechts.
+   - Sticky-Header: klebt beim Scrollen oben an .view--dashboard, damit der
+     User bedarf-vs-ist auch beim durchstöbern der Woche sehen kann.
+   - Hintergrund wie die inaktive Day-Card (surface-container-low), damit die
+     Pille sich als Teil der Card-Sprache liest statt als Overlay. Blur bleibt
+     als visueller Puffer, wenn Content durchscrollt.
+   - Nur sichtbar wenn Profil ausgefüllt (siehe dashboard/calorie-bar.js). */
+.calorie-bar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  width: 100%;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 16px;
+  border: none;
+  /* Farbton der inaktiven Day-Card, aber semi-transparent, damit backdrop-blur
+     tatsaechlich etwas durchweichzeichnen kann (opake Farbe wuerde den Blur
+     unsichtbar machen). */
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-low) 80%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  font-family: inherit;
+  color: inherit;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+}
+.calorie-bar:hover {
+  background: color-mix(in srgb, var(--md-sys-color-surface-container) 80%, transparent);
+}
+
+.calorie-bar__label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  letter-spacing: 0.02em;
+}
+
+.calorie-bar__values {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  color: var(--md-sys-color-on-surface);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.calorie-bar__target {
+  color: var(--md-sys-color-on-surface);
+  font-weight: 600;
+}
+
+.calorie-bar__avg {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.calorie-bar__avg-label {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px;
+}
+
+.calorie-bar__intake {
+  font-weight: 700;
+  color: var(--md-sys-color-on-surface);
+  font-size: 14px;
+}
+
+/* Farbcodierung — dezent, nur der Ist-Wert erhält den Akzentton.
+   Über: leicht warmer Ton (tertiary im M3-Sinn, hier per direkter Farbe
+   damit wir nicht neue Tokens einführen). Unter: primary-Ton. */
+.calorie-bar--over .calorie-bar__intake {
+  color: var(--semantic-warn);
+}
+
+.calorie-bar--under .calorie-bar__intake {
+  color: var(--md-sys-color-primary);
+}
+
+/* Placeholder-Pille für unvollständiges Profil — gleiche Basis-Geometrie wie
+   die normale Bedarfs-Pille, aber CTA-Text zentriert statt Werte. Klick öffnet
+   den Onboarding-Wizard. */
+.calorie-bar--empty {
+  justify-content: center;
+}
+.calorie-bar--empty .calorie-bar__values {
+  flex: 0 0 auto;
+}
+.calorie-bar__cta {
+  color: var(--md-sys-color-primary);
+  font-weight: 600;
+  font-size: 0.9375rem;
+}

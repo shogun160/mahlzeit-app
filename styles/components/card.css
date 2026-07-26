@@ -1,0 +1,385 @@
+/* Filled Card (M3): surface-container-low als leicht angehobener Grund gegen
+   die Base-Surface, kein Border. Elevation-Shadow bleibt fürs Light-Theme
+   dezent, im Dark sowieso unsichtbar. Beim Selected verschiebt sich der Grund
+   auf einen leichten primary-Tint. */
+.day-card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 0;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--md-elevation-1);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.day-card:active {
+  transform: scale(0.99);
+  box-shadow: var(--md-elevation-2);
+}
+
+.day-card--selected {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-low));
+}
+
+/* In einer ausgewählten Card behält die Portion-Pille den Aktiv-Ton.
+   Die Action-Buttons bleiben in ihrem Filled-Tonal-Look (primary-container);
+   der einzelne "Liste"-Button wechselt via action-btn--active-Modifier in
+   den stärkeren primary-tint, damit der Aktiv-Zustand als Punktinformation
+   sichtbar bleibt statt in der Card-weiten Tint zu verschwinden. */
+.day-card--selected .stepper--compact {
+  background: var(--md-sys-color-primary-tint);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.day-card__image-wrap {
+  position: relative;
+}
+
+.day-card__image {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  display: block;
+  background: var(--md-sys-color-surface-container-low);
+}
+
+/* Portion-Stepper als Overlay oben rechts auf dem Bild.
+   Frosted-Glass Look wie die Makro-Pills, damit er auch über bunte Motive lesbar ist.
+   Bei selected Card wechselt er auf denselben primary-Look wie die kcal-Pille. */
+.day-card__portion-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  pointer-events: none;
+}
+
+/* Edit-Pille oben links: öffnet das Dish-Picker-Overlay für diesen Tag. Optik
+   symmetrisch zur Portion-Pille (weißer Frosted-Glass, primary-Look bei
+   Selected). */
+.day-card__edit-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  pointer-events: none;
+}
+
+/* M3 Standard-Icon-Button: 40 dp Container, kreisrund, 24 dp Icon.
+   Frosted-Glass bleibt (konsistent mit Portion-/Makro-Pillen), aber die Form
+   ist bewusst kreisförmig statt pill — signalisiert Icon-Button statt Chip. */
+.edit-pill {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: var(--frosted-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-glass);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, transform 120ms ease;
+}
+
+.edit-pill svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+  color: inherit;
+}
+
+.edit-pill:active {
+  transform: scale(0.96);
+}
+
+/* Selected Card: Edit-Pille wechselt auf denselben primary-Look wie kcal- und
+   Portion-Pille (geschlossene Farbwelt für aktiven Zustand). */
+.day-card--selected .edit-pill {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
+.day-card__portion-overlay .stepper--pill {
+  pointer-events: auto;
+  background: var(--frosted-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-glass);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Selektierte Card: Portion-Pille = kcal-Pillen-Look (88 % primary, weiße Zahlen).
+   Innere Elemente (Icon, ±-Buttons, Wert) haben in stepper.css hardcoded
+   on-surface-Farben — hier explizit auf on-primary überschreiben. */
+.day-card--selected .day-card__portion-overlay .stepper--pill {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+
+.day-card--selected .day-card__portion-overlay .stepper__icon,
+.day-card--selected .day-card__portion-overlay .stepper__btn,
+.day-card--selected .day-card__portion-overlay .stepper__value {
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Makro-Pills rechtsbündig unten auf dem Bild — Card-Höhe bleibt unverändert.
+   Wrappen in 2 Zeilen auf schmalen Cards (mobile portrait). */
+.day-card__makros {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: calc(100% - 20px);
+  /* Klicks durchreichen — der User soll das Bild antippen können auch wenn
+     zwischen den Pills der leere Bereich getroffen wird. Pills selbst opt-in. */
+  pointer-events: none;
+}
+
+.makro-pill {
+  pointer-events: auto;
+  background: var(--frosted-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: var(--md-sys-color-on-glass);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+/* Feste Breiten pro Makro-Typ, gerade so groß dass die Maximalwerte
+   reinpassen. Referenz-Fälle bei 6 Portionen:
+   - kcal:  977 * 6 = 5862 → "5862 kcal"
+   - P:     84 * 6  = 504  → "504 g P"
+   - KH:    102 * 6 = 612  → "612 g KH"   (Thai-Curry ist hier der breiteste Fall)
+   - F:     42 * 6  = 252  → "252 g F"
+   Damit springen die Pills bei Portion-Wechsel nicht mehr in der Breite. */
+.makro-pill--kcal { min-width: 88px; }
+.makro-pill--p    { min-width: 64px; }
+.makro-pill--kh   { min-width: 76px; }
+.makro-pill--f    { min-width: 64px; }
+
+.makro-pill .unit {
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-left: 2px;
+}
+
+/* kcal-Pill hebt sich in primary-Farbe ab — hauptwert der Makros. */
+.makro-pill--kcal {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 78%, transparent);
+  color: var(--md-sys-color-on-primary);
+  font-size: 0.8125rem;
+}
+
+.makro-pill--kcal .unit {
+  color: color-mix(in srgb, var(--md-sys-color-on-primary) 75%, transparent);
+}
+
+/* Favoriten-Pille rechts neben Fett — quadratisch, nur Icon. Off: frosted
+   wie die anderen Makros (default .makro-pill), On: primary bg wie kcal.
+   Als <button> mit reset-Styles (border 0, cursor pointer, kein tap-highlight). */
+.makro-pill--fav {
+  min-width: 0;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.makro-pill--fav svg {
+  width: 16px;
+  height: 16px;
+}
+.makro-pill--fav.is-on {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 78%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
+.makro-pill--fav:active {
+  transform: scale(0.92);
+}
+
+.day-card__body {
+  padding: 12px 16px 14px;
+}
+
+/* Wochentag links, Meta (Zeit + Cuisine) rechts — beide in einer Zeile,
+   spart eine Body-Zeile Höhe. */
+.day-card__header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+
+.day-card__day {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--md-sys-color-primary);
+  flex-shrink: 0;
+}
+
+.day-card__meta {
+  font-size: 0.875rem;
+  color: var(--md-sys-color-on-surface-variant);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.day-card__title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  line-height: 1.3;
+  /* Einzeilig — spart Karten-Höhe. Zu lange Titel werden mit Ellipsis gekürzt;
+     die dishes.json-Namen sind so gepflegt, dass sie in der Regel in eine Zeile passen. */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.day-card__actions {
+  display: flex;
+  gap: 8px;
+  /* Kompakter Abstand zum Titel — vergleichbar zum Body-padding-bottom, damit
+     die Buttons symmetrisch zwischen Titel und Karten-Boden sitzen. Divider
+     bewusst weg (M3-Cards vermeiden interne Trennlinien). */
+  margin-top: 10px;
+}
+
+/* Action-Buttons im Standard-Zustand (nicht-selected Card): dezenter tonal
+   Look mit surface-container-low, on-surface Label. Bewusst zurückhaltend —
+   die Buttons sollen der Card nicht die Show stehlen; erst beim Selected
+   wechseln sie in den kräftigen Primary-Auftritt (siehe .day-card--selected). */
+.action-btn {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--touch-target-min);
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease, transform 120ms ease;
+}
+
+.action-btn:hover {
+  background: var(--md-sys-color-surface);
+}
+
+/* Selektierte Card: alle drei Action-Buttons wechseln auf voll primary —
+   gleiche Farbe wie die kcal-Pille auf dem Bild. Icons + Labels werden
+   on-primary (weiß), Aktiv-Zustand des Cards wird als geschlossene
+   Farbwelt gelesen. */
+.day-card--selected .action-btn {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.day-card--selected .action-btn:hover {
+  background: color-mix(in srgb, black 8%, var(--md-sys-color-primary));
+}
+
+.action-btn:active {
+  transform: scale(0.98);
+}
+
+/* Material-Symbols-SVG-Icons in den Action-Buttons — M3-Spec 18 dp. */
+.action-btn__icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+  flex-shrink: 0;
+  color: inherit;
+}
+
+/* Icon-Wrap für den Zutaten-Button — hält das Icon + einen kleinen Zahl-Badge
+   oben rechts (Anzahl Zutaten). Wrap ist relativ positioniert, Badge absolut. */
+.action-btn__icon-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.action-btn__badge {
+  position: absolute;
+  /* M3 Badge-Positionierung: Zentrum auf der oberen rechten Ecke des Icons.
+     Icon 18 dp, Badge 16 dp → top/right jeweils -8 px (halbe Badge-Größe). */
+  top: -8px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  /* Ring in der Card-Grundfarbe, damit der Badge (der halb über den Button-Rand
+     ragt) sowohl auf der Card als auch am Button-Border sauber abgesetzt ist. */
+  box-shadow: 0 0 0 2px var(--md-sys-color-surface-container-lowest);
+}
+
+/* Selektierte Card: Button-Background ist primary. Badge invertieren, damit er
+   Kontrast behält — sonst würde primary-auf-primary verschwinden. Weißer Kreis
+   mit teal Zahl auf dunklem Button. Ring in der Button-Farbe (primary). */
+.day-card--selected .action-btn__badge {
+  background: var(--md-sys-color-on-primary);
+  color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+}
+
+/* Bild und Content-Bereich öffnen das Detail-Sheet (Rezept-Tab).
+   Nur der Cursor signalisiert die Interaktion — keine Farb- oder Overlay-Änderung,
+   damit die Card nicht wie ein einzelner riesiger Button wirkt. */
+.day-card__image {
+  cursor: pointer;
+}
+
+.day-card__body {
+  cursor: pointer;
+}
+
+/* Interaktive Kinder ignorieren den Body-Cursor und zeigen ihren eigenen. */
+.day-card__body .stepper,
+.day-card__body .stepper__btn,
+.day-card__body .action-btn {
+  cursor: default;
+}
+
+.day-card__body .stepper__btn:not(:disabled),
+.day-card__body .action-btn {
+  cursor: pointer;
+}

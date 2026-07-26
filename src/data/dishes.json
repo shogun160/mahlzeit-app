@@ -1,0 +1,2333 @@
+{
+  "dishes": [
+    {
+      "id": 1,
+      "name": "Wildlachs-Bowl",
+      "cuisine": "Asiatisch-Fusion",
+      "cooktime": 35,
+      "kcal": 922,
+      "p": 74,
+      "kh": 78,
+      "f": 36,
+      "tags": [
+        "contains-fish",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "lachs_sockeye",
+          "grams": 220
+        },
+        {
+          "key": "reis_schwarz",
+          "grams": 80
+        },
+        {
+          "key": "edamame",
+          "grams": 120,
+          "note": "TK-Packung à 400 g"
+        },
+        {
+          "key": "karotte",
+          "grams": 40
+        },
+        {
+          "key": "gurke",
+          "grams": 50
+        },
+        {
+          "key": "sesamoel",
+          "grams": 8
+        },
+        {
+          "key": "sojasauce",
+          "grams": 15
+        },
+        {
+          "key": "sesam",
+          "grams": 8
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Reis nach Packungsanweisung kochen.",
+        "Edamame 3 Min. in kochendem Wasser garen, abschrecken.",
+        "Karotte julienne schneiden, Gurke in Scheiben.",
+        "Lachs salzen/pfeffern, in wenig Öl 3–4 Min. pro Seite braten.",
+        "Sojasauce + Sesamöl zu Dressing verrühren.",
+        "Reis in Bowl anrichten, Lachs, Edamame, Karotte, Gurke verteilen, Dressing darüber, mit Sesam und Frühlingszwiebel bestreuen."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 2,
+      "name": "Hähnchen-Skyr-Tikka",
+      "cuisine": "Indisch",
+      "cooktime": 40,
+      "kcal": 862,
+      "p": 84,
+      "kh": 77,
+      "f": 24,
+      "tags": [
+        "contains-meat",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "grams": 240
+        },
+        {
+          "key": "skyr",
+          "grams": 150,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "reis_basmati",
+          "grams": 60
+        },
+        {
+          "key": "blumenkohl",
+          "grams": 250
+        },
+        {
+          "key": "spinat",
+          "grams": 80,
+          "note": "Beutel à 100 g"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 40
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "ingwer",
+          "grams": 5,
+          "note": "1 kleines Stück deckt den Bedarf mehrerer Gerichte"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        },
+        {
+          "key": "gewuerz_tikka",
+          "grams": 8
+        }
+      ],
+      "steps": [
+        "Hähnchen würfeln, mit Gewürzmischung, Knoblauch, Ingwer, halbem Skyr marinieren (mind. 20 Min.).",
+        "Blumenkohl im Blitzhacker zu „Reis“ verarbeiten.",
+        "Basmatireis kochen.",
+        "Hähnchen in Öl anbraten, restlichen Skyr + Spritzer Wasser zugeben, 8–10 Min. köcheln.",
+        "Blumenkohlreis kurz andünsten, Spinat unterheben bis zusammengefallen.",
+        "Anrichten."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 3,
+      "name": "Garnelen-Zucchini-Pasta",
+      "cuisine": "Italienisch-mediterran",
+      "cooktime": 20,
+      "kcal": 823,
+      "p": 76,
+      "kh": 49,
+      "f": 37,
+      "tags": [
+        "contains-fish",
+        "contains-gluten",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "grams": 280
+        },
+        {
+          "key": "zucchini",
+          "grams": 300
+        },
+        {
+          "key": "vollkornpasta",
+          "grams": 50
+        },
+        {
+          "key": "olivenoel",
+          "grams": 18
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "zitrone",
+          "grams": 10
+        },
+        {
+          "key": "feta_schaf",
+          "grams": 45,
+          "note": "Packung à 200 g"
+        },
+        {
+          "key": "mandeln",
+          "grams": 12,
+          "note": "aus Vorratspackung"
+        },
+        {
+          "key": "petersilie",
+          "grams": 5
+        }
+      ],
+      "steps": [
+        "Pasta nach Packungsanweisung kochen.",
+        "Zucchini mit Spiralschneider zu Nudeln verarbeiten.",
+        "Chili (mit Kernen, nach Geschmack) und Knoblauch in Olivenöl andünsten, Garnelen 2–3 Min. pro Seite braten.",
+        "Zucchininudeln kurz mitschwenken.",
+        "Pasta unterheben, mit Zitronensaft, gehackten Mandeln, Feta und Petersilie servieren."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 4,
+      "name": "Rinderfilet Bohnensalat Chimichurri",
+      "cuisine": "Argentinisch",
+      "cooktime": 35,
+      "kcal": 880,
+      "p": 68,
+      "kh": 62,
+      "f": 42,
+      "tags": [
+        "contains-meat"
+      ],
+      "ingredients": [
+        {
+          "key": "rinderfilet",
+          "grams": 240
+        },
+        {
+          "key": "bohnen_schwarz",
+          "grams": 200,
+          "note": "Dose à 400 g (Abtropfgewicht ~240 g)"
+        },
+        {
+          "key": "mais_dose",
+          "grams": 100,
+          "note": "Dose à 425 g (Abtropfgewicht ~285 g)"
+        },
+        {
+          "key": "paprika",
+          "grams": 80
+        },
+        {
+          "key": "zwiebel",
+          "grams": 40
+        },
+        {
+          "key": "olivenoel",
+          "grams": 25
+        },
+        {
+          "key": "petersilie",
+          "grams": 15
+        },
+        {
+          "key": "zitrone",
+          "grams": 8
+        }
+      ],
+      "steps": [
+        "Filet salzen und pfeffern.",
+        "In Olivenöl scharf anbraten (3–4 Min./Seite, medium), 5 Min. ruhen lassen.",
+        "Petersilie fein hacken, mit Olivenöl, Zitronensaft und Knoblauch zur Chimichurri verrühren.",
+        "Bohnen und Mais abtropfen, mit gewürfelter Paprika und Zwiebel mischen.",
+        "Filet in Scheiben auf dem Salat anrichten, Chimichurri darüber."
+      ],
+      "cuisineGroup": "americas"
+    },
+    {
+      "id": 5,
+      "name": "Putenbällchen Tomate Couscous",
+      "cuisine": "Griechisch",
+      "cooktime": 40,
+      "kcal": 894,
+      "p": 73,
+      "kh": 84,
+      "f": 27,
+      "tags": [
+        "contains-meat",
+        "contains-gluten",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "putenhack",
+          "grams": 220
+        },
+        {
+          "key": "couscous",
+          "grams": 90
+        },
+        {
+          "key": "tomaten_passiert",
+          "grams": 200,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 40
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "olivenoel",
+          "grams": 18
+        },
+        {
+          "key": "feta_schaf",
+          "grams": 30,
+          "note": "Packung à 200 g"
+        }
+      ],
+      "steps": [
+        "Putenhack mit Salz/Pfeffer/Oregano zu Bällchen formen.",
+        "In Olivenöl rundum anbraten.",
+        "Zwiebel/Knoblauch dazu, kurz mitdünsten, passierte Tomaten zugeben, 15 Min. köcheln.",
+        "Couscous mit heißem Wasser übergießen, quellen lassen.",
+        "Anrichten, Feta darüberbröckeln."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 6,
+      "name": "Wildlachs Fenchel Weiße Bohnen",
+      "cuisine": "Sizilianisch",
+      "cooktime": 25,
+      "kcal": 815,
+      "p": 71,
+      "kh": 51,
+      "f": 38,
+      "tags": [
+        "contains-fish"
+      ],
+      "ingredients": [
+        {
+          "key": "lachs_sockeye",
+          "grams": 240
+        },
+        {
+          "key": "fenchel",
+          "grams": 200
+        },
+        {
+          "key": "bohnen_weiss",
+          "grams": 220,
+          "note": "Dose à 400 g (Abtropfgewicht ~240 g)"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 20
+        },
+        {
+          "key": "zitrone",
+          "grams": 8
+        },
+        {
+          "key": "petersilie",
+          "grams": 5
+        }
+      ],
+      "steps": [
+        "Fenchel in Spalten schneiden, in Olivenöl 10–12 Min. karamellisieren lassen.",
+        "Weiße Bohnen abtropfen, zum Fenchel geben und kurz erwärmen.",
+        "Lachs salzen und pfeffern.",
+        "In separater Pfanne 3–4 Min. pro Seite braten.",
+        "Fenchel-Bohnen anrichten, Lachs darauf, mit Zitronensaft und Petersilie servieren."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 7,
+      "name": "Bulgogi-Rind",
+      "cuisine": "Koreanisch",
+      "cooktime": 40,
+      "kcal": 866,
+      "p": 67,
+      "kh": 78,
+      "f": 29,
+      "tags": [
+        "contains-meat",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "rind_sirloin",
+          "grams": 270
+        },
+        {
+          "key": "reis_jasmin",
+          "grams": 90
+        },
+        {
+          "key": "gurke",
+          "grams": 100
+        },
+        {
+          "key": "kimchi",
+          "grams": 60,
+          "note": "Glas à 300 g"
+        },
+        {
+          "key": "sesamoel",
+          "grams": 10
+        },
+        {
+          "key": "sojasauce",
+          "grams": 15
+        },
+        {
+          "key": "knoblauch",
+          "grams": 5
+        },
+        {
+          "key": "sesam",
+          "grams": 8
+        }
+      ],
+      "steps": [
+        "Rind in dünne Scheiben schneiden.",
+        "Mit Sojasauce, Sesamöl und Knoblauch 15–20 Min. marinieren.",
+        "Reis nach Packungsanleitung kochen.",
+        "Mariniertes Fleisch in heißer Pfanne 2–3 Min. braten.",
+        "Mit Reis, Gurkenscheiben, Kimchi und Sesam anrichten."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 8,
+      "name": "Hähnchen-Tajine",
+      "cuisine": "Marokkanisch",
+      "cooktime": 70,
+      "kcal": 931,
+      "p": 72,
+      "kh": 87,
+      "f": 30,
+      "tags": [
+        "contains-meat",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "grams": 250
+        },
+        {
+          "key": "couscous",
+          "grams": 80
+        },
+        {
+          "key": "aprikosen_getrocknet",
+          "grams": 30,
+          "note": "Packung à 200 g"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 50
+        },
+        {
+          "key": "mandeln",
+          "grams": 15,
+          "note": "aus Vorratspackung"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        },
+        {
+          "key": "gewuerz_raselhanout",
+          "grams": 6
+        }
+      ],
+      "steps": [
+        "Hähnchen würfeln, mit Ras-el-Hanout würzen.",
+        "Zwiebel in Olivenöl andünsten, Hähnchen zugeben, anbraten.",
+        "Aprikosen + etwas Wasser/Brühe zugeben, 15–20 Min. köcheln.",
+        "Couscous mit heißer Flüssigkeit übergießen, quellen lassen.",
+        "Mandeln kurz rösten, darüberstreuen."
+      ],
+      "cuisineGroup": "middleEast"
+    },
+    {
+      "id": 9,
+      "name": "Garnelen-Fajitas Guacamole",
+      "cuisine": "Mexikanisch",
+      "cooktime": 25,
+      "kcal": 784,
+      "p": 69,
+      "kh": 56,
+      "f": 35,
+      "tags": [
+        "contains-fish"
+      ],
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "grams": 300
+        },
+        {
+          "key": "paprika",
+          "grams": 200
+        },
+        {
+          "key": "zwiebel",
+          "grams": 50
+        },
+        {
+          "key": "avocado",
+          "grams": 130
+        },
+        {
+          "key": "tortilla_mais",
+          "grams": 60
+        },
+        {
+          "key": "olivenoel",
+          "grams": 12
+        },
+        {
+          "key": "limette",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Paprika und Zwiebel in Streifen schneiden, in Olivenöl scharf anbraten.",
+        "Garnelen mit Paprikapulver, Kreuzkümmel und Limette würzen.",
+        "Garnelen zum Gemüse geben, 3–4 Min. braten.",
+        "Avocado zerdrücken, mit Limettensaft und Petersilie zu Guacamole verarbeiten.",
+        "Tortillas erwärmen, Fajita-Mix und Guacamole darin anrichten."
+      ],
+      "cuisineGroup": "americas"
+    },
+    {
+      "id": 10,
+      "name": "Kabeljau Kartoffelstampf Skyr",
+      "cuisine": "Skandinavisch",
+      "cooktime": 40,
+      "kcal": 804,
+      "p": 73,
+      "kh": 74,
+      "f": 23,
+      "tags": [
+        "contains-fish",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "kabeljau",
+          "grams": 280
+        },
+        {
+          "key": "kartoffeln",
+          "grams": 400
+        },
+        {
+          "key": "skyr",
+          "grams": 140,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 20
+        },
+        {
+          "key": "petersilie",
+          "grams": 5
+        }
+      ],
+      "steps": [
+        "Kartoffeln schälen und in Salzwasser weichkochen.",
+        "Kabeljau mit Petersilie und Olivenöl bestreichen, bei 180 °C 12–15 Min. garen.",
+        "Kartoffeln abgießen, Kochwasser auffangen.",
+        "Kartoffeln mit Skyr und etwas Kochwasser zu cremigem Stampf verarbeiten.",
+        "Fisch auf dem Stampf mit restlichem Skyr als Sauce servieren."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 11,
+      "name": "Entenbrust Sesam-Orange",
+      "cuisine": "Asiatisch-French",
+      "cooktime": 40,
+      "kcal": 838,
+      "p": 70,
+      "kh": 80,
+      "f": 25,
+      "tags": [
+        "contains-meat",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "entenbrust",
+          "grams": 300
+        },
+        {
+          "key": "reis_jasmin",
+          "grams": 80
+        },
+        {
+          "key": "pak_choi",
+          "grams": 200
+        },
+        {
+          "key": "orange",
+          "grams": 50
+        },
+        {
+          "key": "sojasauce",
+          "grams": 12
+        },
+        {
+          "key": "honig",
+          "grams": 8
+        },
+        {
+          "key": "sesamoel",
+          "grams": 8
+        },
+        {
+          "key": "sesam",
+          "grams": 6
+        }
+      ],
+      "steps": [
+        "Entenbrust ohne Haut scharf anbraten (3–4 Min./Seite).",
+        "Reis kochen.",
+        "Orangensaft, Sojasauce, Honig, Sesamöl zu Glasur einkochen.",
+        "Pak Choi kurz andünsten.",
+        "Ente in Scheiben, mit Glasur bestreichen, Sesam darüber, mit Reis und Pak Choi servieren."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 12,
+      "name": "Schweine-Paprikaspieße",
+      "cuisine": "Deutsch-Balkan",
+      "cooktime": 45,
+      "kcal": 865,
+      "p": 72,
+      "kh": 81,
+      "f": 28,
+      "tags": [
+        "contains-meat"
+      ],
+      "ingredients": [
+        {
+          "key": "schweinefilet",
+          "grams": 300
+        },
+        {
+          "key": "kartoffeln",
+          "grams": 380
+        },
+        {
+          "key": "paprika",
+          "grams": 120
+        },
+        {
+          "key": "zwiebel",
+          "grams": 60
+        },
+        {
+          "key": "tomatenmark",
+          "grams": 20,
+          "note": "Tube à 200 g"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 20
+        }
+      ],
+      "steps": [
+        "Schweinefilet würfeln, mit Paprika/Zwiebel abwechselnd auf Spieße stecken.",
+        "In Pfanne oder auf Grill rundum braten (10–12 Min.).",
+        "Sauce: übrige Paprika/Zwiebel klein schneiden, mit Tomatenmark und etwas Wasser 10 Min. köcheln, mit Paprikapulver edelsüß würzen.",
+        "Kartoffeln kochen.",
+        "Spieße mit Sauce und Kartoffeln servieren."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 13,
+      "name": "Thai-Curry Garnelen Süßkartoffel",
+      "cuisine": "Thailändisch",
+      "cooktime": 35,
+      "kcal": 882,
+      "p": 77,
+      "kh": 101,
+      "f": 19,
+      "tags": [
+        "contains-fish",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "grams": 260
+        },
+        {
+          "key": "suesskartoffel",
+          "grams": 220
+        },
+        {
+          "key": "skyr",
+          "grams": 120,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "currypaste_thai",
+          "grams": 25,
+          "note": "Glas à 200 g"
+        },
+        {
+          "key": "erdnuesse",
+          "grams": 15,
+          "note": "aus Vorratspackung"
+        },
+        {
+          "key": "reis_jasmin",
+          "grams": 55
+        },
+        {
+          "key": "zwiebel",
+          "grams": 30
+        },
+        {
+          "key": "olivenoel",
+          "grams": 8
+        }
+      ],
+      "steps": [
+        "Zwiebel in Olivenöl andünsten, Currypaste kurz mitrösten.",
+        "Süßkartoffel würfeln, zugeben, mit etwas Wasser/Brühe 10 Min. köcheln.",
+        "Garnelen zugeben, 3–4 Min. garen.",
+        "Hitze reduzieren, Skyr einrühren (nicht kochen), Erdnüsse grob hacken.",
+        "Reis kochen, Curry darauf anrichten. Chili (falls verwendet: immer mit Kernen) nach Geschmack zugeben."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 14,
+      "name": "Hähnchen-Garnelen-Paella",
+      "cuisine": "Spanisch",
+      "cooktime": 60,
+      "kcal": 901,
+      "p": 72,
+      "kh": 97,
+      "f": 24,
+      "tags": [
+        "contains-meat",
+        "contains-fish"
+      ],
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "grams": 150
+        },
+        {
+          "key": "garnelen",
+          "grams": 130
+        },
+        {
+          "key": "reis_rundkorn",
+          "grams": 100
+        },
+        {
+          "key": "erbsen_tk",
+          "grams": 60,
+          "note": "TK-Packung à 400 g"
+        },
+        {
+          "key": "paprika",
+          "grams": 60
+        },
+        {
+          "key": "zwiebel",
+          "grams": 40
+        },
+        {
+          "key": "tomaten_passiert",
+          "grams": 60,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 18
+        }
+      ],
+      "steps": [
+        "Zwiebel/Paprika in Olivenöl andünsten.",
+        "Reis zugeben, kurz mitrösten.",
+        "Passierte Tomaten und heiße Brühe nach und nach zugeben, ca. 18–20 Min. köcheln.",
+        "Hähnchen und Erbsen nach halber Garzeit zugeben.",
+        "Garnelen in den letzten 3–4 Min. zugeben, bis gar."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 15,
+      "name": "Rote-Linsen-Dal Spiegeleier Skyr",
+      "cuisine": "Indisch-vegetarisch",
+      "cooktime": 25,
+      "kcal": 977,
+      "p": 70,
+      "kh": 95,
+      "f": 34,
+      "tags": [
+        "contains-egg",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "linsen_rot_trocken",
+          "grams": 120
+        },
+        {
+          "key": "zwiebel",
+          "grams": 50
+        },
+        {
+          "key": "tomaten_passiert",
+          "grams": 150,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "ingwer",
+          "grams": 5,
+          "note": "1 kleines Stück deckt den Bedarf mehrerer Gerichte"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 12
+        },
+        {
+          "key": "ei",
+          "grams": 212
+        },
+        {
+          "key": "skyr",
+          "grams": 80,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "spinat",
+          "grams": 60,
+          "note": "Beutel à 100 g"
+        }
+      ],
+      "steps": [
+        "Zwiebel/Knoblauch/Ingwer in Olivenöl andünsten.",
+        "Linsen und passierte Tomaten zugeben, mit Wasser auffüllen, 20–25 Min. köcheln bis weich.",
+        "Spinat kurz vor Ende unterrühren.",
+        "Eier separat als Spiegeleier braten.",
+        "Dal mit Spiegeleiern und einem Klecks Skyr servieren."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 16,
+      "name": "Wildlachs Miso Pak Choi",
+      "cuisine": "Japanisch",
+      "cooktime": 30,
+      "kcal": 887,
+      "p": 72,
+      "kh": 96,
+      "f": 23,
+      "tags": [
+        "contains-fish",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "lachs_keta",
+          "grams": 270
+        },
+        {
+          "key": "reis_jasmin",
+          "grams": 100
+        },
+        {
+          "key": "pak_choi",
+          "grams": 200
+        },
+        {
+          "key": "miso",
+          "grams": 25,
+          "note": "Glas/Packung à 250 g"
+        },
+        {
+          "key": "sesamoel",
+          "grams": 8
+        },
+        {
+          "key": "honig",
+          "grams": 10
+        }
+      ],
+      "steps": [
+        "Miso-Paste mit Honig und Sesamöl verrühren, Lachs damit bestreichen, 10 Min. ziehen lassen.",
+        "Bei 200 °C 10–12 Min. im Ofen garen (oder in der Pfanne).",
+        "Reis kochen.",
+        "Pak Choi kurz andünsten oder dämpfen.",
+        "Reis als Boden, Pak Choi seitlich, Lachs darauf anrichten."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 17,
+      "name": "Rind Rogan Josh",
+      "cuisine": "Nordindisch",
+      "cooktime": 45,
+      "kcal": 912,
+      "p": 64,
+      "kh": 89,
+      "f": 32,
+      "tags": [
+        "contains-meat",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "rindergulasch",
+          "grams": 250
+        },
+        {
+          "key": "reis_basmati",
+          "grams": 85
+        },
+        {
+          "key": "joghurt_griech",
+          "grams": 120,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "tomaten_passiert",
+          "grams": 120,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 60
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "ingwer",
+          "grams": 5,
+          "note": "1 kleines Stück deckt den Bedarf mehrerer Gerichte"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        },
+        {
+          "key": "gewuerz_roganjosh",
+          "grams": 8
+        }
+      ],
+      "steps": [
+        "Rinderwürfel in Olivenöl scharf anbraten.",
+        "Zwiebel, Knoblauch, Ingwer zugeben, andünsten.",
+        "Gewürzmischung kurz mitrösten, passierte Tomaten zugeben.",
+        "Mit Wasser/Brühe auffüllen, 35–40 Min. köcheln bis Rind zart.",
+        "Joghurt kurz vor Ende unterrühren (nicht kochen).",
+        "Mit Basmatireis servieren."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 18,
+      "name": "Hähnchen-Skyr-Curry",
+      "cuisine": "Südindisch",
+      "cooktime": 35,
+      "kcal": 831,
+      "p": 101,
+      "kh": 63,
+      "f": 18,
+      "tags": [
+        "contains-meat",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "grams": 299
+        },
+        {
+          "key": "skyr",
+          "grams": 120
+        },
+        {
+          "key": "kichererbsen_dose",
+          "grams": 80
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 69
+        },
+        {
+          "key": "zwiebel",
+          "grams": 50
+        },
+        {
+          "key": "lauch",
+          "grams": 33
+        },
+        {
+          "key": "knoblauch",
+          "grams": 15
+        },
+        {
+          "key": "ingwer",
+          "grams": 30
+        },
+        {
+          "key": "kurkuma_frisch",
+          "grams": 10
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 15
+        },
+        {
+          "key": "gewuerz_koriander",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_garam",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_chili",
+          "grams": 1
+        },
+        {
+          "key": "tomaten_stueckig",
+          "grams": 196
+        },
+        {
+          "key": "brokkoli",
+          "grams": 100
+        },
+        {
+          "key": "spinat",
+          "grams": 125
+        },
+        {
+          "key": "olivenoel",
+          "grams": 5
+        },
+        {
+          "key": "petersilie",
+          "grams": 15
+        }
+      ],
+      "steps": [
+        "Ganze Gewürze (Kreuzkümmel, Kardamom, Lorbeer) in Öl anrösten.",
+        "Zwiebeln und Lauch goldbraun anbraten.",
+        "Knoblauch, Ingwer, Kurkuma und Chili dazu, kurz mitrösten.",
+        "Trockengewürze mitrösten, Hähnchen anbraten.",
+        "Tomaten einrühren, köcheln lassen.",
+        "Brühe und Kichererbsen dazu, dann Brokkoli mitköcheln.",
+        "Hitze reduzieren, Skyr einrühren (nicht mehr kochen).",
+        "Spinat unterheben, mit Garam Masala, Petersilie und Zitrone servieren."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 19,
+      "name": "Lachs Freekeh Karotten",
+      "cuisine": "Levantinisch",
+      "cooktime": 90,
+      "kcal": 1155,
+      "p": 71,
+      "kh": 95,
+      "f": 57,
+      "tags": [
+        "contains-fish",
+        "contains-gluten",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "lachs_sockeye",
+          "grams": 180
+        },
+        {
+          "key": "joghurt_griech10",
+          "grams": 63
+        },
+        {
+          "key": "skyr",
+          "grams": 63
+        },
+        {
+          "key": "freekeh",
+          "grams": 75
+        },
+        {
+          "key": "haselnuesse",
+          "grams": 10
+        },
+        {
+          "key": "pinienkerne",
+          "grams": 10
+        },
+        {
+          "key": "sesam",
+          "grams": 5
+        },
+        {
+          "key": "tahini",
+          "grams": 15
+        },
+        {
+          "key": "karotten_bunt",
+          "grams": 160
+        },
+        {
+          "key": "granatapfelkerne",
+          "grams": 60
+        },
+        {
+          "key": "petersilie",
+          "grams": 15
+        },
+        {
+          "key": "minze",
+          "grams": 10
+        },
+        {
+          "key": "knoblauch",
+          "grams": 3
+        },
+        {
+          "key": "gewuerz_zaatar",
+          "grams": 5
+        },
+        {
+          "key": "gewuerz_sumach",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_koriander",
+          "grams": 1
+        },
+        {
+          "key": "olivenoel",
+          "grams": 10
+        },
+        {
+          "key": "honig",
+          "grams": 3
+        }
+      ],
+      "steps": [
+        "Dukkah rösten (Haselnüsse, Sesam, Koriandersamen, Kreuzkümmel).",
+        "Granatapfel entkernen, Kräuter waschen.",
+        "Freekeh in Gemüsebrühe garen.",
+        "Karotten mit Öl und Kreuzkümmel bei 200 °C ~25–30 Min. rösten.",
+        "Tahini-Dressing und Kräuter-Joghurt anrühren.",
+        "Lachs Haut-Seite zuerst kross braten, wenden, Za'atar nur auf Fleischseite.",
+        "Lachs auf Kräuter-Freekeh mit Joghurt, Pinienkernen, Granatapfel und Sumach anrichten."
+      ],
+      "cuisineGroup": "middleEast"
+    },
+    {
+      "id": 20,
+      "name": "Rinderfilet Bohnen-Salat Toskana",
+      "cuisine": "Italienisch (Toskana)",
+      "cooktime": 60,
+      "kcal": 1148,
+      "p": 99,
+      "kh": 80,
+      "f": 50,
+      "tags": [
+        "contains-meat",
+        "contains-fish",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "rinderfilet",
+          "grams": 320
+        },
+        {
+          "key": "bohnen_cannellini",
+          "grams": 60
+        },
+        {
+          "key": "cherry_tomate",
+          "grams": 200
+        },
+        {
+          "key": "zucchini",
+          "grams": 150
+        },
+        {
+          "key": "paprika_gelb",
+          "grams": 100
+        },
+        {
+          "key": "avocado",
+          "grams": 70
+        },
+        {
+          "key": "rucola",
+          "grams": 60
+        },
+        {
+          "key": "erbsen_tk",
+          "grams": 50
+        },
+        {
+          "key": "schalotte",
+          "grams": 40
+        },
+        {
+          "key": "feta_schaf",
+          "grams": 30
+        },
+        {
+          "key": "knoblauch",
+          "grams": 12
+        },
+        {
+          "key": "olivenoel",
+          "grams": 10
+        },
+        {
+          "key": "sardellenfilet",
+          "grams": 8
+        },
+        {
+          "key": "petersilie",
+          "grams": 10
+        },
+        {
+          "key": "kapern",
+          "grams": 5
+        }
+      ],
+      "steps": [
+        "Cannellini am Vortag 8–12 h einweichen.",
+        "Knoblauch schneiden, 10 Min. ruhen lassen.",
+        "Rosmarin, Thymian, Lorbeer und Knoblauch mit Schalotten, Sardellen und Chili anziehen.",
+        "Paprika und Zucchini scharf anbraten, Cherry-Tomaten mitschwenken.",
+        "Cannellini und Erbsen mit Kochwasser 3 Min. ziehen lassen, mit Zitrone abschmecken.",
+        "Filet in rauchheißer Pfanne je 2 Min. pro Seite braten, 5 Min. ruhen lassen.",
+        "Auf Rucola und Avocado mit Bohnen-Mix, Schafkäse und aufgeschnittenem Filet anrichten."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 21,
+      "name": "Wildlachs-Quinoa-Bowl",
+      "cuisine": "Asiatisch (Bowl)",
+      "cooktime": 25,
+      "kcal": 934,
+      "p": 72,
+      "kh": 70,
+      "f": 43,
+      "tags": [
+        "contains-fish"
+      ],
+      "ingredients": [
+        {
+          "key": "lachs_sockeye",
+          "grams": 200
+        },
+        {
+          "key": "quinoa",
+          "grams": 60
+        },
+        {
+          "key": "rotkohl",
+          "grams": 167
+        },
+        {
+          "key": "gurke",
+          "grams": 158
+        },
+        {
+          "key": "brokkoli",
+          "grams": 100
+        },
+        {
+          "key": "avocado",
+          "grams": 60
+        },
+        {
+          "key": "sellerie_stauden",
+          "grams": 31
+        },
+        {
+          "key": "karotte",
+          "grams": 29
+        },
+        {
+          "key": "kurkuma_frisch",
+          "grams": 16
+        },
+        {
+          "key": "knoblauch",
+          "grams": 15
+        },
+        {
+          "key": "ingwer",
+          "grams": 5
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 4
+        },
+        {
+          "key": "zitrone_saft",
+          "grams": 48
+        },
+        {
+          "key": "olivenoel",
+          "grams": 5
+        },
+        {
+          "key": "chuan_nan_chili",
+          "grams": 50
+        },
+        {
+          "key": "petersilie",
+          "grams": 20
+        }
+      ],
+      "steps": [
+        "Quinoa in doppelter Menge Wasser 12–15 Min. garen.",
+        "Lachs mit Öl, Salz, Pfeffer und Zitronenscheiben belegt bei 140 °C 12–14 Min. garen.",
+        "Kurkuma, Ingwer, Knoblauch, Chili und Zitronensaft zum Dressing verrühren.",
+        "Quinoa, Rotkohl, Gurke, Karotte, Sellerie, blanchierten Brokkoli und Avocado zur Bowl schichten.",
+        "Lachs obenauf, Dressing, Chili-Topping und Petersilie darüber."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 22,
+      "name": "Hähnchen-Power-Bowl",
+      "cuisine": "Sizilianisch (Caesar)",
+      "cooktime": 40,
+      "kcal": 908,
+      "p": 101,
+      "kh": 46,
+      "f": 33,
+      "tags": [
+        "contains-meat",
+        "contains-fish",
+        "contains-lactose",
+        "contains-egg"
+      ],
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "grams": 190
+        },
+        {
+          "key": "sardellenfilet",
+          "grams": 40
+        },
+        {
+          "key": "ei",
+          "grams": 50
+        },
+        {
+          "key": "kichererbsen_dose",
+          "grams": 100
+        },
+        {
+          "key": "paprika",
+          "grams": 50
+        },
+        {
+          "key": "paprika_gelb",
+          "grams": 50
+        },
+        {
+          "key": "zucchini",
+          "grams": 100
+        },
+        {
+          "key": "rucola",
+          "grams": 60
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 50
+        },
+        {
+          "key": "petersilie",
+          "grams": 15
+        },
+        {
+          "key": "kapern",
+          "grams": 10
+        },
+        {
+          "key": "knoblauch",
+          "grams": 12
+        },
+        {
+          "key": "skyr",
+          "grams": 250
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        },
+        {
+          "key": "dijon_senf",
+          "grams": 5
+        },
+        {
+          "key": "gewuerz_paprika_gerauch",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_sumach",
+          "grams": 1
+        }
+      ],
+      "steps": [
+        "Skyr-Caesar-Dressing anrühren (Skyr, Sardellen, Knoblauch, Zitrone, Dijon, Paprikapulver, Chili), 2 EL als Marinade abnehmen.",
+        "Hähnchen mit Marinade 15–30 Min. ziehen lassen.",
+        "Ei hart kochen (9 Min.), Rote Zwiebel in Zitronensaft schnellpickeln (5 Min.).",
+        "Hähnchen scharf anbraten (3–4 Min. pro Seite).",
+        "Kichererbsen mit Knoblauch crispy braten (6–8 Min.).",
+        "Paprika und Zucchini mit Salz und Oregano braten.",
+        "Dressing als Basis, Rucola, Gemüse, Kichererbsen, Zwiebel, Kapern, Hähnchen und Ei-Viertel darauf schichten.",
+        "Mit Petersilie und Sumach vollenden."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 23,
+      "name": "Linsen-Curry Tempeh und Austernpilze",
+      "cuisine": "Indisch-vegetarisch",
+      "cooktime": 45,
+      "kcal": 985,
+      "p": 79,
+      "kh": 124,
+      "f": 25,
+      "tags": [
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "linsen_rot_trocken",
+          "grams": 60
+        },
+        {
+          "key": "tempeh",
+          "grams": 120
+        },
+        {
+          "key": "skyr",
+          "grams": 200
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 109
+        },
+        {
+          "key": "knoblauch",
+          "grams": 10
+        },
+        {
+          "key": "ingwer",
+          "grams": 10
+        },
+        {
+          "key": "kurkuma_frisch",
+          "grams": 25
+        },
+        {
+          "key": "sellerie_stauden",
+          "grams": 23
+        },
+        {
+          "key": "karotte",
+          "grams": 40
+        },
+        {
+          "key": "lauch",
+          "grams": 13
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 6
+        },
+        {
+          "key": "tomaten_stueckig",
+          "grams": 400
+        },
+        {
+          "key": "paprika_spitz",
+          "grams": 180
+        },
+        {
+          "key": "austernpilze",
+          "grams": 140
+        },
+        {
+          "key": "spinat",
+          "grams": 100
+        },
+        {
+          "key": "minze",
+          "grams": 5
+        },
+        {
+          "key": "gewuerz_koriander",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_garam",
+          "grams": 1
+        },
+        {
+          "key": "olivenoel",
+          "grams": 6
+        }
+      ],
+      "steps": [
+        "Zwiebel, Karotte, Sellerie und Lauch in Öl 5–7 Min. anschwitzen.",
+        "Ingwer, Kurkuma, Knoblauch, Chili und Trockengewürze 1 Min. mitrösten.",
+        "Tomaten und ~200 ml Wasser mit Linsen 15–20 Min. köcheln.",
+        "Paprika dazu, weitere ~8 Min. köcheln.",
+        "Austernpilze und Tempeh parallel scharf anbraten, unter das Curry heben.",
+        "Babyspinat einrühren, mit Zitrone abschmecken.",
+        "Skyr-Raita (Skyr, Salz, Zitronenabrieb) obendrauf, Minze zum Finish."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 24,
+      "name": "Garnelen-Pfanne mediterran",
+      "cuisine": "Mediterran",
+      "cooktime": 30,
+      "kcal": 528,
+      "p": 56,
+      "kh": 55,
+      "f": 13,
+      "tags": [
+        "contains-fish",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "grams": 132
+        },
+        {
+          "key": "skyr",
+          "grams": 150
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 138
+        },
+        {
+          "key": "karotte",
+          "grams": 48
+        },
+        {
+          "key": "sellerie_stauden",
+          "grams": 54
+        },
+        {
+          "key": "zucchini",
+          "grams": 200
+        },
+        {
+          "key": "cherry_tomate",
+          "grams": 200
+        },
+        {
+          "key": "spinat",
+          "grams": 25
+        },
+        {
+          "key": "rucola",
+          "grams": 60
+        },
+        {
+          "key": "kapern",
+          "grams": 10
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 26
+        },
+        {
+          "key": "olivenoel",
+          "grams": 9
+        },
+        {
+          "key": "knoblauch",
+          "grams": 30
+        },
+        {
+          "key": "gewuerz_paprika_gerauch",
+          "grams": 2
+        },
+        {
+          "key": "petersilie",
+          "grams": 10
+        },
+        {
+          "key": "dijon_senf",
+          "grams": 5
+        }
+      ],
+      "steps": [
+        "Aromenbasis (Zwiebel, Karotte, Sellerie) anschwitzen.",
+        "Knoblauch, Paprikapulver und Chili dazu.",
+        "Zucchini und Cherry-Tomaten anbraten.",
+        "Garnelen kurz mitgaren.",
+        "Spinat und Rucola unterheben, mit Zitrone und Kapern abschmecken.",
+        "Skyr-Aioli separat (Skyr, Knoblauch, Dijon, Zitrone, Salz) als Dip reichen."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 25,
+      "name": "Tofu-Tempeh-Bowl asiatisch",
+      "cuisine": "Asiatisch-vegetarisch",
+      "cooktime": 35,
+      "kcal": 1182,
+      "p": 82,
+      "kh": 84,
+      "f": 65,
+      "tags": [
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "tofu_fest",
+          "grams": 200
+        },
+        {
+          "key": "tempeh",
+          "grams": 150
+        },
+        {
+          "key": "edamame",
+          "grams": 100
+        },
+        {
+          "key": "pak_choi",
+          "grams": 100
+        },
+        {
+          "key": "karotte",
+          "grams": 100
+        },
+        {
+          "key": "paprika",
+          "grams": 80
+        },
+        {
+          "key": "reis_basmati",
+          "grams": 30
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "grams": 15
+        },
+        {
+          "key": "sojasauce",
+          "grams": 15
+        },
+        {
+          "key": "sesamoel",
+          "grams": 5
+        },
+        {
+          "key": "reisessig",
+          "grams": 5
+        },
+        {
+          "key": "honig",
+          "grams": 7
+        },
+        {
+          "key": "ingwer",
+          "grams": 15
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 5
+        },
+        {
+          "key": "limette_saft",
+          "grams": 10
+        },
+        {
+          "key": "sesam",
+          "grams": 10
+        },
+        {
+          "key": "minze",
+          "grams": 5
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        }
+      ],
+      "steps": [
+        "Tofu 15 Min. in Küchenpapier pressen, würfeln.",
+        "Reis kochen.",
+        "Glaze anrühren (Sojasauce, Reisessig, Honig, Ingwer, Knoblauch, Chili, Limettensaft).",
+        "Tofu und Tempeh im Wok 6–8 Min. goldbraun braten.",
+        "Karotten, Paprika und Pak Choi 2–3 Min. im Wok schwenken.",
+        "Edamame und Glaze unterheben, kurz schwenken.",
+        "Auf Reis anrichten, mit Sesamöl, Sesamsamen und Frühlingszwiebeln vollenden."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 26,
+      "name": "Putenbrust Tzatziki und Choriatiki",
+      "cuisine": "Griechisch",
+      "cooktime": 40,
+      "kcal": 894,
+      "p": 93,
+      "kh": 59,
+      "f": 33,
+      "tags": [
+        "contains-meat",
+        "contains-lactose",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "putenhack",
+          "grams": 200
+        },
+        {
+          "key": "skyr",
+          "grams": 250
+        },
+        {
+          "key": "feta_schaf",
+          "grams": 50
+        },
+        {
+          "key": "zucchini",
+          "grams": 70
+        },
+        {
+          "key": "aubergine",
+          "grams": 70
+        },
+        {
+          "key": "paprika",
+          "grams": 60
+        },
+        {
+          "key": "cherry_tomate",
+          "grams": 200
+        },
+        {
+          "key": "gurke",
+          "grams": 150
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 50
+        },
+        {
+          "key": "kalamata_oliven",
+          "grams": 20
+        },
+        {
+          "key": "vollkornbrot",
+          "grams": 40
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        },
+        {
+          "key": "knoblauch",
+          "grams": 12
+        },
+        {
+          "key": "minze",
+          "grams": 5
+        },
+        {
+          "key": "petersilie",
+          "grams": 5
+        },
+        {
+          "key": "gewuerz_sumach",
+          "grams": 1
+        }
+      ],
+      "steps": [
+        "Tzatziki (Skyr, geraspelte Gurke, Knoblauch, Zitrone, Minze, Salz) anrühren, kalt stellen.",
+        "2 EL als Puten-Marinade abnehmen (Knoblauch, Zitronenabrieb, Oregano), 15–30 Min. ziehen lassen.",
+        "Gemüse in Scheiben mit Öl, Salz und Oregano wenden.",
+        "Grillpfanne heiß: Gemüse 3–4 Min. pro Seite, dann Pute 4–5 Min. pro Seite.",
+        "Choriatiki mischen (Tomaten, Gurke, Zwiebel, Oliven, Öl, Zitrone, Oregano), Feta obenauf.",
+        "Brot rösten, alles anrichten, mit Sumach und Minze vollenden."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 27,
+      "name": "Garnelen-Wok chinesisch",
+      "cuisine": "Chinesisch",
+      "cooktime": 75,
+      "kcal": 910,
+      "p": 72,
+      "kh": 77,
+      "f": 36,
+      "tags": [
+        "contains-fish",
+        "contains-egg",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "grams": 245
+        },
+        {
+          "key": "ei",
+          "grams": 50
+        },
+        {
+          "key": "reis_basmati_vollkorn",
+          "grams": 55
+        },
+        {
+          "key": "blumenkohl",
+          "grams": 125
+        },
+        {
+          "key": "buschbohnen",
+          "grams": 94
+        },
+        {
+          "key": "pak_choi",
+          "grams": 93
+        },
+        {
+          "key": "paprika_spitz",
+          "grams": 85
+        },
+        {
+          "key": "karotte",
+          "grams": 58
+        },
+        {
+          "key": "zhacai",
+          "grams": 33
+        },
+        {
+          "key": "knoblauch",
+          "grams": 9
+        },
+        {
+          "key": "ingwer",
+          "grams": 6
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "grams": 30
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 10
+        },
+        {
+          "key": "zitrone_saft",
+          "grams": 15
+        },
+        {
+          "key": "thai_basilikum",
+          "grams": 5
+        },
+        {
+          "key": "sesam",
+          "grams": 5
+        },
+        {
+          "key": "sojasauce",
+          "grams": 15
+        },
+        {
+          "key": "shaoxing_reiswein",
+          "grams": 5
+        },
+        {
+          "key": "reisessig",
+          "grams": 5
+        },
+        {
+          "key": "sesamoel",
+          "grams": 3
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        }
+      ],
+      "steps": [
+        "Vollkorn-Basmati 1:2 Wasser kochen (~62 Min.).",
+        "Sauce anrühren.",
+        "Wok sehr heiß, Öl dazu, Garnelen 1–2 Min. scharf anbraten, rausnehmen.",
+        "Knoblauch, Ingwer, Chili und Frühlingszwiebel-Weiß 30 Sek. anbraten.",
+        "Blumenkohl, Buschbohnen, Karotte und Paprika 2–3 Min. stir-fry, Pak Choi zuletzt dazu.",
+        "Garnelen zurück, Zhacai dazu, Sauce angießen und kurz binden.",
+        "Mit Sesamöl, weißem Pfeffer und Zitronensaft abschmecken.",
+        "Mit Frühlingszwiebel-Grün, Sesam und Thai-Basilikum vollenden, mit Reis und Ei servieren."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 28,
+      "name": "Murgh-Chana Curry",
+      "cuisine": "Nordindisch mild",
+      "cooktime": 75,
+      "kcal": 666,
+      "p": 49,
+      "kh": 85,
+      "f": 13,
+      "tags": [
+        "contains-meat",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "haehnchenbrust",
+          "grams": 100
+        },
+        {
+          "key": "kichererbsen_dose",
+          "grams": 120
+        },
+        {
+          "key": "skyr",
+          "grams": 75
+        },
+        {
+          "key": "zwiebel",
+          "grams": 63
+        },
+        {
+          "key": "tomatenpassata",
+          "grams": 125
+        },
+        {
+          "key": "karotte",
+          "grams": 25
+        },
+        {
+          "key": "spinat",
+          "grams": 63
+        },
+        {
+          "key": "ingwer",
+          "grams": 5
+        },
+        {
+          "key": "knoblauch",
+          "grams": 8
+        },
+        {
+          "key": "olivenoel",
+          "grams": 4
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_koriander",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_kurkuma",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_garam",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_chili",
+          "grams": 1
+        },
+        {
+          "key": "reis_basmati_vollkorn",
+          "grams": 55
+        }
+      ],
+      "steps": [
+        "Ganze Gewürze trocken rösten, grob mörsern.",
+        "Zwiebel in Öl 15–20 Min. goldbraun braten, Ingwer-Knoblauch-Paste 1 Min. mitrösten.",
+        "Gemahlene Gewürze (außer Garam Masala) und Passata dazu, 20–25 Min. offen einkochen.",
+        "Hähnchen dazu, 5 Min. anziehen.",
+        "Kichererbsen, Karotte und Wasser dazu, 15–20 Min. köcheln.",
+        "Spinat einfallen lassen, Hitze runter, Skyr temperiert einrühren (nicht kochen).",
+        "Mit Garam Masala abschmecken, Basmati Vollkorn und Raita aus restlichem Skyr servieren."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 29,
+      "name": "Wildlachs-Bohnen-Salat Feta und Ei",
+      "cuisine": "Mediterran",
+      "cooktime": 20,
+      "kcal": 602,
+      "p": 50,
+      "kh": 50,
+      "f": 22,
+      "tags": [
+        "contains-fish",
+        "contains-lactose",
+        "contains-egg"
+      ],
+      "ingredients": [
+        {
+          "key": "lachs_senfhonig",
+          "grams": 130
+        },
+        {
+          "key": "bohnen_kidney",
+          "grams": 93
+        },
+        {
+          "key": "feta_schaf",
+          "grams": 50
+        },
+        {
+          "key": "ei",
+          "grams": 50
+        },
+        {
+          "key": "skyr",
+          "grams": 50
+        },
+        {
+          "key": "gurke",
+          "grams": 172
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 67
+        },
+        {
+          "key": "rucola",
+          "grams": 55
+        },
+        {
+          "key": "sellerie_stauden",
+          "grams": 48
+        },
+        {
+          "key": "kalamata_oliven",
+          "grams": 20
+        },
+        {
+          "key": "knoblauch",
+          "grams": 5
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 3
+        }
+      ],
+      "steps": [
+        "Ei hart kochen (8–10 Min.), abschrecken.",
+        "Wildlachs aus der Dose nehmen, etwas Sauce mitnehmen, kurz erwärmen.",
+        "Kidneybohnen, Zwiebel, Oliven, Rucola, Sellerie, Gurke, Knoblauch und Chili mischen.",
+        "Schafskäse zerbröseln, Ei vierteln.",
+        "Salat mit Lachs, Ei und Feta anrichten, Skyr als Dressing darüber."
+      ],
+      "cuisineGroup": "mediterranean"
+    },
+    {
+      "id": 30,
+      "name": "Thunfisch-Tataki mit Sesamkruste",
+      "cuisine": "Asiatisch (Tataki)",
+      "cooktime": 25,
+      "kcal": 809,
+      "p": 86,
+      "kh": 50,
+      "f": 27,
+      "tags": [
+        "contains-fish",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "thunfisch_sashimi",
+          "grams": 255
+        },
+        {
+          "key": "sesam",
+          "grams": 15
+        },
+        {
+          "key": "quinoa",
+          "grams": 60
+        },
+        {
+          "key": "gurke",
+          "grams": 100
+        },
+        {
+          "key": "radieschen",
+          "grams": 50
+        },
+        {
+          "key": "avocado",
+          "grams": 50
+        },
+        {
+          "key": "sojasauce",
+          "grams": 20
+        },
+        {
+          "key": "limette_saft",
+          "grams": 10
+        },
+        {
+          "key": "reisessig",
+          "grams": 5
+        },
+        {
+          "key": "ingwer",
+          "grams": 5
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "grams": 10
+        },
+        {
+          "key": "sesamoel",
+          "grams": 5
+        }
+      ],
+      "steps": [
+        "Quinoa in Salzwasser 12–15 Min. garen, abtropfen, auskühlen.",
+        "Thunfisch trocken tupfen, in Sesam wälzen (alle Seiten).",
+        "Sesamöl stark erhitzen, Thunfisch von allen Seiten je ~20–30 Sek. scharf anbraten (Kern bleibt rosa).",
+        "Kurz ruhen lassen, in dünne Scheiben schneiden.",
+        "Gurke und Radieschen in feine Scheiben, Avocado in Spalten.",
+        "Ponzu verrühren (Sojasauce, Limettensaft, Reisessig, Wasser, Ingwer).",
+        "Quinoa als Basis, Thunfisch fächern, Gemüse und Avocado anrichten, Ponzu darüber, mit Frühlingszwiebel vollenden."
+      ],
+      "cuisineGroup": "asian"
+    },
+    {
+      "id": 31,
+      "name": "Falafel-Bowl mit Tahini-Skyr-Sauce",
+      "cuisine": "Levantinisch",
+      "cooktime": 50,
+      "kcal": 1099,
+      "p": 56,
+      "kh": 142,
+      "f": 36,
+      "tags": [
+        "contains-lactose",
+        "contains-gluten"
+      ],
+      "ingredients": [
+        {
+          "key": "kichererbsen_trocken",
+          "grams": 130
+        },
+        {
+          "key": "tahini",
+          "grams": 20
+        },
+        {
+          "key": "skyr",
+          "grams": 150
+        },
+        {
+          "key": "bulgur",
+          "grams": 55
+        },
+        {
+          "key": "granatapfelkerne",
+          "grams": 40
+        },
+        {
+          "key": "rucola",
+          "grams": 50
+        },
+        {
+          "key": "petersilie",
+          "grams": 20
+        },
+        {
+          "key": "zwiebel",
+          "grams": 30
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_koriander",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_backpulver",
+          "grams": 1
+        },
+        {
+          "key": "zitrone_saft",
+          "grams": 15
+        },
+        {
+          "key": "olivenoel",
+          "grams": 15
+        }
+      ],
+      "steps": [
+        "Kichererbsen mindestens 12 h einweichen (roh verarbeiten, nicht kochen).",
+        "Mit Zwiebel, Knoblauch, Petersilie und Gewürzen im Food Processor grob zerkleinern.",
+        "Backpulver unterheben, 15 Min. ruhen lassen, zu Pattys formen.",
+        "Mit Öl bestreichen, im Ofen bei 200 °C ~25 Min. backen, auf halber Backzeit wenden.",
+        "Bulgur in Salzwasser 10–12 Min. quellen lassen.",
+        "Tahini, Skyr, Zitronensaft und etwas Wasser glattrühren.",
+        "Bulgur, Rucola, Falafel und Granatapfelkerne anrichten, Sauce darüber."
+      ],
+      "cuisineGroup": "middleEast"
+    },
+    {
+      "id": 32,
+      "name": "Sambal Goreng Udang",
+      "cuisine": "Indonesisch",
+      "cooktime": 40,
+      "kcal": 918,
+      "p": 84,
+      "kh": 89,
+      "f": 24,
+      "tags": [
+        "contains-fish",
+        "contains-lactose"
+      ],
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "grams": 280
+        },
+        {
+          "key": "skyr",
+          "grams": 150
+        },
+        {
+          "key": "buschbohnen",
+          "grams": 150
+        },
+        {
+          "key": "reis_basmati_vollkorn",
+          "grams": 80
+        },
+        {
+          "key": "schalotte",
+          "grams": 30
+        },
+        {
+          "key": "knoblauch",
+          "grams": 9
+        },
+        {
+          "key": "galangal",
+          "grams": 5
+        },
+        {
+          "key": "zitronengras",
+          "grams": 5
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 20
+        },
+        {
+          "key": "limette_saft",
+          "grams": 10
+        },
+        {
+          "key": "fischsauce",
+          "grams": 5
+        },
+        {
+          "key": "honig",
+          "grams": 7
+        },
+        {
+          "key": "olivenoel",
+          "grams": 20
+        }
+      ],
+      "steps": [
+        "Chilis, Schalotten, Knoblauch, Galangal und Zitronengras zu Paste verarbeiten.",
+        "Buschbohnen blanchieren, Reis kochen.",
+        "Öl erhitzen, Paste 5–7 Min. anbraten, bis sie intensiv duftet.",
+        "Garnelen und Fischsauce dazu, 2–3 Min. garen.",
+        "Buschbohnen unterheben.",
+        "Hitze runter, Skyr und Limettensaft einrühren (nicht mehr kochen).",
+        "Honig am Ende unterrühren, mit Reis servieren."
+      ],
+      "cuisineGroup": "asian"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+/* Track sitzt in <main>, ist 200% breit, hält beide Views nebeneinander.
+   Verschiebt sich per translateX per state.view. */
+.view-track {
+  display: flex;
+  width: 200%;
+  height: 100%;
+  transition: transform 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+.view-track[data-view="dashboard"] {
+  transform: translateX(0);
+}
+
+.view-track[data-view="shopping"] {
+  transform: translateX(-50%);
+}
+
+/* Jede View: 50% des Tracks (= 100% Viewport-Breite), scrollt intern vertikal,
+   damit Sticky-Elemente innerhalb der View relativ zu ihrem eigenen Scroll wirken.
+   max-width + margin-inline zentriert die Content-Spalte (früher auf <main>). */
+.view {
+  flex: 0 0 50%;
+  min-width: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  padding: 8px 16px;
+  /* + var(--bottom-nav-height): die Nav ist fixed und liegt visuell über dem
+     letzten Content — ohne Padding würde die letzte Karte / das letzte Item
+     dahinter verschwinden. */
+  padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 20px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Content-Column zentrieren. Da .view direkt Content hält, begrenzt max-width
+   auf .view selbst — kein extra Wrapper nötig. */
+.view--dashboard,
+.view--shopping {
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+/* Shopping-View hat oben KEIN padding — die sticky Progress-Zeile klebt bündig
+   am Header. Dashboard behält das normale padding-top.
+   Außerdem gap: 0, damit der Abstand zwischen Progress-Bar und erster Kategorie
+   im natürlichen Layout identisch ist zum Sticky-Fall (da klebt der Header
+   direkt an progress-height). */
+.view--shopping {
+  padding-top: 0;
+  gap: 0;
+}
+
+/* Direct-Kinder von .view dürfen NICHT shrinken. Grund: .view ist ein flex-column
+   Container mit fester Höhe (100% des view-tracks) und overflow-y: auto. Ohne diesen
+   Reset würden die Kinder (Cards, Shopping-Groups) auf min-content zusammengedrückt
+   — bei Cards sichtbar als "nur Bild, kein Body". flex-shrink: 0 lässt sie ihre
+   natürliche Höhe behalten; overflow-y: auto auf .view sorgt fürs Scrollen. */
+.view > * {
+  flex-shrink: 0;
+}

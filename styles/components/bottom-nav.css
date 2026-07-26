@@ -1,0 +1,99 @@
+/* Bottom-Nav (Material 3 NavigationBar, compact variant): fixed am unteren Rand,
+   80 dp Höhe plus safe-area. Aktiv-Signal ausschließlich über Icon-Filled +
+   Farbwechsel + Label-Bold — keine Pille. Ergibt einen ruhigen, minimalistischen
+   Look ohne Background-Rauschen.
+   Tonal Elevation via surface-container-Farbe (leicht dunkler als surface).
+   z-index 50: über sticky Progress (5) und app-header (10), unter Sheet (100). */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  background: var(--md-sys-color-surface);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.bottom-nav__tab {
+  flex: 1 1 0;
+  min-height: var(--bottom-nav-height);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 8px 8px;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 160ms ease;
+}
+
+.bottom-nav__tab:active {
+  transform: scale(0.97);
+}
+
+/* Icon-Wrap ist nur noch Anchor für den Badge (kein visueller Background mehr).
+   Größe entspricht dem Icon selbst. */
+.bottom-nav__icon-wrap {
+  position: relative;
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bottom-nav__icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  color: inherit;
+}
+
+.bottom-nav__label {
+  font-size: 0.75rem; /* 12 px */
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: inherit;
+  line-height: 1;
+}
+
+/* Aktiver Tab: Icon (via renderTab) wechselt outlined → filled, Farbe und
+   Label-Weight ändern sich mit. Das komplette color: inherit oben zieht durch. */
+.bottom-nav__tab--active {
+  color: var(--md-sys-color-primary);
+}
+
+.bottom-nav__tab--active .bottom-nav__label {
+  font-weight: 700;
+}
+
+/* Badge oben-rechts über dem Icon — bleibt in primary auch wenn der Tab
+   inaktiv ist, damit die "offen"-Zahl visuell zieht. Ring in der Nav-Farbe
+   (surface), damit der Badge sauber vom Nav-Background abgesetzt bleibt. */
+.bottom-nav__badge {
+  position: absolute;
+  /* M3 NavigationBar Badge: Zentrum liegt auf der oberen rechten Ecke des
+     24 dp Icon-Wraps. Bei 18 dp Badge-Größe → top/right jeweils -9 px. */
+  top: -9px;
+  right: -9px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--md-sys-color-surface);
+}

@@ -1,0 +1,465 @@
+/* Onboarding-Wizard — Bottom-Sheet, 88vh, z-index über Settings-Sheet.
+   Slide-up-Animation via .is-open Class-Toggle. Kein Swipe-to-Close — nur
+   "Später"-Button und Backdrop-Klick lösen den Persist-und-Close-Flow aus. */
+
+.onboarding-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1300;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 250ms ease;
+}
+.onboarding-overlay.is-open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.onboarding-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 88vh;
+  background: var(--md-sys-color-surface);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  transform: translateY(100%);
+  transition: transform 250ms cubic-bezier(0.2, 0, 0, 1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.onboarding-overlay.is-open .onboarding-sheet {
+  transform: translateY(0);
+}
+
+.onboarding-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--md-sys-color-on-surface-variant);
+  opacity: 0.4;
+  border-radius: 999px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+/* Header: Titel oben mittig, Progress-Bar darunter. "Überspringen" sitzt jetzt
+   im Footer (statt "Später" oben) — spart eine Zeile im Header und lässt den
+   Titel-Balken ruhiger wirken. */
+.onboarding-header {
+  padding: 12px 16px 16px;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+/* Header-Row: Titel mittig, X rechts. Grid mit Spacer links, damit der Titel
+   trotz einseitigem Button optisch zentriert bleibt. */
+.onboarding-header__row {
+  display: grid;
+  grid-template-columns: 36px 1fr 36px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.onboarding-header__title {
+  margin: 0;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  text-align: center;
+  grid-column: 2;
+}
+.onboarding-close {
+  grid-column: 3;
+  justify-self: end;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  font-size: 1.125rem;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, transform 120ms ease;
+}
+.onboarding-close:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-lowest));
+}
+.onboarding-close:active {
+  transform: scale(0.94);
+}
+
+/* Progress-Zeile — analog zu .shop-progress__track/__fill. */
+.onboarding-progress__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  margin-bottom: 6px;
+  font-variant-numeric: tabular-nums;
+}
+.onboarding-progress__track {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary-track);
+  overflow: hidden;
+}
+.onboarding-progress__fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  transition: width 250ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Body: scrollbar, viel Padding. Placeholder für Task 3 — wird in Task 4 durch
+   den Step-Renderer ersetzt. */
+.onboarding-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 24px 20px;
+}
+.onboarding-placeholder {
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Footer: fix, mit Padding. Zurück / Weiter / Fertig kommen in Task 4.
+   padding-bottom respektiert Android-Gesture-Bar / iOS-Home-Indicator via
+   safe-area-inset, sonst sitzen die Buttons auf der Systemleiste. */
+.onboarding-footer {
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+.onboarding-footer:empty {
+  display: none;
+}
+
+.onboarding-btn {
+  min-height: var(--touch-target-min);
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+.onboarding-btn--primary {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  margin-left: auto;
+}
+.onboarding-btn--tertiary {
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.onboarding-btn--tertiary:active {
+  background: var(--md-sys-color-surface-container);
+}
+.onboarding-btn:active {
+  transform: scale(0.98);
+}
+.onboarding-footer__spacer {
+  flex: 0 0 auto;
+  visibility: hidden;
+}
+
+/* Step-Content — großzügige Abstände, Titel und Beschreibung oben. */
+.onboarding-step__title {
+  margin: 0 0 8px 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+.onboarding-step__desc {
+  margin: 0 0 24px 0;
+  font-size: 0.9375rem;
+  color: var(--md-sys-color-on-surface-variant);
+  line-height: 1.4;
+}
+
+.onboarding-field {
+  margin-bottom: 24px;
+}
+.onboarding-field__label {
+  display: block;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 10px;
+}
+.onboarding-field__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.onboarding-input {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: 10px 14px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 12px;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+.onboarding-input:focus {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: -1px;
+  border-color: transparent;
+}
+
+.onboarding-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.onboarding-chips--nowrap {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.onboarding-chips--nowrap::-webkit-scrollbar {
+  display: none;
+}
+
+/* Ergebnis-Header (Step 4) — Titel + Untertitel links, Theme-Cycle-Button
+   rechts als eigene kleine "Card". Icon-Kachel ist vertikal zentriert
+   relativ zu den beiden Text-Zeilen (align-items: center), Text bleibt
+   linksbündig. Der 24-px-Abstand nach unten sitzt auf dem Row-Container,
+   weil .onboarding-step__desc innen auf margin: 0 überschrieben wird. */
+.onboarding-result__intro {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.onboarding-result__intro-text {
+  flex: 1;
+  min-width: 0;
+}
+.onboarding-result__intro-text .onboarding-step__title {
+  margin-bottom: 4px;
+}
+.onboarding-result__intro-text .onboarding-step__desc {
+  margin-bottom: 0;
+}
+/* Theme-Cycle-Button: kompakte 56x56-Kachel mit Card-Radius, oberhalb der
+   Ergebnis-Karten. Bewusst NICHT surface-container-low wie die Karten
+   darunter — bei einem so kleinen Element ist der 5-Einheiten-Delta zum
+   Sheet-Surface im Light-Mode kaum lesbar. surface-container-high gibt
+   ausreichend Kontrast (~16 Einheiten Light, ~23 Dark), damit die Kachel
+   klar als tippbares Element wirkt.
+   Zustaende ueber data-theme:
+   - auto  = off (surface-container-high + on-surface-variant)
+   - hell  = on  (primary + on-primary, analog aktive Theme-Chip in Settings)
+   - dunkel = on (primary + on-primary) */
+.onboarding-theme-cycle {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card, 16px);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface-variant);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+}
+.onboarding-theme-cycle:hover {
+  color: var(--md-sys-color-on-surface);
+}
+.onboarding-theme-cycle[data-theme="light"],
+.onboarding-theme-cycle[data-theme="dark"] {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-theme-cycle[data-theme="light"]:hover,
+.onboarding-theme-cycle[data-theme="dark"]:hover {
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-theme-cycle:active {
+  transform: scale(0.97);
+}
+.onboarding-theme-cycle svg {
+  width: 24px;
+  height: 24px;
+}
+
+/* Ergebnis-Karten (Step 5) — Filled-Style (M3) analog Dashboard-Cards:
+   surface-container-low als leicht angehobener Grund, kein Border. Akzent
+   nur über die primary-Zahl bei den hervorgehobenen Karten (Tagesbedarf +
+   Abendessen). */
+.onboarding-result__card {
+  background: var(--md-sys-color-surface-container-low);
+  border: 0;
+  border-radius: var(--radius-card, 16px);
+  padding: 16px;
+  margin-bottom: 12px;
+  color: var(--md-sys-color-on-surface);
+}
+/* Abendessen als "active card" — Primary-Background wie ein filled Button,
+   weißer Text. Macht deutlich klar dass das der zentrale Wert im Ergebnis ist.
+   Die inneren Label/Value-Farben werden hier hart überschrieben, weil die
+   Basis-Klassen jeweils eigene Farben setzen (on-surface / on-surface-variant). */
+.onboarding-result__card--accent {
+  background: var(--md-sys-color-primary);
+  border-color: transparent;
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-result__card--accent .onboarding-result__label,
+.onboarding-result__card--accent .onboarding-result__value,
+.onboarding-result__card--accent .onboarding-result__value--big {
+  color: var(--md-sys-color-on-primary);
+}
+.onboarding-result__card--accent .onboarding-result__label {
+  opacity: 0.85;
+}
+.onboarding-result__card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.onboarding-result__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.onboarding-result__value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+.onboarding-result__value--big {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--md-sys-color-primary);
+}
+/* Inline neben "Tagesbedarf" im Card-Header, nur sichtbar wenn Override
+   aktiv. Dezent (on-surface-variant), damit der Titel im Vordergrund bleibt.
+   Kein Block-Element mehr — spart die Höhen-Änderung der Card wenn der
+   Override-State wechselt. */
+.onboarding-result__suggestion {
+  margin-left: 4px;
+  font-weight: 400;
+  color: var(--md-sys-color-on-surface-variant);
+}
+.onboarding-result__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.onboarding-result__row .onboarding-result__card {
+  margin-bottom: 0;
+}
+/* Makro-Verteilung: Horseshoe links (halbkreisförmiges Segment-Chart) +
+   Legende rechts (P/KH/F je in Chart-Farbe + Gramm-Wert). */
+.onboarding-macro-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 8px;
+}
+.onboarding-macro-ring {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 auto;
+  display: block;
+}
+.onboarding-macro-legend {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.onboarding-macro-legend__row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  font-size: 0.9375rem;
+}
+.onboarding-macro-legend__row .onboarding-macro__key {
+  min-width: 108px;
+}
+.onboarding-macro-legend__value {
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+  min-width: 44px;
+  text-align: right;
+}
+.onboarding-macro__key {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+.onboarding-macro__key--p  { color: var(--chart-color-p); }
+.onboarding-macro__key--kh { color: var(--chart-color-kh); }
+.onboarding-macro__key--f  { color: var(--chart-color-f); }
+.onboarding-result__note {
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+  margin: 8px 0 0;
+}
+
+.onboarding-field__value {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Live-Preview auf Step 2 (Alltag): zeigt das berechnete Abendessen-Kontingent,
+   sobald Frühstück/Mittag/Aktivität/Ziel gesetzt sind. Dezent ausgegraut mit
+   Abstand nach oben, damit klar ist: nur Anzeige, keine Aktion. */
+.onboarding-preview {
+  margin-top: 32px;
+  padding: 12px 16px;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.875rem;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.onboarding-preview [data-role="dinner-preview-value"] {
+  font-weight: 600;
+}
+
+/* Kompakte Makro-Pills auf Step 3 (Filter) — schlichte flache Pills mit
+   farbigem Buchstabe + Gramm-Wert, kein Donut. Zeigt nur die grobe Verteilung
+   für den gewählten Preset. */
+.onboarding-macro-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.onboarding-macro-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-surface-container-low);
+  color: var(--md-sys-color-on-surface);
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
