@@ -191,7 +191,7 @@ function renderShell() {
           <ul>
             <li><strong>1 Person</strong> → nur das aktive Profil zählt. Rezept wird auf dessen Ziel skaliert.</li>
             <li><strong>2+ Personen</strong> → die ersten N Profile aus deiner Liste kochen mit. Für jedes wird ein individueller Anteil berechnet und aufsummiert.</li>
-            <li><strong>N &gt; Anzahl Profile</strong> → für jede fehlende Person wird ein DGE-Standard-Gast angenommen (2200 kcal/Tag, davon 880 kcal Abendessen).</li>
+            <li><strong>N &gt; Anzahl Profile</strong> → für jede fehlende Person wird das <strong>Standard-Profil</strong> aus deinen Einstellungen benutzt.</li>
           </ul>
           <p>Die <strong>Bedarfs-Anzeige</strong> im Dashboard folgt immer nur dem aktiven Profil (dem ersten in der Liste) — sie zeigt, was <em>du persönlich</em> von dem Gericht bekommst.</p>
         </div>
@@ -881,7 +881,7 @@ function handlePortions(delta) {
     const profilesCount = state.settings.profiles?.length ?? 0;
     const missing = Math.max(0, defaultPortions - profilesCount);
     hintEl.textContent = missing > 0
-      ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als DGE-Standard berechnet`
+      ? `${missing === 1 ? 'Eine Person wird' : `${missing} Personen werden`} als Standard-Profil berechnet`
       : 'Wird sofort auf alle Tage angewendet';
   }
   updateSectionSummary('profile');
