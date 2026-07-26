@@ -120,12 +120,13 @@
   gap: 8px;
 }
 .profile-detail-delete__btn {
-  width: 100%;
-  min-height: 44px;
+  align-self: center;
+  min-height: 40px;
+  padding: 8px 24px;
   border: none;
   background: var(--md-sys-color-error);
-  color: var(--md-sys-color-on-error);
-  border-radius: 12px;
+  color: #fff;
+  border-radius: var(--radius-pill);
   font-size: 0.9375rem;
   font-weight: 600;
   cursor: pointer;
