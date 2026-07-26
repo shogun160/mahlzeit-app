@@ -61,6 +61,10 @@
      überschreibt auf dunkles Glas. */
   --frosted-glass: rgba(255, 255, 255, 0.78);
   --frosted-glass-strong: rgba(255, 255, 255, 0.88);
+  /* Card-Pillen (Makros P/KH/F, Edit-Pill + Portions-Stepper wenn Card
+     inaktiv) — spuerbar weniger transparent als Standard-Frosted-Glass,
+     damit sie auf hellem Bild besser lesbar bleiben. */
+  --card-pill-glass: rgba(255, 255, 255, 0.94);
 
   /* Backdrop hinter Modals — halbtransparenter Overlay-Ton für Sheets. */
   --overlay-backdrop: rgba(15, 23, 42, 0.42);
@@ -112,6 +116,7 @@
 
   --frosted-glass: rgba(0, 0, 0, 0.4);
   --frosted-glass-strong: rgba(0, 0, 0, 0.55);
+  --card-pill-glass: rgba(0, 0, 0, 0.72);
   --overlay-backdrop: rgba(0, 0, 0, 0.6);
   --semantic-warn: #FB923C;
 
