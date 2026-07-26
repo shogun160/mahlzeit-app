@@ -1,6 +1,6 @@
 {
   "appId": "com.mahlzeit.myapp",
-  "appName": "Mahlzeit Neu",
+  "appName": "Mahlzeit Beta",
   "webDir": "www",
   "plugins": {
     "SystemBars": {
