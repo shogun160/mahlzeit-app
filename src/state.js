@@ -128,6 +128,12 @@ export const state = {
     profiles: [blankProfile('u1')],
     activeProfileId: 'u1',
     profile: blankProfile('u1'),
+    // Standard-Profil: globaler Fallback fuer Kochmengen wenn Personenzahl
+    // groesser als profiles.length. Editierbar in Settings, nicht loeschbar.
+    // Wird beim Load aus DEFAULT_USER initialisiert (siehe defaults.js).
+    // Sitzt hier zunaechst als null — loadState() bzw. der Zugriff via
+    // getStandardProfile() fuellt aus DEFAULT_USER.
+    standardProfile: null,
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
   },
 };
@@ -228,6 +234,44 @@ export function updateProfile(id, patch) {
 // Setzt ein Profil auf Position 0 (= aktiv). Die Reihenfolge der anderen
 // Profile bleibt stabil (Insertion an neuer Position ohne shuffle).
 // activeProfileId wird gemirrort auf die neue profiles[0].id.
+// Liefert das globale Standard-Profil (Fallback-Diner, wenn portions >
+// profiles.length). Wird beim ersten Zugriff aus DEFAULT_USER initialisiert.
+// Nicht loeschbar, aber editierbar in Settings > Profile.
+export function getStandardProfile() {
+  if (!state.settings.standardProfile) {
+    // Frisches Standard-Profil aus DEFAULT_USER. Lazy weil DEFAULT_USER
+    // ein zirkulaerer Import waere — wir initialisieren via loadState oder
+    // beim ersten Aufruf.
+    state.settings.standardProfile = createStandardProfileDefaults();
+  }
+  return state.settings.standardProfile;
+}
+
+// Baut Default-Werte fuer standardProfile. Wird von loadState() + lazy-
+// Getter genutzt. Struktur analog zu Profile, aber id '_default' als Marker
+// (UI erkennt daran "nicht loeschbar", "Titel = Standard-Profil").
+function createStandardProfileDefaults() {
+  return {
+    id: '_default',
+    name: 'Standard-Profil',
+    gender: 'male',
+    age: 40,
+    heightCm: 175,
+    weightKg: 75,
+    activityLevel: 3,
+    goal: 'maintain',
+    dailyTargetOverride: 2200,
+    breakfastKcal: 550,
+    lunchKcal: 770,
+    showCalorieBar: false,
+    macroPreset: 'balanced',
+    macroTargets: null,
+    favorites: {},
+    preferences: { meat: false, fish: false, vegetarian: false },
+    cuisines: { asian: false, mediterranean: false, middleEast: false, americas: false },
+  };
+}
+
 export function setActiveProfileId(id) {
   const profiles = state.settings.profiles;
   if (!Array.isArray(profiles) || profiles.length === 0) return;
@@ -443,6 +487,12 @@ export function loadState() {
       // aktive Profil-Eintrag; ein direkter Read (den es nicht mehr geben
       // sollte) wuerde damit dennoch plausible Werte finden.
       profile: profiles.find((p) => p.id === activeProfileId) ?? profiles[0],
+      // Standard-Profil: aus Storage laden falls vorhanden (via normalize
+      // durchgeschickt damit alle Felder sanitized sind), sonst frische
+      // Defaults aus DEFAULT_USER.
+      standardProfile: loadedSettings.standardProfile
+        ? { ...createStandardProfileDefaults(), ...normalizeProfile(loadedSettings.standardProfile, '_default') }
+        : createStandardProfileDefaults(),
       theme: loadedSettings.theme ?? 'auto',
     };
     return true;

@@ -50,7 +50,11 @@ export function mountProfileDetailSheet(el, { onChange } = {}) {
 
 export function openProfileDetailSheet(profileId) {
   if (!rootEl) throw new Error('Profile-Detail-Sheet nicht gemountet.');
-  const profile = state.settings.profiles.find((p) => p.id === profileId);
+  // Standard-Profil hat id '_default' und sitzt in state.settings.standardProfile,
+  // nicht in profiles[]. Fuer alles andere greifen wir in profiles[].
+  const profile = profileId === '_default'
+    ? state.settings.standardProfile
+    : state.settings.profiles.find((p) => p.id === profileId);
   if (!profile) return;
   currentProfile = profile;
   renderShell();
@@ -79,10 +83,17 @@ function handleEsc(ev) {
 }
 
 function renderShell() {
-  const isFirst = state.settings.profiles[0]?.id === currentProfile.id;
-  const isActive = isFirst; // aktives Profil = profiles[0]
+  const isDefault = currentProfile.id === '_default';
+  const isFirst = !isDefault && state.settings.profiles[0]?.id === currentProfile.id;
+  const isActive = isFirst; // aktives Profil = profiles[0]; Standard-Profil ist nie aktiv
   const isOnlyProfile = state.settings.profiles.length <= 1;
-  const title = currentProfile.name ? currentProfile.name : (isActive ? 'Profil' : 'Weiteres Profil');
+  const title = isDefault
+    ? 'Standard-Profil'
+    : (currentProfile.name ? currentProfile.name : (isActive ? 'Profil' : 'Weiteres Profil'));
+  // Standard-Profil-Sonder-Layout: kein Aktiv-Row (ist nie aktiv), kein
+  // Delete-Row (nicht loeschbar), kein Show-Bar (hat keine Bedarfs-Pille im
+  // Dashboard — nur als Kochmengen-Fallback relevant), kein Name-Row (Titel
+  // ist fix "Standard-Profil"). Sonst identische Editier-Optik.
 
   rootEl.innerHTML = `
     <div class="profile-detail-overlay" data-role="backdrop">
@@ -93,8 +104,8 @@ function renderShell() {
           <button class="profile-detail-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="profile-detail-body">
-          ${renderActiveRow(isActive)}
-          ${renderNameRow()}
+          ${isDefault ? renderDefaultInfoRow() : renderActiveRow(isActive)}
+          ${isDefault ? '' : renderNameRow()}
           ${renderGenderRow()}
           ${renderAgeRow()}
           ${renderSliderRow('height', 'Größe', currentProfile.heightCm, HEIGHT_MIN, HEIGHT_MAX, HEIGHT_DEFAULT, 'cm', 'Größe in Zentimetern')}
@@ -107,14 +118,27 @@ function renderShell() {
           ${renderMealRow('breakfast', 'Frühstück', currentProfile.breakfastKcal, BREAKFAST_MAX)}
           ${renderMealRow('lunch', 'Mittag', currentProfile.lunchKcal, LUNCH_MAX)}
           ${renderDinnerRow()}
-          ${renderShowBarRow()}
-          ${renderDeleteRow(isOnlyProfile, isActive)}
+          ${isDefault ? '' : renderShowBarRow()}
+          ${isDefault ? '' : renderDeleteRow(isOnlyProfile, isActive)}
         </div>
       </div>
     </div>
   `;
 
   attachHandlers();
+}
+
+// Info-Zeile ganz oben im Standard-Profil-Detail-Sheet: erklaert Zweck +
+// warum kein Loeschen.
+function renderDefaultInfoRow() {
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Standard-Profil</div>
+        <div class="settings-row__label-secondary">Wird für zusätzliche Personen benutzt, wenn kein passendes Profil da ist.</div>
+      </div>
+    </div>
+  `;
 }
 
 // Aktiv-Zeile: aktives Profil ist immer profiles[0]. Fuer nicht-aktive Profile
