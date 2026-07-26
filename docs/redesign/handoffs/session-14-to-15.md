@@ -15,7 +15,15 @@ Session 14 hat **Dark Mode** komplett umgesetzt (Auto/Hell/Dunkel-Toggle in Sett
 ## Aktueller Repo-Zustand
 
 - **Branch:** `redesign` (lokal, alle Session-14-Commits vorhanden — noch **nicht** gepusht)
-- **Session-14 Commits (neueste zuerst, ohne pre-Session-Setup-Commits):**
+- **Session-14 Commits (neueste zuerst):**
+  - `fix(onboarding): abendessenkontingent-vorschau doch wieder live`
+  - `docs(backlog): google health / health connect sync`
+  - `style(onboarding): abendessen-vorschau nicht live + makros als schlichte pills`
+  - `feat(onboarding): makro-verteilung-vorschau auf filter-step`
+  - `feat: mehrere ux-verbesserungen` (Slider readonly, Theme-Pills, Alltag-Vorschau)
+  - `feat(onboarding): x-button oben rechts speichert als entwurf`
+  - `fix(macro-popup): slider disabled + handle-swipe wie detail/settings`
+  - `docs(redesign): handoff session 14 → 15` (initiale Version)
   - `docs(backlog): favoriten-gerichte als spätere personalisierung`
   - `style(cards): filled-style statt outlined (m3-standard)`
   - `style(dark-mode): surface-palette auf neutral-anthrazit`
@@ -92,7 +100,14 @@ CSS-Filter statt zweitem PNG-Asset: `filter: brightness(0) invert(1)` → PNG wi
 - **Filter-Step im Wizard** ergänzt: Ernährungspräferenzen + Küchen + Makro-Verteilung als 4 exklusive Chips (Step 3, vor Ergebnis)
 - **Details-Link in Settings** hinter Abendessen umbenannt zu **Makros**
 
-## Constraints (aus CLAUDE.md, aktuell)
+### Follow-Ups nach dem initialen Handoff-Commit
+
+- **Makro-Popup-Slider read-only** — P/KH/F-Slider im Ziel-Verteilung-Bereich sind jetzt read-only (pointer-events:none + tabindex=-1 + aria-disabled statt HTML-`disabled`, damit die Chart-Farbcodierung in voller Intensität sichtbar bleibt). Preset-Wechsel ist der einzige Änderungsweg
+- **Makro-Popup Swipe-to-Close** angeglichen an Detail-/Settings-Sheet — Handle-Zone auf 28dp mit grab-Cursor, Body + Slider aus Pointerdown-Handler ausgeschlossen
+- **Onboarding-Wizard X-Button oben rechts** — global auf allen Steps, speichert nur touched-Felder als Draft; `isProfileComplete()` bleibt entsprechend false wenn nicht alles gesetzt (Placeholder-Pille bleibt)
+- **Theme-Toggle-Buttons als Pills** statt 72dp-Chip-Karten — kompaktere Row mit Icon + Label horizontal
+- **Wizard Step 2 (Alltag): Live-Vorschau "Dein Abendessenkontingent"** — ausgegraut mit Abstand am Ende des Steps, rechnet bei jeder Slider-/Chip-Änderung mit
+- **Wizard Step 3 (Filter): Makro-Verteilung-Vorschau als Pills** — 3 kompakte F/P/KH-Pills nach den Preset-Chips, aktualisieren sich beim Preset-Wechsel. Kein Donut (kommt erst im Ergebnis-Screen)
 
 - **Kein Framework** ohne Rückfrage — Vanilla JS + ES Modules
 - **Keine Tests** (Solo-Projekt) — Node-Simulation für Randfälle
