@@ -293,6 +293,13 @@
   background: var(--md-sys-color-surface);
 }
 
+/* Selected Card: Buttons verschmelzen mit dem Card-Tint — background transparent,
+   damit die Card-Farbe durchscheint. Kein zusaetzliches Background-Signal noetig,
+   der Tint ist die Aktiv-Botschaft. */
+.day-card--selected .action-btn {
+  background: transparent;
+}
+
 .action-btn:active {
   transform: scale(0.98);
 }
