@@ -70,7 +70,7 @@ function runValidator(cwd) {
       schemaVersion: 1,
       dishes: [
         { id: 1, name: 'Basis', cuisine: 'X', cuisineGroup: 'asian', cooktime: 10, kcal: 500, p: 20, kh: 60, f: 15, tags: [], ingredients: [{ key: 'karotte', grams: 100 }], steps: ['Kochen.'] },
-        { id: 2, name: 'Neu', cuisine: 'Y', cuisineGroup: 'mediterranean', cooktime: 20, kcal: 600, p: 30, kh: 50, f: 20, tags: [], ingredients: [{ key: 'karotte', grams: 200 }], steps: ['Braten.'] },
+        { id: 2, name: 'Neu', cuisine: 'Y', cuisineGroup: 'mediterranean', cooktime: 20, kcal: 510, p: 30, kh: 50, f: 20, tags: [], ingredients: [{ key: 'karotte', grams: 200 }], steps: ['Braten.'] },
       ],
     },
     prIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'Karotte', cat: 'frisch', unit: 'g', per100g: { kcal: 41, p: 0.9, kh: 9.6, f: 0.2 } } } },
@@ -105,6 +105,54 @@ function runValidator(cwd) {
   const res = runValidator(dir);
   check('Fall 3: falsche cuisineGroup -> exit 1', res.status === 1);
   check('Fall 3: Enum-Text im Output', res.stdout.includes('cuisineGroup'), res.stdout);
+}
+
+// -- Fall 4: Ingredient-Key existiert nicht -> exit 1
+{
+  const dir = makeRepo({
+    mainDishes: { schemaVersion: 1, dishes: [] },
+    mainIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prDishes: { schemaVersion: 1, dishes: [{ id: 5, name: 'X', cuisine: 'Y', cuisineGroup: 'asian', cooktime: 10, kcal: 500, p: 20, kh: 60, f: 15, tags: [], ingredients: [{ key: 'ghee', grams: 20 }], steps: ['Kochen.'] }] },
+    prIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prImageIds: [5],
+  });
+  const res = runValidator(dir);
+  check('Fall 4: fehlender Ingredient -> exit 1', res.status === 1);
+  check('Fall 4: Fehler-Text erwaehnt ghee', res.stdout.includes('ghee'), res.stdout);
+}
+
+// -- Fall 5: kcal-Sanity verletzt -> exit 1
+{
+  const dir = makeRepo({
+    mainDishes: { schemaVersion: 1, dishes: [] },
+    mainIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prDishes: { schemaVersion: 1, dishes: [{ id: 5, name: 'X', cuisine: 'Y', cuisineGroup: 'asian', cooktime: 10, kcal: 5000, p: 20, kh: 60, f: 15, tags: [], ingredients: [{ key: 'karotte', grams: 100 }], steps: ['Kochen.'] }] },
+    prIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prImageIds: [5],
+  });
+  const res = runValidator(dir);
+  check('Fall 5: kcal-Sanity verletzt -> exit 1', res.status === 1);
+  check('Fall 5: Text erwaehnt kcal', res.stdout.includes('kcal'), res.stdout);
+}
+
+// -- Fall 6: Prefix-Warnung (nicht-blockend) -> exit 0 (nur Warning)
+{
+  const dir = makeRepo({
+    mainDishes: { schemaVersion: 1, dishes: [] },
+    mainIngredients: { schemaVersion: 1, ingredients: { oregano_tl: { label: 'Oregano', cat: 'gewuerze', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prDishes: {
+      schemaVersion: 1,
+      dishes: [{ id: 5, name: 'X', cuisine: 'Y', cuisineGroup: 'asian', cooktime: 10, kcal: 200, p: 10, kh: 20, f: 5, tags: [], ingredients: [{ key: 'oregano_g', grams: 5 }], steps: ['Kochen.'] }],
+    },
+    prIngredients: { schemaVersion: 1, ingredients: {
+      oregano_tl: { label: 'Oregano', cat: 'gewuerze', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } },
+      oregano_g: { label: 'Oregano g', cat: 'gewuerze', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } },
+    } },
+    prImageIds: [5],
+  });
+  const res = runValidator(dir);
+  check('Fall 6: Prefix-Warnung -> exit 0', res.status === 0, res.stdout);
+  check('Fall 6: Warning-Text im Output', res.stdout.includes('Prefix-Kollision'), res.stdout);
 }
 
 if (failures > 0) { console.error(`\n${failures} FAILURES`); process.exit(1); }

@@ -74,6 +74,36 @@ async function main() {
     seen.add(d.id);
   }
 
+  // Ingredient-Keys existieren + Sanity-Check pro neuem Dish.
+  const ingredientKeys = new Set(Object.keys(ingredients?.ingredients || {}));
+  for (const d of newDishes) {
+    for (const ing of d.ingredients || []) {
+      if (!ingredientKeys.has(ing.key)) {
+        err('src/data/dishes.json', 0, `Rezept "${d.name}" (id=${d.id}): Zutaten-Key \`${ing.key}\` existiert nicht in ingredients.json.`);
+      }
+    }
+
+    // Naehrwerte-Sanity: |declared kcal - (p*4 + kh*4 + f*9)| < KCAL_SANITY_TOL
+    const calc = (d.p || 0) * 4 + (d.kh || 0) * 4 + (d.f || 0) * 9;
+    if (Math.abs((d.kcal || 0) - calc) >= KCAL_SANITY_TOL) {
+      err('src/data/dishes.json', 0, `Rezept "${d.name}" (id=${d.id}): kcal (${d.kcal}) weicht zu stark vom Makro-Rechner ab (${Math.round(calc)}).`);
+    }
+  }
+
+  // Prefix-Warnung: neue Ingredient-Keys, die mit denselben 4 Zeichen starten wie existierende.
+  const baseIngredients = await loadBaseJson('src/data/ingredients.json');
+  const baseKeys = new Set(Object.keys(baseIngredients?.ingredients || {}));
+  const newKeys = Object.keys(ingredients?.ingredients || {}).filter((k) => !baseKeys.has(k));
+  for (const nk of newKeys) {
+    const prefix = nk.slice(0, PREFIX_LEN);
+    for (const ek of baseKeys) {
+      if (ek.slice(0, PREFIX_LEN) === prefix) {
+        warn('src/data/ingredients.json', `Prefix-Kollision: neuer Key \`${nk}\` startet wie bestehender \`${ek}\` — bitte pruefen ob es sich um dieselbe Zutat handelt.`);
+        break;
+      }
+    }
+  }
+
   emitAnnotations();
   printComment();
   process.exit(errors.length > 0 ? 1 : 0);
