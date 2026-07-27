@@ -15,9 +15,6 @@ export const dishImageUrl = (id) => `${REPO_BASE}/public/dishes/dish-${id}.jpg`;
 export const SCHEMA_VERSION_DISHES = 1;
 export const SCHEMA_VERSION_INGREDIENTS = 1;
 
-// Auto-Check laeuft beim App-Start hoechstens einmal alle 24h.
-export const AUTO_CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
-
 // Manueller Button hat einen 60s-Soft-Cache: innerhalb dieser Zeit
 // wird kein neuer Fetch ausgeloest, sondern ein Toast angezeigt.
 export const MANUAL_RATE_LIMIT_MS = 60 * 1000;

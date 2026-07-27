@@ -7,7 +7,7 @@
 import {
   dishesUrl, ingredientsUrl, dishImageUrl,
   SCHEMA_VERSION_DISHES, SCHEMA_VERSION_INGREDIENTS,
-  AUTO_CHECK_INTERVAL_MS, MANUAL_RATE_LIMIT_MS,
+  MANUAL_RATE_LIMIT_MS,
   IMPORT_ENABLED,
 } from './remote-config.js';
 import { state, saveState } from '../state.js';
@@ -207,16 +207,12 @@ export async function performImport({ onProgress } = {}) {
 // Setzt state.remoteHasUpdates entsprechend. Kein Bild-Download, kein
 // Sheet, kein Toast — laueft im Hintergrund beim App-Start.
 //
-// Bedingungen: IMPORT_ENABLED true, und (remoteUpdatedAt fehlt oder aelter
-// als AUTO_CHECK_INTERVAL_MS).
+// Bedingung: IMPORT_ENABLED true. Frueher gab es einen 24h-Skip auf
+// remoteUpdatedAt-Basis, der wurde entfernt: das Badge wurde sonst nicht
+// aktualisiert, wenn zwischen Checks neue Rezepte auf main gemerged wurden.
+// Kosten pro Start: 2 kleine JSON-Fetches (~30 kB gesamt) — vernachlaessigbar.
 export async function performAutoCheck() {
   if (!IMPORT_ENABLED) return;
-
-  const now = Date.now();
-  if (state.remoteUpdatedAt) {
-    const last = new Date(state.remoteUpdatedAt).getTime();
-    if (!isNaN(last) && (now - last) < AUTO_CHECK_INTERVAL_MS) return;
-  }
 
   const fetched = await fetchRemoteJsons();
   state.remoteLastFetchAt = new Date().toISOString();
