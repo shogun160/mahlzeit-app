@@ -2,7 +2,7 @@ import { addProfile } from '../state.js';
 import { decodeProfile } from './payload.js';
 import { allDishes } from '../data/dishes.js';
 import { showToast } from '../util/toast.js';
-import { isScannerAvailable, requestPermission, scanOnce } from './scanner.js';
+import { isScannerAvailable, scanOnce } from './scanner.js';
 
 let rootEl = null;
 let onDone = null;
@@ -132,19 +132,35 @@ function attachPasteHandlers() {
 }
 
 async function handleScanFlow() {
-  const granted = await requestPermission();
-  if (!granted) {
-    showToast('Kamera-Berechtigung nötig — bitte in Systemeinstellungen erlauben oder Text einfügen.', { tone: 'error', duration: 4000 });
+  // scan() nutzt das Google-Barcode-Scanner-Modul (Play Services). Kein
+  // Kamera-Permission-Prompt noetig — statt dessen laedt das Modul beim
+  // ersten Aufruf ggf. asynchron nach. Wir zeigen Progress im Sheet-Body.
+  const onProgress = (state) => {
+    const bodyEl = rootEl.querySelector('.import-sheet__body');
+    if (!bodyEl) return;
+    const label = state === 'downloading'
+      ? 'Barcode-Scanner wird geladen…'
+      : 'Barcode-Scanner wird installiert…';
+    bodyEl.innerHTML = `<p class="import-sheet__desc">${label}</p>`;
+  };
+
+  const scan = await scanOnce({ onProgress });
+
+  if (scan.error === 'install_failed') {
+    showToast('Barcode-Scanner konnte nicht installiert werden — bitte Text-Weg nutzen.', { tone: 'error', duration: 4500 });
     closeProfileImportSheet();
     return;
   }
-  const scanned = await scanOnce();
-  if (!scanned) {
-    // User hat den Scanner abgebrochen — Sheet schliessen.
+  if (scan.canceled || !scan.rawValue) {
     closeProfileImportSheet();
     return;
   }
-  const result = tryImport(scanned);
+  if (scan.error) {
+    showToast('Scan-Fehler: ' + scan.error, { tone: 'error', duration: 4000 });
+    closeProfileImportSheet();
+    return;
+  }
+  const result = tryImport(scan.rawValue);
   if (!result.ok) {
     showToast(result.message, { tone: 'error', duration: 3500 });
     closeProfileImportSheet();
