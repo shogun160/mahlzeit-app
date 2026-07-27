@@ -56,12 +56,14 @@ function attach() {
     close();
     onManual && onManual();
   });
-  const importFn = () => {
+  rootEl.querySelector('[data-action="scan"]')?.addEventListener('click', () => {
     close();
-    onImport && onImport();
-  };
-  rootEl.querySelector('[data-action="scan"]')?.addEventListener('click', importFn);
-  rootEl.querySelector('[data-action="paste"]')?.addEventListener('click', importFn);
+    onImport && onImport('scan');
+  });
+  rootEl.querySelector('[data-action="paste"]')?.addEventListener('click', () => {
+    close();
+    onImport && onImport('paste');
+  });
 }
 
 function close() {
