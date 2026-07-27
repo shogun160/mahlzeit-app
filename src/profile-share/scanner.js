@@ -129,22 +129,47 @@ export async function scanOnce() {
   document.body.classList.add('barcode-scanner-active');
   debugLog('css class barcode-scanner-active gesetzt');
 
-  // Listener-Race-Fix: BEIDE Listener SYNCHRON registrieren BEVOR startScan()
+  // Listener-Race-Fix: ALLE Listener SYNCHRON registrieren BEVOR startScan()
   // aufgerufen wird. Sonst koennen Events verloren gehen.
   let barcodeHandle = null;
+  let barcodesHandle = null;
   let errorHandle = null;
   let latestError = null;
+
+  // Nimmt den ersten rawValue an – egal ob er ueber den singular- oder
+  // plural-Event kam. Weitere Events werden ignoriert.
+  let accepted = false;
+  const acceptRawValue = (raw, from) => {
+    if (accepted) return;
+    accepted = true;
+    debugLog(`accept rawValue via ${from} · len=${raw.length} · head="${raw.slice(0, 40).replace(/\n/g, '\\n')}"`);
+  };
 
   const result = await new Promise(async (resolve) => {
     try {
       barcodeHandle = await B.addListener('barcodeScanned', (event) => {
         const b = event?.barcode;
-        debugLog(`event barcodeScanned · rawValue=${b?.rawValue ? '(present)' : '(empty)'}`);
-        if (b?.rawValue) resolve({ rawValue: b.rawValue });
+        const raw = b?.rawValue;
+        debugLog(`event barcodeScanned · fmt=${b?.format ?? '?'} · raw=${raw ? `len=${raw.length}` : '(empty)'}`);
+        if (raw) { acceptRawValue(raw, 'barcodeScanned'); resolve({ rawValue: raw }); }
       });
       debugLog('barcodeScanned-Listener registriert');
     } catch (e) {
       debugLog(`addListener(barcodeScanned) warf: ${e?.message ?? e}`);
+    }
+
+    try {
+      barcodesHandle = await B.addListener('barcodesScanned', (event) => {
+        const list = event?.barcodes ?? [];
+        debugLog(`event barcodesScanned · count=${list.length}`);
+        for (const b of list) {
+          const raw = b?.rawValue;
+          if (raw) { acceptRawValue(raw, 'barcodesScanned'); resolve({ rawValue: raw }); return; }
+        }
+      });
+      debugLog('barcodesScanned-Listener registriert');
+    } catch (e) {
+      debugLog(`addListener(barcodesScanned) warf: ${e?.message ?? e}`);
     }
 
     try {
@@ -163,8 +188,11 @@ export async function scanOnce() {
     });
     debugLog('overlay mounted');
 
-    debugLog('rufe startScan({ formats: [QR_CODE] })');
-    B.startScan({ formats: ['QR_CODE'] })
+    // Hoehere Auflosung (1920x1080) fuer dichte QR-Codes: der Default
+    // (1280x720) laesst QR-Codes mit vielen Modulen zu klein wirken →
+    // pro Modul zu wenige Pixel → MLKit erkennt nichts.
+    debugLog('rufe startScan({ formats: [QR_CODE], resolution: 2 })');
+    B.startScan({ formats: ['QR_CODE'], resolution: 2 })
       .then(() => debugLog('startScan resolved (Kamera-Preview sollte laufen)'))
       .catch((e) => {
         const detail = e?.message ?? String(e);
@@ -174,6 +202,7 @@ export async function scanOnce() {
   });
 
   if (barcodeHandle) await barcodeHandle.remove().catch(() => {});
+  if (barcodesHandle) await barcodesHandle.remove().catch(() => {});
   if (errorHandle) await errorHandle.remove().catch(() => {});
   await B.stopScan().catch(() => {});
   unmountOverlay();
