@@ -236,12 +236,15 @@
   line-height: 1.2;
 }
 
-/* Sichtbar nur wenn der Header aktuell sticky ist (am oberen Rand klebt weil
-   der Body oben rausgescrollt ist) — dann kompensiert die Summary die
-   Information des jetzt unsichtbaren Bodies. Im natürlichen Flow ist der Body
-   entweder direkt sichtbar (expanded) oder trivial klein (collapsed), Summary
-   wäre redundant. Klasse wird per JS beim Scrollen gesetzt (updateStickyState). */
-.settings-section__toggle--sticky .settings-section__summary:not(:empty) {
+/* Sichtbar in zwei Faellen:
+   1. Header ist sticky (klebt oben weil Body oben rausgescrollt ist) —
+      Summary kompensiert die Information des jetzt unsichtbaren Bodies.
+   2. Section ist collapsed — Summary zeigt den aktuellen Wert ohne dass
+      der User aufklappen muss.
+   Klasse --sticky wird per JS beim Scrollen gesetzt (updateStickyState);
+   --collapsed vom Toggle-Handler. */
+.settings-section__toggle--sticky .settings-section__summary:not(:empty),
+.settings-section__toggle--collapsed .settings-section__summary:not(:empty) {
   display: inline-flex;
   align-items: center;
 }
