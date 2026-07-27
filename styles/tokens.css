@@ -73,6 +73,14 @@
   /* Warnfarbe für "über Zielkorridor"-Zustand (Bedarfs-Pille). */
   --semantic-warn: #b3541e;
 
+  /* Error / Inverse — M3-Rollen für destruktive Aktionen (Delete-Button)
+     und invertierte Flächen (Toast-Snackbar). Wurden bisher indirekt per
+     Fallback in Session-19-Files genutzt; hier zentral gepflegt. */
+  --md-sys-color-error: #b3261e;
+  --md-sys-color-on-error: #FFFFFF;
+  --md-sys-color-inverse-surface: #303030;
+  --md-sys-color-inverse-on-surface: #F2F4F3;
+
   /* On-Glass: Text-/Icon-Farbe für Foto-Overlay-Badges auf Dish-Bildern
      (Day-Badge, Shop-Indikator, Makro-Ø-Pille auf Card, Picker-Tile-Overlays).
      Diese Overlays behalten in BEIDEN Themes ihren weißen Background (weil
@@ -124,4 +132,11 @@
   /* On-Glass wird im Dark auf on-surface umgeleitet — die Foto-Overlays
      haben jetzt dunklen Background, Text muss hell sein. */
   --md-sys-color-on-glass: var(--md-sys-color-on-surface);
+
+  /* Error / Inverse — hellere Rot-Variante fuer Dark-Mode-Kontrast; Inverse
+     dreht sich auf hell weil Toast in dunkler App auf hellem Grund liegen soll. */
+  --md-sys-color-error: #F2B8B5;
+  --md-sys-color-on-error: #601410;
+  --md-sys-color-inverse-surface: #E3E6E4;
+  --md-sys-color-inverse-on-surface: #1B1D1F;
 }
