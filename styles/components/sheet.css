@@ -1,14 +1,3 @@
-/* Alle Overlay-Backdrops (Sheet, Picker, Macro-Popup, Settings) blurren im
-   offenen Zustand den darunterliegenden Content (Dashboard/View). Backdrop-
-   filter braucht -webkit-Prefix fuer Safari/Android WebView. */
-.sheet-overlay.is-open,
-.picker-overlay.is-open,
-.macro-overlay.is-open,
-.settings-overlay.is-open {
-  backdrop-filter: blur(3px);
-  -webkit-backdrop-filter: blur(3px);
-}
-
 /* Overlay ist der Full-Screen-Backdrop, hält das Sheet unten am Rand. */
 .sheet-overlay {
   position: fixed;

@@ -35,3 +35,20 @@ main {
   overflow: hidden;
   position: relative;
 }
+
+/* Wenn irgendein Overlay/Sheet offen ist, blurren wir Header + View-Track +
+   Bottom-Nav. Die Klasse wird per JS gesetzt (siehe util/overlay-blur.js),
+   weil CSS backdrop-filter auf Android WebView unzuverlaessig ist.
+   Sheet-Roots (detail-sheet-root etc.) sind separate Body-Kinder und werden
+   NICHT geblurrt — sie schweben scharf ueber dem verschwommenen Content. */
+body.has-open-overlay > #app-header,
+body.has-open-overlay > #app,
+body.has-open-overlay > #bottom-nav {
+  filter: blur(3px);
+  transition: filter 180ms ease;
+}
+body > #app-header,
+body > #app,
+body > #bottom-nav {
+  transition: filter 180ms ease;
+}

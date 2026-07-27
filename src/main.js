@@ -21,6 +21,7 @@ import { state, DAYS, setView, loadState, saveState } from './state.js';
 import { rebuildDishes } from './data/dishes.js';
 import { setNativeNightMode } from './native/theme-plugin.js';
 import { installSliderScrollGuard } from './util/slider-guard.js';
+import { installOverlayBlur } from './util/overlay-blur.js';
 import { Capacitor } from '@capacitor/core';
 import { EdgeToEdge } from '@capawesome/capacitor-android-edge-to-edge-support';
 
@@ -57,6 +58,10 @@ rebuildDishes();
 // Sheet / Onboarding-Wizard versehentlich verstellt werden. Muss vor dem ersten
 // Render laufen, wirkt aber via Delegation auch fuer spaeter gemountete Slider.
 installSliderScrollGuard();
+
+// Setzt body.has-open-overlay sobald irgendein Sheet/Overlay geoeffnet ist.
+// CSS blurred dann Header + View-Track + Bottom-Nav (siehe base.css).
+installOverlayBlur();
 
 // Setzt data-theme am <html>-Element auf das *effektive* Theme (light|dark):
 // - 'light'/'dark' → direkt uebernehmen
