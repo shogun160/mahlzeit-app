@@ -285,3 +285,74 @@ Ideal in derselben Session wie **Datenverwaltung / Iteration 7** (Export/Import 
 - Deep-Link erfordert Änderungen an Android-Manifest (Intent-Filter).
 - Erst wenn Multi-Profile stabil ist und Nutzer echten Bedarf haben („mein Partner will meine Werte übernehmen"). Aktuell reicht: „Werte manuell abtippen" — 5 Slider, in 30 Sekunden gemacht.
 - Ideal in einer Session zusammen mit **Rezept-Import** — beide brauchen JSON-Validation-Framework + Share-Sheet-Integration.
+
+## Kochmodus mit Wake-Lock
+
+**Idee:** Beim Kochen ein dedizierter Vollbild-Modus, der die Rezept-Schritte groß darstellt und den Handy-Screen an lässt, damit man nicht mit fettigen Fingern immer wieder aufwecken muss.
+
+**UX-Skizze:**
+
+- Im Detail-Sheet (Tab „Rezept") neuer primärer Button: **„Jetzt kochen"** — öffnet Vollbild-View.
+- Vollbild-View zeigt:
+  - Aktueller Schritt groß in der Mitte, Fließtext gut lesbar (~20 pt).
+  - Kleine Meta oben: Rezept-Name, Schritt X von N.
+  - Progress-Bar oder Dots am unteren Rand.
+  - Groß-Buttons: „Weiter" / „Zurück" (breit, Daumen-freundlich).
+  - Kleiner Beenden-Button (X oben rechts).
+- Screen bleibt an: [Screen Wake Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) auf modernen Browsern (Chrome/Edge auf Android ab v84). Fallback: Capacitor-Plugin `@capacitor-community/keep-awake` falls WebView-Support unzuverlässig.
+- Beim Verlassen (Beenden, App-Wechsel, Schließen): Wake-Lock wird released.
+
+**State-Skizze:**
+- Kein persistenter State nötig — Kochmodus ist transient. Aktueller Schritt-Index modul-lokal in `src/cook-mode/`.
+
+**Warum später:** Kein State-Migrations-Risiko, aber neuer UI-Screen + Native-Bridge fürs Wake-Lock (falls Screen-Wake-Lock-API in Capacitor-WebView Probleme macht). Ideal zusammen mit **Timer im Rezept**, weil beide im Kochmodus leben.
+
+## Timer im Rezept (nur im Kochmodus)
+
+**Idee:** Wenn ein Rezept-Schritt eine Zeitangabe enthält („4 Min braten", „25 Min köcheln"), wird beim Schritt im Kochmodus ein Timer-Chip erkannt und tapbar dargestellt. Ein Tap startet den Timer, er läuft im Hintergrund weiter (auch bei Schritt-Wechsel im Kochmodus), Notification + Ton bei Ablauf.
+
+**UX-Skizze:**
+
+- **Parsing der Schritt-Zeit:** Regex im Step-Text sucht Muster wie „X Min", „X Minuten", „X Sek", „X-Y Min" (bei Range: nutze Untergrenze oder Mittelwert). Erster Match wird zum Timer-Kandidaten.
+- **Rendering im Kochmodus:** Neben dem Schritt-Text ein Chip mit ⏱ + „4 Min" (Zeit-Wert). Tap → Timer startet, Chip wechselt in Running-State mit Countdown.
+- **Running-State-Chip:** Zeigt verbleibende Zeit (mm:ss). Interaktionen per Long-Press oder zusätzliches Menü:
+  - **Pausieren** → Chip zeigt „⏸ 2:15", Zeit friert ein
+  - **Neustarten** → springt zurück auf Original-Zeit, läuft
+  - **Editieren** → Bottom-Sheet mit Number-Input für Minuten/Sekunden, Bestätigen setzt neue Zeit als Rest-Zeit
+  - **Stoppen** → Chip zurück in Idle-State (tapbar, Original-Zeit)
+- **Ablauf-Notification:** Bei Zeit-Ende Ton (kurz, Notification-Sound) + Vibration + Notification mit Rezept-Name und Schritt-Text („Bratzeit vorbei — 4 Min braten"). Timer-Chip wechselt in „Fertig"-State (grüner Haken, tap → reset).
+- **Multi-Timer:** Ein Rezept kann mehrere Zeit-Schritte haben. Beim Schritt-Wechsel im Kochmodus laufen aktive Timer im Hintergrund weiter — sichtbar als kleine Pille oben unter dem Rezept-Namen („🟢 2 Timer laufen"), tap öffnet Timer-Übersicht.
+- **Nur im Kochmodus:** Im normalen Detail-Sheet wird der Timer-Chip NICHT gezeigt. Der Timer ist ein Kochhilfe-Feature — außerhalb des Kochens macht er keinen Sinn.
+
+**State-Skizze:**
+
+```js
+// Modul-lokal in src/cook-mode/timers.js
+const runningTimers = new Map(); // key: `${dishId}-${stepIndex}` → { endsAt, paused, remainingMs, originalMs }
+```
+
+- Persistenz zwischen App-Restarts nicht nötig — Kochmodus ist eine kohärente Session.
+- Bei App-Suspend (Background): Timer-Endzeit als Timestamp speichern, bei Resume ausrechnen was verbleibt. Sonst würden Timer beim Bildschirmsperren einfrieren.
+- Native Notification-Trigger via Capacitor `LocalNotifications` — feuert auch wenn App im Hintergrund oder Screen aus.
+
+**Warum später:** Braucht **Kochmodus als Basis** (Timer lebt darin), Regex-Parsing der Steps (Fallback wenn kein Match: kein Timer-Chip, Schritt bleibt normal), Notification-Permission-Handling, Capacitor `LocalNotifications`-Plugin.
+
+## Rezept-Suche (Text) im Dish-Picker
+
+**Idee:** Textfeld im Dish-Picker unter den Filter-Chips. Sucht in Rezept-Name, Zutaten-Namen und Küche. Bei aktiver Suche werden die Filter-Chips zusätzlich angewandt (Suche AND Filter).
+
+**UX-Skizze:**
+
+- Position: unter der letzten Filter-Reihe (macro), oberhalb der Tile-Grid.
+- Kompakt-Design analog Header-Suchfelder: `<input type="search">` mit Lupen-Icon links, Clear-X rechts sobald Text vorhanden.
+- Live-Suche (kein Enter nötig): bei jedem Tastendruck neu filtern. Debounce ~150 ms, damit bei schnellem Tippen nicht jeder Frame gerendert wird.
+- Case-insensitive, umlauttolerant (`ü` matcht `ue`).
+- Match-Prio (für Sortierung bei aktiver Suche): 1. Name-Prefix, 2. Name-Contains, 3. Zutat-Match, 4. Küche-Match. Innerhalb einer Prio: bestehende Fav-/Präferenz-Sortierung.
+- Empty-State: wenn nichts passt, Hint „Nichts gefunden — Filter zurücksetzen?" (Button zur Reset-Action).
+- **Collapse-State analog Filter-Section:** wenn User scrollt, Suchfeld kollabiert mit den Filtern nach oben (bleibt als schmale Pille sichtbar).
+
+**State-Skizze:**
+- Suchbegriff modul-lokal in `src/dish-picker/render.js` (analog `activeFilters`, `filtersCollapsed`).
+- Kein persistenter State — Suche verliert sich beim Sheet-Close.
+
+**Warum später:** Kein Blocker für aktuelle Rezept-Anzahl (~30 Gerichte, überschaubar). Wird spürbar sinnvoll ab ~50+ Rezepten. Guter Session-Kandidat wenn parallel Rezept-Import oder eine größere Content-Erweiterung kommt.
