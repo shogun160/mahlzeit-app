@@ -59,10 +59,6 @@ rebuildDishes();
 // Render laufen, wirkt aber via Delegation auch fuer spaeter gemountete Slider.
 installSliderScrollGuard();
 
-// Setzt body.has-open-overlay sobald irgendein Sheet/Overlay geoeffnet ist.
-// CSS blurred dann Header + View-Track + Bottom-Nav (siehe base.css).
-installOverlayBlur();
-
 // Setzt data-theme am <html>-Element auf das *effektive* Theme (light|dark):
 // - 'light'/'dark' → direkt uebernehmen
 // - 'auto' → aus prefers-color-scheme aufloesen
@@ -258,6 +254,12 @@ attachViewSwipe(mainEl, {
     refresh();
   },
 });
+
+// Overlay-Blur: setzt body.has-open-overlay sobald ein Sheet/Overlay sichtbar
+// ist. Muss NACH allen mount*()-Calls laufen, damit die Sheet-Roots bereits
+// hidden=true gesetzt haben — sonst wird der initial-state als "alles offen"
+// interpretiert und das Dashboard permanent geblurrt.
+installOverlayBlur();
 
 refresh();
 

@@ -25,8 +25,11 @@ export function installOverlayBlur() {
     .filter(Boolean);
   if (roots.length === 0) return;
 
+  // "Offen" = nicht hidden UND hat Content. Der Content-Check faengt Roots ab
+  // die im mount() kein hidden=true setzen (z. B. update-sheet) — solange kein
+  // Sheet gerendert wurde, ist der Container leer und zaehlt nicht als offen.
   const update = () => {
-    const anyOpen = roots.some((el) => !el.hidden);
+    const anyOpen = roots.some((el) => !el.hidden && el.children.length > 0);
     document.body.classList.toggle('has-open-overlay', anyOpen);
   };
 
@@ -34,6 +37,7 @@ export function installOverlayBlur() {
   roots.forEach((el) => observer.observe(el, {
     attributes: true,
     attributeFilter: ['hidden'],
+    childList: true,
   }));
   update();
 }
