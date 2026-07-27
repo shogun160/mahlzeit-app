@@ -14,33 +14,27 @@ export function mountProfileImportSheet(el) {
   rootEl.hidden = true;
 }
 
-// mode: 'scan' oeffnet direkt Kamera-Scanner; 'paste' zeigt Textarea.
-// Kein Choice-Screen dazwischen — der Aufrufer (Add-Choice-Sheet oder
-// Wizard-Welcome) hat schon eine Auswahl getroffen. Fallback bei Scan
-// ohne Native: paste (defensiv, sollte im Web nicht getriggert werden,
-// weil die Aufrufer den Scan-Button dort disabled zeigen).
+// mode: 'scan' oeffnet direkt Kamera-Scanner (kein Sheet), 'paste' zeigt
+// Textarea im Sheet. Fallback bei Scan ohne Native: paste.
 export function openProfileImportSheet({ onImported, mode } = {}) {
   if (!rootEl) throw new Error('Import-Sheet nicht gemountet.');
   onDone = onImported || (() => {});
   const effective = (mode === 'scan' && !isScannerAvailable()) ? 'paste' : mode;
 
   if (effective === 'scan') {
-    renderScan();
-  } else {
-    renderPaste();
+    // Kein Sheet fuer den Scan-Modus — scanner.js oeffnet direkt die native
+    // Kamera-Preview mit App-eigenem Cancel-Overlay.
+    runScanFlow();
+    return;
   }
 
+  renderPaste();
   rootEl.hidden = false;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       rootEl.querySelector('.import-sheet-overlay')?.classList.add('is-open');
     });
   });
-
-  if (effective === 'scan') {
-    // Kurz warten damit Sheet erst gerendert ist, dann Scanner triggern.
-    setTimeout(handleScanFlow, 80);
-  }
 }
 
 export function closeProfileImportSheet() {
@@ -52,24 +46,6 @@ export function closeProfileImportSheet() {
       rootEl.innerHTML = '';
     }
   }, TRANSITION_MS);
-}
-
-function renderScan() {
-  rootEl.innerHTML = `
-    <div class="import-sheet-overlay" data-role="backdrop">
-      <div class="import-sheet" role="dialog" aria-modal="true" aria-labelledby="import-sheet-title">
-        <div class="import-sheet__handle" aria-hidden="true"></div>
-        <div class="import-sheet__header">
-          <h2 class="import-sheet__title" id="import-sheet-title">QR-Code scannen</h2>
-          <button class="import-sheet__close" type="button" data-action="close" aria-label="Schließen">✕</button>
-        </div>
-        <div class="import-sheet__body">
-          <p class="import-sheet__desc">Kamera wird geöffnet…</p>
-        </div>
-      </div>
-    </div>
-  `;
-  attachCloseHandlers();
 }
 
 function renderPaste() {
@@ -131,39 +107,24 @@ function attachPasteHandlers() {
   });
 }
 
-async function handleScanFlow() {
-  // scan() nutzt das Google-Barcode-Scanner-Modul (Play Services). Kein
-  // Kamera-Permission-Prompt noetig — statt dessen laedt das Modul beim
-  // ersten Aufruf ggf. asynchron nach. Wir zeigen Progress im Sheet-Body.
-  const onProgress = (state) => {
-    const bodyEl = rootEl.querySelector('.import-sheet__body');
-    if (!bodyEl) return;
-    const label = state === 'downloading'
-      ? 'Barcode-Scanner wird geladen…'
-      : 'Barcode-Scanner wird installiert…';
-    bodyEl.innerHTML = `<p class="import-sheet__desc">${label}</p>`;
-  };
+async function runScanFlow() {
+  // startScan() zeigt System-Permission-Dialog beim ersten Aufruf, dann
+  // native Kamera-Preview mit App-eigenem Cancel-Overlay. Kein Sheet dazwischen.
+  const scan = await scanOnce();
 
-  const scan = await scanOnce({ onProgress });
-
-  if (scan.error === 'install_failed') {
-    showToast('Barcode-Scanner konnte nicht installiert werden — bitte Text-Weg nutzen.', { tone: 'error', duration: 4500 });
-    closeProfileImportSheet();
+  if (scan.error === 'permission_denied') {
+    showToast('Kamera-Berechtigung nötig — bitte in Systemeinstellungen erlauben oder Text-Weg nutzen.', { tone: 'error', duration: 4500 });
     return;
   }
-  if (scan.canceled || !scan.rawValue) {
-    closeProfileImportSheet();
-    return;
-  }
+  if (scan.canceled) return;
   if (scan.error) {
     showToast('Scan-Fehler: ' + scan.error, { tone: 'error', duration: 4000 });
-    closeProfileImportSheet();
     return;
   }
+  if (!scan.rawValue) return;
   const result = tryImport(scan.rawValue);
   if (!result.ok) {
     showToast(result.message, { tone: 'error', duration: 3500 });
-    closeProfileImportSheet();
     return;
   }
   finishImport(result.profile, result.meta);
@@ -196,6 +157,8 @@ function finishImport(profile, meta) {
   const nameStr = name ? `Profil von ${name} hinzugefügt` : 'Profil hinzugefügt';
   const suffix = skipped > 0 ? ` (${skipped} Favoriten übersprungen)` : '';
   showToast(nameStr + suffix);
-  closeProfileImportSheet();
+  // Sheet nur schliessen wenn es fuer den Paste-Modus offen war (Scan-Modus
+  // oeffnet gar keins).
+  if (rootEl && !rootEl.hidden) closeProfileImportSheet();
   onDone(added);
 }
