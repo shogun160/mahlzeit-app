@@ -1391,6 +1391,32 @@
         "f": 17.8
       }
     },
+    "gewuerz_curry": {
+      "label": "Currypulver (mild)",
+      "cat": "gewuerze",
+      "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
+      "per100g": {
+        "kcal": 325,
+        "p": 14.3,
+        "kh": 55.8,
+        "f": 14.0
+      }
+    },
+    "gewuerz_senfkoerner": {
+      "label": "Senfkörner",
+      "cat": "gewuerze",
+      "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 3.5,
+      "per100g": {
+        "kcal": 508,
+        "p": 26.1,
+        "kh": 28.1,
+        "f": 36.2
+      }
+    },
     "gewuerz_paprika_edelsuess": {
       "label": "Paprikapulver, edelsüß",
       "cat": "gewuerze",
