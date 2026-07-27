@@ -2507,6 +2507,99 @@
         "Reis, Bohnen, Steak, Pico de Gallo und Avocado in Bowl anrichten, Skyr-Dip dazu."
       ],
       "cuisineGroup": "americas"
+    },
+    {
+      "id": 35,
+      "name": "Dal Tadka mit Spiegelei",
+      "cuisine": "Indisch",
+      "cooktime": 40,
+      "kcal": 983,
+      "p": 73,
+      "kh": 110,
+      "f": 23,
+      "tags": [
+        "vegetarian",
+        "contains-lactose",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "key": "linsen_rot_trocken",
+          "grams": 100
+        },
+        {
+          "key": "reis_basmati_vollkorn",
+          "grams": 40
+        },
+        {
+          "key": "olivenoel",
+          "grams": 3,
+          "note": "für den Tadka"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 40
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "ingwer",
+          "grams": 5
+        },
+        {
+          "key": "tomaten_passiert",
+          "grams": 80,
+          "note": "Packung à 400 g"
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_senfkoerner",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_kurkuma",
+          "grams": 1,
+          "note": "für die Linsen"
+        },
+        {
+          "key": "gewuerz_chili",
+          "grams": 0.5
+        },
+        {
+          "key": "gewuerz_curry",
+          "grams": 2
+        },
+        {
+          "key": "skyr",
+          "grams": 180,
+          "note": "Becher à 500 g"
+        },
+        {
+          "key": "ei",
+          "grams": 180,
+          "note": "3 Stück"
+        },
+        {
+          "key": "petersilie",
+          "grams": 5,
+          "note": "Topping"
+        }
+      ],
+      "steps": [
+        "Vollkorn-Basmati mit Wasser 1:2 im Reiskocher kochen (Modus Brown, ca. 40 Min.).",
+        "Rote Linsen abspülen, mit 3-facher Wassermenge und Kurkuma weich kochen (ca. 15–18 Min.).",
+        "Olivenöl heiß werden lassen, Kreuzkümmel und Senfkörner anrösten bis sie duften. Zwiebel, Knoblauch und Ingwer 3–4 Min. anschwitzen.",
+        "Chili und Currypulver kurz mitrösten, passierte Tomaten zugeben, 2–3 Min. andünsten (Tadka).",
+        "Tadka unter die Linsen rühren. Skyr bei niedriger Hitze einrühren, mit Salz abschmecken.",
+        "Eier in Non-Stick-Pfanne als Spiegelei braten.",
+        "Dal auf Reis anrichten, Spiegelei obenauf, Petersilie darüber."
+      ],
+      "cuisineGroup": "asian"
     }
   ]
 }
