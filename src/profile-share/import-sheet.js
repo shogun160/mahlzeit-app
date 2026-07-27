@@ -14,16 +14,33 @@ export function mountProfileImportSheet(el) {
   rootEl.hidden = true;
 }
 
-export function openProfileImportSheet({ onImported } = {}) {
+// mode: 'scan' oeffnet direkt Kamera-Scanner; 'paste' zeigt Textarea.
+// Kein Choice-Screen dazwischen — der Aufrufer (Add-Choice-Sheet oder
+// Wizard-Welcome) hat schon eine Auswahl getroffen. Fallback bei Scan
+// ohne Native: paste (defensiv, sollte im Web nicht getriggert werden,
+// weil die Aufrufer den Scan-Button dort disabled zeigen).
+export function openProfileImportSheet({ onImported, mode } = {}) {
   if (!rootEl) throw new Error('Import-Sheet nicht gemountet.');
   onDone = onImported || (() => {});
-  renderChoice();
+  const effective = (mode === 'scan' && !isScannerAvailable()) ? 'paste' : mode;
+
+  if (effective === 'scan') {
+    renderScan();
+  } else {
+    renderPaste();
+  }
+
   rootEl.hidden = false;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       rootEl.querySelector('.import-sheet-overlay')?.classList.add('is-open');
     });
   });
+
+  if (effective === 'scan') {
+    // Kurz warten damit Sheet erst gerendert ist, dann Scanner triggern.
+    setTimeout(handleScanFlow, 80);
+  }
 }
 
 export function closeProfileImportSheet() {
@@ -37,67 +54,58 @@ export function closeProfileImportSheet() {
   }, TRANSITION_MS);
 }
 
-function renderChoice() {
-  const scannerHint = isScannerAvailable() ? '' : `<p class="import-sheet__hint">Kamera-Scan nur in der App verfügbar — im Browser bitte Text-Paste nutzen.</p>`;
+function renderScan() {
   rootEl.innerHTML = `
     <div class="import-sheet-overlay" data-role="backdrop">
       <div class="import-sheet" role="dialog" aria-modal="true" aria-labelledby="import-sheet-title">
         <div class="import-sheet__handle" aria-hidden="true"></div>
         <div class="import-sheet__header">
-          <h2 class="import-sheet__title" id="import-sheet-title">Profil importieren</h2>
+          <h2 class="import-sheet__title" id="import-sheet-title">QR-Code scannen</h2>
           <button class="import-sheet__close" type="button" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="import-sheet__body">
-          <p class="import-sheet__desc">QR-Code eines anderen Mahlzeit-Profils scannen oder den geteilten Text einfügen.</p>
-          ${scannerHint}
+          <p class="import-sheet__desc">Kamera wird geöffnet…</p>
+        </div>
+      </div>
+    </div>
+  `;
+  attachCloseHandlers();
+}
+
+function renderPaste() {
+  const canPaste = typeof navigator !== 'undefined' && navigator.clipboard?.readText;
+  rootEl.innerHTML = `
+    <div class="import-sheet-overlay" data-role="backdrop">
+      <div class="import-sheet" role="dialog" aria-modal="true" aria-labelledby="import-sheet-title">
+        <div class="import-sheet__handle" aria-hidden="true"></div>
+        <div class="import-sheet__header">
+          <h2 class="import-sheet__title" id="import-sheet-title">Profil-Text einfügen</h2>
+          <button class="import-sheet__close" type="button" data-action="close" aria-label="Schließen">✕</button>
+        </div>
+        <div class="import-sheet__body">
+          <p class="import-sheet__desc">Text aus Chat/Mail hier einfügen:</p>
+          <textarea class="import-sheet__textarea" data-role="paste" rows="5" placeholder="hier einfügen…"></textarea>
+          <p class="import-sheet__error" data-role="paste-error" hidden></p>
           <div class="import-sheet__actions">
-            <button class="btn btn--primary import-sheet__btn" type="button" data-action="scan"${isScannerAvailable() ? '' : ' disabled'}>QR-Code scannen</button>
-            <button class="btn btn--secondary import-sheet__btn" type="button" data-action="paste">Text einfügen</button>
+            ${canPaste ? `<button class="btn btn--secondary import-sheet__btn" type="button" data-action="paste-clipboard">Aus Zwischenablage einfügen</button>` : ''}
+            <button class="btn btn--primary import-sheet__btn" type="button" data-action="do-import" disabled>Importieren</button>
           </div>
         </div>
       </div>
     </div>
   `;
-  attachChoiceHandlers();
+  attachCloseHandlers();
+  attachPasteHandlers();
 }
 
-function attachChoiceHandlers() {
+function attachCloseHandlers() {
   rootEl.querySelector('[data-action="close"]')?.addEventListener('click', closeProfileImportSheet);
   rootEl.querySelector('[data-role="backdrop"]')?.addEventListener('click', (ev) => {
     if (ev.target === ev.currentTarget) closeProfileImportSheet();
   });
-  rootEl.querySelector('[data-action="scan"]')?.addEventListener('click', handleScanFlow);
-  rootEl.querySelector('[data-action="paste"]')?.addEventListener('click', renderPaste);
 }
 
-async function handleScanFlow() {
-  const granted = await requestPermission();
-  if (!granted) {
-    showToast('Kamera-Berechtigung nötig — bitte in Systemeinstellungen erlauben oder Text einfügen.', { tone: 'error', duration: 4000 });
-    return;
-  }
-  const scanned = await scanOnce();
-  if (!scanned) return;
-  const result = tryImport(scanned);
-  if (!result.ok) {
-    showToast(result.message, { tone: 'error', duration: 3500 });
-    return;
-  }
-  finishImport(result.profile, result.meta);
-}
-
-function renderPaste() {
-  const canPaste = typeof navigator !== 'undefined' && navigator.clipboard?.readText;
-  rootEl.querySelector('.import-sheet__body').innerHTML = `
-    <p class="import-sheet__desc">Text aus Chat/Mail hier einfügen:</p>
-    <textarea class="import-sheet__textarea" data-role="paste" rows="5" placeholder="hier einfügen…"></textarea>
-    <p class="import-sheet__error" data-role="paste-error" hidden></p>
-    <div class="import-sheet__actions">
-      ${canPaste ? `<button class="btn btn--secondary import-sheet__btn" type="button" data-action="paste-clipboard">Aus Zwischenablage einfügen</button>` : ''}
-      <button class="btn btn--primary import-sheet__btn" type="button" data-action="do-import" disabled>Importieren</button>
-      <button class="btn btn--text import-sheet__btn" type="button" data-action="back">Zurück</button>
-    </div>
-  `;
+function attachPasteHandlers() {
   const ta = rootEl.querySelector('[data-role="paste"]');
   const doBtn = rootEl.querySelector('[data-action="do-import"]');
   ta.addEventListener('input', () => {
@@ -121,7 +129,28 @@ function renderPaste() {
     }
     finishImport(result.profile, result.meta);
   });
-  rootEl.querySelector('[data-action="back"]').addEventListener('click', renderChoice);
+}
+
+async function handleScanFlow() {
+  const granted = await requestPermission();
+  if (!granted) {
+    showToast('Kamera-Berechtigung nötig — bitte in Systemeinstellungen erlauben oder Text einfügen.', { tone: 'error', duration: 4000 });
+    closeProfileImportSheet();
+    return;
+  }
+  const scanned = await scanOnce();
+  if (!scanned) {
+    // User hat den Scanner abgebrochen — Sheet schliessen.
+    closeProfileImportSheet();
+    return;
+  }
+  const result = tryImport(scanned);
+  if (!result.ok) {
+    showToast(result.message, { tone: 'error', duration: 3500 });
+    closeProfileImportSheet();
+    return;
+  }
+  finishImport(result.profile, result.meta);
 }
 
 function tryImport(text) {

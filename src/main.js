@@ -165,7 +165,8 @@ mountSettingsSheet(settingsRoot, {
   onOpenProfileDetail: (profileId) => openProfileDetailSheet(profileId),
   onAddProfile: () => openAddChoiceSheet({
     onManualChoice: () => openOnboardingWizard({ addProfile: true }),
-    onImportChoice: () => openProfileImportSheet({
+    onImportChoice: (mode) => openProfileImportSheet({
+      mode,
       onImported: () => {
         refreshProfileListInOpenSheet();
         refresh();

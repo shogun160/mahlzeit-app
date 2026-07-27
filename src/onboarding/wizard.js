@@ -451,13 +451,12 @@ function attachWelcomeHandlers() {
     showWelcome = false;
     renderShell();
   });
-  const openImport = () => {
-    openProfileImportSheet({
-      onImported: (importedProfile) => onWizardImported(importedProfile),
-    });
-  };
-  rootEl.querySelector('[data-action="welcome-scan"]')?.addEventListener('click', openImport);
-  rootEl.querySelector('[data-action="welcome-paste"]')?.addEventListener('click', openImport);
+  const openImport = (mode) => () => openProfileImportSheet({
+    mode,
+    onImported: (importedProfile) => onWizardImported(importedProfile),
+  });
+  rootEl.querySelector('[data-action="welcome-scan"]')?.addEventListener('click', openImport('scan'));
+  rootEl.querySelector('[data-action="welcome-paste"]')?.addEventListener('click', openImport('paste'));
 }
 
 function onWizardImported(importedProfile) {
