@@ -10,6 +10,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
+// Pfad zum echten public/dishes/ Verzeichnis des Projekts.
+const PROJECT_DISHES_DIR = path.resolve(new URL('.', import.meta.url).pathname, '../public/dishes');
+
 const validatorPath = path.resolve(new URL('.', import.meta.url).pathname, 'validate-recipe.mjs');
 
 let failures = 0;
@@ -19,7 +22,10 @@ function check(name, cond, detail) {
 }
 
 // Baut ein temporaeres Repo mit Basis-Files auf main und Test-Files auf PR-Branch.
-function makeRepo({ mainDishes, mainIngredients, prDishes, prIngredients, prImageIds = [] }) {
+// prImageIds: Array von IDs, die als 1x1-Pixel-JPEG angelegt werden (fuer Nicht-Dimension-Tests).
+// realImageIds: Mapping { fixtureId: sourceId } — kopiert echte 800x800-Bilder aus
+//   public/dishes/dish-<sourceId>.jpg als dish-<fixtureId>.jpg in das Fixture-Repo.
+function makeRepo({ mainDishes, mainIngredients, prDishes, prIngredients, prImageIds = [], realImageIds = {} }) {
   const dir = mkdtempSync(path.join(tmpdir(), 'validator-test-'));
 
   const runGit = (...args) => spawnSync('git', args, { cwd: dir, encoding: 'utf-8' });
@@ -46,10 +52,16 @@ function makeRepo({ mainDishes, mainIngredients, prDishes, prIngredients, prImag
   writeFileSync(path.join(dir, 'src/data/dishes.json'), JSON.stringify(prDishes, null, 2));
   writeFileSync(path.join(dir, 'src/data/ingredients.json'), JSON.stringify(prIngredients, null, 2));
   for (const id of prImageIds) {
-    // 1x1 pixel jpeg (base64). Nicht 800x800, aber existiert - wird in B.4
-    // von sharp geprueft, hier reicht Existenz fuer Pflichtfeld-Check.
+    // 1x1 pixel jpeg (base64). Fuer Dimension-Fehler-Tests.
     const jpg = Buffer.from('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFAEBAAAAAAAAAAAAAAAAAAAAAP/EABQRAQAAAAAAAAAAAAAAAAAAAAD/2gAMAwEAAhEDEQA/AL+AH//Z', 'base64');
     writeFileSync(path.join(dir, `public/dishes/dish-${id}.jpg`), jpg);
+  }
+  for (const [fixtureId, sourceId] of Object.entries(realImageIds)) {
+    // Echtes 800x800-JPEG aus dem Projekt-Verzeichnis kopieren.
+    cpSync(
+      path.join(PROJECT_DISHES_DIR, `dish-${sourceId}.jpg`),
+      path.join(dir, `public/dishes/dish-${fixtureId}.jpg`),
+    );
   }
   runGit('add', '.');
   runGit('commit', '-m', 'pr');
@@ -74,7 +86,8 @@ function runValidator(cwd) {
       ],
     },
     prIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'Karotte', cat: 'frisch', unit: 'g', per100g: { kcal: 41, p: 0.9, kh: 9.6, f: 0.2 } } } },
-    prImageIds: [2],
+    // Echtes 800x800-JPEG aus dem Projekt verwenden, damit der Bild-Check besteht.
+    realImageIds: { 2: 1 },
   });
   const res = runValidator(dir);
   check('Fall 1: sauberes Rezept -> exit 0', res.status === 0, res.stdout + res.stderr);
@@ -148,11 +161,40 @@ function runValidator(cwd) {
       oregano_tl: { label: 'Oregano', cat: 'gewuerze', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } },
       oregano_g: { label: 'Oregano g', cat: 'gewuerze', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } },
     } },
-    prImageIds: [5],
+    // Echtes 800x800-JPEG damit der Bild-Check nicht blockiert (Test prueft nur Prefix-Warning).
+    realImageIds: { 5: 1 },
   });
   const res = runValidator(dir);
   check('Fall 6: Prefix-Warnung -> exit 0', res.status === 0, res.stdout);
   check('Fall 6: Warning-Text im Output', res.stdout.includes('Prefix-Kollision'), res.stdout);
+}
+
+// -- Fall 7: fehlendes Bild fuer neues Dish -> exit 1
+{
+  const dir = makeRepo({
+    mainDishes: { schemaVersion: 1, dishes: [] },
+    mainIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prDishes: { schemaVersion: 1, dishes: [{ id: 5, name: 'X', cuisine: 'Y', cuisineGroup: 'asian', cooktime: 10, kcal: 200, p: 10, kh: 20, f: 5, tags: [], ingredients: [{ key: 'karotte', grams: 100 }], steps: ['Kochen.'] }] },
+    prIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prImageIds: [],   // KEIN Bild
+  });
+  const res = runValidator(dir);
+  check('Fall 7: fehlendes Bild -> exit 1', res.status === 1);
+  check('Fall 7: Text erwaehnt Bild', res.stdout.includes('dish-5.jpg') || res.stdout.includes('Bild fehlt'), res.stdout);
+}
+
+// -- Fall 8: falsche Bild-Dimension (1x1 statt 800x800) -> exit 1
+{
+  const dir = makeRepo({
+    mainDishes: { schemaVersion: 1, dishes: [] },
+    mainIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prDishes: { schemaVersion: 1, dishes: [{ id: 5, name: 'X', cuisine: 'Y', cuisineGroup: 'asian', cooktime: 10, kcal: 200, p: 10, kh: 20, f: 5, tags: [], ingredients: [{ key: 'karotte', grams: 100 }], steps: ['Kochen.'] }] },
+    prIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'K', cat: 'x', unit: 'g', per100g: { kcal: 0, p: 0, kh: 0, f: 0 } } } },
+    prImageIds: [5],   // 1x1 pixel jpeg aus dem Fixture
+  });
+  const res = runValidator(dir);
+  check('Fall 8: falsche Bild-Dimension -> exit 1', res.status === 1, res.stdout);
+  check('Fall 8: Text erwaehnt Dimension', res.stdout.includes('Dimension') || res.stdout.includes('800x800'), res.stdout);
 }
 
 if (failures > 0) { console.error(`\n${failures} FAILURES`); process.exit(1); }

@@ -104,6 +104,53 @@ async function main() {
     }
   }
 
+  // Bild-Checks: fuer jedes neue Dish muss public/dishes/dish-<id>.jpg existieren.
+  const newImageIds = new Set(newDishes.map((d) => d.id));
+  for (const id of newImageIds) {
+    const imgPath = `public/dishes/dish-${id}.jpg`;
+    let s;
+    try {
+      s = await stat(imgPath);
+    } catch (_) {
+      err(imgPath, 0, `Bild fehlt: erwartet ${imgPath} fuer neues Rezept id=${id}.`);
+      continue;
+    }
+    if (s.size > MAX_IMAGE_BYTES) {
+      err(imgPath, 0, `Bild zu gross: ${Math.round(s.size / 1024)} kB, erlaubt max. ${Math.round(MAX_IMAGE_BYTES / 1024)} kB.`);
+    }
+    try {
+      const meta = await sharp(imgPath).metadata();
+      if (meta.format !== 'jpeg') {
+        err(imgPath, 0, `Bild-Format ${meta.format} — erwartet JPEG.`);
+      }
+      if (Math.abs((meta.width || 0) - IMAGE_SIZE) > IMAGE_SIZE_TOL || Math.abs((meta.height || 0) - IMAGE_SIZE) > IMAGE_SIZE_TOL) {
+        err(imgPath, 0, `Bild-Dimension ${meta.width}x${meta.height} — erwartet ${IMAGE_SIZE}x${IMAGE_SIZE} (Toleranz ±${IMAGE_SIZE_TOL}px).`);
+      }
+    } catch (e) {
+      err(imgPath, 0, `Bild konnte nicht gelesen werden: ${e.message}`);
+    }
+  }
+
+  // Zusaetzliche geaenderte Bilder (nicht zu neuen Dishes gehoerend) auch pruefen.
+  for (const imgFile of changedImages) {
+    const match = imgFile.match(/dish-(\d+)\.jpg$/);
+    if (!match) continue;
+    const id = Number(match[1]);
+    if (newImageIds.has(id)) continue;   // schon oben geprueft
+    // Fuer Update von bestehendem Bild: gleiche Regeln.
+    try {
+      const s = await stat(imgFile);
+      if (s.size > MAX_IMAGE_BYTES) err(imgFile, 0, `Bild zu gross: ${Math.round(s.size / 1024)} kB.`);
+      const meta = await sharp(imgFile).metadata();
+      if (meta.format !== 'jpeg') err(imgFile, 0, `Bild-Format ${meta.format} — erwartet JPEG.`);
+      if (Math.abs((meta.width || 0) - IMAGE_SIZE) > IMAGE_SIZE_TOL || Math.abs((meta.height || 0) - IMAGE_SIZE) > IMAGE_SIZE_TOL) {
+        err(imgFile, 0, `Bild-Dimension ${meta.width}x${meta.height} — erwartet ${IMAGE_SIZE}x${IMAGE_SIZE}.`);
+      }
+    } catch (e) {
+      err(imgFile, 0, `Bild konnte nicht gelesen werden: ${e.message}`);
+    }
+  }
+
   emitAnnotations();
   printComment();
   process.exit(errors.length > 0 ? 1 : 0);
