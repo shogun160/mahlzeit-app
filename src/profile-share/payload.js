@@ -10,8 +10,6 @@ const VALID_GENDER = new Set(['male', 'female']);
 const VALID_ACTIVITY = new Set([1, 2, 3, 4, 5]);
 const VALID_GOAL = new Set(['maintain', 'lose', 'gain']);
 const VALID_MACRO_PRESET = new Set(['balanced', 'protein', 'lowcarb', 'lowfat']);
-const VALID_PREFS = ['meat', 'fish', 'vegetarian'];
-const VALID_CUISINES = ['asian', 'mediterranean', 'middleEast', 'americas'];
 
 // Base64 isomorph (Browser: btoa/atob; Node fuer Tests: Buffer).
 function toBase64(str) {
