@@ -3,7 +3,10 @@
    dezent, im Dark sowieso unsichtbar. Beim Selected verschiebt sich der Grund
    auf einen leichten primary-Tint. */
 .day-card {
-  background: var(--md-sys-color-surface-container-low);
+  /* --card-bg als eigene Variable, damit Kinder (z.B. Badge-Ring) auf den
+     tatsaechlichen Card-Hintergrund referenzieren koennen — auch bei selected. */
+  --card-bg: var(--md-sys-color-surface-container-low);
+  background: var(--card-bg);
   border: 0;
   border-radius: var(--radius-card);
   overflow: hidden;
@@ -16,18 +19,12 @@
   box-shadow: var(--md-elevation-2);
 }
 
+/* Selected-State: Card-Tint + die Bild-Overlay-Pillen (Portion + Edit)
+   bleiben im primary-Look (deren Aktiv-Zustand ist an dieser Stelle
+   Punktinformation). Die Action-Buttons unten und ihr Badge behalten
+   bewusst ihren Default — Material-3 State-Layer-Prinzip. */
 .day-card--selected {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-low));
-}
-
-/* In einer ausgewählten Card behält die Portion-Pille den Aktiv-Ton.
-   Die Action-Buttons bleiben in ihrem Filled-Tonal-Look (primary-container);
-   der einzelne "Liste"-Button wechselt via action-btn--active-Modifier in
-   den stärkeren primary-tint, damit der Aktiv-Zustand als Punktinformation
-   sichtbar bleibt statt in der Card-weiten Tint zu verschwinden. */
-.day-card--selected .stepper--compact {
-  background: var(--md-sys-color-primary-tint);
-  color: var(--md-sys-color-on-primary-container);
+  --card-bg: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-low));
 }
 
 .day-card__image-wrap {
@@ -274,10 +271,9 @@
   margin-top: 10px;
 }
 
-/* Action-Buttons im Standard-Zustand (nicht-selected Card): dezenter tonal
-   Look mit surface-container-low, on-surface Label. Bewusst zurückhaltend —
-   die Buttons sollen der Card nicht die Show stehlen; erst beim Selected
-   wechseln sie in den kräftigen Primary-Auftritt (siehe .day-card--selected). */
+/* Action-Buttons: dezenter tonal Look mit surface-container-low, on-surface
+   Label. Bewusst zurueckhaltend — auch bei selected Cards behalten sie diesen
+   Look (Zustandsmarker ist der Card-Tint). */
 .action-btn {
   flex: 1 1 0;
   display: inline-flex;
@@ -300,17 +296,18 @@
   background: var(--md-sys-color-surface);
 }
 
-/* Selektierte Card: alle drei Action-Buttons wechseln auf voll primary —
-   gleiche Farbe wie die kcal-Pille auf dem Bild. Icons + Labels werden
-   on-primary (weiß), Aktiv-Zustand des Cards wird als geschlossene
-   Farbwelt gelesen. */
+/* Selected Card: Buttons verschmelzen mit dem Card-Tint — background transparent,
+   damit die Card-Farbe durchscheint. Kein zusaetzliches Background-Signal noetig,
+   der Tint ist die Aktiv-Botschaft. */
 .day-card--selected .action-btn {
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  background: transparent;
 }
 
-.day-card--selected .action-btn:hover {
-  background: color-mix(in srgb, black 8%, var(--md-sys-color-primary));
+/* Selected: nur das Liste-Icon (toggle-selected) wechselt auf primary — Text
+   bleibt neutral. Zusammen mit dem filled shopping_bag ist das Icon der
+   punktgenaue Aktiv-Signal-Traeger. */
+.day-card--selected .action-btn[data-action="toggle-selected"] .action-btn__icon {
+  color: var(--md-sys-color-primary);
 }
 
 .action-btn:active {
@@ -353,18 +350,9 @@
   line-height: 16px;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  /* Ring in der Card-Grundfarbe, damit der Badge (der halb über den Button-Rand
-     ragt) sowohl auf der Card als auch am Button-Border sauber abgesetzt ist. */
-  box-shadow: 0 0 0 2px var(--md-sys-color-surface-container-lowest);
-}
-
-/* Selektierte Card: Button-Background ist primary. Badge invertieren, damit er
-   Kontrast behält — sonst würde primary-auf-primary verschwinden. Weißer Kreis
-   mit teal Zahl auf dunklem Button. Ring in der Button-Farbe (primary). */
-.day-card--selected .action-btn__badge {
-  background: var(--md-sys-color-on-primary);
-  color: var(--md-sys-color-primary);
-  box-shadow: 0 0 0 2px var(--md-sys-color-primary);
+  /* Ring in der Card-Grundfarbe (--card-bg wechselt bei selected mit) — Badge
+     ragt halb ueber den Button-Rand, der Ring setzt ihn optisch von der Card ab. */
+  box-shadow: 0 0 0 2px var(--card-bg);
 }
 
 /* Bild und Content-Bereich öffnen das Detail-Sheet (Rezept-Tab).
