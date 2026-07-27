@@ -52,7 +52,27 @@ async function main() {
   const baseDishes = await loadBaseJson('src/data/dishes.json');
   const baseIds = new Set((baseDishes?.dishes || []).map((d) => d.id));
 
-  // Weitere Validation-Schritte werden in Task B.2/B.3/B.4 hinzugefuegt.
+  // Neue Dishes = alle die im aktuellen JSON drin sind, aber nicht in base.
+  const newDishes = (dishes?.dishes || []).filter((d) => !baseIds.has(d.id));
+
+  for (const d of newDishes) {
+    for (const field of REQUIRED_DISH_FIELDS) {
+      if (!(field in d) || d[field] === null || d[field] === undefined) {
+        err('src/data/dishes.json', 0, `Rezept "${d.name || '?'}" (id=${d.id ?? '?'}): Pflichtfeld \`${field}\` fehlt.`);
+      }
+    }
+
+    if (d.cuisineGroup && !CUISINE_GROUPS.includes(d.cuisineGroup)) {
+      err('src/data/dishes.json', 0, `Rezept "${d.name}" (id=${d.id}): \`cuisineGroup: "${d.cuisineGroup}"\` ist nicht im Enum. Erlaubt: ${CUISINE_GROUPS.join(', ')}`);
+    }
+  }
+
+  // ID-Eindeutigkeit im aktuellen JSON.
+  const seen = new Set();
+  for (const d of dishes?.dishes || []) {
+    if (seen.has(d.id)) err('src/data/dishes.json', 0, `Doppelte ID: ${d.id}`);
+    seen.add(d.id);
+  }
 
   emitAnnotations();
   printComment();
