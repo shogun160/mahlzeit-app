@@ -60,3 +60,14 @@ export async function fetchRemoteJsons() {
 
   return { ok: true, dishes: dishesJson, ingredients: ingredientsJson };
 }
+
+// Ermittelt welche Remote-Dishes wirklich neu sind — also weder bundled noch
+// bereits in state.remoteDishes vorhanden.
+export function diffRemoteAgainstLocal({ bundled, alreadyImported, remote }) {
+  const known = new Set([
+    ...bundled.map((d) => d.id),
+    ...alreadyImported.map((d) => d.id),
+  ]);
+  const newIds = remote.filter((d) => !known.has(d.id)).map((d) => d.id);
+  return { newIds };
+}
