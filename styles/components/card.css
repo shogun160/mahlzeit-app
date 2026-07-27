@@ -16,18 +16,11 @@
   box-shadow: var(--md-elevation-2);
 }
 
+/* Selected-State: nur Card-Tint als Signal (Material-3 State-Layer-Pattern).
+   Alle inneren Elemente (Action-Buttons, Portion-Pille, Edit-Pille, Badges)
+   behalten ihren Default-Look — ein Akzent pro Zustand ist genug. */
 .day-card--selected {
   background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-low));
-}
-
-/* In einer ausgewählten Card behält die Portion-Pille den Aktiv-Ton.
-   Die Action-Buttons bleiben in ihrem Filled-Tonal-Look (primary-container);
-   der einzelne "Liste"-Button wechselt via action-btn--active-Modifier in
-   den stärkeren primary-tint, damit der Aktiv-Zustand als Punktinformation
-   sichtbar bleibt statt in der Card-weiten Tint zu verschwinden. */
-.day-card--selected .stepper--compact {
-  background: var(--md-sys-color-primary-tint);
-  color: var(--md-sys-color-on-primary-container);
 }
 
 .day-card__image-wrap {
