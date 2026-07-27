@@ -1,4 +1,6 @@
-import { state, getActiveProfile, getProfileById, addProfile, removeProfile, saveState } from '../state.js';
+import { state, getActiveProfile, getProfileById, addProfile, removeProfile, saveState, setActiveProfileId } from '../state.js';
+import { openProfileImportSheet } from '../profile-share/import-sheet.js';
+import { isScannerAvailable } from '../profile-share/scanner.js';
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { DEFAULT_USER } from '../nutrition/defaults.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
@@ -31,6 +33,7 @@ let editingProfileId = null;
 let personIndex = 1;
 let showFollowup = false;
 let suppressFollowup = false;
+let showWelcome = false;
 
 // Draft hält die Werte, die der User im Wizard eingibt. Beim Öffnen aus dem
 // editierten Profil (getEditingProfile()) pre-fillt. touched trackt pro Feld,
@@ -113,6 +116,11 @@ export function openOnboardingWizard(opts = {}) {
   } else {
     initDraftFromProfile(getActiveProfile());
   }
+
+  // Welcome-Screen nur beim First-Run (nicht bei addProfile aus Settings — dort
+  // hat der User schon manuell "+ Profil hinzufuegen" geklickt, ein zweiter
+  // Choice-Screen waere redundant).
+  showWelcome = !opts.addProfile;
 
   // onboardingSeen SOFORT setzen — auch bei App-Crash während Wizard nicht wieder
   // auto-triggern. saveState() persistiert das direkt.
@@ -241,6 +249,7 @@ function startSubProfileWizard() {
   const p = addProfile({});
   editingProfileId = p.id;
   showFollowup = false;
+  showWelcome = true;   // Sub-Wizard startet auch mit Welcome-Screen
   currentStep = 1;
   initDraftFromProfile(p);
   renderShell();
@@ -260,8 +269,9 @@ function renderShell() {
     ? `<div class="onboarding-header__person"><span class="onboarding-header__person-pill" aria-label="Person ${personIndex} von ${totalPersons}">Person ${personIndex} von ${totalPersons}</span></div>`
     : '';
   // Progress-Bar wird nur im normalen Wizard gezeigt, nicht im Follow-up-Screen
-  // (dort gibt es keinen Step-Progress, nur die Ja/Spaeter-Entscheidung).
-  const progressBar = showFollowup ? '' : `
+  // (dort gibt es keinen Step-Progress, nur die Ja/Spaeter-Entscheidung) und
+  // nicht im Welcome-Screen (dort gibt es noch keine Steps).
+  const progressBar = (showFollowup || showWelcome) ? '' : `
     <div class="onboarding-progress">
       <div class="onboarding-progress__label">Schritt ${currentStep} von ${TOTAL_STEPS}</div>
       <div class="onboarding-progress__track"
@@ -298,6 +308,7 @@ function renderShell() {
 }
 
 function renderStepContent() {
+  if (showWelcome) return renderWelcome();
   if (showFollowup) return renderFollowup();
   switch (currentStep) {
     case 1: return renderStep1(draft, { isSubProfile: isSubProfileWizard() });
@@ -324,7 +335,29 @@ function renderFollowup() {
   `;
 }
 
+function renderWelcome() {
+  const isSub = isSubProfileWizard();
+  const title = isSub ? 'Person hinzufügen' : 'Willkommen bei Mahlzeit';
+  const desc = isSub
+    ? 'Neue Person manuell einrichten oder Profil-QR eines anderen Mahlzeit-Nutzers übernehmen.'
+    : 'Zum ersten Mal hier? Richte dein Profil ein oder übernimm ein bestehendes.';
+  const scanEnabled = isScannerAvailable();
+  const scanLabel = scanEnabled ? 'Profil-QR scannen' : 'Profil-QR scannen (nur in der App)';
+  return `
+    <div class="wizard-welcome">
+      <h3 class="wizard-welcome__title">${title}</h3>
+      <p class="wizard-welcome__desc">${desc}</p>
+      <div class="wizard-welcome__actions">
+        <button class="btn btn--primary wizard-welcome__btn" type="button" data-action="welcome-manual">Manuell einrichten</button>
+        <button class="btn btn--secondary wizard-welcome__btn" type="button" data-action="welcome-scan"${scanEnabled ? '' : ' disabled'}>${scanLabel}</button>
+        <button class="btn btn--text wizard-welcome__btn" type="button" data-action="welcome-paste">Text einfügen</button>
+      </div>
+    </div>
+  `;
+}
+
 function renderFooter() {
+  if (showWelcome) return '';
   if (showFollowup) {
     // Follow-up hat zwei Buttons: "Spaeter" (schliesst) + "Ja, jetzt" (naechster
     // Sub-Wizard). Kein Zurueck/Ueberspringen — die Entscheidung ist binaer.
@@ -383,8 +416,8 @@ function attachShellHandlers() {
   const laterBtn = rootEl.querySelector('[data-action="followup-later"]');
   if (laterBtn) laterBtn.addEventListener('click', closeOnboardingWizard);
 
-  // Step-Handler nur binden wenn wir gerade einen Step zeigen (Follow-up hat
-  // keine Step-Inputs).
+  // Step-Handler nur binden wenn wir gerade einen Step zeigen (Follow-up und
+  // Welcome haben keine Step-Inputs).
   if (!showFollowup) attachStepHandlers();
 }
 
@@ -403,10 +436,51 @@ function goBack() {
 }
 
 function attachStepHandlers() {
+  if (showWelcome) {
+    attachWelcomeHandlers();
+    return;
+  }
   if (currentStep === 1) attachStep1Handlers();
   if (currentStep === 2) attachStep2Handlers();
   if (currentStep === 3) attachStep3Handlers();
   if (currentStep === 4) attachStep4Handlers();
+}
+
+function attachWelcomeHandlers() {
+  rootEl.querySelector('[data-action="welcome-manual"]')?.addEventListener('click', () => {
+    showWelcome = false;
+    renderShell();
+  });
+  const openImport = () => {
+    openProfileImportSheet({
+      onImported: (importedProfile) => onWizardImported(importedProfile),
+    });
+  };
+  rootEl.querySelector('[data-action="welcome-scan"]')?.addEventListener('click', openImport);
+  rootEl.querySelector('[data-action="welcome-paste"]')?.addEventListener('click', openImport);
+}
+
+function onWizardImported(importedProfile) {
+  if (isSubProfileWizard()) {
+    // Blank-Sub-Profil (das startSubProfileWizard vorhin angelegt hat) wieder loeschen.
+    removeProfile(editingProfileId);
+    editingProfileId = importedProfile.id;
+    maybeShowFollowupOrClose();
+  } else {
+    // First-Run: importedProfile ans erste Slot ziehen (aktives Profil).
+    setActiveProfileId(importedProfile.id);
+    // Alten Blank-User u1 (falls noch komplett leer) entfernen — sonst hat der
+    // User zwei Profile: das importierte (jetzt aktiv) und einen alten leeren.
+    const profiles = state.settings.profiles;
+    const stale = profiles.find((p) => p.id !== importedProfile.id && isBlankProfile(p));
+    if (stale && profiles.length > 1) removeProfile(stale.id);
+    saveState();
+    closeOnboardingWizard();
+  }
+}
+
+function isBlankProfile(p) {
+  return p && p.name == null && p.gender == null && p.age == null && p.heightCm == null && p.weightKg == null;
 }
 
 // Step 1 (Über dich) — Name + Geschlecht + Alter + Größe + Gewicht.

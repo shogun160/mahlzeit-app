@@ -212,6 +212,8 @@ Ideal in derselben Session wie **Datenverwaltung / Iteration 7** (Export/Import 
 
 ## Profil teilen / importieren
 
+**Status:** Umgesetzt in Session 19 (Branch `multiuser`, in `beta` gemerged). Siehe [Design-Doc](2026-07-27-profil-teilen-import-design.md) und [Implementierungs-Plan](2026-07-27-profil-teilen-import-plan.md). MVP-Scope: Text-Share via `@capacitor/share`, QR (`qrcode` + `@capacitor-mlkit/barcode-scanning`), Copy-Paste; Deep-Link + Datei-Export bewusst nicht enthalten.
+
 **Idee:** Ein Profil (z. B. das eigene) als Datei oder Deep-Link teilen, damit ein anderer Mahlzeit-Nutzer es bei sich importieren kann. Kein Cloud-Sync, sondern manueller Peer-to-Peer-Transport (WhatsApp/Signal/Mail/AirDrop).
 
 **Auslöser:** Multi-Profile (Session 18) macht es reizvoll: „Mein Partner nutzt die App neu — ich schicke ihm mein Profil damit er nicht alles neu einrichten muss." Oder Tausch von Ernährungs-/Küchen-Präferenzen zwischen Freunden.
