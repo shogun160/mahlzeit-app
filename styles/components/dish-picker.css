@@ -273,12 +273,13 @@
 /* Modifier für Gruppen die IMMER einzeilig bleiben sollen (Küche mit 4 Chips —
    sonst würde die Gruppe schnell auf 2 Zeilen brechen und die semantische
    Zugehörigkeit "vier Küchen" wäre visuell zerteilt). Der JS-Fitter shrinkt
-   die Schriftgröße runter bis die Zeile in die Breite passt; center-Alignment
-   damit sie mittig sitzt sobald sie passt. Overflow als Fallback wenn selbst
-   das Minimum nicht reicht. */
+   die Schriftgröße runter bis die Zeile in die Breite passt; flex-start-
+   Alignment damit bei Overflow der erste Chip links stehen bleibt statt
+   in den unsichtbaren Bereich abgeschnitten zu werden (center + overflow-x
+   verschiebt Content in beide Richtungen). */
 .picker-filter-row--nowrap {
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;

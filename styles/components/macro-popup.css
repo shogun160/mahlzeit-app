@@ -321,8 +321,20 @@
 }
 .macro-controls__presets {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px;
+  overflow-x: auto;
+  /* Scrollbar ausblenden auf allen Plattformen — der Scroll-Hint kommt aus
+     den halb sichtbaren Chips am rechten Rand. */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  -webkit-overflow-scrolling: touch;
+}
+.macro-controls__presets::-webkit-scrollbar {
+  display: none;
+}
+.macro-controls__presets > .pref-chip {
+  flex: 0 0 auto;
 }
 
 /* Profil-Pills oberhalb des Charts — Toggle-Chips zur Multi-User-Anzeige.

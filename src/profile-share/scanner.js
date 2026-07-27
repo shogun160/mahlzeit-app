@@ -1,75 +1,85 @@
-// Wrapper um @capacitor-mlkit/barcode-scanning. Nutzt scan() = Google
-// Barcode Scanner Modul (Play Services). Braucht keine Kamera-Permission,
-// aber ggf. Nachinstallation des Play-Services-Moduls beim ersten Aufruf.
+// Klassischer Kamera-Preview-Scanner via @capacitor-mlkit/barcode-scanning
+// startScan(). Fragt CAMERA-Permission an, zeigt die native Kamera hinter der
+// transparenten WebView und legt ein App-eigenes Overlay (Fokus-Rahmen +
+// "Abbrechen"-Button) drueber. Vergleiche scan() (Google-Barcode-Modul) das
+// beim Nachlade-Progress auf manchen Devices haengt.
 import { Capacitor } from '@capacitor/core';
 
-let BarcodeScannerRef = null;
+let PluginRef = null;
 async function loadPlugin() {
-  if (BarcodeScannerRef) return BarcodeScannerRef;
+  if (PluginRef) return PluginRef;
   const mod = await import('@capacitor-mlkit/barcode-scanning');
-  BarcodeScannerRef = mod.BarcodeScanner;
-  return BarcodeScannerRef;
+  PluginRef = mod.BarcodeScanner;
+  return PluginRef;
 }
 
 export function isScannerAvailable() {
   return Capacitor.isNativePlatform();
 }
 
-// Stellt sicher dass das Google-Barcode-Scanner-Modul (Play Services) verfuegbar
-// ist. Falls nicht: Install starten und auf das Progress-Event 'completed'
-// warten. `onProgress(state)` liefert Zustands-Updates fuer die UI:
-//   'downloading' | 'installing' | 'completed' | 'failed'
-async function ensureGoogleScannerModule(B, onProgress) {
-  try {
-    const check = await B.isGoogleBarcodeScannerModuleAvailable();
-    if (check?.available) return { ok: true };
-  } catch {
-    // isGoogleBarcodeScannerModuleAvailable ist Android-only; auf iOS wirft es
-    // — dort ist das Modul in scan() ohnehin integriert.
-    return { ok: true };
-  }
-  return new Promise((resolve) => {
-    let handle = null;
-    B.addListener('googleBarcodeScannerModuleInstallProgress', (ev) => {
-      // state: 1=PENDING, 2=DOWNLOADING, 3=CANCELED, 4=COMPLETED, 5=FAILED,
-      //        6=INSTALLING, 7=DOWNLOAD_PAUSED — laut Plugin-Enum
-      if (ev.state === 4) {
-        handle?.remove();
-        resolve({ ok: true });
-      } else if (ev.state === 3 || ev.state === 5) {
-        handle?.remove();
-        resolve({ ok: false, reason: 'install_failed' });
-      } else if (ev.state === 2 && onProgress) {
-        onProgress('downloading');
-      } else if (ev.state === 6 && onProgress) {
-        onProgress('installing');
-      }
-    }).then((h) => { handle = h; });
-    B.installGoogleBarcodeScannerModule().catch(() => {
-      handle?.remove();
-      resolve({ ok: false, reason: 'install_failed' });
-    });
-    if (onProgress) onProgress('downloading');
-  });
+// Sichert CAMERA-Permission. Wenn noch nicht gefragt: System-Dialog.
+// Wenn schon denied: kein zweiter Dialog moeglich (System-Verhalten) → return false.
+async function ensureCameraPermission(B) {
+  const status = await B.checkPermissions();
+  if (status.camera === 'granted' || status.camera === 'limited') return true;
+  if (status.camera === 'denied') return false;
+  const req = await B.requestPermissions();
+  return req.camera === 'granted' || req.camera === 'limited';
 }
 
-// Ruft den Scanner auf. Rueckgabe:
-//   { rawValue }               -> QR erfolgreich erkannt
-//   { canceled: true }         -> User hat Scanner abgebrochen (kein Barcode)
-//   { error: 'install_failed' }-> Play-Services-Modul-Install fehlgeschlagen
-//   { error: '<message>' }     -> sonstiger Fehler
-// onProgress ist optional und liefert 'downloading' | 'installing' waehrend
-// der Modul-Nachinstallation, damit die UI Feedback zeigen kann.
-export async function scanOnce({ onProgress } = {}) {
+let activeOverlay = null;
+function mountOverlay(onCancel) {
+  activeOverlay = document.createElement('div');
+  activeOverlay.className = 'qr-scan-overlay';
+  activeOverlay.innerHTML = `
+    <div class="qr-scan-frame" aria-hidden="true"></div>
+    <p class="qr-scan-hint">QR-Code in den Rahmen halten</p>
+    <button class="qr-scan-cancel" type="button">Abbrechen</button>
+  `;
+  document.body.appendChild(activeOverlay);
+  activeOverlay.querySelector('.qr-scan-cancel')?.addEventListener('click', onCancel);
+}
+function unmountOverlay() {
+  if (activeOverlay?.parentNode) activeOverlay.parentNode.removeChild(activeOverlay);
+  activeOverlay = null;
+}
+
+// Ruft den Scanner mit Kamera-Preview auf.
+//   { rawValue }               -> QR erkannt
+//   { canceled: true }         -> User hat den Abbrechen-Button geklickt
+//   { error: 'permission_denied' | 'not_native' | '<msg>' }
+export async function scanOnce() {
+  if (!isScannerAvailable()) return { error: 'not_native' };
   const B = await loadPlugin();
-  const modReady = await ensureGoogleScannerModule(B, onProgress);
-  if (!modReady.ok) return { error: modReady.reason || 'module_unavailable' };
-  try {
-    const result = await B.scan({ formats: ['QR_CODE'] });
-    const first = result?.barcodes?.[0];
-    if (first?.rawValue) return { rawValue: first.rawValue };
-    return { canceled: true };
-  } catch (e) {
-    return { error: String(e && e.message || e) };
-  }
+
+  const granted = await ensureCameraPermission(B);
+  if (!granted) return { error: 'permission_denied' };
+
+  // WebView transparent + Body-Content unsichtbar (per CSS via .barcode-scanner-active).
+  document.documentElement.classList.add('barcode-scanner-active');
+  document.body.classList.add('barcode-scanner-active');
+
+  let listener = null;
+  const result = await new Promise((resolve) => {
+    // Listener BEVOR startScan, sonst verpasst er den ersten Barcode-Event.
+    B.addListener('barcodeScanned', (event) => {
+      const b = event?.barcode;
+      if (b?.rawValue) resolve({ rawValue: b.rawValue });
+    }).then((h) => { listener = h; });
+
+    mountOverlay(() => resolve({ canceled: true }));
+
+    B.startScan({ formats: ['QR_CODE'] }).catch((e) => {
+      resolve({ error: String(e && e.message || e) });
+    });
+  });
+
+  // Cleanup unabhaengig vom Ausgang.
+  if (listener) await listener.remove().catch(() => {});
+  await B.stopScan().catch(() => {});
+  unmountOverlay();
+  document.documentElement.classList.remove('barcode-scanner-active');
+  document.body.classList.remove('barcode-scanner-active');
+
+  return result;
 }

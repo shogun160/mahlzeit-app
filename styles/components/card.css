@@ -39,14 +39,18 @@
   background: var(--md-sys-color-surface-container-low);
 }
 
-/* Portion-Stepper als Overlay oben rechts auf dem Bild.
-   Frosted-Glass Look wie die Makro-Pills, damit er auch über bunte Motive lesbar ist.
-   Bei selected Card wechselt er auf denselben primary-Look wie die kcal-Pille. */
+/* Overlay oben rechts: Favoriten-Herz-Pille + Portion-Stepper nebeneinander.
+   Beide Pillen sind "persoenliche Wahl" (mag ich das + wieviel koche ich davon)
+   und gruppieren sich damit in einer eigenen Zone, waehrend die Makros unten
+   die reine Naehrwert-Info bleiben. */
 .day-card__portion-overlay {
   position: absolute;
   top: 10px;
   right: 10px;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 /* Edit-Pille oben links: öffnet das Dish-Picker-Overlay für diesen Tag. Optik
@@ -196,35 +200,39 @@
   color: color-mix(in srgb, var(--md-sys-color-on-primary) 75%, transparent);
 }
 
-/* Favoriten-Pille rechts neben Fett — quadratisch, nur Icon. Off: frosted
-   wie die anderen Makros (explizit gesetzt, damit die Button-Reset-Styles
-   nicht dazwischenkommen). On: primary bg wie kcal (unten in .is-on).
-   Als <button> mit reset-Styles (border 0, cursor pointer, kein tap-highlight). */
-.makro-pill--fav {
-  min-width: 0;
-  width: 28px;
-  height: 24px;
-  padding: 0;
+/* Favoriten-Pille im oberen Overlay, links neben dem Portion-Stepper.
+   Groesse auf Portion-Pillen-Hoehe abgestimmt (~26px), damit beide Overlay-
+   Elemente auf gleicher Baseline sitzen. Off: frosted-glass, On: primary. */
+.fav-pill {
+  pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
   border: 0;
+  border-radius: 50%;
   background: var(--card-pill-glass);
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
   color: var(--md-sys-color-on-glass);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease, color 120ms ease, transform 120ms ease;
 }
-.makro-pill--fav svg {
+.fav-pill svg {
   width: 16px;
   height: 16px;
+  display: block;
 }
-.makro-pill--fav.is-on {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 78%, transparent);
+.fav-pill.is-on {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
   color: var(--md-sys-color-on-primary);
 }
-.makro-pill--fav:active {
-  transform: scale(0.92);
+.fav-pill:active {
+  transform: scale(0.94);
 }
 
 .day-card__body {

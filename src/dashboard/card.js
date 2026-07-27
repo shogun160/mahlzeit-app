@@ -61,6 +61,13 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
         </button>
       </div>
       <div class="day-card__portion-overlay">
+        <button class="fav-pill ${isFavorite(dish.id) ? 'is-on' : ''}"
+                type="button"
+                data-action="toggle-favorite"
+                aria-pressed="${isFavorite(dish.id)}"
+                aria-label="${isFavorite(dish.id) ? 'Favorit entfernen' : 'Als Favorit markieren'}">
+          ${isFavorite(dish.id) ? ICON_FAV_FILL : ICON_FAV_OUTLINE}
+        </button>
         <div class="stepper stepper--pill" role="group" aria-label="Portionen für ${day}">
           <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -76,13 +83,6 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
         <span class="makro-pill makro-pill--p" aria-hidden="true">${protein}<span class="unit"> g P</span></span>
         <span class="makro-pill makro-pill--kh" aria-hidden="true">${carbs}<span class="unit"> g KH</span></span>
         <span class="makro-pill makro-pill--f" aria-hidden="true">${fat}<span class="unit"> g F</span></span>
-        <button class="makro-pill makro-pill--fav ${isFavorite(dish.id) ? 'is-on' : ''}"
-                type="button"
-                data-action="toggle-favorite"
-                aria-pressed="${isFavorite(dish.id)}"
-                aria-label="${isFavorite(dish.id) ? 'Favorit entfernen' : 'Als Favorit markieren'}">
-          ${isFavorite(dish.id) ? ICON_FAV_FILL : ICON_FAV_OUTLINE}
-        </button>
       </div>
     </div>
     <div class="day-card__body">
