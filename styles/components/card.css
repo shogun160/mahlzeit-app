@@ -197,7 +197,8 @@
 }
 
 /* Favoriten-Pille rechts neben Fett — quadratisch, nur Icon. Off: frosted
-   wie die anderen Makros (default .makro-pill), On: primary bg wie kcal.
+   wie die anderen Makros (explizit gesetzt, damit die Button-Reset-Styles
+   nicht dazwischenkommen). On: primary bg wie kcal (unten in .is-on).
    Als <button> mit reset-Styles (border 0, cursor pointer, kein tap-highlight). */
 .makro-pill--fav {
   min-width: 0;
@@ -208,6 +209,8 @@
   align-items: center;
   justify-content: center;
   border: 0;
+  background: var(--card-pill-glass);
+  color: var(--md-sys-color-on-glass);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 120ms ease, color 120ms ease, transform 120ms ease;
@@ -216,8 +219,10 @@
   width: 16px;
   height: 16px;
 }
-/* On-Zustand: Background bleibt frosted-glass wie die anderen Makros —
-   Aktiv-Signal traegt allein das gefuellte Herz-Icon. */
+.makro-pill--fav.is-on {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 78%, transparent);
+  color: var(--md-sys-color-on-primary);
+}
 .makro-pill--fav:active {
   transform: scale(0.92);
 }
