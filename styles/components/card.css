@@ -303,6 +303,13 @@
   background: transparent;
 }
 
+/* Selected: nur das Liste-Icon (toggle-selected) wechselt auf primary — Text
+   bleibt neutral. Zusammen mit dem filled shopping_bag ist das Icon der
+   punktgenaue Aktiv-Signal-Traeger. */
+.day-card--selected .action-btn[data-action="toggle-selected"] .action-btn__icon {
+  color: var(--md-sys-color-primary);
+}
+
 .action-btn:active {
   transform: scale(0.98);
 }
