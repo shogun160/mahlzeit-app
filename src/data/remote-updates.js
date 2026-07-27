@@ -27,4 +27,36 @@ export function checkSchemaVersion(remoteJson, expectedVersion) {
   return null;
 }
 
-// Wird in spaeteren Tasks um fetchRemoteJsons + performImport erweitert.
+// Fetcher fuer beide JSON-Dateien parallel. Nutzt native fetch() (in Node 20+
+// verfuegbar, in Browsern eh Standard, in Capacitor-WebViews ebenfalls).
+//
+// Rueckgabe im Erfolgsfall:
+//   { ok: true, dishes: <parsedJson>, ingredients: <parsedJson> }
+// Im Fehlerfall:
+//   { ok: false, error: 'NETWORK' | 'PARSE' | 'SCHEMA_TOO_NEW' | 'SCHEMA_TOO_OLD' | 'SCHEMA_MISSING' }
+//
+// Der Aufrufer entscheidet, wie das UX auf die Fehler reagiert.
+export async function fetchRemoteJsons() {
+  let dishesJson;
+  let ingredientsJson;
+
+  try {
+    const [dishesRes, ingredientsRes] = await Promise.all([
+      fetch(dishesUrl, { cache: 'no-store' }),
+      fetch(ingredientsUrl, { cache: 'no-store' }),
+    ]);
+    if (!dishesRes.ok || !ingredientsRes.ok) return { ok: false, error: 'NETWORK' };
+    dishesJson = await dishesRes.json();
+    ingredientsJson = await ingredientsRes.json();
+  } catch (_) {
+    return { ok: false, error: 'NETWORK' };
+  }
+
+  // Schema-Checks.
+  const dishesErr = checkSchemaVersion(dishesJson, SCHEMA_VERSION_DISHES);
+  const ingredientsErr = checkSchemaVersion(ingredientsJson, SCHEMA_VERSION_INGREDIENTS);
+  const err = dishesErr || ingredientsErr;
+  if (err) return { ok: false, error: err };
+
+  return { ok: true, dishes: dishesJson, ingredients: ingredientsJson };
+}
