@@ -216,10 +216,8 @@
   width: 16px;
   height: 16px;
 }
-.makro-pill--fav.is-on {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 78%, transparent);
-  color: var(--md-sys-color-on-primary);
-}
+/* On-Zustand: Background bleibt frosted-glass wie die anderen Makros —
+   Aktiv-Signal traegt allein das gefuellte Herz-Icon. */
 .makro-pill--fav:active {
   transform: scale(0.92);
 }
