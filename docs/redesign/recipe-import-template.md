@@ -1,3 +1,12 @@
+> ⚠️ **Verworfen** — dieses Template war für den File-Picker-Import-Ansatz gedacht (siehe [`backlog.md`](backlog.md) → „Rezept-Import (File-Picker) — verworfen").
+>
+> Für aktuelle Contribution:
+> - Schema-Referenz: [`docs/recipe-schema.md`](../recipe-schema.md)
+> - Bild-Prompt: [`docs/recipe-image-prompt.md`](../recipe-image-prompt.md)
+> - Contribution-Guide: [`CONTRIBUTING.md`](../../CONTRIBUTING.md)
+
+---
+
 # Rezept-Import-Template
 
 Vorlage für die im Backlog geplante Rezept-Import-Funktion (siehe [`backlog.md`](backlog.md#rezept-import)). Zwei Bausteine:

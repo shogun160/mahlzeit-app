@@ -77,12 +77,19 @@ android/            Capacitor-generiertes Android-Projekt
 www/                Vite-Build-Output
 ```
 
-## Rezepte hinzufügen
+## Rezepte beisteuern
 
-1. Zutaten prüfen: existiert die Zutat schon in [`src/data/ingredients.json`](src/data/ingredients.json)? Wenn ja, den vorhandenen Key wiederverwenden — keine Duplikate anlegen.
-2. Neues Gericht in [`src/data/dishes.json`](src/data/dishes.json) ergänzen: ID, Name, Küche, Nährwerte, Zutaten-Liste mit `key` + `grams`, Zubereitungs-Schritte.
-3. Bild als JPG unter `public/assets/dishes/dish-<id>.jpg` ablegen (empfohlen ~1200×800).
-4. `npm run build && npx cap sync`, dann APK neu bauen.
+Neue Rezepte sind willkommen! Zwei Wege:
+
+- **Mit Git:** Pull Request gegen `main`. Details in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- **Ohne Git:** Issue via Formular (Issues → New Issue → „Rezept-Vorschlag").
+
+Nach Merge landet das Rezept beim nächsten Repo-Update-Check der App automatisch bei allen Usern.
+
+Bild-Standard und JSON-Schema:
+
+- Bild-Prompt: [`docs/recipe-image-prompt.md`](docs/recipe-image-prompt.md)
+- Rezept-Schema: [`docs/recipe-schema.md`](docs/recipe-schema.md)
 
 ## Dokumentation
 
