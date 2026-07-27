@@ -2329,6 +2329,93 @@
         "Honig am Ende unterrühren, mit Reis servieren."
       ],
       "cuisineGroup": "asian"
+    },
+    {
+      "id": 33,
+      "name": "Adana-Style Pute-Köfte mit Bulgur & Ezme",
+      "cuisine": "Türkisch",
+      "cooktime": 25,
+      "kcal": 931,
+      "p": 76,
+      "kh": 73,
+      "f": 40,
+      "tags": [
+        "contains-meat",
+        "contains-lactose",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "key": "putenhack",
+          "grams": 300,
+          "note": "~7 % Fett, roh"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 30,
+          "note": "fein gerieben"
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6,
+          "note": "gepresst"
+        },
+        {
+          "key": "petersilie",
+          "grams": 5,
+          "note": "glatt, gehackt"
+        },
+        {
+          "key": "gewuerz_paprika_edelsuess",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_chili",
+          "grams": 0.5
+        },
+        {
+          "key": "olivenoel",
+          "grams": 9,
+          "note": "6 g braten, 3 g im Salat"
+        },
+        {
+          "key": "bulgur",
+          "grams": 70
+        },
+        {
+          "key": "tomate",
+          "grams": 100
+        },
+        {
+          "key": "gurke",
+          "grams": 50
+        },
+        {
+          "key": "paprika",
+          "grams": 50,
+          "note": "rot"
+        },
+        {
+          "key": "zitrone_saft",
+          "grams": 10
+        },
+        {
+          "key": "feta_schaf",
+          "grams": 30
+        }
+      ],
+      "steps": [
+        "Bulgur in doppelter Menge Wasser aufkochen, Hitze runter, ca. 12 Min. zugedeckt quellen lassen.",
+        "Putenhack mit fein geriebener Zwiebel, gepresstem Knoblauch, gehackter Petersilie, Paprikapulver, Kreuzkümmel, Chili und Salz gründlich verkneten. Zu länglichen Köfte formen.",
+        "Olivenöl (6 g) in einer Pfanne erhitzen, Köfte von allen Seiten braten (8–10 Min.), bis durchgegart.",
+        "Tomate, Gurke und Paprika fein würfeln, mit Zitronensaft und restlichem Olivenöl (3 g) vermengen. Mit Salz und Chili abschmecken.",
+        "Bulgur, Köfte und Ezme-Salat auf den Teller, Feta darüber zerbröckeln."
+      ],
+      "cuisineGroup": "middleEast"
     }
   ]
 }
