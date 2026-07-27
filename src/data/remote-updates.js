@@ -12,7 +12,7 @@ import {
 } from './remote-config.js';
 import { state, saveState } from '../state.js';
 import { imageCache } from '../util/image-cache.js';
-import { mergeRemote } from './dishes.js';
+import { mergeRemote, rebuildDishes } from './dishes.js';
 import dishesData from './dishes.json' with { type: 'json' };
 import ingredientsData from './ingredients.json' with { type: 'json' };
 
@@ -156,6 +156,11 @@ export async function performImport({ onProgress } = {}) {
     if (!(key in bundledIngredients)) state.remoteIngredients[key] = ing;
   }
   state.remoteNewIds = new Set(survived);
+
+  // Live-Bindings aktualisieren: allDishes/dishesById/allDishIds sehen erst
+  // nach diesem Call die neu importierten Rezepte. Ohne rebuildDishes()
+  // wuerden Picker, Reroll, Detail-Sheet den Import ignorieren.
+  rebuildDishes();
 
   // Bilder sequentiell downloaden.
   onProgress?.({ phase: 'images', current: 0, total: survived.length });

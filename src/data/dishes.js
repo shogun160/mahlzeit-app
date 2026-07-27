@@ -5,14 +5,20 @@ import { state } from '../state.js';
 // Kanonische Zutaten-Datenbank (single source of truth für label, cat, unit,
 // size, note, per_100g Makros). Ein Ingredient-Key darf App-weit nur einmal
 // definiert sein — Änderungen hier ziehen automatisch in alle Rezepte durch.
-export const ingredientsDb = ingredientsData.ingredients;
+// Bundled-Registry; Remote-Ingredients werden pro Rebuild dazu gemergt.
+const bundledIngredients = ingredientsData.ingredients;
+
+// Merged Ingredients (bundled + remote) — wird bei jedem rebuildDishes() neu
+// berechnet. Nur intern genutzt (fuer enrichIngredient). Consumer verwenden
+// die pro-dish enriched-Struktur.
+let mergedIngredients = { ...bundledIngredients };
 
 // Dish-Ingredients werden beim Laden angereichert: das JSON speichert nur
 // {key, grams, note?}, hier werden label, cat, unit, size und die konkreten
 // Makros (per_100g × grams) aus der DB dazugelegt. Consumer (Card, Detail-Sheet,
 // Shopping-Liste) sehen weiterhin dieselben Felder wie vor der DB-Migration.
 function enrichIngredient(ing) {
-  const entry = ingredientsDb[ing.key];
+  const entry = mergedIngredients[ing.key];
   if (!entry) {
     // Sollte nach dem Big-Bang-Refactor nicht mehr vorkommen. Wenn doch:
     // hart failen macht den Fehler sichtbar statt still falsche Werte zu liefern.
@@ -42,13 +48,44 @@ function enrichIngredient(ing) {
   };
 }
 
-// Alle Dishes einmalig anreichern (immutable, wird nicht mehr geändert).
-export const allDishes = dishesData.dishes.map((d) => ({
-  ...d,
-  ingredients: d.ingredients.map(enrichIngredient),
-}));
-export const dishesById = new Map(allDishes.map((d) => [d.id, d]));
-export const allDishIds = allDishes.map((d) => d.id);
+// Live-Bindings: nach rebuildDishes() sehen alle Importer die aktualisierten
+// Werte (ESM export-let-Semantik). Consumer greifen weiter direkt auf die
+// Namen zu — nur der Inhalt aendert sich, wenn Remote-Rezepte importiert oder
+// beim Start aus dem persistierten State geladen werden.
+export let allDishes = enrichDishes(dishesData.dishes);
+export let dishesById = new Map(allDishes.map((d) => [d.id, d]));
+export let allDishIds = allDishes.map((d) => d.id);
+
+function enrichDishes(rawDishes) {
+  return rawDishes.map((d) => ({
+    ...d,
+    ingredients: d.ingredients.map(enrichIngredient),
+  }));
+}
+
+// Mergt bundled + persistierte Remote-Rezepte/Zutaten und rebuildet die
+// exportierten Live-Bindings. Wird aufgerufen:
+//   - beim App-Start nach loadState() (Persisted-Import wieder aktivieren)
+//   - nach jedem erfolgreichen performImport (frische Rezepte einblenden)
+// Ohne Aufruf sehen Consumer nur bundled — Remote-Import bleibt unsichtbar.
+export function rebuildDishes() {
+  const remoteDishes = Array.isArray(state.remoteDishes) ? state.remoteDishes : [];
+  const remoteIngredients = state.remoteIngredients && typeof state.remoteIngredients === 'object'
+    ? state.remoteIngredients
+    : {};
+  const merged = mergeRemote({
+    bundled: dishesData.dishes,
+    bundledIngredients,
+    remoteDishes,
+    remoteIngredients,
+  });
+  // mergedIngredients zuerst setzen — enrichIngredient liest daraus.
+  mergedIngredients = merged.ingredients;
+  const enriched = enrichDishes(merged.dishes);
+  allDishes = enriched;
+  dishesById = new Map(enriched.map((d) => [d.id, d]));
+  allDishIds = enriched.map((d) => d.id);
+}
 
 // Fisher-Yates: mischt Array in-place. Wir arbeiten auf einer Kopie.
 export function shuffled(arr) {

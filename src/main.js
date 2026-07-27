@@ -18,6 +18,7 @@ import { showToast } from './util/toast.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
+import { rebuildDishes } from './data/dishes.js';
 import { setNativeNightMode } from './native/theme-plugin.js';
 import { installSliderScrollGuard } from './util/slider-guard.js';
 import { Capacitor } from '@capacitor/core';
@@ -43,6 +44,10 @@ const bottomNavRoot = document.getElementById('bottom-nav');
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
 // renderDashboard() beim ersten Render ein frisches Assignment.
 loadState();
+// Persisted Remote-Rezepte in die exportierten Dish-Bindings uebernehmen,
+// bevor Views auf allDishes/dishesById zugreifen. Ohne diesen Call wuerde
+// die App nach einem Import-Restart nur die bundled Dishes sehen.
+rebuildDishes();
 // remoteImageFailures hat 24h-TTL: beim Start wird die Menge immer geleert,
 // damit fehlgeschlagene Bild-Downloads am naechsten Tag automatisch neu
 // versucht werden. loadState() setzt das Feld schon auf ein leeres Set,
