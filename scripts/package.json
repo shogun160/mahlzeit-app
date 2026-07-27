@@ -1,0 +1,13 @@
+{
+  "name": "mahlzeit-scripts",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Validator-Scripts fuer PR-Checks. Isoliert von der App-package.json (Sicherheit: die Github Action installiert nur diese Deps, nicht die App-Deps).",
+  "scripts": {
+    "test": "node validate-recipe.test.mjs"
+  },
+  "dependencies": {
+    "sharp": "^0.35.0"
+  }
+}
