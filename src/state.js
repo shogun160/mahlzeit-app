@@ -97,6 +97,17 @@ export const state = {
   dishBag: {},
   view: 'dashboard',
   collapsedCategories: new Set(),
+  // Remote-Rezept-Import (Session 21). Alle Slots werden in mahlzeit-state-v2
+  // persistiert (Guardrail 2 bleibt intakt — nur zusaetzliche Felder, kein
+  // Storage-Key-Wechsel). Sets werden wie collapsedCategories als Array
+  // serialisiert.
+  remoteDishes: [],                // Dish[] wie in dishes.json (ohne enrichment — beim Load wird angereichert)
+  remoteIngredients: {},           // { key -> Ingredient } wie in ingredients.json
+  remoteUpdatedAt: null,           // ISO-String vom letzten erfolgreichen Fetch
+  remoteHasUpdates: false,         // vom Auto-Check gesetzt, nach Oeffnen des Settings-Sheets gecleart
+  remoteLastFetchAt: null,         // ISO-String fuer 60s-Soft-Rate-Limit
+  remoteNewIds: new Set(),         // IDs die aktuell als "Neu" gelten
+  remoteImageFailures: new Set(),  // IDs deren Bild-Download failed hat (TTL 24h — beim Start gecleart)
   settings: {
     defaultPortions: 1,   // Default für neu ausgeloste Gerichte
     maxCookTime: COOKTIME_MAX, // in Minuten, Filter fürs Reroll
@@ -332,6 +343,14 @@ export function saveState() {
       dishBag: state.dishBag,
       view: state.view,
       collapsedCategories: Array.from(state.collapsedCategories),
+      remoteDishes: state.remoteDishes,
+      remoteIngredients: state.remoteIngredients,
+      remoteUpdatedAt: state.remoteUpdatedAt,
+      remoteHasUpdates: state.remoteHasUpdates,
+      remoteLastFetchAt: state.remoteLastFetchAt,
+      remoteNewIds: Array.from(state.remoteNewIds),
+      // remoteImageFailures wird bewusst NICHT persistiert (TTL 24h,
+      // beim naechsten Start ohnehin cleared).
       settings: state.settings,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(snapshot));
@@ -346,6 +365,16 @@ export function saveState() {
 // profiles[0] mit id "u1"; profiles[]/activeProfileId werden hinzugefuegt.
 export function loadState() {
   try {
+    // Remote-Slots immer zuruecksetzen, damit Fresh Install (kein Storage)
+    // saubere Defaults hat statt veralteter In-Memory-Werte.
+    state.remoteDishes = [];
+    state.remoteIngredients = {};
+    state.remoteUpdatedAt = null;
+    state.remoteHasUpdates = false;
+    state.remoteLastFetchAt = null;
+    state.remoteNewIds = new Set();
+    state.remoteImageFailures = new Set();
+
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return false;
     const parsed = JSON.parse(raw);
@@ -359,6 +388,13 @@ export function loadState() {
     state.dishBag = parsed.dishBag || {};
     state.view = VIEWS.includes(parsed.view) ? parsed.view : 'dashboard';
     state.collapsedCategories = new Set(Array.isArray(parsed.collapsedCategories) ? parsed.collapsedCategories : []);
+    state.remoteDishes = Array.isArray(parsed.remoteDishes) ? parsed.remoteDishes : [];
+    state.remoteIngredients = (parsed.remoteIngredients && typeof parsed.remoteIngredients === 'object') ? parsed.remoteIngredients : {};
+    state.remoteUpdatedAt = typeof parsed.remoteUpdatedAt === 'string' ? parsed.remoteUpdatedAt : null;
+    state.remoteHasUpdates = parsed.remoteHasUpdates === true;
+    state.remoteLastFetchAt = typeof parsed.remoteLastFetchAt === 'string' ? parsed.remoteLastFetchAt : null;
+    state.remoteNewIds = new Set(Array.isArray(parsed.remoteNewIds) ? parsed.remoteNewIds : []);
+    state.remoteImageFailures = new Set();  // TTL 24h: beim Start immer frisch
 
     // Settings: mergen mit Defaults, damit neue Slots beim Migrate nicht undefined sind.
     const loadedSettings = parsed.settings && typeof parsed.settings === 'object' ? parsed.settings : {};
