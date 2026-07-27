@@ -14,14 +14,24 @@ export function buildRezepteSummary() {
 }
 
 // HTML-Body der Section: Primary-Label + Secondary (Timestamp), rechts Status + Icon-Button.
+// Wenn ein Update ansteht (state.remoteHasUpdates), wird der Status als
+// klickbarer Button gerendert — der User kann direkt in den Import-Flow
+// springen ohne den Refresh-Icon-Umweg.
 export function renderRezepteSectionBody() {
   const secondary = state.remoteUpdatedAt
     ? `Zuletzt geprüft: ${formatDateTime(state.remoteUpdatedAt)}`
     : 'Noch nicht geprüft';
   const status = buildStatusLabel();
-  const statusHtml = status
-    ? `<span class="rezepte-import__status ${state.remoteHasUpdates ? 'rezepte-import__status--updates' : ''}">${status}</span>`
-    : '';
+  let statusHtml = '';
+  if (status) {
+    if (state.remoteHasUpdates) {
+      statusHtml = `<button type="button"
+                            class="rezepte-import__status rezepte-import__status--updates rezepte-import__status--action"
+                            data-action="rezepte-open-update">${status}</button>`;
+    } else {
+      statusHtml = `<span class="rezepte-import__status">${status}</span>`;
+    }
+  }
   return `
     <div class="settings-row rezepte-import-row">
       <div class="settings-row__label">
@@ -54,19 +64,34 @@ function buildStatusLabel() {
 // Element gestorben).
 let lastWireCallbacks = null;
 
-// Wird nach dem Sheet-Rendering aufgerufen; verdrahtet den Button.
+// Wird nach dem Sheet-Rendering aufgerufen; verdrahtet Refresh-Icon und
+// (falls sichtbar) den "Update verfügbar"-Status-Button.
 export function wireRezepteSection(root, callbacks = {}) {
   lastWireCallbacks = { root, ...callbacks };
   const { onOpenUpdateSheet, onToast } = callbacks;
-  const btn = root.querySelector('[data-action="rezepte-check"]');
-  if (!btn) return;
-  btn.addEventListener('click', async () => {
-    if (!canManualFetch()) {
-      onToast?.('Bereits gerade geprüft, keine neuen Rezepte.');
-      return;
-    }
-    onOpenUpdateSheet?.();
-  });
+
+  const refreshBtn = root.querySelector('[data-action="rezepte-check"]');
+  if (refreshBtn) {
+    refreshBtn.addEventListener('click', async () => {
+      // Rate-Limit-Bypass wenn schon ein Update bekannt ist — der Fetch
+      // laeuft trotzdem (und findet die neuen Rezepte auch beim zweiten
+      // Klick), aber der Toast "keine neuen Rezepte" waere hier falsch.
+      if (!canManualFetch() && !state.remoteHasUpdates) {
+        onToast?.('Bereits gerade geprüft, keine neuen Rezepte.');
+        return;
+      }
+      onOpenUpdateSheet?.();
+    });
+  }
+
+  // "Update verfügbar" als Status-Button: kein Rate-Limit-Check noetig,
+  // wir wissen ja bereits dass ein Update wartet.
+  const statusBtn = root.querySelector('[data-action="rezepte-open-update"]');
+  if (statusBtn) {
+    statusBtn.addEventListener('click', () => {
+      onOpenUpdateSheet?.();
+    });
+  }
 }
 
 // Aktualisiert die Row-DOM im offenen Settings-Sheet ohne renderShell().

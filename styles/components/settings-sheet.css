@@ -1060,3 +1060,23 @@
 .rezepte-import__status--updates {
   color: var(--md-sys-color-primary);
 }
+/* Wenn Status als Button (data-action="rezepte-open-update"): Browser-Default-
+   Button-Styles zuruecksetzen und tap-friendly machen. Optisch identisch zum
+   Text, aber klickbar mit Cursor-Pointer. */
+button.rezepte-import__status--action {
+  background: none;
+  border: 0;
+  padding: 6px 8px;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  -webkit-tap-highlight-color: transparent;
+}
+button.rezepte-import__status--action:active {
+  opacity: 0.7;
+}
