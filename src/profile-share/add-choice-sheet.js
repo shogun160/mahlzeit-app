@@ -34,7 +34,7 @@ export function openAddChoiceSheet({ onManualChoice, onImportChoice }) {
           <div class="add-choice-sheet__actions">
             <button class="btn btn--primary add-choice-sheet__btn" type="button" data-action="manual">Manuell einrichten</button>
             <button class="btn btn--secondary add-choice-sheet__btn" type="button" data-action="scan"${scanEnabled ? '' : ' disabled'}>${scanLabel}</button>
-            <button class="btn btn--text add-choice-sheet__btn" type="button" data-action="paste">Text einfügen</button>
+            <button class="btn btn--secondary add-choice-sheet__btn" type="button" data-action="paste">Text einfügen</button>
           </div>
         </div>
       </div>
