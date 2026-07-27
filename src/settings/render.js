@@ -11,6 +11,7 @@ import { changeDefaultPortions } from '../dashboard/portions.js';
 import { GOALS } from '../nutrition/target.js';
 import { showToast } from '../util/toast.js';
 import { renderRezepteSectionBody, buildRezepteSummary, wireRezepteSection } from './rezepte-section.js';
+import { openUpdateSheet } from './update-sheet.js';
 
 const TRANSITION_MS = 250;
 const SWIPE_THRESHOLD_PX = 55;
@@ -608,10 +609,7 @@ function attachHandlers() {
   });
 
   wireRezepteSection(rootEl, {
-    onOpenUpdateSheet: () => {
-      // wird in Task A.11 implementiert
-      console.log('Update-Sheet wird in Task A.11 implementiert');
-    },
+    onOpenUpdateSheet: () => openUpdateSheet(),
     onToast: (msg) => showToast(msg),
   });
 

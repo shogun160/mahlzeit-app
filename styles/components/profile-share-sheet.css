@@ -1,7 +1,8 @@
-/* Gemeinsame Basis fuer Share-, Import- und Add-Choice-Sheets. */
+/* Gemeinsame Basis fuer Share-, Import-, Add-Choice- und Update-Sheets. */
 .share-sheet-overlay,
 .import-sheet-overlay,
-.add-choice-overlay {
+.add-choice-overlay,
+.update-sheet-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, .55);
@@ -15,7 +16,8 @@
 }
 .share-sheet-overlay.is-open,
 .import-sheet-overlay.is-open,
-.add-choice-overlay.is-open {
+.add-choice-overlay.is-open,
+.update-sheet-overlay.is-open {
   opacity: 1;
 }
 .share-sheet,
@@ -40,7 +42,8 @@
 }
 .share-sheet__handle,
 .import-sheet__handle,
-.add-choice-sheet__handle {
+.add-choice-sheet__handle,
+.update-sheet__handle {
   width: 36px;
   height: 4px;
   background: var(--md-sys-color-outline-variant, #ccc);
@@ -241,4 +244,67 @@ body.barcode-scanner-active > *:not(.qr-scan-overlay) {
   font-weight: 600;
   cursor: pointer;
   margin-bottom: max(24px, env(safe-area-inset-bottom, 24px));
+}
+
+/* Update-Sheet: Rezept-Import-Flow */
+.update-sheet {
+  background: var(--md-sys-color-surface, #fff);
+  color: var(--md-sys-color-on-surface, #111);
+  width: 100%;
+  max-width: 480px;
+  border-radius: 24px 24px 0 0;
+  padding: 8px 20px 24px;
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, .2);
+  transform: translateY(24px);
+  transition: transform .2s ease;
+  max-height: 92vh;
+  overflow: auto;
+}
+.update-sheet-overlay.is-open .update-sheet {
+  transform: translateY(0);
+}
+.update-sheet__body {
+  padding: 0;
+}
+.update-sheet__title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.update-sheet__list {
+  list-style: none;
+  padding: 0;
+  margin: 12px 0;
+}
+.update-sheet__item {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.update-sheet__item:last-child {
+  border-bottom: none;
+}
+.update-sheet__name {
+  font-size: 0.9375rem;
+  color: var(--md-sys-color-on-surface);
+}
+.update-sheet__cuisine {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.update-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+.update-sheet__warning {
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.875rem;
+  margin-top: 8px;
+  line-height: 1.4;
 }
