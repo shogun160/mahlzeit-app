@@ -10,6 +10,7 @@
 // akzeptabel; ein spaetere Konsolidierung waere ein Refactor eigener Session.
 
 import { state, removeProfile, setActiveProfileId } from '../state.js';
+import { openProfileShareSheet } from '../profile-share/share-sheet.js';
 import {
   ACTIVITY_LEVELS,
   GOALS,
@@ -570,11 +571,8 @@ function attachHandlers() {
     });
   }
 
-  // Share-Button — Dynamic-Import damit qrcode + @capacitor/share nur bei Bedarf geladen werden
   rootEl.querySelector('[data-action="share-profile"]')?.addEventListener('click', () => {
-    import('../profile-share/share-sheet.js').then(({ openProfileShareSheet }) => {
-      openProfileShareSheet(currentProfile);
-    });
+    openProfileShareSheet(currentProfile);
   });
 
   // Delete-Button — mit Confirm, dann Sheet schliessen + refresh
