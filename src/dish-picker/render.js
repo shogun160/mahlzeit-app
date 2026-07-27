@@ -36,7 +36,7 @@ const FILTERS = [
   { key: 'meat',   label: 'Fleisch',       group: 'diet',    test: (d) => d.tags.includes('contains-meat') },
   { key: 'fish',   label: 'Fisch',         group: 'diet',    test: (d) => d.tags.includes('contains-fish') },
   { key: 'veg',    label: 'Vegetarisch',   group: 'diet',    test: (d) => !d.tags.includes('contains-meat') && !d.tags.includes('contains-fish') },
-  { key: 'is-new', label: 'Neu', group: 'special', test: (d) => isNewDish(d.id) },
+  { key: 'is-new', label: 'Neu', group: 'neu', test: (d) => isNewDish(d.id) },
   { key: 'asian',         label: 'Asiatisch',   group: 'cuisine', test: (d) => d.cuisineGroup === 'asian' },
   { key: 'mediterranean', label: 'Mediterran',  group: 'cuisine', test: (d) => d.cuisineGroup === 'mediterranean' },
   { key: 'middleEast',    label: 'Nahost',      group: 'cuisine', test: (d) => d.cuisineGroup === 'middleEast' },
@@ -245,7 +245,7 @@ function renderFiltersSection() {
       <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'cuisine').map(chipHtml).join('')}
       </div>
-      ${state.remoteNewIds.size > 0 ? `<div class="picker-filter-row">${FILTERS.filter((f) => f.group === 'special').map(chipHtml).join('')}</div>` : ''}
+      ${state.remoteNewIds.size > 0 ? `<div class="picker-filter-row">${FILTERS.filter((f) => f.group === 'neu').map(chipHtml).join('')}</div>` : ''}
       <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'macro').map(chipHtml).join('')}
       </div>
