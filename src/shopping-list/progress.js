@@ -21,7 +21,7 @@ export function renderProgress(items) {
   const doneCount = total - openCount;
   const pct = total > 0 ? Math.round((doneCount / total) * 100) : 0;
 
-  const { hasCollapsedWithOpen, hasExpanded } = summarizeCategories(items);
+  const { hasCollapsed, hasExpanded } = summarizeCategories(items);
 
   return `
     <div class="shop-progress">
@@ -31,11 +31,11 @@ export function renderProgress(items) {
           <span class="shop-progress__of">von ${total} offen</span>
         </div>
         <div class="shop-progress__actions">
-          ${hasCollapsedWithOpen ? `
+          ${hasCollapsed ? `
             <button class="shop-progress__action"
                     type="button"
                     data-action="expand-all-shopping"
-                    aria-label="Alle offenen Kategorien aufklappen"
+                    aria-label="Alle Kategorien aufklappen"
                     title="Alle aufklappen">
               ${ICON_UNFOLD_MORE}
             </button>
@@ -57,24 +57,16 @@ export function renderProgress(items) {
   `;
 }
 
-// Aggregiert für die gerenderten Kategorien, ob Expand/Collapse aktuell etwas
-// bewirken würden. Expand: mind. eine gerenderte Kategorie ist collapsed UND
-// hat noch offene Zutaten (vollständig erledigte lassen wir zu). Collapse:
-// mind. eine gerenderte Kategorie ist derzeit expanded.
+// Fuer die gerenderten Kategorien: ist mindestens eine collapsed bzw. expanded?
+// Der Expand-Button erscheint auch im Done-State (alles abgehakt, alles
+// collapsed) — der User will die Liste wieder aufklappen koennen.
 function summarizeCategories(items) {
-  const catsInList = new Map();
-  for (const it of items) {
-    const open = state.checkedShopping.has(it.key) ? 0 : 1;
-    const entry = catsInList.get(it.cat) || { open: 0 };
-    entry.open += open;
-    catsInList.set(it.cat, entry);
-  }
-  let hasCollapsedWithOpen = false;
+  const cats = new Set(items.map((it) => it.cat));
+  let hasCollapsed = false;
   let hasExpanded = false;
-  for (const [cat, info] of catsInList) {
-    const collapsed = state.collapsedCategories.has(cat);
-    if (collapsed && info.open > 0) hasCollapsedWithOpen = true;
-    if (!collapsed) hasExpanded = true;
+  for (const cat of cats) {
+    if (state.collapsedCategories.has(cat)) hasCollapsed = true;
+    else hasExpanded = true;
   }
-  return { hasCollapsedWithOpen, hasExpanded };
+  return { hasCollapsed, hasExpanded };
 }

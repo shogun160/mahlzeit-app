@@ -63,14 +63,13 @@ export function renderShoppingList(root, { onChange }) {
     });
   });
 
-  // Expand-All: nur Kategorien mit noch offenen Zutaten aufklappen — vollständig
-  // erledigte bleiben zu (Auto-Collapse ist bewusst dorthin gefahren).
+  // Expand-All: alle gerenderten Kategorien aufklappen — auch die vollstaendig
+  // erledigten. Der Button erscheint auch im Done-State (alles abgehakt +
+  // collapsed) und muss dort tatsaechlich alles wieder oeffnen koennen.
   const expandAllBtn = root.querySelector('[data-action="expand-all-shopping"]');
   if (expandAllBtn) {
     expandAllBtn.addEventListener('click', () => {
-      for (const it of items) {
-        if (!state.checkedShopping.has(it.key)) state.collapsedCategories.delete(it.cat);
-      }
+      for (const it of items) state.collapsedCategories.delete(it.cat);
       onChange();
     });
   }
@@ -295,10 +294,10 @@ function renderDoneBanner() {
   // die neutrale Duz-Variante. escapeHtml() nicht noetig — der Name laeuft
   // schon durch den Wizard-Trim, kein HTML zugelassen.
   const name = getActiveProfile()?.name;
-  const greeting = name ? `Sauber, ${name}, du hast` : 'Sauber, du hast';
+  const greeting = name ? `Sauber ${name}, du hast` : 'Sauber du hast';
   return `
     <div class="shop-done-banner" role="status">
-      ${greeting} alles besorgt – Mahlzeit!
+      ${greeting} alles besorgt <img class="shop-done-banner__logo" src="/logo.png" alt="Mahlzeit" />
     </div>
   `;
 }

@@ -354,6 +354,18 @@
   text-align: center;
 }
 
+/* Mahlzeit-Schriftzug statt Wort — PNG dunkelgruen im Light-Mode, per
+   brightness+invert Filter auf Weiss im Dark-Mode (analog zum Header-Logo). */
+.shop-done-banner__logo {
+  height: 2.8em;
+  width: auto;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+:root[data-theme="dark"] .shop-done-banner__logo {
+  filter: brightness(0) invert(1);
+}
+
 /* Empty-State */
 .shop-empty {
   padding: 64px 24px 40px;
