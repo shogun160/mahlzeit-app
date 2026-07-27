@@ -40,15 +40,17 @@ main {
    Bottom-Nav. Die Klasse wird per JS gesetzt (siehe util/overlay-blur.js),
    weil CSS backdrop-filter auf Android WebView unzuverlaessig ist.
    Sheet-Roots (detail-sheet-root etc.) sind separate Body-Kinder und werden
-   NICHT geblurrt — sie schweben scharf ueber dem verschwommenen Content. */
+   NICHT geblurrt — sie schweben scharf ueber dem verschwommenen Content.
+   Default filter: blur(0) statt none, damit die transition zwischen 0 und
+   3 px sauber interpoliert (none → blur(3px) waere ein harter jump). */
+body > #app-header,
+body > #app,
+body > #bottom-nav {
+  filter: blur(0);
+  transition: filter 60ms ease;
+}
 body.has-open-overlay > #app-header,
 body.has-open-overlay > #app,
 body.has-open-overlay > #bottom-nav {
   filter: blur(3px);
-  transition: filter 180ms ease;
-}
-body > #app-header,
-body > #app,
-body > #bottom-nav {
-  transition: filter 180ms ease;
 }

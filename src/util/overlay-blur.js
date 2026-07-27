@@ -25,19 +25,31 @@ export function installOverlayBlur() {
     .filter(Boolean);
   if (roots.length === 0) return;
 
-  // "Offen" = nicht hidden UND hat Content. Der Content-Check faengt Roots ab
-  // die im mount() kein hidden=true setzen (z. B. update-sheet) — solange kein
-  // Sheet gerendert wurde, ist der Container leer und zaehlt nicht als offen.
+  // "Offen" = nicht hidden, hat Content, UND kein innerer overlay-Container
+  // wartet gerade auf sein Close (dh. hat `.is-open` weiter). Die is-open-
+  // Klasse wird beim closeXX() SOFORT entfernt (vor dem 250ms hidden-Timeout),
+  // damit hier der Blur schnell wegkippt statt bis zum Ende der Slide-Down-
+  // Animation zu haengen.
   const update = () => {
-    const anyOpen = roots.some((el) => !el.hidden && el.children.length > 0);
+    const anyOpen = roots.some((el) => {
+      if (el.hidden || el.children.length === 0) return false;
+      // Overlay-Elemente im Root suchen (sheet-overlay, picker-overlay,
+      // macro-overlay, settings-overlay etc.). Wenn welche da sind, muss
+      // mindestens eines is-open haben. Wenn kein overlay-Element existiert
+      // (kleinere Sheets ohne is-open-Konvention), als offen zaehlen.
+      const overlays = el.querySelectorAll('[class*="overlay"]');
+      if (overlays.length === 0) return true;
+      return Array.from(overlays).some((o) => o.classList.contains('is-open'));
+    });
     document.body.classList.toggle('has-open-overlay', anyOpen);
   };
 
   const observer = new MutationObserver(update);
   roots.forEach((el) => observer.observe(el, {
     attributes: true,
-    attributeFilter: ['hidden'],
+    attributeFilter: ['hidden', 'class'],
     childList: true,
+    subtree: true,
   }));
   update();
 }

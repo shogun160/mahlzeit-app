@@ -18,6 +18,9 @@ const ICON_EDIT = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden
 // Sitzt als Pille rechts neben Fett und togglet Lieblingsgericht-Status.
 const ICON_FAV_OUTLINE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q57 0 105.5 27t84.5 78q42-54 89-79.5T670-854q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Zm0-79q101.24-93.15 166.62-159.58Q712-426 750.5-476t54-89.13q15.5-39.13 15.5-77.87 0-65-42.5-107.5T670-793q-51.63 0-95.31 31.5Q531-730 504-660h-49q-26-69-70-101t-95-32q-65 0-107.5 42.5T140-643q0 38.74 15.5 77.87Q171-526 209.5-476t104 116.42Q378.87-293.15 480-200Zm0-296Z"/></svg>`;
 const ICON_FAV_FILL    = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q52 0 98.5 22t81.5 62q35-40 81.5-62t98.5-22q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Z"/></svg>`;
+// Material Symbol auto_awesome (Sparkles) — Marker fuer neu importierte
+// Rezepte, links neben der Fav-Pill im Portion-Overlay.
+const ICON_NEW_STAR    = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>`;
 
 // Rendert eine einzelne Day-Card als <article>-Element.
 // Erwartet:
@@ -65,6 +68,7 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
         </button>
       </div>
       <div class="day-card__portion-overlay">
+        ${isNew ? `<span class="day-card__new" aria-label="Neu importiert" title="Neu importiert">${ICON_NEW_STAR}</span>` : ''}
         <button class="fav-pill ${isFavorite(dish.id) ? 'is-on' : ''}"
                 type="button"
                 data-action="toggle-favorite"

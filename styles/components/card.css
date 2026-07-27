@@ -200,6 +200,30 @@
   color: color-mix(in srgb, var(--md-sys-color-on-primary) 75%, transparent);
 }
 
+/* Neu-Marker (Sparkles) links neben der Fav-Pill im Portion-Overlay.
+   Nur sichtbar wenn isNewDish(dish.id). Groesse matcht die Fav-Pill
+   (26x26 kreisrund), primary bg als klares "Neu"-Signal. */
+.day-card__new {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+.day-card__new svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: inherit;
+}
+
 /* Favoriten-Pille im oberen Overlay, links neben dem Portion-Stepper.
    Groesse auf Portion-Pillen-Hoehe abgestimmt (~26px), damit beide Overlay-
    Elemente auf gleicher Baseline sitzen. Off: frosted-glass, On: primary. */
