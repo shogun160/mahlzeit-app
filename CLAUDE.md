@@ -111,6 +111,11 @@ Alternativ Android Studio: Build → Generate App Bundles or APKs → Generate A
 - Änderungen die nur für den Live-Test da sind (z. B. `remote-config.js` mit Feature-Branch-URL statt `main`) werden **nicht committed**. Kommentar mit `⚠️ TEMP FUER LIVE-TEST` markieren.
 - Vor Branch-Switch oder APK-Bau: temp-Änderungen mit `git checkout -- <file>` zurücksetzen.
 
+**Rezepte (`dishes.json`) brauchen explizite User-Bestätigung:**
+- Bei neuen oder geänderten Rezepten (Zutaten, Portionsgrößen, Steps, Meta) **immer den vollständigen Entwurf vorzeigen** — kein „vermutlich passt schon"-Commit.
+- Fragen wie „welcher Cut?", „welcher Reis?", „was kommt in den Dip?" bewusst offen ansprechen statt raten. Kleine Interpretationsspielräume (z. B. Gewürz-Grammatur bei „eine Prise") sind ok, größere Entscheidungen (Zutaten-Kandidaten, Marinaden-Split, Zubereitungs-Reihenfolge) müssen bestätigt werden.
+- Erst nach explizitem „passt / commit / PR" wird gepusht — auch wenn der Validator lokal grün ist.
+
 **APK-Bau:**
 - **Nur nach expliziter Ansage „APK bauen".** Auch nach abgeschlossenem Test nicht automatisch.
 - Vor Bau: Version-Bump in `android/app/build.gradle` mit User abstimmen (versionCode + versionName).
