@@ -84,6 +84,39 @@ Alternativ Android Studio: Build → Generate App Bundles or APKs → Generate A
 - Splash / Theme: `android/app/src/main/res/values/styles.xml`
 - App-ID / SDK / Signing: `android/app/build.gradle`
 
+## Release- und Git-Workflow
+
+**Branch-Modell:**
+- `main` = Stable, produktiv (was als APK-Release rausgeht)
+- `beta` = Beta-Test-Kanal, sollte nie hinter `main` sein
+- `<feature>` (z. B. `rezept-import`) = aktive Entwicklung
+- Alte Feature-Branches (z. B. `multiuser`) = abgeschlossen, nicht mehr wechseln
+
+**Release-Flow (streng in dieser Reihenfolge):**
+1. Feature-Branch fertig entwickeln und live testen
+2. Falls `beta` hinter `origin/main`: erst `main → beta` fast-forwarden
+3. Feature-Branch → `beta` mergen (nur nach expliziter Ansage vom User)
+4. Beta-APK bauen, testen
+5. `beta → main` mergen (nach explizitem OK)
+6. Stable-APK bauen
+
+**Commit- und Push-Regeln:**
+- **Nie committen ohne expliziten User-Auftrag.** Auch nicht „defensiv nach dem Fix". Bei größeren Fixes fragen: „Commit + Push?"
+- **Push braucht dieselbe explizite Ansage** wie Commit. Ausnahme: wenn der User „commit + push" oder „mergen + pushen" in einem Auftrag sagt.
+- **Nie force-push, nie `--no-verify`, nie `--no-edit` bei rebase.**
+- **Commit-Style:** `type(scope): kurzbeschreibung` — Kleinschreibung, keine Umlaute im Text der Message (ae/oe/ue), kein Punkt am Ende, Deutsch. Beispiele: `fix(picker): neu-marker sichtbar`, `feat(recipe): adana-koefte (id 33)`.
+- **Kleine Commits.** Ein Fix = ein Commit, keine Sammel-Commits mit gemischten Themen.
+
+**Test-only Änderungen im Working-Copy:**
+- Änderungen die nur für den Live-Test da sind (z. B. `remote-config.js` mit Feature-Branch-URL statt `main`) werden **nicht committed**. Kommentar mit `⚠️ TEMP FUER LIVE-TEST` markieren.
+- Vor Branch-Switch oder APK-Bau: temp-Änderungen mit `git checkout -- <file>` zurücksetzen.
+
+**APK-Bau:**
+- **Nur nach expliziter Ansage „APK bauen".** Auch nach abgeschlossenem Test nicht automatisch.
+- Vor Bau: Version-Bump in `android/app/build.gradle` mit User abstimmen (versionCode + versionName).
+- Beta-APK aus `beta`, Stable-APK aus `main`.
+- Vor Bau prüfen: `remote-config.js` zeigt auf `main` (Prod-Content-URL).
+
 ## Guardrails
 
 Diese Regeln gelten übergreifend — nicht ändern ohne bewusste Rückfrage:
