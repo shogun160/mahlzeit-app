@@ -1,0 +1,144 @@
+/* Gemeinsame Basis fuer Share-, Import-, Welcome- und Add-Choice-Sheets. */
+.share-sheet-overlay,
+.import-sheet-overlay,
+.welcome-overlay,
+.add-choice-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity .2s ease;
+  padding: 0;
+}
+.share-sheet-overlay.is-open,
+.import-sheet-overlay.is-open,
+.welcome-overlay.is-open,
+.add-choice-overlay.is-open {
+  opacity: 1;
+}
+.share-sheet,
+.import-sheet,
+.welcome-sheet,
+.add-choice-sheet {
+  background: var(--md-sys-color-surface, #fff);
+  color: var(--md-sys-color-on-surface, #111);
+  width: 100%;
+  max-width: 560px;
+  border-radius: 24px 24px 0 0;
+  padding: 8px 20px 24px;
+  box-shadow: 0 -8px 24px rgba(0,0,0,.2);
+  transform: translateY(24px);
+  transition: transform .2s ease;
+  max-height: 92vh;
+  overflow: auto;
+}
+.share-sheet-overlay.is-open .share-sheet,
+.import-sheet-overlay.is-open .import-sheet,
+.welcome-overlay.is-open .welcome-sheet,
+.add-choice-overlay.is-open .add-choice-sheet {
+  transform: translateY(0);
+}
+.share-sheet__handle,
+.import-sheet__handle,
+.welcome-sheet__handle,
+.add-choice-sheet__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--md-sys-color-outline-variant, #ccc);
+  border-radius: 2px;
+  margin: 4px auto 12px;
+}
+.share-sheet__header,
+.import-sheet__header,
+.welcome-sheet__header,
+.add-choice-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.share-sheet__title,
+.import-sheet__title,
+.welcome-sheet__title,
+.add-choice-sheet__title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+}
+.share-sheet__close,
+.import-sheet__close,
+.welcome-sheet__close,
+.add-choice-sheet__close {
+  min-width: 48px;
+  min-height: 48px;
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  color: inherit;
+}
+.share-sheet__desc,
+.import-sheet__desc,
+.welcome-sheet__desc,
+.add-choice-sheet__desc {
+  margin: 0 0 16px;
+  color: var(--md-sys-color-on-surface-variant, #444);
+  font-size: 14px;
+  line-height: 1.4;
+}
+.share-sheet__qr-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  padding: 12px;
+  border-radius: 16px;
+  margin: 8px auto 16px;
+  width: fit-content;
+}
+.share-sheet__qr { display: block; }
+.share-sheet__qr-error {
+  color: var(--md-sys-color-error, #b3261e);
+  font-size: 14px;
+  text-align: center;
+}
+.share-sheet__fav-hint {
+  font-size: 13px;
+  color: var(--md-sys-color-on-surface-variant, #444);
+  margin: 0 0 16px;
+  text-align: center;
+}
+.share-sheet__fav-hint--warn {
+  color: var(--md-sys-color-error, #b3261e);
+}
+.share-sheet__actions,
+.import-sheet__actions,
+.welcome-sheet__actions,
+.add-choice-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.share-sheet__btn,
+.import-sheet__btn,
+.welcome-sheet__btn,
+.add-choice-sheet__btn {
+  min-height: 48px;
+  width: 100%;
+}
+.share-sheet__fallback {
+  width: 100%;
+  min-height: 96px;
+  margin-top: 12px;
+  font-family: monospace;
+  font-size: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--md-sys-color-outline-variant, #ccc);
+  background: var(--md-sys-color-surface-variant, #f5f5f5);
+  color: var(--md-sys-color-on-surface-variant, #444);
+}
