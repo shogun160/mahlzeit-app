@@ -437,3 +437,57 @@ Persistenz per bestehendem `mahlzeit-state-v2` (Guardrail 2 bleibt intakt — nu
 - Braucht Bild-Caching-Infrastruktur (Capacitor Filesystem + State-Slot fuer Remote-Referenzen) — die gleiche Fundament wie **Rezept-Import** (JSON-Rezepte per File-Picker). **Ideal zusammen in einer Session designen**, weil Bild-Handling, Merger-Logik und State-Slot geteilt werden.
 - Braucht Schema-Version-Feld in `dishes.json` + `ingredients.json` — im gleichen APK-Release ausrollen.
 - Ideal nach Rezept-Import: erst die File-Picker-Variante (unabhaengig vom Netz), dann diese Repo-Variante als Overlay. Beide teilen sich denselben Loader-Merger.
+
+## Community-Rezepte per GitHub Pull Request
+
+**Idee:** Andere User (oder du selbst) reichen neue Rezepte per Pull Request im GitHub-Repo ein. Templates + automatisierte Checks in einer GitHub Action sorgen dafuer, dass nur mergefaehige PRs bei dir landen — du machst nur den Merge-Klick, dann ist das Rezept ueber das **„Rezepte aus GitHub-Repo aktualisieren"**-Feature fuer alle User verfuegbar.
+
+**Wechselwirkung:** Braucht das Repo-Update-Feature als Konsum-Pfad — ohne den bringt ein Community-PR den Endnutzern nichts. Beide Features in derselben Iteration ausrollen.
+
+### Dateien im Repo
+
+- **`.github/pull_request_template.md`** — wird beim Erstellen jedes PRs automatisch als Body vorgeschlagen. Checkliste:
+  - JSON-Rezept in `src/data/dishes.json` ergaenzt (Schema siehe [`docs/redesign/recipe-import-template.md`](recipe-import-template.md))
+  - Bild als `public/dishes/dish-<id>.jpg` beigelegt (800×800, ≤ 400 kB, JPEG)
+  - Neue Zutaten in `src/data/ingredients.json` ergaenzt (nur wenn noetig)
+  - Naehrwerte plausibel (kcal ≈ p·4 + kh·4 + f·9)
+  - Bild-Generierungs-Prompt aus [`docs/recipe-image-prompt.md`](../recipe-image-prompt.md) verwendet
+  - `npm run build` laeuft lokal ohne Fehler
+- **`.github/ISSUE_TEMPLATE/recipe-suggestion.yml`** — Formular-Issue-Template fuer User ohne Git-Kenntnisse. Ausfuellbare Felder (Name, Kueche, Zutaten, Steps als Textfelder). Du uebernimmst das manuell in JSON oder mit KI-Assistenz. Nicht selbst-mergbar, aber niedrige Huerde fuer Nicht-Techies.
+- **`CONTRIBUTING.md`** — Kurzanleitung „So schlaegst du ein neues Rezept vor": Link auf PR-Template, Bild-Prompt-Datei und JSON-Schema. Wird von GitHub am Contribute-Button angezeigt.
+- **`docs/recipe-image-prompt.md`** — der bewaehrte Bild-Generierungs-Prompt-Rahmen (Foodblog-Stil, Vogelperspektive, natuerliches Licht, quadratisch 800×800). Modell-agnostisch formuliert (funktioniert mit ChatGPT/Midjourney/Nano-Banana). Beispiele mit guten/schlechten Ergebnissen zur Orientierung.
+
+### GitHub Action: automatisierte Checks
+
+`.github/workflows/pr-recipe-check.yml` — laeuft bei jedem PR der `public/dishes/*.jpg` oder `src/data/dishes.json` oder `src/data/ingredients.json` anfasst. Prueft:
+
+**Bild-Checks** (`sharp` oder ImageMagick):
+- Dimension muss 800×800 sein (± 10 px Toleranz)
+- Dateigroesse ≤ 400 kB
+- Format JPEG (kein PNG, kein WebP, kein AVIF)
+- Kein transparenter Hintergrund (JPEG kann sowieso keins, aber gegen falsche Konvertierung)
+
+**JSON-Checks** (Node-Script gegen `dishes.json` + `ingredients.json`):
+- Pflichtfelder vorhanden (name, cuisine, cuisineGroup, cooktime, kcal, p, kh, f, tags, ingredients, steps)
+- `cuisineGroup` gegen bekannte Enum (mediterranean, asian, indian, middleEast, americas, european, german)
+- `id` ist eindeutig (Kollision mit bestehenden Rezepten oder anderen PRs verhindern — GitHub-Action muss Base-Branch mit vergleichen)
+- Bild-Datei `public/dishes/dish-<id>.jpg` existiert im PR
+- Alle `ingredients[].key` existieren in `ingredients.json` (oder werden im gleichen PR ergaenzt)
+- Guardrail 8: keine Duplikat-Zutaten (neue Ingredient-Keys nicht semantisch identisch mit existierenden — schwer automatisiert, deshalb als Warnung mit „Bitte manuell pruefen: `oregano_g` ergaenzt, es existiert bereits `oregano_tl`")
+- Naehrwerte-Sanity: `|declared kcal − (p·4 + kh·4 + f·9)| < 100` (Toleranz weil Ballaststoffe/Alkohol nicht separat gefuehrt werden)
+
+**Bei Fehler:** Roter Check am PR + Kommentar mit konkretem Problem und Fix-Hint. Contributor sieht sofort was zu tun ist, ohne dich zu belaesten.
+
+### Optional: Preview-Deployment
+
+Bei jedem PR koennte die App als Preview auf GitHub Pages oder Vercel gebaut werden — Reviewer sieht das neue Rezept im echten Picker. Nice-to-have, nicht MVP.
+
+### State-/App-Impact
+
+Keiner. Reine Repo-/Prozess-Ebene. Kein Code in der App aendert sich durch dieses Feature — es steht und faellt komplett mit dem separaten „Rezepte aus GitHub-Repo aktualisieren"-Feature.
+
+### Warum später
+
+- Setzt „Rezepte aus GitHub-Repo aktualisieren" voraus — sonst Aufwand ohne Nutzer-Wirkung.
+- Braucht bereits abgestimmtes JSON-Schema + Bild-Standard — beide werden mit Rezept-Import ohnehin festgezogen. Deshalb erst nach den beiden Vorstufen sinnvoll.
+- Ideal in einer Session zusammen mit dem Konsum-Feature einrichten, damit End-to-End-Flow (PR → Merge → Repo-Update-Button → User bekommt Rezept) in einem Rutsch getestet ist.
