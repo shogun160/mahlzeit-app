@@ -142,3 +142,26 @@
   background: var(--md-sys-color-surface-variant, #f5f5f5);
   color: var(--md-sys-color-on-surface-variant, #444);
 }
+.import-sheet__hint {
+  font-size: 13px;
+  color: var(--md-sys-color-error, #b3261e);
+  margin: -8px 0 12px;
+}
+.import-sheet__textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--md-sys-color-outline-variant, #ccc);
+  background: var(--md-sys-color-surface-variant, #f5f5f5);
+  color: var(--md-sys-color-on-surface, #111);
+  font-family: monospace;
+  font-size: 12px;
+  resize: vertical;
+  margin-bottom: 8px;
+}
+.import-sheet__error {
+  color: var(--md-sys-color-error, #b3261e);
+  font-size: 13px;
+  margin: 0 0 12px;
+}

@@ -11,6 +11,7 @@ import { mountMacroPopup, openMacroPopup } from './dashboard/macro-popup.js';
 import { mountOnboardingWizard, openOnboardingWizard } from './onboarding/wizard.js';
 import { mountProfileDetailSheet, openProfileDetailSheet } from './settings/profile-detail-sheet.js';
 import { mountProfileShareSheet } from './profile-share/share-sheet.js';
+import { mountProfileImportSheet } from './profile-share/import-sheet.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
@@ -31,6 +32,7 @@ const macroPopupRoot = document.getElementById('macro-popup-root');
 const onboardingRoot = document.getElementById('onboarding-root');
 const profileDetailRoot = document.getElementById('profile-detail-root');
 const profileShareSheetRoot = document.getElementById('profile-share-sheet-root');
+const profileImportSheetRoot = document.getElementById('profile-import-sheet-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
@@ -174,6 +176,7 @@ mountProfileDetailSheet(profileDetailRoot, {
   },
 });
 mountProfileShareSheet(profileShareSheetRoot);
+mountProfileImportSheet(profileImportSheetRoot);
 mountMacroPopup(macroPopupRoot, {
   onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),
   onChange: refresh,
