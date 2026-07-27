@@ -53,6 +53,12 @@ export function mountSettingsSheet(el, { onChange, onOpenOnboarding, onOpenProfi
 
 export function openSettingsSheet() {
   if (!rootEl) throw new Error('Settings-Sheet nicht gemountet.');
+  // Badge-Clear: der User hat das Sheet geoeffnet → das Signal ist "gesehen",
+  // auch wenn er nicht bis zur Rezepte-Section scrollt.
+  if (state.remoteHasUpdates) {
+    state.remoteHasUpdates = false;
+    // Kein saveState hier — refresh() wird durch onChange-Callback getriggert.
+  }
   renderShell();
   rootEl.hidden = false;
   requestAnimationFrame(() => {

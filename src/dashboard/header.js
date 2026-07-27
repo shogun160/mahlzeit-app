@@ -4,6 +4,20 @@ import { buildConsolidatedList } from '../shopping-list/consolidate.js';
 
 // Material Symbol "menu" (Burger) für den Settings-Öffner.
 const ICON_MENU = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z"/></svg>`;
+
+// Kleiner Dot-Badge fuer "neue Rezepte verfuegbar". Wird ueber den Burger
+// gelegt und per CSS positioniert.
+function menuBtnHtml(hasBadge) {
+  const badgeHtml = hasBadge
+    ? '<span class="icon-btn__dot" aria-hidden="true"></span>'
+    : '';
+  const ariaLabel = hasBadge
+    ? 'Einstellungen öffnen (neue Rezepte verfügbar)'
+    : 'Einstellungen öffnen';
+  return `<button class="icon-btn icon-btn--relative" data-action="open-settings" aria-label="${ariaLabel}" title="Einstellungen">
+    ${ICON_MENU}${badgeHtml}
+  </button>`;
+}
 // Material Symbol "refresh" — Kreispfeil mit Pfeilkopf oben, für Reroll-All.
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
 // Material Symbol "done_all" — Doppel-Haken, fuer Check-All wenn nichts abgehakt.
@@ -57,9 +71,7 @@ function renderDashboardHeader(root, { onRerollAll, onOpenSettings, onToggleAllS
       <button class="icon-btn" data-action="reroll-all" aria-label="Alle Gerichte neu auslosen" title="Alle neu auslosen">
         ${ICON_REFRESH}
       </button>
-      <button class="icon-btn" data-action="open-settings" aria-label="Einstellungen öffnen" title="Einstellungen">
-        ${ICON_MENU}
-      </button>
+      ${menuBtnHtml(state.remoteHasUpdates)}
     </div>
   `;
 
@@ -131,9 +143,7 @@ function renderShoppingHeader(root, { onResetChecked, onCheckAll, onOpenSettings
     </div>
     <div class="app-header__actions">
       ${actionBtnHtml}
-      <button class="icon-btn" data-action="open-settings" aria-label="Einstellungen öffnen" title="Einstellungen">
-        ${ICON_MENU}
-      </button>
+      ${menuBtnHtml(state.remoteHasUpdates)}
     </div>
   `;
 

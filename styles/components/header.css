@@ -190,3 +190,18 @@
 :root[data-theme="dark"] .app-header__logo {
   filter: brightness(0) invert(1);
 }
+
+/* Dot-Badge fuer "neue Rezepte verfuegbar" am Burger-Icon. */
+.icon-btn--relative {
+  position: relative;
+}
+.icon-btn__dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--md-sys-color-error);
+  pointer-events: none;
+}
