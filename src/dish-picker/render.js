@@ -1,7 +1,7 @@
 import { state, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
 import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount, isFavoriteAnyDiner, favoriteLikesCount } from '../nutrition/preferences.js';
 import { getScaleForDish } from '../nutrition/scale.js';
-import { allDishes } from '../data/dishes.js';
+import { allDishes, isNewDish } from '../data/dishes.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
 const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
@@ -36,6 +36,7 @@ const FILTERS = [
   { key: 'meat',   label: 'Fleisch',       group: 'diet',    test: (d) => d.tags.includes('contains-meat') },
   { key: 'fish',   label: 'Fisch',         group: 'diet',    test: (d) => d.tags.includes('contains-fish') },
   { key: 'veg',    label: 'Vegetarisch',   group: 'diet',    test: (d) => !d.tags.includes('contains-meat') && !d.tags.includes('contains-fish') },
+  { key: 'is-new', label: 'Neu', group: 'special', test: (d) => isNewDish(d.id) },
   { key: 'asian',         label: 'Asiatisch',   group: 'cuisine', test: (d) => d.cuisineGroup === 'asian' },
   { key: 'mediterranean', label: 'Mediterran',  group: 'cuisine', test: (d) => d.cuisineGroup === 'mediterranean' },
   { key: 'middleEast',    label: 'Nahost',      group: 'cuisine', test: (d) => d.cuisineGroup === 'middleEast' },
@@ -244,6 +245,7 @@ function renderFiltersSection() {
       <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'cuisine').map(chipHtml).join('')}
       </div>
+      ${state.remoteNewIds.size > 0 ? `<div class="picker-filter-row">${FILTERS.filter((f) => f.group === 'special').map(chipHtml).join('')}</div>` : ''}
       <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'macro').map(chipHtml).join('')}
       </div>

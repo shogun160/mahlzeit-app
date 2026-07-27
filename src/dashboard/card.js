@@ -1,6 +1,7 @@
 import { PORTIONS_MIN, PORTIONS_MAX, isFavorite } from '../state.js';
 import { getScaleForDish } from '../nutrition/scale.js';
 import { resolveDishImage, bindDishImage } from '../data/dish-image.js';
+import { isNewDish } from '../data/dishes.js';
 
 // Material-Symbols-Icons für die Card-Actions (SVG, currentColor).
 // - format_list_bulleted für Zutaten (klare Listen-Metapher)
@@ -38,7 +39,9 @@ const ICON_FAV_FILL    = `<svg viewBox="0 -960 960 960" fill="currentColor" aria
 //     } }
 export function createDayCard({ day, dish, portions, isSelected, openIngredientsCount, handlers }) {
   const article = document.createElement('article');
-  article.className = 'day-card' + (isSelected ? ' day-card--selected' : '');
+  const isNew = isNewDish(dish.id);
+  article.className = 'day-card' + (isSelected ? ' day-card--selected' : '') + (isNew ? ' day-card--new' : '');
+  article.dataset.isNew = String(isNew);
   const imageSrc = resolveDishImage(dish.id);
   const minusDisabled = portions <= PORTIONS_MIN;
   const plusDisabled = portions >= PORTIONS_MAX;
