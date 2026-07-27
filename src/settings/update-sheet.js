@@ -7,6 +7,7 @@
 
 import { state, saveState } from '../state.js';
 import { performImport, fetchRemoteJsons, diffRemoteAgainstLocal, SCHEMA_ERROR } from '../data/remote-updates.js';
+import { refreshRezepteRow } from './rezepte-section.js';
 import dishesData from '../data/dishes.json' with { type: 'json' };
 
 let mountRoot = null;
@@ -41,8 +42,11 @@ export async function openUpdateSheet() {
     // remoteUpdatedAt trotzdem updaten damit "vor X min" stimmt.
     state.remoteLastFetchAt = new Date().toISOString();
     state.remoteUpdatedAt = state.remoteLastFetchAt;
+    // Badge-Clear: wenn wirklich nichts mehr neu ist, kann der Dot weg.
+    state.remoteHasUpdates = false;
     saveState();
     refreshApp?.();
+    refreshRezepteRow();
     return;
   }
 
@@ -115,7 +119,16 @@ function renderPreview(newDishes) {
     </div>
   `;
   wireBackdrop();
-  mountRoot.querySelector('[data-action="cancel"]').addEventListener('click', close);
+  mountRoot.querySelector('[data-action="cancel"]').addEventListener('click', () => {
+    // Aktiver Dismiss: der User hat die Preview gesehen und bewusst abgelehnt.
+    // Badge weg, damit er nicht erneut daran erinnert wird. Backdrop-Klick /
+    // Escape gelten dagegen als "passiv weggehen" → Badge bleibt.
+    state.remoteHasUpdates = false;
+    saveState();
+    close();
+    refreshApp?.();
+    refreshRezepteRow();
+  });
   mountRoot.querySelector('[data-action="import"]').addEventListener('click', () => startImport());
 }
 
@@ -138,6 +151,12 @@ async function startImport() {
     renderError(result.error);
     return;
   }
+
+  // Import erfolgreich → Badge weg. Passiert erst hier (nicht schon in
+  // performImport), damit ein Import-Abbruch mit Fehler den Badge nicht clear'd.
+  state.remoteHasUpdates = false;
+  saveState();
+  refreshRezepteRow();
 
   const importedCount = result.imported.length;
   const skippedCount = result.warnings.length;

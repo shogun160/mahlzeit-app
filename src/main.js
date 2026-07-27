@@ -251,6 +251,13 @@ attachViewSwipe(mainEl, {
 
 refresh();
 
+// Debug-Bridge nur im Dev-Mode: erlaubt Console-Zugriff auf state/refresh
+// zum manuellen Testen von Remote-Import-Flows. Wird von Vite im Prod-Build
+// ge-tree-shaked (import.meta.env.DEV ist dann false).
+if (import.meta.env.DEV) {
+  window.__dbg = { state, refresh, setView };
+}
+
 // Remote-Rezept-Auto-Check: laueft asynchron im Hintergrund, blockiert
 // den ersten Render nicht. Wenn neue Rezepte gefunden werden, setzt der
 // Check state.remoteHasUpdates=true und triggert einen refresh() damit

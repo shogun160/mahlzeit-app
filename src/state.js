@@ -104,7 +104,7 @@ export const state = {
   remoteDishes: [],                // Dish[] wie in dishes.json (ohne enrichment — beim Load wird angereichert)
   remoteIngredients: {},           // { key -> Ingredient } wie in ingredients.json
   remoteUpdatedAt: null,           // ISO-String vom letzten erfolgreichen Fetch
-  remoteHasUpdates: false,         // vom Auto-Check gesetzt, nach Oeffnen des Settings-Sheets gecleart
+  remoteHasUpdates: false,         // Auto-Check setzt true; cleared bei erfolgreichem Import oder aktivem Dismiss ("Abbrechen"-Klick)
   remoteLastFetchAt: null,         // ISO-String fuer 60s-Soft-Rate-Limit
   remoteNewIds: new Set(),         // IDs die aktuell als "Neu" gelten
   remoteImageFailures: new Set(),  // IDs deren Bild-Download failed hat (TTL 24h — beim Start gecleart)

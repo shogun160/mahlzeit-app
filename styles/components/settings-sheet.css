@@ -1037,3 +1037,26 @@
 .settings-profile-row--default .settings-profile-row__name {
   color: var(--md-sys-color-primary);
 }
+
+/* Rezepte-Import-Row: Status + Refresh-Icon rechts, kompakt gruppiert.
+   Value wird bei has(.settings-row__label-secondary) an flex-end ausgerichtet
+   (siehe Rule oben) — fuer diese Row wollen wir aber vertikal zentriert bleiben,
+   weil Icon-Button + Status als eine Einheit lesen sollen. */
+.settings-row.rezepte-import-row {
+  align-items: center;
+}
+.rezepte-import__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 400;
+}
+.rezepte-import__status {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  white-space: nowrap;
+}
+.rezepte-import__status--updates {
+  color: var(--md-sys-color-primary);
+}
