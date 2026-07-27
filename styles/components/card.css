@@ -3,7 +3,10 @@
    dezent, im Dark sowieso unsichtbar. Beim Selected verschiebt sich der Grund
    auf einen leichten primary-Tint. */
 .day-card {
-  background: var(--md-sys-color-surface-container-low);
+  /* --card-bg als eigene Variable, damit Kinder (z.B. Badge-Ring) auf den
+     tatsaechlichen Card-Hintergrund referenzieren koennen — auch bei selected. */
+  --card-bg: var(--md-sys-color-surface-container-low);
+  background: var(--card-bg);
   border: 0;
   border-radius: var(--radius-card);
   overflow: hidden;
@@ -21,7 +24,7 @@
    Punktinformation). Die Action-Buttons unten und ihr Badge behalten
    bewusst ihren Default — Material-3 State-Layer-Prinzip. */
 .day-card--selected {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-low));
+  --card-bg: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-low));
 }
 
 .day-card__image-wrap {
@@ -340,9 +343,9 @@
   line-height: 16px;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  /* Ring in der Card-Grundfarbe, damit der Badge (der halb über den Button-Rand
-     ragt) sowohl auf der Card als auch am Button-Border sauber abgesetzt ist. */
-  box-shadow: 0 0 0 2px var(--md-sys-color-surface-container-lowest);
+  /* Ring in der Card-Grundfarbe (--card-bg wechselt bei selected mit) — Badge
+     ragt halb ueber den Button-Rand, der Ring setzt ihn optisch von der Card ab. */
+  box-shadow: 0 0 0 2px var(--card-bg);
 }
 
 /* Bild und Content-Bereich öffnen das Detail-Sheet (Rezept-Tab).
