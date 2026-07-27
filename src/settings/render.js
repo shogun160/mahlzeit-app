@@ -206,7 +206,11 @@ function renderShell() {
   // Initial-Sync jetzt, wo die Sections im DOM sind. Sonst wären die Header-
   // Buttons falsch versteckt beim Sheet-Reopen mit persistierten collapsedSections.
   syncHeaderActions();
-  updateStickyState();
+  // updateStickyState braucht ein stabiles Layout — direkt nach innerHTML sind
+  // die getBoundingClientRect-Werte noch nicht final (Slide-in-Animation, Font
+  // Load). Doppelte rAF verschiebt die Messung auf den ersten stabilen Frame,
+  // damit --sticky nicht faelschlich auf expanded Sections gesetzt wird.
+  requestAnimationFrame(() => requestAnimationFrame(updateStickyState));
 }
 
 function formatCookTime(min) {

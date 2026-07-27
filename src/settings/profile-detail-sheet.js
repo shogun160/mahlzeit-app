@@ -10,6 +10,7 @@
 // akzeptabel; ein spaetere Konsolidierung waere ein Refactor eigener Session.
 
 import { state, removeProfile, setActiveProfileId } from '../state.js';
+import { openProfileShareSheet } from '../profile-share/share-sheet.js';
 import {
   ACTIVITY_LEVELS,
   GOALS,
@@ -119,6 +120,11 @@ function renderShell() {
           ${renderMealRow('lunch', 'Mittag', currentProfile.lunchKcal, LUNCH_MAX)}
           ${renderDinnerRow()}
           ${isDefault ? '' : renderShowBarRow()}
+          ${isDefault ? '' : `
+          <button class="btn btn--secondary profile-detail__share" type="button" data-action="share-profile">
+            Profil teilen
+          </button>
+          `}
           ${isDefault ? '' : renderDeleteRow(isOnlyProfile, isActive)}
         </div>
       </div>
@@ -564,6 +570,10 @@ function attachHandlers() {
       onExternalChange();
     });
   }
+
+  rootEl.querySelector('[data-action="share-profile"]')?.addEventListener('click', () => {
+    openProfileShareSheet(currentProfile);
+  });
 
   // Delete-Button — mit Confirm, dann Sheet schliessen + refresh
   const deleteBtn = rootEl.querySelector('[data-action="delete"]');

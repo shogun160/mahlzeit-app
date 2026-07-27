@@ -28,3 +28,6 @@ android/app/release/
 # Env
 .env
 .env.local
+
+# Claude Code
+.claude/

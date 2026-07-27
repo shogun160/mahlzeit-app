@@ -1,5 +1,6 @@
 import { state, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
 import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount, isFavoriteAnyDiner, favoriteLikesCount } from '../nutrition/preferences.js';
+import { getScaleForDish } from '../nutrition/scale.js';
 import { allDishes } from '../data/dishes.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
@@ -619,7 +620,7 @@ function renderTile(dish, isCurrent, usedMap) {
       </div>
       <div class="picker-tile__body">
         <div class="picker-tile__title">${dish.name}</div>
-        <div class="picker-tile__meta">~${dish.cooktime} Min · ${dish.kcal} kcal</div>
+        <div class="picker-tile__meta">~${dish.cooktime} Min · ${Math.round(dish.kcal * getScaleForDish(dish))} kcal</div>
       </div>
     </button>
   `;

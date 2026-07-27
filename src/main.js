@@ -10,6 +10,9 @@ import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
 import { mountMacroPopup, openMacroPopup } from './dashboard/macro-popup.js';
 import { mountOnboardingWizard, openOnboardingWizard } from './onboarding/wizard.js';
 import { mountProfileDetailSheet, openProfileDetailSheet } from './settings/profile-detail-sheet.js';
+import { mountProfileShareSheet } from './profile-share/share-sheet.js';
+import { mountProfileImportSheet, openProfileImportSheet } from './profile-share/import-sheet.js';
+import { mountAddChoiceSheet, openAddChoiceSheet } from './profile-share/add-choice-sheet.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
 import { state, DAYS, setView, loadState, saveState } from './state.js';
@@ -29,6 +32,9 @@ const pickerRoot = document.getElementById('dish-picker-root');
 const macroPopupRoot = document.getElementById('macro-popup-root');
 const onboardingRoot = document.getElementById('onboarding-root');
 const profileDetailRoot = document.getElementById('profile-detail-root');
+const profileShareSheetRoot = document.getElementById('profile-share-sheet-root');
+const profileImportSheetRoot = document.getElementById('profile-import-sheet-root');
+const addChoiceSheetRoot = document.getElementById('add-choice-sheet-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
@@ -157,7 +163,16 @@ mountSettingsSheet(settingsRoot, {
   onChange: refresh,
   onOpenOnboarding: () => openOnboardingWizard(),
   onOpenProfileDetail: (profileId) => openProfileDetailSheet(profileId),
-  onAddProfile: () => openOnboardingWizard({ addProfile: true }),
+  onAddProfile: () => openAddChoiceSheet({
+    onManualChoice: () => openOnboardingWizard({ addProfile: true }),
+    onImportChoice: (mode) => openProfileImportSheet({
+      mode,
+      onImported: () => {
+        refreshProfileListInOpenSheet();
+        refresh();
+      },
+    }),
+  }),
   onThemeChange: () => {
     applyTheme();
     saveState();
@@ -171,6 +186,9 @@ mountProfileDetailSheet(profileDetailRoot, {
     refreshProfileListInOpenSheet();
   },
 });
+mountProfileShareSheet(profileShareSheetRoot);
+mountProfileImportSheet(profileImportSheetRoot);
+mountAddChoiceSheet(addChoiceSheetRoot);
 mountMacroPopup(macroPopupRoot, {
   onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),
   onChange: refresh,
