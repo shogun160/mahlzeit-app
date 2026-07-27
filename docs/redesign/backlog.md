@@ -356,3 +356,84 @@ const runningTimers = new Map(); // key: `${dishId}-${stepIndex}` → { endsAt, 
 - Kein persistenter State — Suche verliert sich beim Sheet-Close.
 
 **Warum später:** Kein Blocker für aktuelle Rezept-Anzahl (~30 Gerichte, überschaubar). Wird spürbar sinnvoll ab ~50+ Rezepten. Guter Session-Kandidat wenn parallel Rezept-Import oder eine größere Content-Erweiterung kommt.
+
+## Rezepte aus GitHub-Repo aktualisieren
+
+**Idee:** Auf Knopfdruck aus Settings prüft die App, ob im öffentlichen Repo neue Rezepte veröffentlicht wurden, und laedt sie inklusive Bilder nach — ohne APK-Update. Ermoeglicht Content-Rollout ohne Play-Store-/APK-Roundtrip.
+
+**Datenquelle:** Raw-URLs vom Repo (`main`-Branch):
+
+- `https://raw.githubusercontent.com/shogun160/mahlzeit-app/main/src/data/dishes.json`
+- `https://raw.githubusercontent.com/shogun160/mahlzeit-app/main/src/data/ingredients.json`
+- Bilder: `https://raw.githubusercontent.com/shogun160/mahlzeit-app/main/public/dishes/dish-<id>.jpg`
+
+Public-Repo, kein CORS-Problem, keine Auth. Fallback: wenn der User irgendwann das Repo umbenennt, ist die Basis-URL eine Config-Konstante.
+
+**UX-Skizze:**
+
+- Settings > „Daten"-Section neuer Button: **„Nach neuen Rezepten suchen"**. Sekundäre Optik.
+- Klick zeigt Spinner + „Ich prüfe das Repo..."
+- Ergebnis-Sheet:
+  - **Neue Rezepte gefunden:** Liste der neuen Rezepte mit Name + Bild-Thumbnail. Primary-Button „X neue Rezepte laden" + Secondary „Abbrechen".
+  - **Alles aktuell:** kurzer Toast „Deine Rezepte sind aktuell." + letztes-Check-Timestamp in der Section-Summary.
+  - **Fehler (Netz weg, JSON kaputt):** klarer Fehler-Toast, User kann später neu versuchen.
+- Nach Bestätigung: Progress-Anzeige während Bilder gefetcht werden („2 von 5 Rezepten geladen..."). Metadata wird sofort eingespielt, Bilder progressiv nachgeholt — Rezepte mit noch fehlenden Bildern zeigen Platzhalter bis Download durch ist.
+- **Letztes Update sichtbar:** Section-Summary zeigt „Zuletzt geprueft: vor 3 Tagen" damit User weiss wie aktuell sein Bestand ist.
+
+**Schema-Versioning:**
+
+- `dishes.json` bekommt neues Top-Level-Feld `schemaVersion: 1` (Zahl, incrementell). Analog bei `ingredients.json`. Erst-Migration: App legt `schemaVersion: 1` in bestehende JSON-Dateien beim naechsten APK-Build fest.
+- Beim Update-Check vergleicht App die eingebaute `SCHEMA_VERSION_DISHES` / `SCHEMA_VERSION_INGREDIENTS` mit dem Wert der Remote-JSON.
+- **Mismatch-Verhalten** (bewusst kein Auto-Migrations-Code):
+  - Remote-Version **> lokal**: klare Fehlermeldung im Ergebnis-Sheet — „Neue Rezepte nutzen ein neueres Datenformat. Bitte die App aktualisieren und dann erneut versuchen." Kein Import.
+  - Remote-Version **< lokal**: sollte nicht vorkommen (Repo ist immer die aktuellste Wahrheit); wenn doch, gleiche Fehlermeldung mit anderem Text.
+  - Remote-Version **== lokal**: Import laeuft.
+- Vorteil: Schema-Aenderungen bleiben an APK-Releases gekoppelt (Guardrails bleiben stabil), Content-Aenderungen sind entkoppelt. Kein Migration-Framework im JS-Code noetig.
+
+**Merger-Logik (beim App-Start):**
+
+```js
+// src/data/dishes.js (Erweiterung)
+import bundledDishes from './dishes.json';
+import { state } from '../state.js';
+
+export const allDishes = mergeDishes(bundledDishes, state.remoteDishes || []);
+
+function mergeDishes(bundled, remote) {
+  // Bundled hat immer Vorrang (Guarantee: alles was in der APK ist, funktioniert)
+  const byId = new Map(bundled.map((d) => [d.id, d]));
+  for (const d of remote) {
+    if (!byId.has(d.id)) byId.set(d.id, d);
+  }
+  return Array.from(byId.values());
+}
+```
+
+Analog fuer `ingredients.json`. Guardrail 8 (keine Duplikat-Zutaten) greift automatisch: der Merger schmeisst Remote-Zutaten weg, deren Key bereits in `bundledIngredients` existiert.
+
+**State-Skizze:**
+
+```js
+state.remoteDishes = [/* Dish[]-Objekte, wie in dishes.json */];
+state.remoteIngredients = { /* key → Ingredient, wie in ingredients.json */ };
+state.remoteUpdatedAt = "2026-08-01T18:32:00.000Z"; // ISO, fuer Section-Summary
+```
+
+Persistenz per bestehendem `mahlzeit-state-v2` (Guardrail 2 bleibt intakt — nur neue Felder, keine Key-Aenderung).
+
+**Bild-Handling:**
+
+- Web / Dev (Browser): Bilder als Blob-URL, in IndexedDB persistiert (localStorage zu klein fuer JPGs).
+- Android: Capacitor Filesystem API → speichert unter `Directory.Data/remote-dishes/dish-<id>.jpg`. State haelt nur Pfad-Referenz. Loader mappt `dish-<id>.jpg` fuer Bundled vs. Remote-Pfad.
+- Bild-URL-Aufloesung im Card-Render (`day-card__image` src): erst Remote-Cache pruefen, sonst Bundled `/dishes/dish-<id>.jpg`.
+
+**Rate-Limiting / Missbrauchsschutz:**
+
+- Client-seitiger Throttle: Update-Check nur einmal pro Stunde. Danach zeigt der Button „Zuletzt gerade geprueft — bitte spaeter erneut versuchen".
+- Reine Vorsichtsmassnahme — GitHub Raw hat sowieso grosszuegige Limits fuer unauthenticated Public-Content-Requests.
+
+**Warum später:**
+
+- Braucht Bild-Caching-Infrastruktur (Capacitor Filesystem + State-Slot fuer Remote-Referenzen) — die gleiche Fundament wie **Rezept-Import** (JSON-Rezepte per File-Picker). **Ideal zusammen in einer Session designen**, weil Bild-Handling, Merger-Logik und State-Slot geteilt werden.
+- Braucht Schema-Version-Feld in `dishes.json` + `ingredients.json` — im gleichen APK-Release ausrollen.
+- Ideal nach Rezept-Import: erst die File-Picker-Variante (unabhaengig vom Netz), dann diese Repo-Variante als Overlay. Beide teilen sich denselben Loader-Merger.
