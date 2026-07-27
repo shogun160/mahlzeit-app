@@ -449,3 +449,27 @@ Keiner. Reine Repo-/Prozess-Ebene. Kein Code in der App aendert sich durch diese
 - Setzt „Rezepte aus GitHub-Repo aktualisieren" voraus — sonst Aufwand ohne Nutzer-Wirkung.
 - Braucht bereits abgestimmtes JSON-Schema + Bild-Standard — beide werden mit Rezept-Import ohnehin festgezogen. Deshalb erst nach den beiden Vorstufen sinnvoll.
 - Ideal in einer Session zusammen mit dem Konsum-Feature einrichten, damit End-to-End-Flow (PR → Merge → Repo-Update-Button → User bekommt Rezept) in einem Rutsch getestet ist.
+
+## Rezepte als separate Files + optionale Auto-ID-Vergabe
+
+**Problem:** Aktuell liegen alle Rezepte in einer monolithischen `src/data/dishes.json`. Neue Rezepte werden am Ende des Arrays angehängt. Bei zwei parallelen Community-PRs entstehen zwangsläufig zwei Konflikte:
+
+1. **Dateiende-Konflikt:** Beide PRs modifizieren die letzten Zeilen (`      }\n    ]\n}`) — git line-based sieht überlappende Änderungen und kann nicht automatisch mergen, obwohl semantisch verschiedene Rezept-Objekte hinzugefügt werden. Aufgefallen in Session 22 bei PR #2 (carne-asada) + PR #3 (dal-tadka) — Maintainer musste den zweiten PR händisch rebasen.
+2. **ID-Kollisions-Risiko:** Beide PRs müssen selbst die nächste freie ID wählen (aktuell 36). Bei zwei parallelen PRs vergibt jeder dieselbe „nächste freie" — Validator fängt es zwar ab, aber der zweite PR muss neu nummeriert werden.
+
+**Idee A — File-pro-Rezept:** Statt `dishes.json` als eine Datei → `src/data/dishes/dish-<id>.json` pro Rezept. App-Loader nutzt Vite's `import.meta.glob('./dishes/*.json', { eager: true })` und baut das `allDishes`-Array zur Build-Zeit zusammen. Vorteil: Community-PR fügt genau eine neue Datei hinzu, ändert nichts Bestehendes → keine Merge-Konflikte mehr möglich.
+
+- **Remote-Fetch-Impact:** aktuell holt die App `dishes.json` als eine Datei per HTTP. Mit File-pro-Rezept braucht die App entweder:
+  - ein `dishes/index.json`-Manifest mit ID-Liste (Konflikt-Anfälligkeit gering, weil nur eine Zeile pro Rezept), oder
+  - GitHub-API-Call `/repos/…/contents/src/data/dishes` (dynamisch, aber Rate-Limit relevanter — 60 anonyme Requests/Stunde/IP)
+- **Validator/Action-Impact:** Diff-Check muss auf neue Files unter `src/data/dishes/` erweitert werden statt nur `dishes.json`-Diff.
+- **Migration:** Einmaliges Script splittet bestehende `dishes.json` in einzelne Files, Referenzen in Tests etc. anpassen. Alte Datei entfernen.
+
+**Idee B — Auto-ID-Vergabe durch Bot beim Merge:** Contributor reicht Rezept ohne `id`-Feld ein, Bild als `dish-<slug>.jpg`. GitHub-Action beim Merge:
+1. Ermittelt `maxId + 1`
+2. Setzt `id` im JSON-File, benennt Bild-File um zu `dish-<id>.jpg`
+3. Bot-Commit-Push vor Merge
+
+Löst ID-Kollisionen, aber **nicht** den Dateiende-Konflikt (der bleibt bei monolithischer JSON). Nur in Kombination mit Idee A wirklich vollständig.
+
+**Warum später:** Aktuell drei Rezepte im Monat via PR — Maintainer-Rebase reicht. Ab ~10 parallelen PRs oder aktiver Community lohnt sich der Umbau. Beide Ideen zusammen implementieren (A ist Voraussetzung für B).
