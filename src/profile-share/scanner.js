@@ -7,17 +7,12 @@
 // gerendert, das jeden Schritt zeigt (Perm, Listener, startScan, Events).
 // Beim naechsten Kamera-Bug-Fund → auf false setzen.
 import { Capacitor } from '@capacitor/core';
+// Statischer Import statt dynamischem: der Vite-Chunk-Load fuer diesen
+// Import hing in der Capacitor-WebView still (kein Reject, kein Resolve).
+// Statischer Import hebt den Handler beim App-Start und umgeht das Problem.
+import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 
 const SCANNER_DEBUG = true;
-
-let PluginRef = null;
-async function loadPlugin() {
-  if (PluginRef) return PluginRef;
-  const mod = await import('@capacitor-mlkit/barcode-scanning');
-  PluginRef = mod.BarcodeScanner;
-  if (!PluginRef) throw new Error('BarcodeScanner-Export fehlt');
-  return PluginRef;
-}
 
 export function isScannerAvailable() {
   return Capacitor.isNativePlatform();
@@ -114,15 +109,13 @@ export async function scanOnce() {
     return { error: 'not_native' };
   }
 
-  let B;
-  try {
-    B = await loadPlugin();
-    debugLog('plugin loaded');
-  } catch (e) {
-    debugLog(`plugin_load_failed: ${e?.message ?? e}`);
+  const B = BarcodeScanner;
+  if (!B) {
+    debugLog('plugin_load_failed: BarcodeScanner-Export fehlt');
     debugUnmount();
-    return { error: 'plugin_load_failed', detail: e?.message ?? String(e) };
+    return { error: 'plugin_load_failed', detail: 'BarcodeScanner-Export fehlt' };
   }
+  debugLog('plugin ref ok (static import)');
 
   const perm = await ensureCameraPermission(B);
   if (!perm.granted) {
