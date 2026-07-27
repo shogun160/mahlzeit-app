@@ -451,10 +451,20 @@ function attachWelcomeHandlers() {
     showWelcome = false;
     renderShell();
   });
-  const openImport = (mode) => () => openProfileImportSheet({
-    mode,
-    onImported: (importedProfile) => onWizardImported(importedProfile),
-  });
+  const openImport = (mode) => () => {
+    try {
+      openProfileImportSheet({
+        mode,
+        onImported: (importedProfile) => onWizardImported(importedProfile),
+      });
+    } catch (e) {
+      // Sichtbarer Fallback, sonst wuerde eine geworfene Exception im Handler
+      // still verschluckt und der User sieht gar nichts.
+      import('../util/toast.js').then(({ showToast }) => {
+        showToast('Import konnte nicht gestartet werden: ' + (e?.message ?? e), { tone: 'error', duration: 5000 });
+      });
+    }
+  };
   rootEl.querySelector('[data-action="welcome-scan"]')?.addEventListener('click', openImport('scan'));
   rootEl.querySelector('[data-action="welcome-paste"]')?.addEventListener('click', openImport('paste'));
 }

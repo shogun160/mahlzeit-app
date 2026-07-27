@@ -24,7 +24,9 @@ export function openProfileImportSheet({ onImported, mode } = {}) {
   if (effective === 'scan') {
     // Kein Sheet fuer den Scan-Modus — scanner.js oeffnet direkt die native
     // Kamera-Preview mit App-eigenem Cancel-Overlay.
-    runScanFlow();
+    runScanFlow().catch((e) => {
+      showToast('Unerwarteter Scan-Fehler: ' + (e?.message ?? e), { tone: 'error', duration: 5000 });
+    });
     return;
   }
 
@@ -108,17 +110,32 @@ function attachPasteHandlers() {
 }
 
 async function runScanFlow() {
-  // startScan() zeigt System-Permission-Dialog beim ersten Aufruf, dann
-  // native Kamera-Preview mit App-eigenem Cancel-Overlay. Kein Sheet dazwischen.
+  // Sofort-Feedback dass der Handler gefeuert hat (verschwindet bei
+  // Kamera-Start; dient auch als Debug-Hinweis wenn danach nichts folgt).
+  showToast('Kamera wird geöffnet…', { duration: 1500 });
+
   const scan = await scanOnce();
 
   if (scan.error === 'permission_denied') {
-    showToast('Kamera-Berechtigung nötig — bitte in Systemeinstellungen erlauben oder Text-Weg nutzen.', { tone: 'error', duration: 4500 });
+    const detail = scan.detail ? ` (${scan.detail})` : '';
+    showToast('Kamera-Berechtigung nötig' + detail + ' — bitte in Systemeinstellungen erlauben oder Text-Weg nutzen.', { tone: 'error', duration: 5000 });
+    return;
+  }
+  if (scan.error === 'plugin_load_failed') {
+    showToast('Scanner-Plugin nicht ladbar: ' + (scan.detail ?? ''), { tone: 'error', duration: 5000 });
+    return;
+  }
+  if (scan.error === 'start_scan_failed') {
+    showToast('Kamera-Start fehlgeschlagen: ' + (scan.detail ?? ''), { tone: 'error', duration: 5000 });
+    return;
+  }
+  if (scan.error === 'not_native') {
+    showToast('Scanner nur in der App verfügbar.', { tone: 'error', duration: 4000 });
     return;
   }
   if (scan.canceled) return;
   if (scan.error) {
-    showToast('Scan-Fehler: ' + scan.error, { tone: 'error', duration: 4000 });
+    showToast('Scan-Fehler: ' + scan.error + (scan.detail ? ` — ${scan.detail}` : ''), { tone: 'error', duration: 4500 });
     return;
   }
   if (!scan.rawValue) return;

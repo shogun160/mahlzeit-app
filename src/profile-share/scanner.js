@@ -1,8 +1,7 @@
 // Klassischer Kamera-Preview-Scanner via @capacitor-mlkit/barcode-scanning
 // startScan(). Fragt CAMERA-Permission an, zeigt die native Kamera hinter der
 // transparenten WebView und legt ein App-eigenes Overlay (Fokus-Rahmen +
-// "Abbrechen"-Button) drueber. Vergleiche scan() (Google-Barcode-Modul) das
-// beim Nachlade-Progress auf manchen Devices haengt.
+// "Abbrechen"-Button) drueber.
 import { Capacitor } from '@capacitor/core';
 
 let PluginRef = null;
@@ -10,6 +9,7 @@ async function loadPlugin() {
   if (PluginRef) return PluginRef;
   const mod = await import('@capacitor-mlkit/barcode-scanning');
   PluginRef = mod.BarcodeScanner;
+  if (!PluginRef) throw new Error('BarcodeScanner-Export fehlt');
   return PluginRef;
 }
 
@@ -17,14 +17,23 @@ export function isScannerAvailable() {
   return Capacitor.isNativePlatform();
 }
 
-// Sichert CAMERA-Permission. Wenn noch nicht gefragt: System-Dialog.
-// Wenn schon denied: kein zweiter Dialog moeglich (System-Verhalten) → return false.
 async function ensureCameraPermission(B) {
-  const status = await B.checkPermissions();
-  if (status.camera === 'granted' || status.camera === 'limited') return true;
-  if (status.camera === 'denied') return false;
-  const req = await B.requestPermissions();
-  return req.camera === 'granted' || req.camera === 'limited';
+  let status;
+  try {
+    status = await B.checkPermissions();
+  } catch (e) {
+    return { granted: false, reason: `checkPermissions warf: ${e?.message ?? e}` };
+  }
+  if (status?.camera === 'granted' || status?.camera === 'limited') return { granted: true };
+  if (status?.camera === 'denied') return { granted: false, reason: 'system: denied' };
+  let req;
+  try {
+    req = await B.requestPermissions();
+  } catch (e) {
+    return { granted: false, reason: `requestPermissions warf: ${e?.message ?? e}` };
+  }
+  const granted = req?.camera === 'granted' || req?.camera === 'limited';
+  return { granted, reason: granted ? undefined : `system: ${req?.camera ?? 'unbekannt'}` };
 }
 
 let activeOverlay = null;
@@ -47,34 +56,40 @@ function unmountOverlay() {
 // Ruft den Scanner mit Kamera-Preview auf.
 //   { rawValue }               -> QR erkannt
 //   { canceled: true }         -> User hat den Abbrechen-Button geklickt
-//   { error: 'permission_denied' | 'not_native' | '<msg>' }
+//   { error: '<key>', detail } -> Fehler mit lesbarem Detail
 export async function scanOnce() {
   if (!isScannerAvailable()) return { error: 'not_native' };
-  const B = await loadPlugin();
 
-  const granted = await ensureCameraPermission(B);
-  if (!granted) return { error: 'permission_denied' };
+  let B;
+  try {
+    B = await loadPlugin();
+  } catch (e) {
+    return { error: 'plugin_load_failed', detail: e?.message ?? String(e) };
+  }
 
-  // WebView transparent + Body-Content unsichtbar (per CSS via .barcode-scanner-active).
+  const perm = await ensureCameraPermission(B);
+  if (!perm.granted) return { error: 'permission_denied', detail: perm.reason };
+
   document.documentElement.classList.add('barcode-scanner-active');
   document.body.classList.add('barcode-scanner-active');
 
   let listener = null;
+  let startError = null;
+
   const result = await new Promise((resolve) => {
-    // Listener BEVOR startScan, sonst verpasst er den ersten Barcode-Event.
     B.addListener('barcodeScanned', (event) => {
       const b = event?.barcode;
       if (b?.rawValue) resolve({ rawValue: b.rawValue });
-    }).then((h) => { listener = h; });
+    }).then((h) => { listener = h; }).catch(() => { /* nicht kritisch */ });
 
     mountOverlay(() => resolve({ canceled: true }));
 
     B.startScan({ formats: ['QR_CODE'] }).catch((e) => {
-      resolve({ error: String(e && e.message || e) });
+      startError = e?.message ?? String(e);
+      resolve({ error: 'start_scan_failed', detail: startError });
     });
   });
 
-  // Cleanup unabhaengig vom Ausgang.
   if (listener) await listener.remove().catch(() => {});
   await B.stopScan().catch(() => {});
   unmountOverlay();
