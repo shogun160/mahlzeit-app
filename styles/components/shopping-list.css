@@ -361,8 +361,13 @@
   width: auto;
   vertical-align: middle;
   margin-left: 4px;
+  /* Light-Mode: PNG-Original ist etwas blass gegen den primary-Text —
+     abdunkeln + saettigen, damit der Schriftzug in gleicher Intensitaet
+     rueber kommt. */
+  filter: brightness(0.45) saturate(1.7);
 }
 :root[data-theme="dark"] .shop-done-banner__logo {
+  /* Dark-Mode: auf reines Weiss ziehen (analog Header-Logo). */
   filter: brightness(0) invert(1);
 }
 
