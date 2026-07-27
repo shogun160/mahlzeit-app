@@ -1,5 +1,6 @@
 import { state, PORTIONS_MIN, PORTIONS_MAX, isFavorite, toggleFavorite } from '../state.js';
 import { dishesById } from '../data/dishes.js';
+import { resolveDishImage, bindDishImage } from '../data/dish-image.js';
 import { changePortion } from '../dashboard/portions.js';
 import { toggleSelected } from '../dashboard/selection.js';
 import { rerollDay } from '../dashboard/reroll.js';
@@ -88,6 +89,7 @@ function renderShell() {
       <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
         <div class="sheet-handle" aria-hidden="true"></div>
         <div class="sheet-header">
+          <img class="sheet-header__image" src="${resolveDishImage(dish.id)}" alt="${dish.name}" />
           <div class="sheet-header__title-wrap">
             <div class="sheet-header__day">
               <span>${day}</span>
@@ -142,6 +144,11 @@ function renderShell() {
   `;
 
   attachHandlers();
+
+  // Async-Bild-Binding: sofort Sync-Src (bundled oder placeholder), dann
+  // async Cache-URI fuer Remote-Gerichte nachladen.
+  const imgEl = rootEl.querySelector('.sheet-header__image');
+  if (imgEl) bindDishImage(imgEl, currentContext.dishId);
 }
 
 function attachHandlers() {

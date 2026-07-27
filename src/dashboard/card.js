@@ -1,5 +1,6 @@
 import { PORTIONS_MIN, PORTIONS_MAX, isFavorite } from '../state.js';
 import { getScaleForDish } from '../nutrition/scale.js';
+import { resolveDishImage, bindDishImage } from '../data/dish-image.js';
 
 // Material-Symbols-Icons für die Card-Actions (SVG, currentColor).
 // - format_list_bulleted für Zutaten (klare Listen-Metapher)
@@ -38,7 +39,7 @@ const ICON_FAV_FILL    = `<svg viewBox="0 -960 960 960" fill="currentColor" aria
 export function createDayCard({ day, dish, portions, isSelected, openIngredientsCount, handlers }) {
   const article = document.createElement('article');
   article.className = 'day-card' + (isSelected ? ' day-card--selected' : '');
-  const imageSrc = `/dishes/dish-${dish.id}.jpg`;
+  const imageSrc = resolveDishImage(dish.id);
   const minusDisabled = portions <= PORTIONS_MIN;
   const plusDisabled = portions >= PORTIONS_MAX;
   const selectionLabel = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
@@ -110,6 +111,11 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
       </div>
     </div>
   `;
+
+  // Async-Bild-Binding: sofort Sync-Src (bundled oder placeholder), dann
+  // async Cache-URI fuer Remote-Gerichte nachladen.
+  const imgEl = article.querySelector('.day-card__image');
+  if (imgEl) bindDishImage(imgEl, dish.id);
 
   article.querySelector('[data-action="portion-minus"]').addEventListener('click', () => handlers.onPortionChange(-1));
   article.querySelector('[data-action="portion-plus"]').addEventListener('click', () => handlers.onPortionChange(1));
