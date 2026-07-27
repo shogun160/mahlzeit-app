@@ -49,9 +49,13 @@ export async function fetchRemoteJsons() {
   let ingredientsJson;
 
   try {
+    // Cache-Buster: Android WebView (Capacitor) ignoriert `cache: 'no-store'`
+    // teils, und GitHub raw hat einen 5-min CDN-Cache mit inkonsistenten
+    // Fastly-Nodes. Query-Parameter zwingt frischen Fetch bei allen Layern.
+    const bust = `?_=${Date.now()}`;
     const [dishesRes, ingredientsRes] = await Promise.all([
-      fetch(dishesUrl, { cache: 'no-store' }),
-      fetch(ingredientsUrl, { cache: 'no-store' }),
+      fetch(dishesUrl + bust, { cache: 'no-store' }),
+      fetch(ingredientsUrl + bust, { cache: 'no-store' }),
     ]);
     if (!dishesRes.ok || !ingredientsRes.ok) return { ok: false, error: 'NETWORK' };
     dishesJson = await dishesRes.json();
