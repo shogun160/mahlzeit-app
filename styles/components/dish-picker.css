@@ -562,7 +562,7 @@
    primary bg + weiße Schrift. */
 .picker-tile__day-badge {
   position: absolute;
-  top: 8px;
+  bottom: 8px;
   left: 8px;
   z-index: 2;
   padding: 3px 8px;
@@ -573,15 +573,44 @@
   letter-spacing: 0.06em;
   line-height: 1.2;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-  background: var(--frosted-glass-strong);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  color: var(--md-sys-color-on-glass);
+  /* Immer im Aktiv-Look (primary bg, weisse Schrift) — bessere Lesbarkeit
+     als die frueher unterschiedene frosted-glass-Variante fuer fremde Tage. */
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
 }
 
+/* Alias fuer historische Konsistenz — der Modifier hat keinen Effekt mehr,
+   weil die Base-Regel bereits den Aktiv-Look setzt. */
 .picker-tile__day-badge--active {
   background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
   color: var(--md-sys-color-on-primary);
+}
+
+/* Neu-Marker oben-links: Sparkles-Icon (auto_awesome). Groesse und
+   frosted-glass-Optik analog zum Fav-Badge, damit beide visuell zueinander
+   passen. Keine Interaktion — reines Status-Icon. */
+.picker-tile__new {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 24px;
+  padding: 0;
+  border-radius: var(--radius-pill);
+  background: color-mix(in srgb, var(--md-sys-color-primary) 88%, transparent);
+  color: var(--md-sys-color-on-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  pointer-events: none;
+}
+.picker-tile__new svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+  color: inherit;
 }
 
 /* Shopping-Pille unten rechts auf dem Bild: Icon + Anzahl offener Zutaten.

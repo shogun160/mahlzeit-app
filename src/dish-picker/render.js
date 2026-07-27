@@ -11,6 +11,10 @@ const ICON_CLOSE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidde
 // Genutzt in Tile-Badge, Filter-Chip und Empty-State.
 const ICON_FAV_OUTLINE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q57 0 105.5 27t84.5 78q42-54 89-79.5T670-854q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Zm0-79q101.24-93.15 166.62-159.58Q712-426 750.5-476t54-89.13q15.5-39.13 15.5-77.87 0-65-42.5-107.5T670-793q-51.63 0-95.31 31.5Q531-730 504-660h-49q-26-69-70-101t-95-32q-65 0-107.5 42.5T140-643q0 38.74 15.5 77.87Q171-526 209.5-476t104 116.42Q378.87-293.15 480-200Zm0-296Z"/></svg>`;
 const ICON_FAV_FILL    = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m480-121-41-37q-105.77-97.12-174.88-167.56Q195-396 154-451.5T96.5-552Q80-597 80-643q0-90.15 60.5-150.58Q201-854 290-854q52 0 98.5 22t81.5 62q35-40 81.5-62t98.5-22q89 0 149.5 60.42Q880-733.15 880-643q0 46-16.5 91T806-451.5Q765-396 695.88-325.56 626.77-255.12 521-158l-41 37Z"/></svg>`;
+// Material Icons "auto_awesome" — Sparkles/Stern-Cluster fuer "neu importiert".
+// 24px viewBox weil Material Symbols den 960er-Path nicht bereitstellt; CSS
+// skaliert das SVG auf die Badge-Groesse.
+const ICON_NEW_STAR = `<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 9l1.25-2.75L23 5l-2.75-1.25L19 1l-1.25 2.75L15 5l2.75 1.25L19 9zm-7.5.5L9 4 6.5 9.5 1 12l5.5 2.5L9 20l2.5-5.5L17 12l-5.5-2.5zM19 15l-1.25 2.75L15 19l2.75 1.25L19 23l1.25-2.75L23 19l-2.75-1.25L19 15z"/></svg>`;
 
 // Filter-Chips oben im Picker. Vier Gruppen mit unterschiedlicher Verknüpfung:
 //
@@ -36,7 +40,6 @@ const FILTERS = [
   { key: 'meat',   label: 'Fleisch',       group: 'diet',    test: (d) => d.tags.includes('contains-meat') },
   { key: 'fish',   label: 'Fisch',         group: 'diet',    test: (d) => d.tags.includes('contains-fish') },
   { key: 'veg',    label: 'Vegetarisch',   group: 'diet',    test: (d) => !d.tags.includes('contains-meat') && !d.tags.includes('contains-fish') },
-  { key: 'is-new', label: 'Neu', group: 'neu', test: (d) => isNewDish(d.id) },
   { key: 'asian',         label: 'Asiatisch',   group: 'cuisine', test: (d) => d.cuisineGroup === 'asian' },
   { key: 'mediterranean', label: 'Mediterran',  group: 'cuisine', test: (d) => d.cuisineGroup === 'mediterranean' },
   { key: 'middleEast',    label: 'Nahost',      group: 'cuisine', test: (d) => d.cuisineGroup === 'middleEast' },
@@ -44,6 +47,10 @@ const FILTERS = [
   { key: 'fast',      label: 'Schnell',       group: 'attr', test: (d) => d.cooktime <= 30 },
   { key: 'simple',    label: 'Wenig Zutaten', group: 'attr', test: (d) => openIngredientCount(d) <= 8 },
   { key: 'favorite',  label: 'Favoriten',     group: 'attr', icon: ICON_FAV_FILL, test: (d) => isFavoriteAnyDiner(d.id) },
+  // is-new haengt an der attr-Gruppe (AND-Verknuepfung), damit "neu + fleisch"
+  // funktioniert. Chip wird nur gerendert wenn state.remoteNewIds nicht leer
+  // ist, sonst waere er semantisch immer false und wuerde nur verwirren.
+  { key: 'is-new',    label: 'Neu importiert', group: 'attr', icon: ICON_NEW_STAR, test: (d) => isNewDish(d.id) },
   { key: 'kcal_low',  label: 'Kalorienarm',   group: 'kcal', test: (d) => d.kcal < KCAL_MEDIAN },
   { key: 'kcal_high', label: 'Kalorienreich', group: 'kcal', test: (d) => d.kcal > KCAL_MEDIAN },
   { key: 'macro_protein', label: 'Proteinreich',    group: 'macro', test: (d) => macroPct(d).p > 35 },
@@ -245,7 +252,6 @@ function renderFiltersSection() {
       <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'cuisine').map(chipHtml).join('')}
       </div>
-      ${state.remoteNewIds.size > 0 ? `<div class="picker-filter-row">${FILTERS.filter((f) => f.group === 'neu').map(chipHtml).join('')}</div>` : ''}
       <div class="picker-filter-row picker-filter-row--nowrap">
         ${FILTERS.filter((f) => f.group === 'macro').map(chipHtml).join('')}
       </div>
@@ -253,7 +259,10 @@ function renderFiltersSection() {
         ${FILTERS.filter((f) => f.group === 'kcal').map(chipHtml).join('')}
       </div>
       <div class="picker-filter-row">
-        ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
+        ${FILTERS
+          .filter((f) => f.group === 'attr')
+          .filter((f) => f.key !== 'is-new' || state.remoteNewIds.size > 0)
+          .map(chipHtml).join('')}
       </div>
     </div>
   `;
@@ -504,7 +513,7 @@ function renderResults(main, overflow, currentDishId, used) {
       <div class="picker-divider" role="separator" aria-label="Bereits geplant">
         <span class="picker-divider__label">Bereits geplant</span>
       </div>
-      <div class="picker-grid picker-grid--overflow">${overflow.map((d) => renderTile(d, false, used)).join('')}</div>
+      <div class="picker-grid picker-grid--overflow">${overflow.map((d) => renderTile(d, d.id === currentDishId, used)).join('')}</div>
     `
     : '';
   // Counter zeigt "verfügbar / gesamt" — positive Framing analog Filter-Counter.
@@ -568,12 +577,17 @@ function renderTile(dish, isCurrent, usedMap) {
   if (isCurrent) cls.push('picker-tile--current');
   if (isDisabled) cls.push('picker-tile--disabled');
   const disabledAttr = isDisabled ? 'aria-disabled="true" tabindex="-1"' : '';
-  // Aktueller Tag: Badge im Aktiv-Look (primary bg, weiße Schrift — analog
-  // zur kcal-Pille auf der Card). Fremder Tag: Frosted-Glass Badge (primary
-  // Schrift auf weißem semi-transparent bg).
-  const badgeCls = 'picker-tile__day-badge' + (isCurrent ? ' picker-tile__day-badge--active' : '');
+  // Day-Badge unten-links (Platz oben-links macht Neu-Marker frei). Immer im
+  // Aktiv-Look (primary bg, weisse Schrift) — bessere Lesbarkeit als die
+  // fruehere frosted-glass-Variante fuer fremde Tage.
   const dayBadge = displayDay
-    ? `<span class="${badgeCls}">${displayDay}</span>`
+    ? `<span class="picker-tile__day-badge picker-tile__day-badge--active">${displayDay}</span>`
+    : '';
+  // Neu-Marker oben-links: markiert Rezepte aus dem letzten Remote-Import.
+  // Verschwindet automatisch beim naechsten Import (state.remoteNewIds wird
+  // dann auf die neuen IDs ueberschrieben).
+  const newBadge = isNewDish(dish.id)
+    ? `<span class="picker-tile__new" aria-label="Neu importiert" title="Neu importiert">${ICON_NEW_STAR}</span>`
     : '';
   // Anzahl noch nicht abgehakter Zutaten dieses Gerichts — identische Semantik
   // wie beim Card-Badge im Dashboard ("so viele Zutaten stehen noch offen").
@@ -615,6 +629,7 @@ function renderTile(dish, isCurrent, usedMap) {
             aria-current="${isCurrent ? 'true' : 'false'}"
             ${disabledAttr}>
       <div class="picker-tile__image-wrap">
+        ${newBadge}
         ${dayBadge}
         ${favBadge}
         ${shopPill}
