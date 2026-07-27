@@ -201,16 +201,15 @@
 }
 
 /* Favoriten-Pille im oberen Overlay, links neben dem Portion-Stepper.
-   Optik identisch zur Edit-Pille (40 dp kreisrunder Icon-Button, frosted-glass),
-   damit die drei runden Overlay-Pillen (Edit oben links, Herz + Portion oben
-   rechts) visuell konsistent sind. Off: frosted, On: primary-Fuellung. */
+   Groesse auf Portion-Pillen-Hoehe abgestimmt (~26px), damit beide Overlay-
+   Elemente auf gleicher Baseline sitzen. Off: frosted-glass, On: primary. */
 .fav-pill {
   pointer-events: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -224,8 +223,8 @@
   transition: background 120ms ease, color 120ms ease, transform 120ms ease;
 }
 .fav-pill svg {
-  width: 24px;
-  height: 24px;
+  width: 16px;
+  height: 16px;
   display: block;
 }
 .fav-pill.is-on {
