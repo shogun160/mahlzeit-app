@@ -40,6 +40,10 @@ const bottomNavRoot = document.getElementById('bottom-nav');
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
 // renderDashboard() beim ersten Render ein frisches Assignment.
 loadState();
+// remoteImageFailures hat 24h-TTL: beim Start wird die Menge immer geleert,
+// damit fehlgeschlagene Bild-Downloads am naechsten Tag automatisch neu
+// versucht werden. loadState() setzt das Feld schon auf ein leeres Set,
+// dieser Kommentar dokumentiert die bewusste Semantik.
 
 // Globaler Guard verhindert dass Slider beim vertikalen Scrollen im Settings-
 // Sheet / Onboarding-Wizard versehentlich verstellt werden. Muss vor dem ersten
@@ -239,6 +243,16 @@ attachViewSwipe(mainEl, {
 });
 
 refresh();
+
+// Remote-Rezept-Auto-Check: laueft asynchron im Hintergrund, blockiert
+// den ersten Render nicht. Wenn neue Rezepte gefunden werden, setzt der
+// Check state.remoteHasUpdates=true und triggert einen refresh() damit
+// der Badge am Burger-Icon erscheint.
+import('./data/remote-updates.js').then(({ performAutoCheck }) => {
+  performAutoCheck().then(() => {
+    if (state.remoteHasUpdates) refresh();
+  }).catch(() => { /* silent */ });
+});
 
 // Onboarding-Auto-Open beim allerersten App-Start. Wizard setzt onboardingSeen
 // sofort auf true (in openOnboardingWizard selbst), damit auch ein Crash
