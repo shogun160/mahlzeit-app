@@ -118,6 +118,9 @@ let activeFilters = new Set();
 // beim App-Restart, überlebt aber Sheet-Close/Reopen weil das Modul lebt).
 // Konsistent mit dem Muster im Settings-Sheet.
 let filtersCollapsed = false;
+// Pro-Oeffnung optionaler Callback, der nach einem Pick gefeuert wird
+// (z. B. vom Detail-Sheet, um sich mit dem neuen Gericht wieder zu oeffnen).
+let afterPickCallback = null;
 
 export function mountDishPicker(el, { onPick } = {}) {
   rootEl = el;
@@ -126,9 +129,10 @@ export function mountDishPicker(el, { onPick } = {}) {
   rootEl.hidden = true;
 }
 
-export function openDishPicker(day) {
+export function openDishPicker(day, { onAfterPick } = {}) {
   if (!rootEl) throw new Error('Dish-Picker nicht gemountet.');
   currentDay = day;
+  afterPickCallback = onAfterPick || null;
   activeFilters = deriveInitialFilters();
   // Frisch öffnen → Filter-Section standardmäßig aufgeklappt zeigen. Der User
   // muss die aktiven Chips sehen bevor er weiter interagiert.
@@ -147,6 +151,10 @@ export function closeDishPicker() {
   const overlay = rootEl.querySelector('.picker-overlay');
   if (overlay) overlay.classList.remove('is-open');
   document.removeEventListener('keydown', handleEsc);
+  // Callback wird nur bei tatsaechlichem Pick gefeuert (siehe handlePick).
+  // Beim Close ohne Pick verwerfen, sonst wuerde er beim naechsten Open
+  // stehen bleiben.
+  afterPickCallback = null;
   setTimeout(() => {
     if (rootEl && !rootEl.querySelector('.picker-overlay.is-open')) {
       rootEl.hidden = true;
@@ -676,8 +684,13 @@ function attachHandlers() {
     btn.addEventListener('click', () => {
       if (btn.getAttribute('aria-disabled') === 'true') return;
       const id = parseInt(btn.dataset.dishId, 10);
-      onExternalPick(currentDay, id);
+      // Pro-Oeffnung-Callback in lokale Var ziehen — closeDishPicker resettet
+      // afterPickCallback synchron.
+      const day = currentDay;
+      const cb = afterPickCallback;
+      onExternalPick(day, id);
       closeDishPicker();
+      if (cb) cb(day, id);
     });
   });
 
@@ -873,8 +886,13 @@ function updateGrid({ preserveScroll = false, animate = false } = {}) {
     btn.addEventListener('click', () => {
       if (btn.getAttribute('aria-disabled') === 'true') return;
       const id = parseInt(btn.dataset.dishId, 10);
-      onExternalPick(currentDay, id);
+      // Pro-Oeffnung-Callback in lokale Var ziehen — closeDishPicker resettet
+      // afterPickCallback synchron.
+      const day = currentDay;
+      const cb = afterPickCallback;
+      onExternalPick(day, id);
       closeDishPicker();
+      if (cb) cb(day, id);
     });
   });
   // Fav-Badge-Handler nach Grid-Rebuild neu binden.

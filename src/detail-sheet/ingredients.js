@@ -28,11 +28,12 @@ function sortByCategory(ingredients) {
     .map(({ ing }) => ing);
 }
 
-// Baut die Zutaten-Liste als HTML-String, inklusive Check-Kreise vor jeder Zeile
-// und einer Sum-Row am Ende mit Gesamt-kcal + Makro-Aufteilung.
+// Baut die Zutaten-Liste als HTML-String, inklusive Check-Kreise vor jeder Zeile.
 // dish.ingredients: [{ key, label, grams, unit, ... }, ...]
 // portions: aktuell gültige Portionen für den zugehörigen Tag (state.portions[day])
 // Der Check-Zustand kommt aus state.checkedShopping — geteilt mit der Einkaufsliste.
+// Der Makro-Footer ist NICHT hier drin — er lebt als Sheet-Bottom-Element in
+// beiden Tabs (siehe renderMacroFooter, in render.js unter der sheet-body).
 export function renderIngredients(dish, portions) {
   const rows = sortByCategory(dish.ingredients).map((ing) => {
     const checked = state.checkedShopping.has(ing.key);
@@ -53,48 +54,26 @@ export function renderIngredients(dish, portions) {
       </li>
     `;
   }).join('');
-  return `
-    <ul class="ingredient-list">${rows}</ul>
-    ${renderMacroSum(dish, portions)}
-  `;
+  return `<ul class="ingredient-list">${rows}</ul>`;
 }
 
-// Zweizeilige Sum-Row: oben "Gesamt … kcal", darunter g-Werte + %-Anteile.
-// Prozente = kcal-Anteil des Makros (Atwater: 4 kcal/g P, 4 kcal/g KH, 9 kcal/g F).
-// Basis für die %-Berechnung ist die Summe der Makro-Kalorien (nicht dish.kcal),
-// damit sich die drei Prozente auf ~100 % addieren.
-//
-// Multi-Profile: totalFactor aggregiert ueber alle teilnehmenden Diner
-// (portions Personen). Bei portions > 1 wird zusaetzlich pro Diner eine
-// kompakte Zeile eingeblendet, damit sichtbar ist wer wieviel bekommt.
-function renderMacroSum(dish, portions) {
+// Makro-Footer fuer beide Tabs (Zutaten + Rezept). Zeigt die 4 Header-Pills
+// (kcal + P + KH + F) mittig — Werte sind die Total-Summe fuer alle Portionen
+// via totalFactorForDish. Bei portions > 1 zusaetzlich Pro-Diner-Aufteilung.
+export function renderMacroFooter(dish, portions) {
   const totalFactor = totalFactorForDish(dish, portions);
   const kcal = Math.round(dish.kcal * totalFactor);
   const p = Math.round(dish.p * totalFactor);
   const kh = Math.round(dish.kh * totalFactor);
   const f = Math.round(dish.f * totalFactor);
-  const kcalP = p * 4;
-  const kcalKh = kh * 4;
-  const kcalF = f * 9;
-  const total = kcalP + kcalKh + kcalF;
-  const pctP = total > 0 ? Math.round((kcalP / total) * 100) : 0;
-  const pctKh = total > 0 ? Math.round((kcalKh / total) * 100) : 0;
-  const pctF = total > 0 ? Math.round((kcalF / total) * 100) : 0;
-
   const dinerRows = portions > 1 ? renderDinerRows(dish, portions) : '';
-
   return `
-    <div class="ingredient-sum" role="group" aria-label="Gesamt-Nährwerte">
-      <div class="ingredient-sum__row">
-        <span class="ingredient-sum__label">Gesamt</span>
-        <span class="ingredient-sum__kcal">${kcal} kcal</span>
-      </div>
-      <div class="ingredient-sum__macros">
-        <span>${p} g <span class="ingredient-sum__key ingredient-sum__key--p">P</span> (${pctP}%)</span>
-        <span class="ingredient-sum__sep" aria-hidden="true">·</span>
-        <span>${kh} g <span class="ingredient-sum__key ingredient-sum__key--kh">KH</span> (${pctKh}%)</span>
-        <span class="ingredient-sum__sep" aria-hidden="true">·</span>
-        <span>${f} g <span class="ingredient-sum__key ingredient-sum__key--f">F</span> (${pctF}%)</span>
+    <div class="sheet-macro-footer" role="group" aria-label="Gesamt-Nährwerte">
+      <div class="sheet-macro-footer__pills">
+        <span class="makro-pill makro-pill--kcal" aria-hidden="true">${kcal}<span class="unit"> kcal</span></span>
+        <span class="makro-pill makro-pill--p" aria-hidden="true">${p}<span class="unit"> g P</span></span>
+        <span class="makro-pill makro-pill--kh" aria-hidden="true">${kh}<span class="unit"> g KH</span></span>
+        <span class="makro-pill makro-pill--f" aria-hidden="true">${f}<span class="unit"> g F</span></span>
       </div>
       ${dinerRows}
     </div>
