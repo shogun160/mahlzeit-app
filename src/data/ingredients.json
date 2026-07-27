@@ -61,10 +61,10 @@
       "cat": "fleisch_fisch",
       "unit": "g",
       "per100g": {
-        "kcal": 104,
-        "p": 24.0,
+        "kcal": 149,
+        "p": 19.6,
         "kh": 0.0,
-        "f": 0.7
+        "f": 7.6
       }
     },
     "rinderfilet": {
@@ -301,18 +301,6 @@
         "f": 0.1
       }
     },
-    "zitrone": {
-      "label": "Zitrone (für Saft)",
-      "cat": "frisch",
-      "unit": "stueck",
-      "per100g": {
-        "kcal": 22,
-        "p": 0.0,
-        "kh": 7.5,
-        "f": 0.0
-      },
-      "size": 40
-    },
     "limette": {
       "label": "Limette (für Saft)",
       "cat": "frisch",
@@ -520,6 +508,17 @@
         "p": 3.2,
         "kh": 19.0,
         "f": 1.2
+      }
+    },
+    "tomate": {
+      "label": "Tomate",
+      "cat": "frisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 18,
+        "p": 0.9,
+        "kh": 3.9,
+        "f": 0.2
       }
     },
     "tomaten_passiert": {
@@ -1390,6 +1389,19 @@
         "p": 12.4,
         "kh": 55.0,
         "f": 17.8
+      }
+    },
+    "gewuerz_paprika_edelsuess": {
+      "label": "Paprikapulver, edelsüß",
+      "cat": "gewuerze",
+      "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
+      "per100g": {
+        "kcal": 282,
+        "p": 14.0,
+        "kh": 54.0,
+        "f": 13.0
       }
     },
     "gewuerz_paprika_gerauch": {
