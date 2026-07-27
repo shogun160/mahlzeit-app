@@ -2,6 +2,8 @@
 // Zeigt drei Optionen. Auswahl fuehrt in Wizard (addProfile-Modus) oder
 // Import-Sheet.
 
+import { isScannerAvailable } from './scanner.js';
+
 let rootEl = null;
 let onManual = null;
 let onImport = null;
@@ -17,6 +19,8 @@ export function openAddChoiceSheet({ onManualChoice, onImportChoice }) {
   if (!rootEl) throw new Error('Add-Choice-Sheet nicht gemountet.');
   onManual = onManualChoice;
   onImport = onImportChoice;
+  const scanEnabled = isScannerAvailable();
+  const scanLabel = scanEnabled ? 'Profil-QR scannen' : 'Profil-QR scannen (nur in der App)';
   rootEl.innerHTML = `
     <div class="add-choice-overlay" data-role="backdrop">
       <div class="add-choice-sheet" role="dialog" aria-modal="true" aria-labelledby="add-choice-title">
@@ -29,7 +33,7 @@ export function openAddChoiceSheet({ onManualChoice, onImportChoice }) {
           <p class="add-choice-sheet__desc">Wie möchtest du das neue Profil anlegen?</p>
           <div class="add-choice-sheet__actions">
             <button class="btn btn--primary add-choice-sheet__btn" type="button" data-action="manual">Manuell einrichten</button>
-            <button class="btn btn--secondary add-choice-sheet__btn" type="button" data-action="scan">Profil-QR scannen</button>
+            <button class="btn btn--secondary add-choice-sheet__btn" type="button" data-action="scan"${scanEnabled ? '' : ' disabled'}>${scanLabel}</button>
             <button class="btn btn--text add-choice-sheet__btn" type="button" data-action="paste">Text einfügen</button>
           </div>
         </div>

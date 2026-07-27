@@ -1,5 +1,6 @@
 import { state, getActiveProfile, getProfileById, addProfile, removeProfile, saveState, setActiveProfileId } from '../state.js';
 import { openProfileImportSheet } from '../profile-share/import-sheet.js';
+import { isScannerAvailable } from '../profile-share/scanner.js';
 import { AGE_MIN, AGE_MAX, ACTIVITY_LEVELS, dailyTarget, dinnerTarget, kcalRange } from '../nutrition/target.js';
 import { DEFAULT_USER } from '../nutrition/defaults.js';
 import { renderStep1, renderStep2, renderStep3, DEFAULTS } from './steps.js';
@@ -340,13 +341,15 @@ function renderWelcome() {
   const desc = isSub
     ? 'Neue Person manuell einrichten oder Profil-QR eines anderen Mahlzeit-Nutzers übernehmen.'
     : 'Zum ersten Mal hier? Richte dein Profil ein oder übernimm ein bestehendes.';
+  const scanEnabled = isScannerAvailable();
+  const scanLabel = scanEnabled ? 'Profil-QR scannen' : 'Profil-QR scannen (nur in der App)';
   return `
     <div class="wizard-welcome">
       <h3 class="wizard-welcome__title">${title}</h3>
       <p class="wizard-welcome__desc">${desc}</p>
       <div class="wizard-welcome__actions">
         <button class="btn btn--primary wizard-welcome__btn" type="button" data-action="welcome-manual">Manuell einrichten</button>
-        <button class="btn btn--secondary wizard-welcome__btn" type="button" data-action="welcome-scan">Profil-QR scannen</button>
+        <button class="btn btn--secondary wizard-welcome__btn" type="button" data-action="welcome-scan"${scanEnabled ? '' : ' disabled'}>${scanLabel}</button>
         <button class="btn btn--text wizard-welcome__btn" type="button" data-action="welcome-paste">Text einfügen</button>
       </div>
     </div>

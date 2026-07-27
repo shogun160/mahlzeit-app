@@ -166,7 +166,10 @@ mountSettingsSheet(settingsRoot, {
   onAddProfile: () => openAddChoiceSheet({
     onManualChoice: () => openOnboardingWizard({ addProfile: true }),
     onImportChoice: () => openProfileImportSheet({
-      onImported: () => refreshProfileListInOpenSheet(),
+      onImported: () => {
+        refreshProfileListInOpenSheet();
+        refresh();
+      },
     }),
   }),
   onThemeChange: () => {

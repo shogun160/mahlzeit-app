@@ -5,7 +5,6 @@ import { renderQrToCanvas } from './qr.js';
 import { showToast } from '../util/toast.js';
 
 let rootEl = null;
-let isOpen = false;
 const TRANSITION_MS = 200;
 
 export function mountProfileShareSheet(el) {
@@ -45,7 +44,6 @@ export async function openProfileShareSheet(profile) {
   rootEl.hidden = false;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      isOpen = true;
       rootEl.querySelector('.share-sheet-overlay')?.classList.add('is-open');
     });
   });
@@ -60,7 +58,6 @@ export async function openProfileShareSheet(profile) {
 
 export function closeProfileShareSheet() {
   if (!rootEl || rootEl.hidden) return;
-  isOpen = false;
   rootEl.querySelector('.share-sheet-overlay')?.classList.remove('is-open');
   setTimeout(() => {
     if (rootEl && !rootEl.querySelector('.share-sheet-overlay.is-open')) {

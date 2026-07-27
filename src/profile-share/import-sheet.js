@@ -5,7 +5,6 @@ import { showToast } from '../util/toast.js';
 import { isScannerAvailable, requestPermission, scanOnce } from './scanner.js';
 
 let rootEl = null;
-let isOpen = false;
 let onDone = null;
 const TRANSITION_MS = 200;
 
@@ -22,7 +21,6 @@ export function openProfileImportSheet({ onImported } = {}) {
   rootEl.hidden = false;
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
-      isOpen = true;
       rootEl.querySelector('.import-sheet-overlay')?.classList.add('is-open');
     });
   });
@@ -30,7 +28,6 @@ export function openProfileImportSheet({ onImported } = {}) {
 
 export function closeProfileImportSheet() {
   if (!rootEl || rootEl.hidden) return;
-  isOpen = false;
   rootEl.querySelector('.import-sheet-overlay')?.classList.remove('is-open');
   setTimeout(() => {
     if (rootEl && !rootEl.querySelector('.import-sheet-overlay.is-open')) {
