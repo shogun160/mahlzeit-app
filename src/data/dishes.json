@@ -2419,6 +2419,96 @@
       "cuisineGroup": "middleEast"
     },
     {
+      "id": 34,
+      "name": "Carne-Asada-Bowl mit schwarzen Bohnen & Avocado",
+      "cuisine": "Mexikanisch",
+      "cooktime": 40,
+      "kcal": 951,
+      "p": 76,
+      "kh": 86,
+      "f": 32,
+      "tags": [
+        "contains-meat",
+        "contains-lactose",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "key": "rind_sirloin",
+          "grams": 240,
+          "note": "Hüfte, mager"
+        },
+        {
+          "key": "reis_basmati_vollkorn",
+          "grams": 55
+        },
+        {
+          "key": "bohnen_schwarz",
+          "grams": 200,
+          "note": "Dose à 400 g (Abtropfgewicht ~240 g)"
+        },
+        {
+          "key": "tomate",
+          "grams": 100
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 30
+        },
+        {
+          "key": "petersilie",
+          "grams": 5,
+          "note": "für Pico de Gallo"
+        },
+        {
+          "key": "limette_saft",
+          "grams": 15,
+          "note": "12 g Pico de Gallo, 3 g Skyr-Dip"
+        },
+        {
+          "key": "avocado",
+          "grams": 70
+        },
+        {
+          "key": "skyr",
+          "grams": 40,
+          "note": "als Dip"
+        },
+        {
+          "key": "minze",
+          "grams": 2,
+          "note": "für den Skyr-Dip"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 12,
+          "note": "3 g Marinade, 9 g Anbraten"
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_paprika_edelsuess",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_chili",
+          "grams": 0.5
+        }
+      ],
+      "steps": [
+        "Vollkorn-Basmati mit Wasser 1:2 im Reiskocher kochen (Modus Brown, ca. 40 Min.).",
+        "Rinderhüfte mit 3 g Olivenöl, Kreuzkümmel, Paprika, Chili und Salz einreiben.",
+        "Restliches Olivenöl heiß werden lassen, Steak je Seite 2–3 Min. anbraten, 3–5 Min. ruhen lassen, quer zur Faser aufschneiden.",
+        "Tomate, rote Zwiebel und Petersilie fein hacken, mit 12 g Limettensaft mischen (Pico de Gallo).",
+        "Bohnen erwärmen, Avocado aufschneiden.",
+        "Skyr mit einer Prise Salz, 3 g Limettensaft und gehackter Minze verrühren (Dip).",
+        "Reis, Bohnen, Steak, Pico de Gallo und Avocado in Bowl anrichten, Skyr-Dip dazu."
+      ],
+      "cuisineGroup": "americas"
+    },
+    {
       "id": 35,
       "name": "Dal Tadka mit Spiegelei",
       "cuisine": "Indisch",
