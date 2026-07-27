@@ -119,16 +119,12 @@ function renderPreview(newDishes) {
     </div>
   `;
   wireBackdrop();
-  mountRoot.querySelector('[data-action="cancel"]').addEventListener('click', () => {
-    // Aktiver Dismiss: der User hat die Preview gesehen und bewusst abgelehnt.
-    // Badge weg, damit er nicht erneut daran erinnert wird. Backdrop-Klick /
-    // Escape gelten dagegen als "passiv weggehen" → Badge bleibt.
-    state.remoteHasUpdates = false;
-    saveState();
-    close();
-    refreshApp?.();
-    refreshRezepteRow();
-  });
+  // Abbrechen ist reines Sheet-Schliessen ohne state-aenderung — status bleibt
+  // "Update verfuegbar" bis der User importiert oder das rezept aus main
+  // verschwindet. Frueher wurde hier remoteHasUpdates = false gesetzt
+  // ("aktiver dismiss"), das ist verwirrend: user sieht "aktuell" obwohl
+  // die neuen rezepte noch da sind.
+  mountRoot.querySelector('[data-action="cancel"]').addEventListener('click', close);
   mountRoot.querySelector('[data-action="import"]').addEventListener('click', () => startImport());
 }
 

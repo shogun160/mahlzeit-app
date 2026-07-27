@@ -1073,8 +1073,6 @@ button.rezepte-import__status--action {
   font-size: 0.8125rem;
   font-weight: 600;
   color: var(--md-sys-color-primary);
-  text-decoration: underline;
-  text-underline-offset: 3px;
   -webkit-tap-highlight-color: transparent;
 }
 button.rezepte-import__status--action:active {
