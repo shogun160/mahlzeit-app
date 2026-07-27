@@ -1,0 +1,45 @@
+name: Rezept-Vorschlag
+description: Ein neues Rezept vorschlagen — Formular für User ohne Git-Kenntnisse.
+title: "[Rezept-Vorschlag]: "
+labels: ["recipe-suggestion"]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Rezept-Name
+      placeholder: "z. B. Butter Chicken mit Basmati"
+    validations:
+      required: true
+  - type: dropdown
+    id: cuisine
+    attributes:
+      label: Küche
+      options:
+        - mediterranean
+        - asian
+        - middleEast
+        - americas
+        - andere
+    validations:
+      required: true
+  - type: textarea
+    id: ingredients
+    attributes:
+      label: Zutaten
+      description: Eine Zutat pro Zeile, mit ungefährer Menge pro Portion (z. B. "200 g Hähnchenbrust")
+      placeholder: "200 g Hähnchenbrust\n80 g Basmati-Reis\n..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Zubereitungs-Schritte
+      description: Ein Schritt pro Zeile
+      placeholder: "Reis nach Packungsanweisung kochen.\nHähnchen würfeln...\n..."
+    validations:
+      required: true
+  - type: textarea
+    id: image
+    attributes:
+      label: Bild (optional)
+      description: Falls du ein Bild hast, füge es dem Kommentar bei nach Erstellung des Issues.
