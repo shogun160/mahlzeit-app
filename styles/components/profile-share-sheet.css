@@ -116,8 +116,41 @@
 .share-sheet__btn,
 .import-sheet__btn,
 .add-choice-sheet__btn {
-  min-height: 48px;
   width: 100%;
+}
+
+/* Wiederverwendbare Button-Klassen fuer Sheets + Wizard-Welcome.
+ * Material-3-Pattern angelehnt an .onboarding-btn. */
+.btn {
+  min-height: var(--touch-target-min, 48px);
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+  transition: transform .1s ease, opacity .15s ease;
+}
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn--primary {
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+.btn--secondary {
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  border: 1px solid var(--md-sys-color-outline, #ccc);
+}
+.btn--text {
+  background: transparent;
+  color: var(--md-sys-color-primary);
 }
 .share-sheet__fallback {
   width: 100%;
