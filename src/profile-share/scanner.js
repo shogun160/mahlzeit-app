@@ -5,14 +5,15 @@
 //
 // Debug-Modus: Wenn SCANNER_DEBUG aktiv, wird ein sichtbares Log-Overlay
 // gerendert, das jeden Schritt zeigt (Perm, Listener, startScan, Events).
-// Beim naechsten Kamera-Bug-Fund → auf false setzen.
+// Falls der Scan-Flow wieder haengt: hier auf true setzen, APK bauen,
+// Overlay am oberen Rand liest man live mit.
 import { Capacitor } from '@capacitor/core';
 // Statischer Import statt dynamischem: der Vite-Chunk-Load fuer diesen
 // Import hing in der Capacitor-WebView still (kein Reject, kein Resolve).
 // Statischer Import hebt den Handler beim App-Start und umgeht das Problem.
 import { BarcodeScanner } from '@capacitor-mlkit/barcode-scanning';
 
-const SCANNER_DEBUG = true;
+const SCANNER_DEBUG = false;
 
 export function isScannerAvailable() {
   return Capacitor.isNativePlatform();
