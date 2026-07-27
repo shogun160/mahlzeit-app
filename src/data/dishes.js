@@ -1,5 +1,6 @@
-import dishesData from './dishes.json';
-import ingredientsData from './ingredients.json';
+import dishesData from './dishes.json' with { type: 'json' };
+import ingredientsData from './ingredients.json' with { type: 'json' };
+import { state } from '../state.js';
 
 // Kanonische Zutaten-Datenbank (single source of truth für label, cat, unit,
 // size, note, per_100g Makros). Ein Ingredient-Key darf App-weit nur einmal
@@ -81,4 +82,60 @@ export function weightedShuffle(ids, weightFn) {
     result.push(pool.splice(idx, 1)[0]);
   }
   return result;
+}
+
+// Merger fuer den Remote-Rezept-Import (Session 21).
+//
+// Regeln:
+// 1. Bundled hat immer Vorrang. Remote-Dishes mit einer ID die bereits
+//    bundled ist werden verworfen und ihre ID zurueckgegeben (staleRemoteIds),
+//    damit der Caller State + Bild-Cache aufraeumen kann.
+// 2. Analog fuer Ingredients: bundled Key bleibt, Remote-Kopie wird ignoriert.
+//    Guardrail 8 (keine Duplikat-Zutaten) greift damit automatisch.
+// 3. Remote-Dishes werden geskipped wenn sie auf einen Ingredient-Key
+//    verweisen, der weder bundled noch remote ist. Warnung wird gesammelt.
+//
+// Rueckgabe:
+//   { dishes: Dish[]           merged, ohne die geskippten
+//   , ingredients: { key: Ing } merged, bundled hat Vorrang
+//   , staleRemoteIds: number[] Remote-IDs die aus State/Cache raus muessen
+//   , warnings: { id: number, name: string, missingKey: string }[]
+//   }
+//
+// Verwendet KEINE globale State-Referenz — pure Funktion fuer Testbarkeit.
+export function mergeRemote({ bundled, bundledIngredients, remoteDishes, remoteIngredients }) {
+  const bundledIds = new Set(bundled.map((d) => d.id));
+  const staleRemoteIds = [];
+  const warnings = [];
+
+  // Ingredients-Merger: bundled zuerst, dann Remote-Keys die nicht bundled sind.
+  const ingredients = { ...bundledIngredients };
+  for (const [key, ing] of Object.entries(remoteIngredients || {})) {
+    if (!(key in ingredients)) ingredients[key] = ing;
+  }
+
+  // Dishes-Merger:
+  const dishes = [...bundled];
+  for (const d of remoteDishes || []) {
+    if (bundledIds.has(d.id)) {
+      staleRemoteIds.push(d.id);
+      continue;
+    }
+    // Missing-Ingredient-Filter.
+    const missing = (d.ingredients || []).find((ing) => !(ing.key in ingredients));
+    if (missing) {
+      warnings.push({ id: d.id, name: d.name, missingKey: missing.key });
+      continue;
+    }
+    dishes.push(d);
+  }
+
+  return { dishes, ingredients, staleRemoteIds, warnings };
+}
+
+// isNewDish liefert true wenn die ID im aktuellen "Neu"-Batch ist.
+// Consumer (Card, Picker-Filter) nutzen das. State-Zugriff erlaubt hier,
+// weil das eine reine Getter-Konvention ist.
+export function isNewDish(id) {
+  return state.remoteNewIds instanceof Set && state.remoteNewIds.has(id);
 }
