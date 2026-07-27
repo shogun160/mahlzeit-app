@@ -73,10 +73,10 @@ export function wireRezepteSection(root, callbacks = {}) {
   const refreshBtn = root.querySelector('[data-action="rezepte-check"]');
   if (refreshBtn) {
     refreshBtn.addEventListener('click', async () => {
-      // Rate-Limit-Bypass wenn schon ein Update bekannt ist — der Fetch
-      // laeuft trotzdem (und findet die neuen Rezepte auch beim zweiten
-      // Klick), aber der Toast "keine neuen Rezepte" waere hier falsch.
-      if (!canManualFetch() && !state.remoteHasUpdates) {
+      // Refresh-Icon triggert immer einen frischen Fetch (Prufen auf neue
+      // Rezepte). 60s-rate-limit greift normal — bekannte updates werden
+      // via klick auf den "update verfuegbar"-text geoeffnet (ohne fetch).
+      if (!canManualFetch()) {
         onToast?.('Bereits gerade geprüft, keine neuen Rezepte.');
         return;
       }

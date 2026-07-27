@@ -289,7 +289,8 @@ body.barcode-scanner-active > *:not(.qr-scan-overlay) {
 }
 .update-sheet__name {
   font-size: 0.9375rem;
-  color: var(--md-sys-color-on-surface);
+  font-weight: 600;
+  color: var(--md-sys-color-primary);
 }
 .update-sheet__cuisine {
   color: var(--md-sys-color-on-surface-variant);

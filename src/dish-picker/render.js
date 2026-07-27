@@ -2,6 +2,7 @@ import { state, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js'
 import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount, isFavoriteAnyDiner, favoriteLikesCount } from '../nutrition/preferences.js';
 import { getScaleForDish } from '../nutrition/scale.js';
 import { allDishes, isNewDish } from '../data/dishes.js';
+import { resolveDishImage, bindDishImage } from '../data/dish-image.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
 const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
@@ -639,7 +640,7 @@ function renderTile(dish, isCurrent, usedMap) {
         ${dayBadge}
         ${favBadge}
         ${shopPill}
-        <img class="picker-tile__img" src="/dishes/dish-${dish.id}.jpg" alt="" loading="lazy" />
+        <img class="picker-tile__img" src="${resolveDishImage(dish.id)}" alt="" loading="lazy" data-dish-image-id="${dish.id}" />
       </div>
       <div class="picker-tile__body">
         <div class="picker-tile__title">${dish.name}</div>
@@ -678,6 +679,13 @@ function attachHandlers() {
       onExternalPick(currentDay, id);
       closeDishPicker();
     });
+  });
+
+  // Remote-Bilder aus dem Cache nachladen — analog updateGrid(), aber fuer
+  // das initiale Rendering (attachHandlers laeuft nach dem ersten renderSheet).
+  rootEl.querySelectorAll('img[data-dish-image-id]').forEach((imgEl) => {
+    const id = parseInt(imgEl.dataset.dishImageId, 10);
+    if (!isNaN(id)) bindDishImage(imgEl, id);
   });
 
   // Favoriten-Badge: togglet Fav-Status und rendert das Grid neu, damit
@@ -851,6 +859,14 @@ function updateGrid({ preserveScroll = false, animate = false } = {}) {
   if (oldGrids) oldGrids.remove();
 
   body.insertAdjacentHTML('beforeend', renderResults(main, overflow, currentDishId, used));
+  // Remote-Bilder aus dem Cache nachladen (fuer nicht-bundled ids). Ohne
+  // diesen Call bleiben importierte Rezepte auf der Placeholder-Silhouette
+  // haengen — die Card im Dashboard nutzt bindDishImage schon, der Picker
+  // war der letzte Ort mit dem direkten path.
+  body.querySelectorAll('img[data-dish-image-id]').forEach((imgEl) => {
+    const id = parseInt(imgEl.dataset.dishImageId, 10);
+    if (!isNaN(id)) bindDishImage(imgEl, id);
+  });
   // Handler für alle neuen Tiles binden (main + overflow) — nur die Tile-
   // Buttons, NICHT die inneren Fav-Badges (die haben denselben data-dish-id).
   body.querySelectorAll('button[data-dish-id]').forEach((btn) => {
