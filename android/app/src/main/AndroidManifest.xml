@@ -33,6 +33,14 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- ML Kit Barcode-Scanning: Play Services soll das Barcode-Modul beim
+             App-Install bereitstellen. Ohne diesen Eintrag muss ML Kit das
+             Modul zur Laufzeit dynamisch nachladen — was ohne Progress-Feedback
+             stumm haengen kann. -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
     </application>
 
     <!-- Permissions -->
