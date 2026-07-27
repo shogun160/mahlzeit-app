@@ -259,10 +259,7 @@ function renderFiltersSection() {
         ${FILTERS.filter((f) => f.group === 'kcal').map(chipHtml).join('')}
       </div>
       <div class="picker-filter-row">
-        ${FILTERS
-          .filter((f) => f.group === 'attr')
-          .filter((f) => f.key !== 'is-new' || state.remoteNewIds.size > 0)
-          .map(chipHtml).join('')}
+        ${FILTERS.filter((f) => f.group === 'attr').map(chipHtml).join('')}
       </div>
     </div>
   `;
@@ -502,9 +499,18 @@ function renderResults(main, overflow, currentDishId, used) {
   // Wenn niemand favorisiert hat -> freundliche Copy statt generisches Empty.
   const diners = state.settings.profiles.slice(0, state.settings.defaultPortions || 1);
   const anyFav = diners.some((p) => Object.keys(p.favorites || {}).length > 0);
-  const emptyMsg = (favActive && !anyFav)
-    ? `<p class="picker-empty">Noch keine Favoriten — Nimm dir ein Herz ${ICON_FAV_FILL}</p>`
-    : '<p class="picker-empty">Keine Gerichte für diese Filter.</p>';
+  // Analoger Spezialfall fuer den "Neu importiert"-Filter: aktiv aber keine
+  // Rezepte im aktuellen Neu-Batch → passende Copy mit Sparkles-Icon.
+  const newActive = activeFilters.has('is-new');
+  const hasNew = state.remoteNewIds.size > 0;
+  let emptyMsg;
+  if (favActive && !anyFav) {
+    emptyMsg = `<p class="picker-empty">Noch keine Favoriten — Nimm dir ein Herz ${ICON_FAV_FILL}</p>`;
+  } else if (newActive && !hasNew) {
+    emptyMsg = `<p class="picker-empty">Keine neuen Rezepte ${ICON_NEW_STAR}</p>`;
+  } else {
+    emptyMsg = '<p class="picker-empty">Keine Gerichte für diese Filter.</p>';
+  }
   const mainHtml = main.length > 0
     ? `<div class="picker-grid">${main.map((d) => renderTile(d, d.id === currentDishId, used)).join('')}</div>`
     : emptyMsg;
