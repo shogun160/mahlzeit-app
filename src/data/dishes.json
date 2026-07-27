@@ -2417,6 +2417,83 @@
         "Bulgur, Köfte und Ezme-Salat auf den Teller, Feta darüber zerbröckeln."
       ],
       "cuisineGroup": "middleEast"
+    },
+    {
+      "id": 34,
+      "name": "Carne-Asada-Bowl mit schwarzen Bohnen & Avocado",
+      "cuisine": "Mexikanisch",
+      "cooktime": 40,
+      "kcal": 951,
+      "p": 76,
+      "kh": 86,
+      "f": 32,
+      "tags": [
+        "contains-meat",
+        "contains-lactose",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "key": "rind_sirloin",
+          "grams": 240,
+          "note": "Hüfte, mager"
+        },
+        {
+          "key": "reis_basmati",
+          "grams": 55
+        },
+        {
+          "key": "bohnen_schwarz",
+          "grams": 200,
+          "note": "Dose à 400 g (Abtropfgewicht ~240 g)"
+        },
+        {
+          "key": "tomate",
+          "grams": 100
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 30
+        },
+        {
+          "key": "limette_saft",
+          "grams": 15
+        },
+        {
+          "key": "avocado",
+          "grams": 70
+        },
+        {
+          "key": "skyr",
+          "grams": 40,
+          "note": "als Dip"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 12
+        },
+        {
+          "key": "gewuerz_kreuzkuemmel",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_paprika_edelsuess",
+          "grams": 1
+        },
+        {
+          "key": "gewuerz_chili",
+          "grams": 0.5
+        }
+      ],
+      "steps": [
+        "Basmati mit Wasser 1:1,25 im Reiskocher ansetzen (Modus Weiß, ca. 40 Min.) oder nach Packungsanweisung kochen.",
+        "Rinderhüfte trocken tupfen, mit Kreuzkümmel, Paprika, Chili und Salz einreiben.",
+        "Olivenöl in der Pfanne heiß werden lassen, Steak je Seite 2–3 Min. scharf anbraten, dann 3–5 Min. ruhen lassen. Quer zur Faser aufschneiden.",
+        "Tomate und rote Zwiebel fein würfeln, mit Limettensaft mischen, mit Salz abschmecken (Pico de Gallo).",
+        "Bohnen abtropfen und in der Pfanne kurz erwärmen. Avocado in Scheiben schneiden.",
+        "Reis in die Bowl, Bohnen, Steak, Pico de Gallo und Avocado anlegen. Skyr als Dip dazu."
+      ],
+      "cuisineGroup": "americas"
     }
   ]
 }
