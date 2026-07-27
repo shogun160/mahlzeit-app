@@ -1,3 +1,14 @@
+/* Alle Overlay-Backdrops (Sheet, Picker, Macro-Popup, Settings) blurren im
+   offenen Zustand den darunterliegenden Content (Dashboard/View). Backdrop-
+   filter braucht -webkit-Prefix fuer Safari/Android WebView. */
+.sheet-overlay.is-open,
+.picker-overlay.is-open,
+.macro-overlay.is-open,
+.settings-overlay.is-open {
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
 /* Overlay ist der Full-Screen-Backdrop, hält das Sheet unten am Rand. */
 .sheet-overlay {
   position: fixed;
@@ -387,49 +398,37 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-/* Nur die P/KH/F-Buchstaben in Chart-Farben — Werte + %-Klammern bleiben in
-   der neutralen Sum-Farbe. Etwas größer + fett, damit die farbigen Keys als
-   Etiketten wirken (analog Makro-Popup-Pillen). */
-.ingredient-sum__key {
-  font-weight: 700;
-  font-size: 1.05em;
-  margin: 0 1px;
+/* Multi-User-Rows im Footer (portions > 1): eine Zeile pro Profil-User +
+   optional eine "Standard"-Zeile fuer Gaeste. Label links, 4 Pills rechts —
+   IMMER einzeilig (kein wrap). */
+.sheet-macro-footer__row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+  flex-wrap: nowrap;
 }
-.ingredient-sum__key--p  { color: var(--chart-color-p); }
-.ingredient-sum__key--kh { color: var(--chart-color-kh); }
-.ingredient-sum__key--f  { color: var(--chart-color-f); }
-
-.ingredient-sum__sep {
-  color: var(--md-sys-color-outline-variant);
-}
-
-/* Multi-Profile-Aufteilung (Etappe 4): bei portions > 1 eine kompakte Zeile
-   pro teilnehmender Person unter der Gesamt-Summe. Zeigt wer wieviel bekommt
-   basierend auf individuellem Abendessen-Ziel. Zweizeilig auf schmalen
-   Screens (Label oben, Werte darunter), einzeilig sonst. */
-.ingredient-sum__diners {
-  margin-top: 8px;
-  padding-top: 8px;
+.sheet-macro-footer__row + .sheet-macro-footer__row {
   border-top: 1px dashed var(--md-sys-color-outline-variant);
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
 }
-.ingredient-sum__diner-row {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-  font-size: 0.8125rem;
-  color: var(--md-sys-color-on-surface-variant);
-  flex-wrap: wrap;
-}
-.ingredient-sum__diner-label {
-  font-weight: 600;
+
+.sheet-macro-footer__label {
+  font-size: 0.875rem;
+  font-weight: 700;
   color: var(--md-sys-color-on-surface);
   flex-shrink: 0;
+  /* Feste min-width damit die Pills-Spalten ueber alle Zeilen fluchten,
+     auch wenn Namen unterschiedlich lang sind ("Oliver" vs "Standard"). */
+  min-width: 80px;
 }
-.ingredient-sum__diner-values {
-  text-align: right;
+
+/* In der Multi-Row nehmen die Pills den restlichen Platz und sitzen
+   rechtsbuendig — Label links, Werte rechts. Nowrap-Overrides der Base-Regel,
+   damit die 4 Pills in einer Zeile bleiben, egal wie schmal der Screen. */
+.sheet-macro-footer__row .sheet-macro-footer__pills {
+  flex: 1 1 auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
 }
 
 /* Rezept-Schritte: <ol> mit CSS-Counter für runde Nummern-Badges.

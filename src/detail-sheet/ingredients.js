@@ -57,52 +57,78 @@ export function renderIngredients(dish, portions) {
   return `<ul class="ingredient-list">${rows}</ul>`;
 }
 
-// Makro-Footer fuer beide Tabs (Zutaten + Rezept). Zeigt die 4 Header-Pills
-// (kcal + P + KH + F) mittig — Werte sind die Total-Summe fuer alle Portionen
-// via totalFactorForDish. Bei portions > 1 zusaetzlich Pro-Diner-Aufteilung.
+// Makro-Footer fuer beide Tabs (Zutaten + Rezept).
+// portions=1: die 4 Header-Pills mittig (kcal + P + KH + F) fuer eine Person
+//   (Total = aktiver User scale).
+// portions>1: KEINE Summe — stattdessen eine Zeile pro Profil-User (Label +
+//   4 Pills mit dessen Werten) und, falls Gaeste mitessen, EINE einzige
+//   "Standard"-Zeile mit den Werten fuer EINE Standard-Person (unabhaengig
+//   wieviel Gaeste).
 export function renderMacroFooter(dish, portions) {
+  if (portions > 1) {
+    return `
+      <div class="sheet-macro-footer" role="group" aria-label="Nährwerte pro Person">
+        ${renderMultiUserRows(dish, portions)}
+      </div>
+    `;
+  }
   const totalFactor = totalFactorForDish(dish, portions);
   const kcal = Math.round(dish.kcal * totalFactor);
   const p = Math.round(dish.p * totalFactor);
   const kh = Math.round(dish.kh * totalFactor);
   const f = Math.round(dish.f * totalFactor);
-  const dinerRows = portions > 1 ? renderDinerRows(dish, portions) : '';
   return `
-    <div class="sheet-macro-footer" role="group" aria-label="Gesamt-Nährwerte">
+    <div class="sheet-macro-footer" role="group" aria-label="Nährwerte">
       <div class="sheet-macro-footer__pills">
         <span class="makro-pill makro-pill--kcal" aria-hidden="true">${kcal}<span class="unit"> kcal</span></span>
         <span class="makro-pill makro-pill--p" aria-hidden="true">${p}<span class="unit"> g P</span></span>
         <span class="makro-pill makro-pill--kh" aria-hidden="true">${kh}<span class="unit"> g KH</span></span>
         <span class="makro-pill makro-pill--f" aria-hidden="true">${f}<span class="unit"> g F</span></span>
       </div>
-      ${dinerRows}
     </div>
   `;
 }
 
-// Pro-Diner-Aufteilung: eine kleine Zeile pro Person mit kcal + P/KH/F.
-// Reihenfolge: erste N Profile in profiles-Reihenfolge, dann Gaeste
-// (DEFAULT_USER). Name-Fallback: "User 1"/"User 2"/... wenn kein Name
-// gesetzt, "Gast" fuer DEFAULT_USER-Fueller.
-function renderDinerRows(dish, portions) {
-  const rows = dinerScalesForDish(dish, portions).map(({ diner, scale, isDefault }, idx) => {
-    const label = isDefault ? 'Gast' : (diner.name || `User ${idx + 1}`);
-    const kcal = Math.round(dish.kcal * scale);
-    const p = Math.round(dish.p * scale);
-    const kh = Math.round(dish.kh * scale);
-    const f = Math.round(dish.f * scale);
-    return `
-      <div class="ingredient-sum__diner-row">
-        <span class="ingredient-sum__diner-label">${escapeHtml(label)}</span>
-        <span class="ingredient-sum__diner-values">
-          ${kcal} kcal · ${p} g <span class="ingredient-sum__key ingredient-sum__key--p">P</span>
-          · ${kh} g <span class="ingredient-sum__key ingredient-sum__key--kh">KH</span>
-          · ${f} g <span class="ingredient-sum__key ingredient-sum__key--f">F</span>
-        </span>
+// Eine Zeile je Profil-User + eine "Standard"-Zeile falls Gaeste dabei sind.
+// Berechnung je User: dish.kcal * user-snap-scale — identische Formel wie
+// bei portions=1 (dort totalFactor = active user's snap-scale). Snap auf
+// 0.25-Schritte kommt aus dishScale, damit Kochmengen und Anzeige denselben
+// Wert nutzen. Wenn alle Ziele auf denselben Scale snappen (z. B. alle auf
+// 1.0), sind auch die Zeilen identisch — das ist der bewusst gewaehlte
+// Trade-off der Snap-Rundung.
+function renderMultiUserRows(dish, portions) {
+  const diners = dinerScalesForDish(dish, portions);
+  const userDiners = diners.filter((d) => !d.isDefault);
+  const guestDiners = diners.filter((d) => d.isDefault);
+  const rows = userDiners.map(({ diner, scale }, idx) => {
+    // Erster Profil-User = "Du" (der Owner der App). Weitere User mit
+    // Profilname (Fallback "User 2"/"User 3"/...).
+    const label = idx === 0 ? 'Du' : (diner.name || `User ${idx + 1}`);
+    return renderDinerPillRow(dish, scale, label);
+  });
+  if (guestDiners.length > 0) {
+    const label = guestDiners.length === 1 ? 'Gast' : 'Gäste';
+    rows.push(renderDinerPillRow(dish, guestDiners[0].scale, label));
+  }
+  return rows.join('');
+}
+
+function renderDinerPillRow(dish, scale, label) {
+  const kcal = Math.round(dish.kcal * scale);
+  const p = Math.round(dish.p * scale);
+  const kh = Math.round(dish.kh * scale);
+  const f = Math.round(dish.f * scale);
+  return `
+    <div class="sheet-macro-footer__row">
+      <span class="sheet-macro-footer__label">${escapeHtml(label)}</span>
+      <div class="sheet-macro-footer__pills">
+        <span class="makro-pill makro-pill--kcal" aria-hidden="true">${kcal}<span class="unit"> kcal</span></span>
+        <span class="makro-pill makro-pill--p" aria-hidden="true">${p}<span class="unit"> g P</span></span>
+        <span class="makro-pill makro-pill--kh" aria-hidden="true">${kh}<span class="unit"> g KH</span></span>
+        <span class="makro-pill makro-pill--f" aria-hidden="true">${f}<span class="unit"> g F</span></span>
       </div>
-    `;
-  }).join('');
-  return `<div class="ingredient-sum__diners" aria-label="Aufteilung pro Person">${rows}</div>`;
+    </div>
+  `;
 }
 
 function escapeHtml(s) {
