@@ -9,6 +9,8 @@ import {
 } from '../state.js';
 import { changeDefaultPortions } from '../dashboard/portions.js';
 import { GOALS } from '../nutrition/target.js';
+import { showToast } from '../util/toast.js';
+import { renderRezepteSectionBody, buildRezepteSummary, wireRezepteSection } from './rezepte-section.js';
 
 const TRANSITION_MS = 250;
 const SWIPE_THRESHOLD_PX = 55;
@@ -173,8 +175,9 @@ function renderShell() {
               </div>
               <button class="settings-action-btn" type="button" data-action="open-onboarding">Starten</button>
             </div>
-            <p class="settings-section__note settings-section__note--soft">Kommt bald: Gerichte importieren und erstellen</p>
           `)}
+
+          ${section('rezepte', 'Rezepte', renderRezepteSectionBody())}
 
           ${section('ueber', 'Über', `
             <a class="settings-link settings-link--compact"
@@ -281,6 +284,7 @@ function summaryFor(key) {
     if (count > 1) label += ` · ${count} Profile`;
     return label;
   }
+  if (key === 'rezepte') return buildRezepteSummary();
   return '';
 }
 
@@ -601,6 +605,14 @@ function attachHandlers() {
       syncHeaderActions();
       updateStickyState();
     });
+  });
+
+  wireRezepteSection(rootEl, {
+    onOpenUpdateSheet: () => {
+      // wird in Task A.11 implementiert
+      console.log('Update-Sheet wird in Task A.11 implementiert');
+    },
+    onToast: (msg) => showToast(msg),
   });
 
   attachCloseSwipe();
