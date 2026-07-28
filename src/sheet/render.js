@@ -255,15 +255,22 @@ function updateHeroForMode() {
 // --- Sheet-Level-Handlers (Hero) ---
 
 function attachSheetHandlers() {
-  // Hero-Bild async binden — bundled sofort, Cache-URI fuer Remote-Rezepte
-  // nach dem naechsten Frame.
-  const heroImg = rootEl.querySelector('[data-role="hero-image"]');
-  if (heroImg) bindDishImage(heroImg, state.assignment[session.day]);
-
   const overlay = rootEl.querySelector('[data-role="backdrop"]');
   overlay.addEventListener('click', (ev) => {
     if (ev.target === overlay) closeSheet();
   });
+  attachHeroHandlers();
+  attachCloseSwipe();
+}
+
+// Bindet alle Handler die am Hero-DOM (.sheet-hero) haengen. Wird sowohl beim
+// initialen Mount als auch nach rerenderHeroAndInfo aufgerufen — der ganze
+// Hero-Node wird per outerHTML ersetzt, alle vorherigen Handler dort sind weg.
+function attachHeroHandlers() {
+  // Hero-Bild async binden — bundled sofort, Cache-URI fuer Remote-Rezepte
+  // nach dem naechsten Frame.
+  const heroImg = rootEl.querySelector('[data-role="hero-image"]');
+  if (heroImg) bindDishImage(heroImg, state.assignment[session.day]);
 
   // Portion-Stepper.
   rootEl.querySelector('[data-action="sheet-portion-minus"]').addEventListener('click', () => handleSheetPortion(-1));
@@ -313,7 +320,6 @@ function attachSheetHandlers() {
   }
 
   attachHeroSwipe();
-  attachCloseSwipe();
 }
 
 function attachHeroModePillHandlers() {
@@ -356,6 +362,8 @@ function attachHeroModePillHandlers() {
 
 // Rendert Hero + Info neu — genutzt nach Reroll oder Day-Swipe (currentDish
 // wechselt komplett). Body wird separat via notifyBodyDishChange informiert.
+// Overlay + Close-Swipe leben weiter (haengen an .sheet-overlay / .sheet,
+// die durch das outerHTML-Replace des Hero nicht angefasst werden).
 function rerenderHeroAndInfo() {
   const sheet = rootEl.querySelector('.sheet');
   if (!sheet) return;
@@ -365,60 +373,7 @@ function rerenderHeroAndInfo() {
   const infoHtml = renderInfo();
   if (oldHero) oldHero.outerHTML = heroHtml;
   if (oldInfo) oldInfo.outerHTML = infoHtml;
-  // Sheet-Level-Handler neu binden (Hero-Handler waren an den alten Nodes).
-  // Overlay-Handler + Swipes bleiben — die haengen an .sheet-overlay / .sheet
-  // und den Body-Slot, nicht am Hero.
-  attachHeroLevelHandlersOnly();
-}
-
-// Nach rerenderHeroAndInfo: nur die Hero-Buttons + Bild binden. Backdrop +
-// Swipes leben weiter, weil die an ueberlebenden Elementen haengen.
-function attachHeroLevelHandlersOnly() {
-  const heroImg = rootEl.querySelector('[data-role="hero-image"]');
-  if (heroImg) bindDishImage(heroImg, state.assignment[session.day]);
-
-  rootEl.querySelector('[data-action="sheet-portion-minus"]').addEventListener('click', () => handleSheetPortion(-1));
-  rootEl.querySelector('[data-action="sheet-portion-plus"]').addEventListener('click', () => handleSheetPortion(1));
-
-  attachHeroModePillHandlers();
-
-  const favBtn = rootEl.querySelector('[data-action="toggle-fav"]');
-  if (favBtn) {
-    favBtn.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      const id = state.assignment[session.day];
-      if (id == null) return;
-      toggleFavorite(id);
-      const on = isFavorite(id);
-      favBtn.classList.toggle('is-on', on);
-      favBtn.setAttribute('aria-pressed', String(on));
-      const label = on ? 'Favorit entfernen' : 'Als Favorit markieren';
-      favBtn.setAttribute('aria-label', label);
-      favBtn.setAttribute('title', label);
-      favBtn.innerHTML = on ? ICON_FAV_FILL : ICON_FAV_OUTLINE;
-      saveState();
-      onExternalChange();
-      notifyBodyDishChange();
-    });
-  }
-
-  const listBtn = rootEl.querySelector('[data-action="toggle-list"]');
-  if (listBtn) {
-    listBtn.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      toggleSelected(session.day);
-      const on = !!state.selected[session.day];
-      listBtn.classList.toggle('is-on', on);
-      listBtn.setAttribute('aria-pressed', String(on));
-      const label = on ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
-      listBtn.setAttribute('aria-label', label);
-      listBtn.setAttribute('title', label);
-      listBtn.innerHTML = on ? ICON_LIST_FILLED : ICON_LIST;
-      saveState();
-      onExternalChange();
-      notifyBodyDishChange();
-    });
-  }
+  attachHeroHandlers();
 }
 
 function handleSheetPortion(delta) {
