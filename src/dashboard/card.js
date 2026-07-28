@@ -153,5 +153,12 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
     handlers.onToggleSelected();
   });
 
+  // Makro-Pillen-Reihe (kcal, P, KH, F) im Bild-Wrap oeffnet den Rezept-Tab —
+  // gleiches Ziel wie Bild-Klick, damit die Werte-Pillen nicht "tot" wirken.
+  const makrosEl = article.querySelector('.day-card__makros');
+  if (makrosEl) {
+    makrosEl.addEventListener('click', () => handlers.onOpenDetail('rezept'));
+  }
+
   return article;
 }
