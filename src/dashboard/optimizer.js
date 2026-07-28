@@ -1,6 +1,7 @@
 // Ziel-orientierter Reroll: reine Funktionen fuer Fitness-Score und
-// Greedy-Swap-Optimierung. Kein Import aus state.js — Consumer (reroll.js)
-// reichen den aktuellen Assignment-Snapshot und das Ziel-Profil rein.
+// Greedy-Swap-Optimierung. Reine Funktionen ohne Zugriff auf laufzeitlichen State.
+// Der Consumer (reroll.js) reicht Assignment-Snapshot und Ziel-Profil rein. DAYS ist
+// eine unveraenderliche Konstante (kein State-Zugriff zur Laufzeit).
 //
 // Fitness ist die Summe quadrierter, normalisierter Deltas ueber vier
 // Metriken (kcal, P, KH, F) gegen dayCount × Ziel. Kleiner = besser.
@@ -24,7 +25,7 @@ export function dayScopeFitness(assignment, dayCount, profile) {
   };
 
   let actual = { kcal: 0, p: 0, kh: 0, f: 0 };
-  for (const day in assignment) {
+  for (const day of DAYS) {
     const dish = dishesById.get(assignment[day]);
     if (!dish) continue;
     const scale = dishScale(dish.kcal, dinner);
@@ -62,7 +63,7 @@ export function weekFitness(assignment, profile) {
 export function optimizeAssignment(assignment, pool, profile, maxRounds = 50) {
   const current = { ...assignment };
   let bestScore = weekFitness(current, profile);
-  if (bestScore === 0) return current;
+  if (bestScore === 0) return current; // Perfektes Match — Loop unnoetig.
 
   for (let round = 0; round < maxRounds; round++) {
     let improvedThisRound = false;
