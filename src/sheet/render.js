@@ -133,7 +133,14 @@ function buildBodyApi() {
       saveState();
       onExternalChange();
     },
-    onPick: (day, dishId) => onExternalPick(day, dishId),
+    // Nach einem picker-tile-pick wandert state.assignment[day] auf das
+    // neue dish. Hero + Info werden neu gerendert, damit bild/titel/kcal
+    // dem neuen gericht folgen — der body wird direkt danach vom picker-
+    // body-tile-handler via switchMode('detail') ohnehin ausgetauscht.
+    onPick: (day, dishId) => {
+      onExternalPick(day, dishId);
+      rerenderHeroAndInfo();
+    },
   };
 }
 
