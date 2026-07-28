@@ -331,13 +331,19 @@ function attachHeroHandlers() {
   // Hero-Bild async binden — bundled sofort, Cache-URI fuer Remote-Rezepte
   // nach dem naechsten Frame.
   const heroImg = rootEl.querySelector('[data-role="hero-image"]');
-  if (heroImg) {
-    bindDishImage(heroImg, state.assignment[session.day]);
-    // Klick aufs Bild im Detail-Mode schliesst das Sheet — zweite Close-
-    // Affordance neben Runter-Swipe und Backdrop-Tap. Im Picker-Mode nicht,
-    // dort ist das Bild reine Vorschau.
-    heroImg.addEventListener('click', () => {
-      if (session && session.mode === 'detail') closeSheet();
+  if (heroImg) bindDishImage(heroImg, state.assignment[session.day]);
+
+  // Klick auf den Hero-Bereich im Detail-Mode schliesst das Sheet — zweite
+  // Close-Affordance neben Runter-Swipe und Backdrop-Tap. Handler am ganzen
+  // Hero (nicht am Bild), weil Overlays (Handle, Wochentag-Label, Makro-Row)
+  // ueber dem Bild sitzen und den Klick sonst schlucken. Buttons und Stepper
+  // sind per closest-Filter ausgenommen — gleiche Regel wie attachHeroSwipe.
+  const hero = rootEl.querySelector('.sheet-hero');
+  if (hero) {
+    hero.addEventListener('click', (ev) => {
+      if (!session || session.mode !== 'detail') return;
+      if (ev.target.closest('button, .stepper')) return;
+      closeSheet();
     });
   }
 
