@@ -10,6 +10,13 @@ import { DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { dinnerTarget, dinnerMacroTargets, dishScale } from '../nutrition/target.js';
 
+// Toleranz fuer den Swap-Loop: unter allen verbessernden Kandidaten wird
+// zufaellig einer aus dem Toleranzband gewaehlt. Ohne diesen Random-Anteil
+// terminiert der Greedy-Swap immer im selben lokalen Optimum — jeder
+// Reroll liefert dieselben Gerichte. 5 % Toleranz gibt sichtbare Vielfalt
+// ohne die Ziel-Naehe signifikant zu verschlechtern.
+const SWAP_TOLERANCE = 0.05;
+
 // Fitness gegen dayCount × Ziel. Verwendet vom rerollDay-Boost mit dem
 // aktuellen Selected-Scope, und von weekFitness (dayCount = 7).
 export function dayScopeFitness(assignment, dayCount, profile) {
@@ -53,8 +60,10 @@ export function weekFitness(assignment, profile) {
 
 // Greedy Swap: startet vom aktuellen Assignment, prueft fuer jeden Tag ob
 // ein Tausch gegen einen Pool-Kandidaten die Wochen-Fitness verbessert.
-// Deterministisch (kein Zufall im Loop, nur im Start-Assignment). Terminiert
-// frueh, wenn eine ganze Runde keine Verbesserung mehr bringt.
+// Pro Tag werden alle verbessernden Kandidaten gesammelt; aus dem Toleranz-
+// band (SWAP_TOLERANCE relativ zum besten) wird zufaellig einer gewaehlt —
+// das verhindert, dass der Loop immer im selben lokalen Optimum landet.
+// Terminiert frueh, wenn eine ganze Runde keine Verbesserung mehr bringt.
 //
 // - assignment: { [day]: dishId } — Start-Assignment, wird nicht mutiert
 // - pool: number[] — eligible Dish-IDs (Kochzeit + Diaet + Cuisine gefiltert)
@@ -70,17 +79,33 @@ export function optimizeAssignment(assignment, pool, profile, maxRounds = 50) {
     for (const day of DAYS) {
       const currentUsed = new Set(Object.values(current));
       currentUsed.delete(current[day]);
+
+      // Alle Kandidaten sammeln die den aktuellen Score verbessern.
+      const improvers = [];
       for (const candidateId of pool) {
         if (candidateId === current[day]) continue;
         if (currentUsed.has(candidateId)) continue;
         const trial = { ...current, [day]: candidateId };
         const trialScore = weekFitness(trial, profile);
         if (trialScore < bestScore) {
-          current[day] = candidateId;
-          bestScore = trialScore;
-          improvedThisRound = true;
+          improvers.push({ id: candidateId, score: trialScore });
         }
       }
+
+      if (improvers.length === 0) continue;
+
+      // Toleranzband: alle Kandidaten deren Score max SWAP_TOLERANCE
+      // relativ zum besten schlechter sind. Zufaellig einen waehlen.
+      improvers.sort((a, b) => a.score - b.score);
+      const minCandScore = improvers[0].score;
+      const acceptable = improvers.filter((c) => {
+        const denom = Math.max(Math.abs(minCandScore), 0.0001);
+        return (c.score - minCandScore) / denom <= SWAP_TOLERANCE;
+      });
+      const pick = acceptable[Math.floor(Math.random() * acceptable.length)];
+      current[day] = pick.id;
+      bestScore = pick.score;
+      improvedThisRound = true;
     }
     if (!improvedThisRound) break;
   }

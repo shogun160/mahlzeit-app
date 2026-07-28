@@ -165,10 +165,12 @@ export function rerollAll() {
   const previousIds = new Set(Object.values(state.assignment));
   const pool = eligibleDishIds();
   let shuffledPool = weightedShuffle(pool, cuisineWeight).filter((id) => !previousIds.has(id));
+  let optimizePool = pool.filter((id) => !previousIds.has(id));
   if (shuffledPool.length < DAYS.length) {
     // Fallback: nimm auch bekannte Gerichte, damit wir 7 zusammenbekommen.
     // Weighted bleibt aktiv — Praeferenzen sollen auch im Fallback wirken.
     shuffledPool = weightedShuffle(pool, cuisineWeight);
+    optimizePool = pool;
   }
 
   // Random-Start (Cuisine-gewichtet, previousIds gemieden).
@@ -176,10 +178,11 @@ export function rerollAll() {
   DAYS.forEach((day, i) => { startAssignment[day] = shuffledPool[i]; });
 
   // Ziel-orientierte Optimierung: Greedy-Swap gegen Wochen-Sollwerte.
-  // Bei unvollstaendigem Profil greift getTargetProfile auf Standard-
-  // Profil zurueck — Optimizer laeuft immer.
+  // optimizePool ohne previousIds — sonst tauscht der Optimizer die
+  // Vermeidung wieder rein. Bei unvollstaendigem Profil greift
+  // getTargetProfile auf Standard-Profil zurueck.
   const profile = getTargetProfile();
-  const optimized = optimizeAssignment(startAssignment, pool, profile);
+  const optimized = optimizeAssignment(startAssignment, optimizePool, profile);
 
   DAYS.forEach((day) => {
     state.assignment[day] = optimized[day];
