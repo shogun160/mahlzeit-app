@@ -1195,7 +1195,6 @@
       "f": 50,
       "tags": [
         "contains-meat",
-        "contains-fish",
         "contains-lactose"
       ],
       "ingredients": [
@@ -1371,7 +1370,6 @@
       "f": 33,
       "tags": [
         "contains-meat",
-        "contains-fish",
         "contains-lactose",
         "contains-egg"
       ],
