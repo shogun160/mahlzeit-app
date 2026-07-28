@@ -7,7 +7,7 @@
 // Aufruf: node scripts/reroll-sanity.js
 
 import { allDishes, allDishIds, dishesById, weightedShuffle, shuffled } from '../src/data/dishes.js';
-import { dinnerTarget, effectiveMacroTargets, dishScale } from '../src/nutrition/target.js';
+import { dinnerTarget, dinnerMacroTargets, dishScale } from '../src/nutrition/target.js';
 import { weekFitness, optimizeAssignment } from '../src/dashboard/optimizer.js';
 import { DAYS } from '../src/state.js';
 
@@ -67,7 +67,7 @@ function assignmentTotals(assignment, profile) {
 
 function targets(profile) {
   const dinner = dinnerTarget(profile);
-  const macros = effectiveMacroTargets(profile);
+  const macros = dinnerMacroTargets(profile);
   return {
     kcal: dinner * DAYS.length,
     p:    macros.p * DAYS.length,

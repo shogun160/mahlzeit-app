@@ -293,3 +293,22 @@ export function getTargetProfile() {
   if (isProfileComplete(active)) return active;
   return getStandardProfile();
 }
+
+// Abendessen-Makro-Ziele fuer ein einzelnes Profil. Rechnung: Tages-Makros
+// (aus effectiveMacroTargets) skaliert mit dem Anteil dinner/daily. Damit
+// vergleicht der Ziel-Reroll-Optimizer skalierte Rezept-Makros gegen die
+// tatsaechlichen Abendessen-Sollwerte statt gegen die Tages-Sollwerte —
+// sonst ist die Referenz zu hoch und die Fitness dominiert die
+// Optimierung nicht sinnvoll.
+export function dinnerMacroTargets(profile) {
+  const dinner = dinnerTarget(profile);
+  const daily = effectiveDailyTarget(profile);
+  const macros = effectiveMacroTargets(profile);
+  if (!dinner || !daily || !macros) return null;
+  const share = dinner / daily;
+  return {
+    p: macros.p * share,
+    kh: macros.kh * share,
+    f: macros.f * share,
+  };
+}

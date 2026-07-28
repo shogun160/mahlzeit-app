@@ -8,13 +8,13 @@
 
 import { DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
-import { dinnerTarget, effectiveMacroTargets, dishScale } from '../nutrition/target.js';
+import { dinnerTarget, dinnerMacroTargets, dishScale } from '../nutrition/target.js';
 
 // Fitness gegen dayCount × Ziel. Verwendet vom rerollDay-Boost mit dem
 // aktuellen Selected-Scope, und von weekFitness (dayCount = 7).
 export function dayScopeFitness(assignment, dayCount, profile) {
   const dinner = dinnerTarget(profile);
-  const macros = effectiveMacroTargets(profile);
+  const macros = dinnerMacroTargets(profile);
   if (!dinner || !macros) return 0;
 
   const target = {
