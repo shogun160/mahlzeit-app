@@ -32,3 +32,6 @@ android/app/release/
 # Claude Code
 .claude/
 releases/
+
+# Session-Handoffs bleiben lokal — nicht mehr im public repo tracken.
+docs/redesign/handoffs/
