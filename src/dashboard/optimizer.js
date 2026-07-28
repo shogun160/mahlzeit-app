@@ -25,7 +25,7 @@ export function dayScopeFitness(assignment, dayCount, profile) {
   };
 
   let actual = { kcal: 0, p: 0, kh: 0, f: 0 };
-  for (const day of DAYS) {
+  for (const day of Object.keys(assignment)) {
     const dish = dishesById.get(assignment[day]);
     if (!dish) continue;
     const scale = dishScale(dish.kcal, dinner);

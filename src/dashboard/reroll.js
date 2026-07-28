@@ -9,6 +9,12 @@ import { optimizeAssignment, dayScopeFitness } from './optimizer.js';
 // docs/redesign/2026-07-26-session-9-plan.md für die Entscheidung.
 const CUISINE_PREFERENCE_WEIGHT = 3;
 
+// TAU steuert im refillBag wie stark die Fitness gegenueber dem Cuisine-
+// Weight dominiert. exp(-(score-min)/TAU): TAU = 0.02 empirisch — Kandidaten
+// mit doppelt so hohem Delta bekommen ~1/e = 37 % Gewicht. Klein genug damit
+// Fitness fuehrt, gross genug damit Zufall drin bleibt.
+const TAU = 0.02;
+
 // Gewicht einer Dish-ID für den Weighted-Reroll bei Multi-User: proportional
 // zur Anzahl der mitkochenden Diner, die diese cuisineGroup als Praeferenz
 // gewaehlt haben. Basis 1, +CUISINE_PREFERENCE_WEIGHT pro Voter. Bei Solo /
@@ -109,11 +115,7 @@ function refillBag(day) {
   const minScore = scores.size > 0 ? Math.min(...scores.values()) : 0;
 
   // Combined-Weight: (a) Cuisine-Bonus (1 oder 1+3xVoters), (b) Fitness-
-  // Boost exp(-(score-minScore)/TAU). TAU steuert wie stark Fitness
-  // dominiert. 0.02 empirisch: Kandidaten mit doppelt so hohem Delta
-  // bekommen ~1/e = 37% Gewicht — klein genug damit Fitness fuehrt, gross
-  // genug damit Zufall drin bleibt.
-  const TAU = 0.02;
+  // Boost exp(-(score-minScore)/TAU).
   const combined = (id) => {
     const cuisine = cuisineWeight(id);
     const s = scores.get(id) ?? 0;
