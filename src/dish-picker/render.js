@@ -517,15 +517,10 @@ function renderHero(currentDishId) {
   const newBadge = isNewDish(dish.id)
     ? `<span class="sheet-hero__new" aria-label="Neu importiert" title="Neu importiert">${ICON_NEW_STAR}</span>`
     : '';
-  // Makros: identisch zur Dashboard-Card (siehe dashboard/card.js) — kcal + P/KH/F
-  // auf Basis des AKTIVEN Users (userScale), eine Portion, wie er sie isst.
-  // NICHT kumulierte Kochmenge, damit die Zahlen zwischen Card + Picker-Hero
-  // konsistent sind.
-  const userScale = getScaleForDish(dish);
-  const kcal = Math.round(dish.kcal * userScale);
-  const protein = Math.round(dish.p * userScale);
-  const carbs = Math.round(dish.kh * userScale);
-  const fat = Math.round(dish.f * userScale);
+  // kcal auf Basis des AKTIVEN Users (userScale), eine Portion — identisch
+  // zur Dashboard-Card. Makros (P/KH/F) hier bewusst weggelassen, das Detail-
+  // Sheet zeigt die vollstaendigen Naehrwerte.
+  const kcal = Math.round(dish.kcal * getScaleForDish(dish));
   return `
     <div class="sheet-hero">
       <img class="sheet-hero__image" alt="" aria-hidden="true" data-role="hero-image" />
@@ -557,9 +552,6 @@ function renderHero(currentDishId) {
       <span class="sheet-hero__day">${day}</span>
       <div class="sheet-hero__meta-row">
         <span class="makro-pill makro-pill--kcal" aria-hidden="true">${kcal}<span class="unit"> kcal</span></span>
-        <span class="makro-pill makro-pill--p" aria-hidden="true">${protein}<span class="unit"> g P</span></span>
-        <span class="makro-pill makro-pill--kh" aria-hidden="true">${carbs}<span class="unit"> g KH</span></span>
-        <span class="makro-pill makro-pill--f" aria-hidden="true">${fat}<span class="unit"> g F</span></span>
         <div class="stepper stepper--pill" role="group" aria-label="Portionen für ${day}">
           <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>

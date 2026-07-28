@@ -111,13 +111,27 @@
 
 /* Personen-Stepper unten rechts (matcht die Dashboard-Card-Makros-Position).
    Frosted-Glass wie die Overlay-Pills, damit er auf jedem Bild lesbar bleibt. */
-.sheet-hero__stepper-overlay {
+/* Meta-Row unten-rechts im Hero: EIN Flex-Container mit flachen Siblings
+   (im Detail-Sheet: kcal + Stepper, im Picker analog). flex-wrap, damit
+   Pills auf schmalen Screens einzeln umspringen; max-width laesst ~60 px
+   fuer die Day-Pill links. Ersetzt den frueheren .sheet-hero__stepper-
+   overlay-Wrapper. */
+.sheet-hero__meta-row {
   position: absolute;
   bottom: 10px;
   right: 10px;
   z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: calc(100% - 20px - 60px);
 }
-.sheet-hero__stepper-overlay .stepper--pill {
+
+/* Stepper im Hero: frosted-glass explizit hier — die Kinder liegen jetzt
+   als flache Siblings direkt in der Meta-Row (kein eigener Wrapper mehr). */
+.sheet-hero__meta-row .stepper--pill {
   background: var(--card-pill-glass);
   backdrop-filter: blur(14px) saturate(1.5);
   -webkit-backdrop-filter: blur(14px) saturate(1.5);

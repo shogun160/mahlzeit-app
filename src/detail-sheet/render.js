@@ -6,6 +6,7 @@ import { toggleSelected } from '../dashboard/selection.js';
 import { rerollDay } from '../dashboard/reroll.js';
 import { openDishPicker } from '../dish-picker/render.js';
 import { toggleChecked } from '../shopping-list/check.js';
+import { getScaleForDish } from '../nutrition/scale.js';
 import { renderIngredients, renderMacroFooter } from './ingredients.js';
 import { renderRecipe } from './recipe.js';
 
@@ -98,6 +99,10 @@ function renderShell() {
   const newBadge = isNewDish(dish.id)
     ? `<span class="sheet-hero__new" aria-label="Neu importiert" title="Neu importiert">${ICON_NEW_STAR}</span>`
     : '';
+  // kcal-Pill im Hero — identisch zum Picker. Basis: aktiver User, eine
+  // Portion (getScaleForDish). Der Macro-Footer unten zeigt separat die
+  // vollstaendigen Naehrwerte inkl. P/KH/F.
+  const kcal = Math.round(dish.kcal * getScaleForDish(dish));
 
   // Wenn renderShell aus goToNeighborDay gerufen wird (Sheet ist schon offen),
   // muss die neue .sheet-overlay direkt .is-open tragen — sonst hat sie
@@ -140,7 +145,8 @@ function renderShell() {
             </button>
           </div>
           <span class="sheet-hero__day">${day}</span>
-          <div class="sheet-hero__stepper-overlay">
+          <div class="sheet-hero__meta-row">
+            <span class="makro-pill makro-pill--kcal" aria-hidden="true">${kcal}<span class="unit"> kcal</span></span>
             <div class="stepper stepper--pill" role="group" aria-label="Portionen für ${day}">
               <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
