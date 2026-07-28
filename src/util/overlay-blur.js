@@ -7,14 +7,13 @@
 // gemeinsamen MutationObserver — kein Eingriff in die einzelnen Sheet-Module.
 
 const OVERLAY_ROOT_IDS = [
-  'detail-sheet-root',
+  'sheet-root',
   'settings-sheet-root',
   'profile-detail-root',
   'profile-share-sheet-root',
   'profile-import-sheet-root',
   'add-choice-sheet-root',
   'update-sheet-root',
-  'dish-picker-root',
   'macro-popup-root',
   'onboarding-root',
 ];
