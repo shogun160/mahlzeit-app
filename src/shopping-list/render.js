@@ -205,6 +205,12 @@ function syncAutoCollapse(items, cat) {
   const openCount = groupItems.filter((i) => !state.checkedShopping.has(i.key)).length;
   if (openCount === 0) state.collapsedCategories.add(cat);
   else state.collapsedCategories.delete(cat);
+  // Sub-Collapse zuruecksetzen, sobald der Divider ohnehin verschwindet
+  // (checkedCount unter 4). Damit gilt beim naechsten Erreichen von >=4
+  // wieder der Default 'collapsed', selbst wenn der User zuvor manuell
+  // 'anzeigen' gedrueckt hatte.
+  const checkedCount = groupItems.length - openCount;
+  if (checkedCount < 4) state.expandedCheckedCategories.delete(cat);
 }
 
 function collectRects(root) {
