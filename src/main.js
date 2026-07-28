@@ -4,9 +4,8 @@ import { rerollAll, rerollDay } from './dashboard/reroll.js';
 import { toggleAllSelected } from './dashboard/selection.js';
 import { renderShoppingList } from './shopping-list/render.js';
 import { resetChecked, checkAll } from './shopping-list/check.js';
-import { mountDetailSheet, openDetailSheet } from './detail-sheet/render.js';
+import { mountSheet, openSheet } from './sheet/render.js';
 import { mountSettingsSheet, openSettingsSheet, refreshProfileListInOpenSheet } from './settings/render.js';
-import { mountDishPicker, openDishPicker } from './dish-picker/render.js';
 import { mountMacroPopup, openMacroPopup } from './dashboard/macro-popup.js';
 import { mountOnboardingWizard, openOnboardingWizard } from './onboarding/wizard.js';
 import { mountProfileDetailSheet, openProfileDetailSheet } from './settings/profile-detail-sheet.js';
@@ -30,9 +29,8 @@ const mainEl = document.getElementById('app');
 const viewTrack = document.getElementById('view-track');
 const dashboardRoot = document.getElementById('view-dashboard');
 const shoppingRoot = document.getElementById('view-shopping');
-const sheetRoot = document.getElementById('detail-sheet-root');
+const sheetRoot = document.getElementById('sheet-root');
 const settingsRoot = document.getElementById('settings-sheet-root');
-const pickerRoot = document.getElementById('dish-picker-root');
 const macroPopupRoot = document.getElementById('macro-popup-root');
 const onboardingRoot = document.getElementById('onboarding-root');
 const profileDetailRoot = document.getElementById('profile-detail-root');
@@ -150,7 +148,16 @@ function refresh() {
   });
 
   // Beide Views immer rendern: der Swipe braucht den Zielinhalt sofort sichtbar.
-  renderDashboard(dashboardRoot, refresh, openDetailSheet, openDishPicker, openMacroPopup, openOnboardingWizard);
+  // Sheet-Callbacks: dishId wird vom Sheet aus state.assignment[day] gelesen —
+  // die uebergebene dishId hier ist historisch, wird nicht mehr genutzt.
+  renderDashboard(
+    dashboardRoot,
+    refresh,
+    (_dishId, tab, day) => openSheet({ mode: 'detail', day, tab }),
+    (day) => openSheet({ mode: 'picker', day }),
+    openMacroPopup,
+    openOnboardingWizard,
+  );
   renderShoppingList(shoppingRoot, { onChange: refresh });
 
   // Bottom-Nav: aktiver Tab + Badge sind state-abhängig, deshalb pro refresh() neu.
@@ -168,10 +175,34 @@ function refresh() {
   saveState();
 }
 
-// Sheets einmalig mounten. Detail-Sheet triggert bei internen Änderungen ein
+// Sheets einmalig mounten. Sheet triggert bei internen Änderungen ein
 // refresh() (Card-Badges, Shopping-Mengen). Settings-Sheet auch — Änderungen
 // dort (Standard-Portionen, Kochzeit) sollen mindestens saveState triggern.
-mountDetailSheet(sheetRoot, { onChange: refresh });
+// onPick uebernimmt die Post-Pick-Semantik: assignment setzen, Auto-Select
+// fuer die Einkaufsliste, Doppelbelegungen auf anderen Tagen aufloesen.
+mountSheet(sheetRoot, {
+  onChange: refresh,
+  onPick: (day, dishId) => {
+    state.assignment[day] = dishId;
+    // Auto-Select: bewusstes Umwaehlen ist ein starkes Signal, dass der User
+    // das Gericht wirklich kochen will → Tag landet automatisch auf der
+    // Einkaufsliste. checkedShopping bleibt unangetastet — bereits gekaufte
+    // Artikel bleiben abgehakt, auch wenn sie im neuen Gericht wieder
+    // auftauchen.
+    state.selected[day] = true;
+    // Doppelbelegung aufloesen: jeder andere Tag mit demselben Gericht wird
+    // neu ausgelost. Reihenfolge wichtig — assignment[day] steht bereits auf
+    // dishId, sodass rerollDay das gewaehlte Gericht via usedElsewhere
+    // ausschliesst und einen echten Wechsel liefert.
+    for (const otherDay of DAYS) {
+      if (otherDay === day) continue;
+      if (state.assignment[otherDay] === dishId) {
+        rerollDay(otherDay);
+      }
+    }
+    refresh();
+  },
+});
 mountSettingsSheet(settingsRoot, {
   onChange: refresh,
   onOpenOnboarding: () => openOnboardingWizard(),
@@ -207,7 +238,7 @@ mountUpdateSheet(updateSheetRoot, {
   showToast: (msg) => showToast(msg),
 });
 mountMacroPopup(macroPopupRoot, {
-  onOpenDetail: (dishId, tab, day) => openDetailSheet(dishId, tab, day),
+  onOpenDetail: (_dishId, tab, day) => openSheet({ mode: 'detail', day, tab }),
   onChange: refresh,
 });
 mountOnboardingWizard(onboardingRoot, {
@@ -215,36 +246,6 @@ mountOnboardingWizard(onboardingRoot, {
   onThemeChange: () => {
     applyTheme();
     saveState();
-  },
-});
-
-// Dish-Picker: onPick mutiert das Assignment für den gewählten Tag und würfelt
-// alle anderen Tage, die dasselbe Gericht hatten, automatisch neu — sonst wäre
-// das Gericht zweifach im Dashboard.
-mountDishPicker(pickerRoot, {
-  onChange: refresh,
-  onPick: (day, dishId) => {
-    state.assignment[day] = dishId;
-    // Auto-Select: bewusstes Umwählen ist ein starkes Signal, dass der User
-    // das Gericht wirklich kochen will → Tag landet automatisch auf der
-    // Einkaufsliste. Wenn schon selected, ändert sich nichts.
-    // Wichtig: checkedShopping bleibt unangetastet — bereits gekaufte Artikel
-    // bleiben abgehakt, auch wenn sie im neuen Gericht (oder als Leftover)
-    // wieder auftauchen.
-    state.selected[day] = true;
-    // Doppelbelegung auflösen: jeder andere Tag mit demselben Gericht wird
-    // neu ausgelost. Reihenfolge ist wichtig — assignment[day] steht bereits
-    // auf dishId, sodass rerollDay das gewählte Gericht via usedElsewhere
-    // ausschließt und einen echten Wechsel liefert. Der reroll setzt den
-    // anderen Tag zusätzlich auf selected=false; das trifft im Regelfall
-    // ohnehin nur zu (nur solche Tage waren im Picker klickbar).
-    for (const otherDay of DAYS) {
-      if (otherDay === day) continue;
-      if (state.assignment[otherDay] === dishId) {
-        rerollDay(otherDay);
-      }
-    }
-    refresh();
   },
 });
 
