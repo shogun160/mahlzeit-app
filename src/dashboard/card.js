@@ -145,12 +145,12 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
     });
   }
 
-  // Content-Bereich (Body außerhalb Stepper und Actions) öffnet ebenfalls den Rezept-Tab.
-  // Kein separater Wrapper — Klick-Filter via closest().
+  // Body-Klick (Wochentag, Titel, Meta) togglet die Einkaufslisten-Auswahl.
+  // Rezept-Tab öffnet man über das Bild. Stepper/Actions bleiben ausgenommen.
   const body = article.querySelector('.day-card__body');
   body.addEventListener('click', (ev) => {
     if (ev.target.closest('.stepper, .day-card__actions')) return;
-    handlers.onOpenDetail('rezept');
+    handlers.onToggleSelected();
   });
 
   return article;
