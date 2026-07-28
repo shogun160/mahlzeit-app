@@ -134,14 +134,56 @@ function buildBodyApi() {
       onExternalChange();
     },
     // Nach einem picker-tile-pick wandert state.assignment[day] auf das
-    // neue dish. Hero + Info werden neu gerendert, damit bild/titel/kcal
-    // dem neuen gericht folgen — der body wird direkt danach vom picker-
-    // body-tile-handler via switchMode('detail') ohnehin ausgetauscht.
+    // neue dish. Hero + Info werden in-place upgedatet (Bild, Titel, Meta,
+    // kcal-Pill, Fav-Pill, List-Pill) — kein outerHTML-swap, damit die
+    // eventhandler auf dem hero intakt bleiben und der noch offene tile-
+    // click nicht durch einen ausgetauschten DOM-teil weggerissen wird.
     onPick: (day, dishId) => {
       onExternalPick(day, dishId);
-      rerenderHeroAndInfo();
+      updateHeroDish();
     },
   };
+}
+
+// In-place-Update fuer hero + info nach dish-change (via api.onPick). Nur
+// die inhalte werden getauscht (textContent / innerHTML auf inneren nodes),
+// keine outerHTML-swaps. Die day-pill bleibt gleich (session.day unveraendert).
+function updateHeroDish() {
+  if (!session || !rootEl) return;
+  const dishId = state.assignment[session.day];
+  const dish = dishesById.get(dishId);
+  if (!dish) return;
+  const heroImg = rootEl.querySelector('[data-role="hero-image"]');
+  if (heroImg) bindDishImage(heroImg, dishId);
+  const infoTitle = rootEl.querySelector('.sheet-info__title');
+  if (infoTitle) infoTitle.textContent = dish.name;
+  const infoMeta = rootEl.querySelector('.sheet-info__meta');
+  if (infoMeta) infoMeta.textContent = `~${dish.cooktime} Min. · ${dish.cuisine}`;
+  const kcalPill = rootEl.querySelector('.sheet-hero__meta-row .makro-pill--kcal');
+  if (kcalPill) {
+    const kcal = Math.round(dish.kcal * getScaleForDish(dish));
+    kcalPill.innerHTML = `${kcal}<span class="unit"> kcal</span>`;
+  }
+  const favBtn = rootEl.querySelector('[data-action="toggle-fav"]');
+  if (favBtn) {
+    const favOn = isFavorite(dishId);
+    favBtn.classList.toggle('is-on', favOn);
+    favBtn.setAttribute('aria-pressed', String(favOn));
+    const label = favOn ? 'Favorit entfernen' : 'Als Favorit markieren';
+    favBtn.setAttribute('aria-label', label);
+    favBtn.setAttribute('title', label);
+    favBtn.innerHTML = favOn ? ICON_FAV_FILL : ICON_FAV_OUTLINE;
+  }
+  const listBtn = rootEl.querySelector('[data-action="toggle-list"]');
+  if (listBtn) {
+    const isSelected = !!state.selected[session.day];
+    listBtn.classList.toggle('is-on', isSelected);
+    listBtn.setAttribute('aria-pressed', String(isSelected));
+    const label = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
+    listBtn.setAttribute('aria-label', label);
+    listBtn.setAttribute('title', label);
+    listBtn.innerHTML = isSelected ? ICON_LIST_FILLED : ICON_LIST;
+  }
 }
 
 // --- Rendering ---
