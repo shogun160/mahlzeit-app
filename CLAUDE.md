@@ -133,12 +133,13 @@ Diese Regeln gelten übergreifend — nicht ändern ohne bewusste Rückfrage:
 5. **Kein Framework-Umbau** (Vue/React/Angular) ohne Rückfrage. Vanilla JS + Vite ist bewusste Wahl
 6. **Statusbar-Farbe synchron halten** — `capacitor.config.json` (`EdgeToEdge.backgroundColor`) und CSS (`--md-sys-color-surface` bzw. aktives Theme) immer gemeinsam ändern
 7. **Nach Änderungen zwingend `npm run build && npx cap sync`** — sonst landet nichts im Android-Projekt
-8. **Zutaten-Wiederverwendung, keine Duplikate** — beim Anlegen/Ändern von Rezepten (`dishes.json`) IMMER prüfen, ob die Zutat bereits in `ingredients.json` existiert (auch unter leicht anderem Namen). Nur neuen Key anlegen, wenn es wirklich eine neue Zutat ist. Verhindert Drifts wie zwei Petersilie-Einträge (Bund vs. g), die die Einkaufsliste doppelt zeigt.
+8. **Zutaten-Wiederverwendung, keine Duplikate** — beim Anlegen/Ändern von Rezepten (`dishes.json`) IMMER zuerst im [`docs/zutaten-katalog.md`](docs/zutaten-katalog.md) nachschauen (auto-generierte Übersicht aller Zutaten mit Werten pro 100g). Nur neuen Key in `ingredients.json` anlegen, wenn die Zutat wirklich noch nicht existiert — auch verwandte Formen prüfen (z. B. „Petersilie" vs. „Petersilie glatt"). Bei Unit-Abweichung trotzdem die bestehende Zutat nutzen, wenn semantisch dieselbe. Nach Änderung an `ingredients.json`: `node scripts/zutaten-katalog.js` ausführen, damit die Übersicht aktuell bleibt.
 9. **Touch-Targets ≥ 48 px** — bei Chip-Reihen über die Breite der ganzen Reihe erfüllt
 10. **Keine Tests** (Solo-Projekt) — Node-Simulation für Randfälle wenn nötig
 
 ## Referenz
 
+- **Zutaten-Katalog:** [`docs/zutaten-katalog.md`](docs/zutaten-katalog.md) — Übersicht aller Zutaten mit Werten pro 100g. Vor jedem neuen Rezept dort nachschauen.
 - **Rebuild-Design-Doc:** [`docs/redesign/2026-07-25-rebuild-design.md`](docs/redesign/2026-07-25-rebuild-design.md)
 - **Session-Handoffs:** [`docs/redesign/handoffs/`](docs/redesign/handoffs/) — letzter: `session-26-to-27.md`
 - **Backlog:** [`docs/redesign/backlog.md`](docs/redesign/backlog.md)
