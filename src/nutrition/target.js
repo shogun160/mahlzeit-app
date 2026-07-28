@@ -117,17 +117,39 @@ export function effectiveDailyTarget(profile) {
   return dailyTarget(profile);
 }
 
-// Abendessen-Ziel = Tagesziel − Frühstück − Mittag. Die App plant nur das
-// Abendessen — nur dieser Rest ist für die Wochen-Bar relevant. Bei negativem
-// Rest (Frühstück+Mittag überschreitet Tagesziel) clampen wir auf 0, damit die
-// Bar nicht in Endlosschleife über-alarmiert.
+// Prozentualer Standard-Anteil am Tagesbedarf, wenn keine Profi-Aufteilung
+// (Fr/Mi) gesetzt ist. 35 % entspricht dem oberen Rand der DGE-Empfehlung
+// (Abendessen ~25-35 % des Tagesbedarfs) — der User plant hier bewusst, also
+// tendenziell die reichere Mahlzeit.
+export const DINNER_STANDARD_SHARE = 0.35;
+
+// Untergrenze fuer das Abendessen im Profi-Modus. Wenn Fr+Mi so hoch sind,
+// dass weniger als das uebrig bliebe, greift der Clamp — Slider-Handler
+// sollten das aufgreifen (Toast + Wert clampen), damit der User nicht
+// verwirrt ist warum sein Fr/Mi-Wert nicht "wirkt".
+export const DINNER_MIN_KCAL = 500;
+
+// Abendessen-Ziel-Ableitung. Prioritaet:
+//  1. dinnerKcalOverride (manueller Slider im Profil-Sheet) — gewinnt immer.
+//  2. Profi-Modus: mindestens einer von Fr/Mi gesetzt → daily-bf-lu (min 500).
+//  3. Standard-Modus: 35 % des Tagesbedarfs (DGE-orientiert, skaliert mit
+//     BMR und Aktivitaet automatisch mit).
+// Rueckgabe null wenn Profil unvollstaendig (kein Daily).
 export function dinnerTarget(profile) {
+  if (profile?.dinnerKcalOverride != null) return profile.dinnerKcalOverride;
   const daily = effectiveDailyTarget(profile);
   if (daily == null) return null;
   const bf = profile.breakfastKcal ?? 0;
   const lu = profile.lunchKcal ?? 0;
-  return Math.max(0, daily - bf - lu);
+  if (bf > 0 || lu > 0) {
+    return Math.max(DINNER_MIN_KCAL, daily - bf - lu);
+  }
+  return Math.round(daily * DINNER_STANDARD_SHARE);
 }
+
+// Slider-Range fuer den Abendessen-Override im Profil-Sheet.
+export const DINNER_KCAL_MIN = 300;
+export const DINNER_KCAL_MAX = 2500;
 
 // [low, high]-Range um einen kcal-Wert mit TARGET_WINDOW_KCAL als Halbfenster.
 // Wird für Tages-, Abendessen- und Wochen-Anzeige verwendet — überall dieselbe
@@ -136,6 +158,16 @@ export function kcalRange(value, factor = 1) {
   if (value == null) return null;
   const window = TARGET_WINDOW_KCAL * factor;
   return [Math.max(0, value - window), value + window];
+}
+
+// Same as kcalRange, aber auf 10 kcal gerundet fuer UI-Anzeige. Damit die
+// Range-Werte ueberall gleich formatiert erscheinen (Profil-Card, Bedarfs-
+// Pille, Detail-Sheet, Wizard-Preview) — keine "797 vs 800"-Inkonsistenz.
+export function kcalRangeRounded(value, factor = 1) {
+  const r = kcalRange(value, factor);
+  if (!r) return null;
+  const round10 = (n) => Math.round(n / 10) * 10;
+  return [round10(r[0]), round10(r[1])];
 }
 
 // Makro-Presets — Verteilung der Tageskalorien auf P/KH/F in Prozent.

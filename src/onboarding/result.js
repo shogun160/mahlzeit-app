@@ -48,6 +48,7 @@ export function resolvedProfile(draft) {
     breakfastKcal:        draft.breakfastKcal ?? p.breakfastKcal ?? DEFAULTS.breakfastKcal,
     lunchKcal:            draft.lunchKcal     ?? p.lunchKcal     ?? DEFAULTS.lunchKcal,
     dailyTargetOverride:  draft.dailyTargetOverride ?? null,
+    dinnerKcalOverride:   draft.dinnerKcalOverride ?? null,
     macroPreset:          p.macroPreset ?? MACRO_PRESET_DEFAULT,
     macroTargets:         null, // Ergebnis nutzt immer das Preset
   };
@@ -72,15 +73,13 @@ export function renderStep5(draft) {
   const dinner = dinnerTarget(p);
   const isOverride = draft.dailyTargetOverride != null && draft.dailyTargetOverride !== suggestion;
   const macros = dinner != null ? macrosForKcal(dinner, p.macroPreset) : null;
-  const nameGreeting = draft.name ? `, ${draft.name}` : '';
   const fmt = (n) => n == null ? '—' : n.toLocaleString('de-DE');
-  const sliderVal = effective ?? 2000;
   const theme = state.settings.theme || 'auto';
   return `
     <div class="onboarding-result__intro">
       <div class="onboarding-result__intro-text">
-        <h3 class="onboarding-step__title">Fertig${nameGreeting}.</h3>
-        <p class="onboarding-step__desc">Mahlzeit, lass es dir schmecken!</p>
+        <h3 class="onboarding-step__title"><img class="onboarding-mahlzeit-logo" src="/logo.png" alt="Mahlzeit" /></h3>
+        <p class="onboarding-step__desc">Lass es dir schmecken!</p>
       </div>
       <button class="onboarding-theme-cycle"
               type="button"
@@ -107,14 +106,6 @@ export function renderStep5(draft) {
         </button>
       </div>
       <div class="onboarding-result__value onboarding-result__value--big" data-role="target-value">${formatKcalRange(effective)}</div>
-      <input class="settings-slider"
-             type="range"
-             min="1000"
-             max="4000"
-             step="50"
-             value="${sliderVal}"
-             data-action="target-change"
-             aria-label="Tageskalorien-Ziel" />
     </div>
 
     <div class="onboarding-result__row">
@@ -129,7 +120,9 @@ export function renderStep5(draft) {
     </div>
 
     <div class="onboarding-result__card onboarding-result__card--accent">
-      <div class="onboarding-result__label">Abendessen</div>
+      <div class="onboarding-result__card-header">
+        <span class="onboarding-result__label">Abendessen</span>
+      </div>
       <div class="onboarding-result__value onboarding-result__value--big" data-role="dinner-value">${formatKcalRange(dinner)}</div>
     </div>
 
@@ -138,6 +131,11 @@ export function renderStep5(draft) {
         ${renderMacros(macros)}
       </div>
     ` : ''}
+
+    <button class="onboarding-result__add-user" type="button" data-action="add-another-user">
+      <span class="onboarding-result__add-user__icon" aria-hidden="true">+</span>
+      <span>Weiteres Profil hinzufügen</span>
+    </button>
 
     <p class="onboarding-result__note">Du kannst alle Werte später in den Einstellungen anpassen.</p>
   `;
@@ -167,7 +165,7 @@ function formatKcalRange(val) {
 // Presets deutlicher sichtbar — ein Preset mit KH=50% zieht optisch klarer
 // nach vorne als eines mit KH=40%. Die aria-label-Prozente bleiben echt,
 // damit Screenreader den korrekten Anteil vorlesen.
-function renderHorseshoe(macros) {
+export function renderHorseshoe(macros) {
   const pKcal = macros.p * 4;
   const khKcal = macros.kh * 4;
   const fKcal = macros.f * 9;
@@ -224,15 +222,25 @@ export function renderMacrosPills(macros) {
   `;
 }
 
-export function renderMacros(macros) {
+export function renderMacros(macros, { withLabel = true } = {}) {
+  const label = withLabel ? '<div class="onboarding-result__label">Makro-Verteilung</div>' : '';
+  const pKcal = macros.p * 4;
+  const khKcal = macros.kh * 4;
+  const fKcal = macros.f * 9;
+  const total = pKcal + khKcal + fKcal;
+  const pct = (kcal) => total > 0 ? Math.round(kcal / total * 100) : 0;
+  // Zahlen in fixe Spalten (tabular-nums + min-width via CSS) — so springt
+  // das Kreisdiagramm nicht wenn 2 vs 3 Stellen und der ·-Trenner bleibt in
+  // allen Zeilen an derselben horizontalen Position.
+  const fmtRow = (g, pctVal) => `<span class="onboarding-macro-legend__num">${g}</span> g <span class="onboarding-macro-legend__sep">·</span> <span class="onboarding-macro-legend__num">${pctVal}</span> %`;
   return `
-    <div class="onboarding-result__label">Makro-Verteilung</div>
+    ${label}
     <div class="onboarding-macro-row">
       ${renderHorseshoe(macros)}
       <div class="onboarding-macro-legend">
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--f">Fett</span><span class="onboarding-macro-legend__value">${macros.f}&thinsp;g</span></div>
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--p">Protein</span><span class="onboarding-macro-legend__value">${macros.p}&thinsp;g</span></div>
-        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--kh">Kohlenhydrate</span><span class="onboarding-macro-legend__value">${macros.kh}&thinsp;g</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--f">Fett</span><span class="onboarding-macro-legend__value">${fmtRow(macros.f, pct(fKcal))}</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--p">Protein</span><span class="onboarding-macro-legend__value">${fmtRow(macros.p, pct(pKcal))}</span></div>
+        <div class="onboarding-macro-legend__row"><span class="onboarding-macro__key onboarding-macro__key--kh">Kohlenhydrate</span><span class="onboarding-macro-legend__value">${fmtRow(macros.kh, pct(khKcal))}</span></div>
       </div>
     </div>
   `;

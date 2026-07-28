@@ -53,14 +53,47 @@
   flex-shrink: 0;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
 }
-/* Header-Row: Titel mittig, X rechts. Grid mit Spacer links, damit der Titel
-   trotz einseitigem Button optisch zentriert bleibt. */
+/* Header-Row: links Undo+Reset, Titel mittig, X rechts. */
 .onboarding-header__row {
   display: grid;
-  grid-template-columns: 36px 1fr 36px;
+  grid-template-columns: 80px 1fr 36px;
   align-items: center;
   gap: 8px;
   margin-bottom: 12px;
+}
+.onboarding-header__actions {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.onboarding-header__icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 120ms ease, transform 120ms ease;
+}
+.onboarding-header__icon-btn:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 18%, var(--md-sys-color-surface-container-lowest));
+}
+.onboarding-header__icon-btn:active {
+  transform: scale(0.94);
+}
+.onboarding-header__icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.onboarding-header__icon-btn svg {
+  width: 18px;
+  height: 18px;
 }
 .onboarding-header__title {
   margin: 0;
@@ -214,6 +247,11 @@
 .onboarding-field {
   margin-bottom: 24px;
 }
+/* Kleinerer Abstand nach unten — Feld schliesst nahtlos an einen Divider an
+   (z. B. in Step 3 zwischen Praeferenz-Kategorien). */
+.onboarding-field--tight {
+  margin-bottom: 8px;
+}
 .onboarding-field__label {
   display: block;
   font-size: 0.9375rem;
@@ -231,9 +269,9 @@
 .onboarding-input {
   width: 100%;
   min-height: var(--touch-target-min);
-  padding: 10px 14px;
+  padding: 10px 18px;
   border: 1px solid var(--md-sys-color-outline);
-  border-radius: 12px;
+  border-radius: var(--radius-pill);
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
   font-size: 1rem;
@@ -250,16 +288,9 @@
   flex-wrap: wrap;
   gap: 8px;
 }
-/* Preset-Chip (z. B. "Standard" in der Gender-Zeile): Action, kein Toggle.
-   Visuell mit dashed border + primary-Farbe abgesetzt, damit klar wird
-   dass er eine Aktion ist und keinen selected-Zustand hat. */
-.pref-chip--preset {
-  border-style: dashed !important;
-  border-color: var(--md-sys-color-primary) !important;
-  color: var(--md-sys-color-primary);
-}
-.pref-chip--preset:hover {
-  background: color-mix(in srgb, var(--md-sys-color-primary) 10%, transparent);
+/* Rechtsbuendige Chip-Reihe (z. B. Ernaehrungs-/Kuechen-Praeferenzen). */
+.onboarding-chips--right {
+  justify-content: flex-end;
 }
 .onboarding-chips--nowrap {
   flex-wrap: nowrap;
@@ -440,8 +471,21 @@
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
   font-variant-numeric: tabular-nums;
-  min-width: 44px;
+  white-space: nowrap;
   text-align: right;
+}
+/* Zahlenspalten mit fester Breite: 2- vs 3-stellig veraendert nicht das
+   Layout, und der ·-Trenner sitzt in allen Zeilen an derselben Position. */
+.onboarding-macro-legend__num {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: right;
+}
+.onboarding-macro-legend__sep {
+  display: inline-block;
+  width: 0.6em;
+  text-align: center;
+  color: var(--md-sys-color-on-surface-variant);
 }
 .onboarding-macro__key {
   font-weight: 700;
@@ -464,19 +508,144 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* Live-Preview auf Step 2 (Alltag): zeigt das berechnete Abendessen-Kontingent,
-   sobald Frühstück/Mittag/Aktivität/Ziel gesetzt sind. Dezent ausgegraut mit
-   Abstand nach oben, damit klar ist: nur Anzeige, keine Aktion. */
-.onboarding-preview {
-  margin-top: 32px;
-  padding: 12px 16px;
+/* Hint-Zeile unterhalb eines Slider-Feldes — dezenter Erklaertext.
+   Genutzt fuer Profi-Standardwert-Angaben (25 %/35 %). */
+.onboarding-field__hint {
+  margin: 6px 0 0;
+  font-size: 0.75rem;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 0.875rem;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
 }
-.onboarding-preview [data-role="dinner-preview-value"] {
+
+/* Trennlinie zwischen Feld-Gruppen (z. B. Filter-Kategorien in Step 3). */
+.onboarding-divider {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/* "Weiteres Profil hinzufuegen" auf Step 4 — dashed outline, primary Text,
+   analog zum settings-profile-add-Button in den Einstellungen. */
+.onboarding-result__add-user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  margin-top: 4px;
+  border: 1px dashed var(--md-sys-color-outline);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  font-size: 0.9375rem;
   font-weight: 600;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+.onboarding-result__add-user:hover {
+  background: color-mix(in srgb, var(--md-sys-color-primary) 8%, transparent);
+  border-color: var(--md-sys-color-primary);
+}
+.onboarding-result__add-user__icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* "Mahlzeit"-Schriftzug als Bild in der Fertig-Zeile (Step 4) — analog zum
+   Done-Banner der Einkaufsliste. Light: dunkler Filter, Dark: auf Weiss. */
+.onboarding-mahlzeit-logo {
+  height: 2.8em;
+  width: auto;
+  vertical-align: middle;
+  margin-right: 2px;
+  filter: brightness(0.45) saturate(1.7);
+}
+.onboarding-result__name {
+  font-weight: 400;
+  vertical-align: middle;
+  transform: translateY(0.3em);
+  display: inline-block;
+}
+:root[data-theme="dark"] .onboarding-mahlzeit-logo {
+  filter: brightness(0) invert(1);
+}
+
+/* Aktiv-Pill fuer den Abendessen-Wert im Wizard — identisch zur
+   settings-row__value--pill (primary bg, on-primary Text). Signalisiert:
+   berechneter, ableitbarer Wert (aus Slider oder Rechnung). */
+.onboarding-field__value--pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Profi-Einstellungen (Frueh/Mittag) auf Step 2 als natives details/summary,
+   ohne Card-Rahmen — die Section soll sich einreihen wie eine weitere
+   Feld-Gruppe. Summary im gleichen Section-Header-Style wie im Settings-Sheet
+   (Uppercase, Primary, kleiner Chevron). */
+.onboarding-profi-wrap {
+  position: relative;
+}
+.onboarding-profi {
+  margin-top: 24px;
+}
+.onboarding-profi__reset {
+  position: absolute;
+  top: 6px;
+  right: 32px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+.onboarding-profi__reset[hidden] {
+  display: none;
+}
+.onboarding-profi__reset svg {
+  width: 18px;
+  height: 18px;
+}
+.onboarding-profi__summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 8px 0;
+  color: var(--md-sys-color-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+}
+.onboarding-profi__summary::-webkit-details-marker {
+  display: none;
+}
+.onboarding-profi__summary-text {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
+}
+.onboarding-profi__chevron {
+  margin-left: auto;
+  width: 20px;
+  height: 20px;
+  display: block;
+  transition: transform 160ms ease;
+}
+.onboarding-profi[open] .onboarding-profi__chevron {
+  transform: rotate(180deg);
 }
 
 /* Kompakte Makro-Pills auf Step 3 (Filter) — schlichte flache Pills mit

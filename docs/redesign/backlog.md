@@ -473,3 +473,52 @@ Keiner. Reine Repo-/Prozess-Ebene. Kein Code in der App aendert sich durch diese
 Löst ID-Kollisionen, aber **nicht** den Dateiende-Konflikt (der bleibt bei monolithischer JSON). Nur in Kombination mit Idee A wirklich vollständig.
 
 **Warum später:** Aktuell drei Rezepte im Monat via PR — Maintainer-Rebase reicht. Ab ~10 parallelen PRs oder aktiver Community lohnt sich der Umbau. Beide Ideen zusammen implementieren (A ist Voraussetzung für B).
+
+## Multi-Person Skalierung — Dämpfungsfaktor für kleine Mengen
+
+**Problem:** Bei mehreren Personen werden Zutaten aktuell linear mit der Portionszahl skaliert (`grams × portionFactor`). Für Kern-Zutaten (Hauptzutat, Beilage) ist das korrekt — 4 Personen brauchen ~4× das Hauptgericht. Für **Kleinstmengen und Aromageber** wird die lineare Skalierung schnell absurd:
+
+- 1 Chili für 1 Person → 4 Chilis für 4 Personen ("gerade noch okay") → **8 Chilis für 8 Personen (nicht essbar)**
+- 1 Petersilie-Bund → 4 Bund (viel zu viel)
+- 1 Zitrone → 4 Zitronen für die Sauce (überwürzt)
+- 2 EL Öl → 8 EL Öl (Pfanne läuft über)
+- 1 TL Tomatenmark → 4 TL (nicht linear nötig)
+
+Die Menge sollte mit **abnehmendem Grenzertrag** skalieren — z. B. Wurzelformel oder Preset-Faktoren pro Kategorie.
+
+**Idee A — Dämpfungsfaktor pro Zutat:** Neues Feld `scaleMode: 'linear' | 'sqrt' | 'log'` (oder Zahl 0..1) in `ingredients.json`. Bei `scaleMode: 'sqrt'` wird `grams × sqrt(portionFactor)` gerechnet statt linear. Petersilie/Chili/Zitrone bekommen `sqrt`, Fleisch/Reis/Kartoffeln bleiben `linear`.
+
+**Idee B — Zutaten-Kategorie mit Preset-Faktoren:** Kategorie `gewuerze`, `oel` etc. bekommen Standard-Dämpfung (z. B. sqrt), User kann pro Rezept übersteuern.
+
+**Idee C — Absolute Untergrenze:** Neben Faktor eine Max-Menge festlegen: `maxGrams: 30` bedeutet nie mehr als 30 g Petersilie, egal wie viele Personen.
+
+Kombination A + C wäre robust: pro Zutat den Skalierungs-Modus + optionalen Max-Wert.
+
+**Warum später:** Erfordert Datenmodell-Erweiterung in `ingredients.json` + Migrations-Aufwand für alle bestehenden Rezepte + Anpassung von `scaledGrams` und der Einkaufslisten-Konsolidierung. Realer Bedarf entsteht erst wenn User regelmäßig für 4+ Personen kocht (aktuell selten).
+
+## Ziel-orientierter Reroll — Woche komponiert kcal + Makros zum Sollwert
+
+**Problem:** `rerollAll` in `src/dashboard/reroll.js` wählt aktuell 7 Rezepte per `weightedShuffle` aus dem eligible Pool — reiner Zufall mit Cuisine-Gewichtung. Ergebnis:
+- **kcal-Summe** matcht das Wochenziel nur grob (durch `dishScale`-Snap-Rundung auf 0,25-Schritten).
+- **Makro-Summe** (P/KH/F) über die Woche ist zufällig. Ein User mit Preset „Proteinreich" (40 % P) bekommt Rezepte deren Makro-Inhalt in der Woche z. B. bei 32 % P landet — sichtbar im Nährstoff-Sheet als Delta Soll vs Ist.
+
+**Ziel:** Die 7 Rezepte einer Woche werden so gewählt, dass am Wochenende gilt:
+- `Σ (dish.kcal × scale)` liegt im User-Sollwert-Bereich `kcalRange(dinnerTarget)` (± 125 kcal/Tag)
+- `Σ (dish.p × scale)`, `Σ dish.kh × scale`, `Σ dish.f × scale` liegen nah an den User-Makro-Zielen (Preset oder Custom `macroTargets`)
+
+**Umsetzungs-Ideen:**
+
+- **A — Greedy Swap-Optimierung.** Start: aktueller Random-Reroll. Danach in `N` Iterationen: prüfe jedes Rezept i, prüfe ob Austausch gegen ein anderes Rezept aus dem eligible Pool die Wochen-Abweichung (Summe der quadrierten Deltas P/KH/F/kcal zu den Zielen) verringert. Wenn ja: tauschen. Terminiere wenn kein Swap mehr verbessert oder nach `N=50` Runden.
+- **B — Constraint-Search.** Behandele jeden Tag als Slot mit erlaubtem Kandidaten-Set. Erzeuge zufällige Kombis, bewerte die Fitness (Distanz zu Sollwerten), wähle beste aus K=100 Kandidaten-Kombis.
+- **C — Balanced Bucketing.** Klassifiziere Rezepte in Makro-Buckets (protein-rich, carb-heavy, fat-light, ausgewogen) via `dish.p*4 / dish.kcal`-Anteil. Beim Reroll: ziehe pro Woche eine Mischung passend zum Preset (bei „Ausgewogen" 3× ausgewogen + 2× varying, bei „Proteinreich" 5× protein-rich).
+
+**Vermutlich A + tags aus C:** Greedy ist deterministisch genug für Tests, tags helfen dem Algorithmus schnellere Fortschritte zu machen ohne alle Rezepte durchzuprobieren.
+
+**Nebeneffekte / Fragen zu klären vor Umsetzung:**
+- **Cuisine-Präferenz** vs. Makro-Ziel: was schlägt? Bisher ist Cuisine ein Hard-Filter. Möglich dass ein Cuisine-passender Pool das Makro-Ziel nicht erreicht — dann Cuisine als Weichfaktor.
+- **Neu-Rezept-Bias** (`isNewDish`): heutiges Verhalten priorisiert neue Rezepte — mit Makro-Optimierung könnte das gebrochen werden.
+- **Wiederholungen**: aktuell wird derselbe Reroll-Bag vermieden. Bei Optimierung darf ein Rezept mehrfach vorkommen? Eher nein.
+- **Performance**: eligible Pool aktuell ~30-40 Rezepte, 7 Slots → `40^7` Kombinationen → zu viel für brute force. Greedy/Sampling ist Pflicht.
+- **UI-Feedback**: sichtbar machen wenn Reroll die Wochenkomposition explizit auf Ziele bringt (kleine Toast „Wochenplan auf Zielwerte optimiert" o. ä.).
+
+**Priorität: hoch** — direkt verantwortlich für die Delta-Soll-Ist-Diskrepanz im Nährstoff-Sheet die der User bemängelt hat.

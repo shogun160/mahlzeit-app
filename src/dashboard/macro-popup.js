@@ -1,5 +1,6 @@
 import { state, getActiveProfile, getProfileById, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
+import { renderMacros } from '../onboarding/result.js';
 import {
   hasProfile,
   dinnerTarget,
@@ -212,11 +213,13 @@ function dinnerMacroTargets() {
   };
 }
 
-// Ø-Werte der SELECTED Tage. Gleiche Semantik wie in der Bedarfs-Pille:
-// nicht-selektierte fließen nicht ein. Wenn 0 selected → null.
+// Ø-Werte. Bei mindestens einem ausgewaehlten Tag: nur diese fliessen ein
+// (Bedarfs-Pille-Semantik). Ohne Auswahl: Fallback = Durchschnitt ueber
+// ALLE 7 Tage, isFallback=true → Balken wird ausgegraut gerendert.
 function averageMacros() {
-  const days = DAYS.filter((d) => state.selected[d]);
-  if (days.length === 0) return null;
+  const selectedDays = DAYS.filter((d) => state.selected[d]);
+  const isFallback = selectedDays.length === 0;
+  const days = isFallback ? DAYS : selectedDays;
   const sum = { p: 0, kh: 0, f: 0, kcal: 0 };
   let count = 0;
   for (const day of days) {
@@ -234,6 +237,7 @@ function averageMacros() {
     kh: sum.kh / count,
     f: sum.f / count,
     kcal: sum.kcal / count,
+    isFallback,
   };
 }
 
@@ -248,13 +252,15 @@ function renderShell() {
       <div class="macro-sheet" role="dialog" aria-modal="true" aria-labelledby="macro-title">
         <div class="macro-handle" aria-hidden="true"></div>
         <div class="macro-header">
-          <h2 class="macro-title" id="macro-title">Nährstoff-Details</h2>
+          <h2 class="macro-title" id="macro-title">Deine Woche</h2>
+          <span class="macro-title__kcal" data-role="header-kcal">${formatHeaderKcal(avg)}</span>
           <button class="macro-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="macro-body">
           ${renderProfilePills()}
+          ${renderChartIntro(rangeLow, rangeHigh)}
           <div data-role="chart-slot">${renderChart(target, rangeLow, rangeHigh, avg)}</div>
-          <div data-role="avg-slot">${renderAverageText(avg, targets)}</div>
+          <div data-role="donut-slot" class="macro-donut-slot ${avg?.isFallback ? 'macro-donut-slot--muted' : ''}">${renderIstMacros(avg)}</div>
           ${renderControls()}
         </div>
       </div>
@@ -432,9 +438,13 @@ function renderChart(target, rangeLow, rangeHigh, avg) {
     const pH = scaleY(avg.p * 4);
     const fH = scaleY(avg.f * 9);
     const avgTopKey = fH > 0.5 ? 'f' : (pH > 0.5 ? 'p' : 'kh');
+    // Fallback (kein Tag ausgewaehlt) → gleiche Damping wie die nicht-
+    // selektierten Wochentag-Bars, damit sichtbar ist: das ist nur ein
+    // Referenzwert, nicht die User-Auswahl.
+    const avgMutedCls = avg.isFallback ? ' macro-chart__bar--muted' : '';
     const avgSeg = (key, y, h, colorCls) => {
       if (h <= 0) return '';
-      const cls = `macro-chart__bar macro-chart__bar--${colorCls}`;
+      const cls = `macro-chart__bar macro-chart__bar--${colorCls}${avgMutedCls}`;
       if (key === avgTopKey) {
         return `<path class="${cls}" d="${topRoundedRectPath(avgX, y, barW, h, BAR_TOP_RADIUS)}" />`;
       }
@@ -532,8 +542,9 @@ function renderAverageText(avg, targets) {
       </div>
     </div>
   `;
+  const rowMuted = avg.isFallback ? ' macro-avg-row--muted' : '';
   return `
-    <div class="macro-avg-row" aria-live="polite">
+    <div class="macro-avg-row${rowMuted}" aria-live="polite">
       ${pill('macro-avg__key--p',  'P',  `${fmtG(avg.p)} g`,  `${fmtPct(pctP)} %`,  cP)}
       ${pill('macro-avg__key--kh', 'KH', `${fmtG(avg.kh)} g`, `${fmtPct(pctKh)} %`, cKh)}
       ${pill('macro-avg__key--f',  'F',  `${fmtG(avg.f)} g`,  `${fmtPct(pctF)} %`,  cF)}
@@ -556,20 +567,22 @@ function renderControls() {
   // Bei Multi-Select zeigen die Slider den Durchschnitt der effektiven Ziele
   // aller selected Profile — nur Anzeige, weil die Controls in Multi-Modus
   // disabled sind (Anpassungen nur bei Einzelauswahl moeglich).
-  const targets = (isMulti ? avgMacroTargetsOfSelected() : effectiveMacroTargets(p)) ?? { p: 0, kh: 0, f: 0 };
+  // Slider zeigen die Ziel-Verteilung fuer's Abendessen (nicht Tages-Makros)
+  // — konsistent zum Rest der App, wo geplantes Abendessen der Fokus ist.
+  const targets = dinnerMacroTargets() ?? { p: 0, kh: 0, f: 0 };
   const isCustom = p.macroTargets != null;
   const activePreset = isCustom ? null : (p.macroPreset ?? MACRO_PRESET_DEFAULT);
+  // Preset-Name nicht mehr im Hint zeigen — der aktive Chip unten spricht
+  // fuer sich. Nur Sonderzustaende (Multi-Select, Custom) bleiben.
   const hint = isMulti
     ? `Ø aus ${selected.length} Profilen`
-    : (isCustom
-        ? 'Manuell überschrieben'
-        : `Preset: ${MACRO_PRESETS.find((m) => m.key === activePreset)?.label ?? 'Ausgewogen'}`);
+    : (isCustom ? 'Manuell überschrieben' : '');
   const disabledAttr = isMulti ? 'disabled' : '';
   const controlsDisabledCls = isMulti ? ' macro-controls--disabled' : '';
   return `
     <div class="macro-controls${controlsDisabledCls}">
       <div class="macro-controls__header">
-        <h3 class="macro-controls__title">Ziel-Verteilung</h3>
+        <h3 class="macro-controls__title">Makro Sollwerte</h3>
         <span class="macro-controls__hint" data-role="macro-hint">${hint}</span>
         <button class="settings-refresh"
                 type="button"
@@ -581,6 +594,8 @@ function renderControls() {
           ${ICON_REFRESH}
         </button>
       </div>
+      <div data-role="soll-donut-slot" class="macro-donut-slot">${renderSollMacros(targets)}</div>
+      <div class="macro-controls__preset-label">Makro Profil</div>
       <div class="macro-controls__presets" role="group" aria-label="Makro-Presets">
         ${MACRO_PRESETS.map((m) => `
           <button class="pref-chip"
@@ -592,37 +607,34 @@ function renderControls() {
           </button>
         `).join('')}
       </div>
-      ${renderMacroSlider('p', 'Protein', targets.p)}
-      ${renderMacroSlider('kh', 'Kohlenhydrate', targets.kh)}
-      ${renderMacroSlider('f', 'Fett', targets.f)}
     </div>
   `;
 }
 
 function renderMacroSlider(key, label, value) {
-  // Slider blockieren User-Eingabe (pointer-events + tabindex), sehen aber
-  // visuell normal aus (kein disabled-graut, das würde die Farb-Codierung
-  // schlucken). aria-disabled=true damit Screen-Reader die Read-only-Rolle
-  // erkennen. Custom-Overrides via Slider-Zug sind entfernt; Preset-Wechsel
-  // ist der einzige Änderungsweg.
+  // Alle drei Slider teilen dieselbe Range 0..200 g — realistisch fuer's
+  // Abendessen (Preset 40 % P bei 1000 kcal Dinner = 100 g; Extreme decken
+  // 200 g ab). Gleiche Skala erlaubt visuellen Groessenvergleich zwischen
+  // P/KH/F. Slider ist reine Anzeige (readonly) — Thumb ist per CSS versteckt.
+  const rounded = Math.round(value);
   return `
-    <div class="settings-field">
+    <div class="settings-field macro-slider--${key}">
       <div class="settings-row">
         <div class="settings-row__label">
           <div class="settings-row__label-primary">${label}</div>
         </div>
-        <div class="settings-row__value" data-role="macro-${key}-value">${value.toLocaleString('de-DE')} g</div>
+        <div class="settings-row__value" data-role="macro-${key}-value">${rounded.toLocaleString('de-DE')} g</div>
       </div>
       <input type="range"
-             class="settings-slider settings-slider--readonly"
+             class="settings-slider settings-slider--readonly settings-slider--${key}"
              data-action="macro-${key}-change"
-             min="${MACRO_MIN}"
-             max="${MACRO_MAX}"
+             min="0"
+             max="200"
              step="${MACRO_STEP}"
-             value="${value}"
+             value="${rounded}"
              tabindex="-1"
              aria-disabled="true"
-             aria-label="${label} in Gramm pro Tag (Anzeige)" />
+             aria-label="${label} für Abendessen in Gramm (Anzeige)" />
     </div>
   `;
 }
@@ -635,13 +647,68 @@ function refreshChartAndAvg() {
   const target = avgDinnerTargetOfSelected();
   const [rangeLow, rangeHigh] = target != null ? kcalRange(target) : [null, null];
   const avg = averageMacros();
-  const targets = avgMacroTargetsOfSelected();
   const chartSlot = rootEl.querySelector('[data-role="chart-slot"]');
-  const avgSlot = rootEl.querySelector('[data-role="avg-slot"]');
+  const donutSlot = rootEl.querySelector('[data-role="donut-slot"]');
+  const headerKcal = rootEl.querySelector('[data-role="header-kcal"]');
   if (chartSlot) chartSlot.innerHTML = renderChart(target, rangeLow, rangeHigh, avg);
-  if (avgSlot) avgSlot.innerHTML = renderAverageText(avg, targets);
+  if (donutSlot) {
+    donutSlot.innerHTML = renderIstMacros(avg);
+    donutSlot.classList.toggle('macro-donut-slot--muted', !!avg?.isFallback);
+  }
+  if (headerKcal) headerKcal.textContent = formatHeaderKcal(avg);
   bindBarHits();
-  requestAnimationFrame(fitAvgFontSize);
+}
+
+// Intro-Zeile ueber dem Balken-Chart: Sollwert-Range in Kcal + Hinweistext
+// dass Ø-Werte auf markierten Gerichten basieren (Fallback: alle 7 Tage).
+function renderChartIntro(rangeLow, rangeHigh) {
+  if (rangeLow == null || rangeHigh == null) return '';
+  const round10 = (n) => Math.round(n / 10) * 10;
+  const lo = round10(rangeLow).toLocaleString('de-DE');
+  const hi = round10(rangeHigh).toLocaleString('de-DE');
+  return `
+    <div class="macro-chart-intro">
+      <div class="macro-chart-intro__row">
+        <span class="macro-chart-intro__label">Sollwert</span>
+        <span class="macro-title__kcal macro-title__kcal--inactive">${lo}&thinsp;–&thinsp;${hi} kcal</span>
+      </div>
+      <div class="macro-chart-intro__hint">Die Ø Ist-Werte berechnen sich auf Basis der markierten Gerichte.</div>
+    </div>
+  `;
+}
+
+// Header-kcal: "Ø n/7 · 1032 kcal" — vor dem Wert steht wieviele Tage der
+// User gewaehlt hat (Fallback = 0/7 → Ø ist aus allen Tagen berechnet und
+// wird visuell dezenter angezeigt).
+function formatHeaderKcal(avg) {
+  if (!avg) return '';
+  const selectedCount = DAYS.filter((d) => state.selected[d]).length;
+  const kcalStr = `${Math.round(avg.kcal).toLocaleString('de-DE')} kcal`;
+  return `Ø ${selectedCount}/${DAYS.length} · ${kcalStr}`;
+}
+
+// Ist-Werte-Ausgabe wie in der Wizzard-Zusammenfassung: Kreisdiagramm links,
+// Farbige Legende mit g + % rechts. Verwendet dieselbe renderMacros-Impl —
+// Werte werden vorher gerundet (avg liefert floats).
+function renderIstMacros(avg) {
+  if (!avg) return '';
+  return renderMacros({
+    p: Math.round(avg.p),
+    kh: Math.round(avg.kh),
+    f: Math.round(avg.f),
+  }, { withLabel: false });
+}
+
+// Soll-Werte-Ausgabe im gleichen Kreis+Legende-Format wie die Ist-Ausgabe —
+// visuell direkt vergleichbar. Werte kommen aus dinnerMacroTargets (Preset
+// oder Custom applied auf Abendessen-kcal).
+function renderSollMacros(targets) {
+  if (!targets) return '';
+  return renderMacros({
+    p: Math.round(targets.p),
+    kh: Math.round(targets.kh),
+    f: Math.round(targets.f),
+  }, { withLabel: false });
 }
 
 function bindBarHits() {
@@ -707,10 +774,9 @@ function attachMacroControlHandlers() {
       rootEl.querySelectorAll('[data-macro-preset]').forEach((other) => {
         other.setAttribute('aria-pressed', String(other.dataset.macroPreset === key));
       });
-      const label = MACRO_PRESETS.find((m) => m.key === key)?.label ?? 'Ausgewogen';
-      if (hintEl) hintEl.textContent = `Preset: ${label}`;
+      if (hintEl) hintEl.textContent = '';
       if (resetBtn) resetBtn.hidden = true;
-      syncSliderValues();
+      syncSollDonut();
       refreshChartAndAvg();
       onExternalChange();
     });
@@ -747,13 +813,12 @@ function attachMacroControlHandlers() {
       const p = getSelectedProfiles()[0] ?? getActiveProfile();
       p.macroPreset = MACRO_PRESET_DEFAULT;
       p.macroTargets = null;
-      const label = MACRO_PRESETS.find((m) => m.key === MACRO_PRESET_DEFAULT)?.label ?? 'Ausgewogen';
-      if (hintEl) hintEl.textContent = `Preset: ${label}`;
+      if (hintEl) hintEl.textContent = '';
       resetBtn.hidden = true;
       rootEl.querySelectorAll('[data-macro-preset]').forEach((other) => {
         other.setAttribute('aria-pressed', String(other.dataset.macroPreset === MACRO_PRESET_DEFAULT));
       });
-      syncSliderValues();
+      syncSollDonut();
       refreshChartAndAvg();
       onExternalChange();
     });
@@ -765,24 +830,35 @@ function readSliderMacros() {
   return { p: g('p'), kh: g('kh'), f: g('f') };
 }
 
+function syncSollDonut() {
+  const slot = rootEl?.querySelector('[data-role="soll-donut-slot"]');
+  if (slot) slot.innerHTML = renderSollMacros(dinnerMacroTargets());
+}
+
 function syncSliderValues() {
-  const p = getSelectedProfiles()[0] ?? getActiveProfile();
-  const targets = effectiveMacroTargets(p);
+  // Slider zeigen Abendessen-Soll (nicht Tages-Werte), analog zu
+  // renderControls. Sonst wuerden Preset-Wechsel/Reset die Slider auf
+  // Tages-Makros zuruecksetzen und mit dem Ist-Kreis nicht mehr vergleichbar.
+  const targets = dinnerMacroTargets();
   if (!targets) return;
   ['p', 'kh', 'f'].forEach((k) => {
     const slider = rootEl.querySelector(`[data-action="macro-${k}-change"]`);
     const valEl = rootEl.querySelector(`[data-role="macro-${k}-value"]`);
-    if (slider) slider.value = String(targets[k]);
-    if (valEl) valEl.textContent = `${targets[k].toLocaleString('de-DE')} g`;
+    const rounded = Math.round(targets[k]);
+    if (slider) slider.value = String(rounded);
+    if (valEl) valEl.textContent = `${rounded.toLocaleString('de-DE')} g`;
   });
 }
 
 function refreshAvgOnly() {
   const avg = averageMacros();
-  const targets = avgMacroTargetsOfSelected();
-  const avgSlot = rootEl.querySelector('[data-role="avg-slot"]');
-  if (avgSlot) avgSlot.innerHTML = renderAverageText(avg, targets);
-  requestAnimationFrame(fitAvgFontSize);
+  const donutSlot = rootEl.querySelector('[data-role="donut-slot"]');
+  const headerKcal = rootEl.querySelector('[data-role="header-kcal"]');
+  if (donutSlot) {
+    donutSlot.innerHTML = renderIstMacros(avg);
+    donutSlot.classList.toggle('macro-donut-slot--muted', !!avg?.isFallback);
+  }
+  if (headerKcal) headerKcal.textContent = formatHeaderKcal(avg);
 }
 
 function attachCloseSwipe() {

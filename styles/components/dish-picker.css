@@ -465,17 +465,7 @@
   transform: scale(0.98);
 }
 
-/* Aktuell zugewiesenes Dish: primary Border + Elevation + primary-Tint als
-   Body-Background (analog zum .day-card--selected Look im Dashboard —
-   25 % primary in surface-container-lowest gemischt). Nur die Tile-Fläche
-   ist getönt, das Bild überlagert seinen eigenen Hintergrund. */
-.picker-tile--current {
-  border-color: var(--md-sys-color-primary);
-  box-shadow: 0 0 0 1px var(--md-sys-color-primary), var(--md-elevation-1);
-  background: color-mix(in srgb, var(--md-sys-color-primary) 25%, var(--md-sys-color-surface-container-lowest));
-}
-
-/* An anderem Wochentag bereits geplantes Dish: M3 Disabled State
+/* Bereits geplantes Dish (aktueller oder anderer Wochentag): M3 Disabled State
    (Content 38 % opacity, kein Klick). Opacity NUR auf Bild + Body — der Day-
    Badge oben links bleibt bei voller Opacity, damit der Wochentag klar lesbar
    ist. Verhindert Doppelbelegung; der User müsste erst den anderen Tag ändern. */

@@ -11,6 +11,9 @@
 
 import { state, removeProfile, setActiveProfileId } from '../state.js';
 import { openProfileShareSheet } from '../profile-share/share-sheet.js';
+import { openOnboardingWizard } from '../onboarding/wizard.js';
+import { showToast } from '../util/toast.js';
+import { rerollAll } from '../dashboard/reroll.js';
 import {
   ACTIVITY_LEVELS,
   GOALS,
@@ -29,18 +32,48 @@ import {
   MEAL_KCAL_STEP,
   BREAKFAST_MAX,
   LUNCH_MAX,
+  DINNER_KCAL_MIN,
+  DINNER_KCAL_MAX,
   dailyTarget,
   effectiveDailyTarget,
   dinnerTarget,
-  kcalRange,
+  kcalRangeRounded,
 } from '../nutrition/target.js';
 
 const TRANSITION_MS = 250;
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
+const ICON_UNDO = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M280-200v-80h284q63 0 109.5-40T720-420q0-60-46.5-100T564-560H312l104 104-56 56-200-200 200-200 56 56-104 104h252q97 0 166.5 63T800-420q0 94-69.5 157T564-200H280Z"/></svg>`;
 
 let rootEl = null;
 let onExternalChange = () => {};
 let currentProfile = null;
+// Snapshot beim Sheet-Open (fuer Reset) und Undo-Stack (pro Slider-Drag /
+// Chip-Klick — pushen VOR der Aenderung).
+let initialProfile = null;
+let undoStack = [];
+// Wird gesetzt, wenn Praeferenz-Slots (Biometrie, Ziel, Aktivitaet, Fr/Mi,
+// Dinner, Prefs, Cuisines) sich veraendert haben. Beim Close triggert das
+// einen Wochen-Reroll — nicht bei jedem Slider-Move, um Ueberreactions und
+// UI-Flackern zu vermeiden.
+let hasProfileChanges = false;
+function markProfileChanged() { hasProfileChanges = true; }
+
+function snapshotProfile() {
+  return currentProfile ? JSON.parse(JSON.stringify(currentProfile)) : null;
+}
+function pushUndo() {
+  if (currentProfile) undoStack.push(snapshotProfile());
+  updateUndoBtnState();
+}
+function updateUndoBtnState() {
+  const btn = rootEl?.querySelector('[data-action="undo"]');
+  if (btn) btn.disabled = undoStack.length === 0;
+}
+function restoreProfile(snap) {
+  if (!snap || !currentProfile) return;
+  for (const key of Object.keys(currentProfile)) delete currentProfile[key];
+  Object.assign(currentProfile, JSON.parse(JSON.stringify(snap)));
+}
 
 export function mountProfileDetailSheet(el, { onChange } = {}) {
   rootEl = el;
@@ -58,6 +91,9 @@ export function openProfileDetailSheet(profileId) {
     : state.settings.profiles.find((p) => p.id === profileId);
   if (!profile) return;
   currentProfile = profile;
+  initialProfile = snapshotProfile();
+  undoStack = [];
+  hasProfileChanges = false;
   renderShell();
   rootEl.hidden = false;
   requestAnimationFrame(() => {
@@ -71,6 +107,14 @@ export function closeProfileDetailSheet() {
   const overlay = rootEl.querySelector('.profile-detail-overlay');
   if (overlay) overlay.classList.remove('is-open');
   document.removeEventListener('keydown', handleEsc);
+  // Wenn im Sheet Praeferenz-Slots geaendert wurden: die Wochenauswahl
+  // spiegelt sie evtl. nicht mehr — neu ausdulesen. Kein Reroll bei reinem
+  // User-Wechsel oder Name-Aenderung.
+  if (hasProfileChanges) {
+    hasProfileChanges = false;
+    rerollAll();
+    onExternalChange();
+  }
   setTimeout(() => {
     if (rootEl && !rootEl.querySelector('.profile-detail-overlay.is-open')) {
       rootEl.hidden = true;
@@ -81,6 +125,22 @@ export function closeProfileDetailSheet() {
 
 function handleEsc(ev) {
   if (ev.key === 'Escape') closeProfileDetailSheet();
+}
+
+// Setzt Standard-Profil-Biometrie auf Bevoelkerungs-Median je Geschlecht.
+// activityLevel + goal + Meal-Aufteilung bleiben unveraendert — sie sind
+// keine Gender-Abhaengigen Werte.
+function applyDefaultBiometrics() {
+  if (!currentProfile) return;
+  if (currentProfile.gender === 'female') {
+    currentProfile.heightCm = 165;
+    currentProfile.weightKg = 65;
+  } else {
+    currentProfile.heightCm = 175;
+    currentProfile.weightKg = 75;
+  }
+  if (currentProfile.activityLevel == null) currentProfile.activityLevel = 3;
+  if (!currentProfile.goal) currentProfile.goal = 'maintain';
 }
 
 function renderShell() {
@@ -101,31 +161,39 @@ function renderShell() {
       <div class="profile-detail-sheet" role="dialog" aria-modal="true" aria-labelledby="profile-detail-title">
         <div class="profile-detail-handle" aria-hidden="true"></div>
         <div class="profile-detail-header">
+          <div class="profile-detail-header__actions">
+            <button class="profile-detail-icon-btn" data-action="undo" aria-label="Letzten Schritt rückgängig" title="Letzten Schritt rückgängig">
+              ${ICON_UNDO}
+            </button>
+            <button class="profile-detail-icon-btn" data-action="reset" aria-label="Auf Ausgangswerte zurücksetzen" title="Auf Ausgangswerte zurücksetzen">
+              ${ICON_REFRESH}
+            </button>
+          </div>
           <h2 class="profile-detail-title" id="profile-detail-title">${escapeHtml(title)}</h2>
           <button class="profile-detail-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="profile-detail-body">
-          ${isDefault ? renderDefaultInfoRow() : renderActiveRow(isActive)}
-          ${isDefault ? '' : renderNameRow()}
+          ${isDefault ? `
+          ${renderDefaultInfoRow()}
           ${renderGenderRow()}
           ${renderAgeRow()}
-          ${renderSliderRow('height', 'Größe', currentProfile.heightCm, HEIGHT_MIN, HEIGHT_MAX, HEIGHT_DEFAULT, 'cm', 'Größe in Zentimetern')}
+          ${renderUserDinnerField()}
+          ` : `
+          ${renderActiveToggleRow(isActive)}
+          ${renderNameRow()}
+          ${renderAgeRow()}
           ${renderSliderRow('weight', 'Gewicht', currentProfile.weightKg, WEIGHT_MIN, WEIGHT_MAX, WEIGHT_DEFAULT, 'kg', 'Gewicht in Kilogramm')}
           ${renderActivityRow()}
           ${renderGoalRow()}
           ${renderPreferencesRow()}
           ${renderCuisinesRow()}
-          ${renderDailyTargetRow()}
-          ${renderMealRow('breakfast', 'Frühstück', currentProfile.breakfastKcal, BREAKFAST_MAX)}
-          ${renderMealRow('lunch', 'Mittag', currentProfile.lunchKcal, LUNCH_MAX)}
-          ${renderDinnerRow()}
-          ${isDefault ? '' : renderShowBarRow()}
-          ${isDefault ? '' : `
+          ${renderUserDinnerField()}
+          ${renderWizardEditRow()}
           <button class="btn btn--secondary profile-detail__share" type="button" data-action="share-profile">
             Profil teilen
           </button>
+          ${renderDeleteRow(isOnlyProfile, isActive)}
           `}
-          ${isDefault ? '' : renderDeleteRow(isOnlyProfile, isActive)}
         </div>
       </div>
     </div>
@@ -137,13 +205,27 @@ function renderShell() {
 // Info-Zeile ganz oben im Standard-Profil-Detail-Sheet: erklaert Zweck +
 // warum kein Loeschen.
 function renderDefaultInfoRow() {
+  // Wenn noch kein User-Profil eingerichtet ist, ist das Standard-Profil
+  // die einzige kcal-Quelle. Andernfalls dient es als Fallback fuer
+  // zusaetzliche Personen jenseits der eingerichteten Profile.
+  const hasUserProfile = Array.isArray(state.settings.profiles) && state.settings.profiles.length > 0;
+  const desc = hasUserProfile
+    ? 'Wird für zusätzliche Personen benutzt, wenn kein passendes Profil da ist.'
+    : 'Für weitere Einstellungen wird ein Nutzerprofil benötigt.';
+  const addBtn = hasUserProfile ? '' : `
+    <button class="settings-profile-add" type="button" data-action="add-profile-from-default">
+      <span class="settings-profile-add__icon" aria-hidden="true">+</span>
+      <span class="settings-profile-add__label">Profil hinzufügen</span>
+    </button>
+  `;
   return `
     <div class="settings-row">
       <div class="settings-row__label">
         <div class="settings-row__label-primary">Standard-Profil</div>
-        <div class="settings-row__label-secondary">Wird für zusätzliche Personen benutzt, wenn kein passendes Profil da ist.</div>
+        <div class="settings-row__label-secondary">${desc}</div>
       </div>
     </div>
+    ${addBtn}
   `;
 }
 
@@ -152,27 +234,34 @@ function renderDefaultInfoRow() {
 // und macht es damit zum aktiven (Bedarfs-Anzeige folgt). Alternativ kann in
 // der Settings-Liste per Drag&Drop umsortiert werden. Fuer bereits aktive
 // Profile: Info-Zeile "Aktuell aktiv" statt Button.
-function renderActiveRow(isActive) {
-  if (isActive) {
-    return `
-      <div class="settings-row">
-        <div class="settings-row__label">
-          <div class="settings-row__label-primary">Aktuell aktives Profil</div>
-          <div class="settings-row__label-secondary">Bedarfs-Anzeige im Dashboard folgt diesem User</div>
-        </div>
-      </div>
-    `;
-  }
+function renderWizardEditRow() {
   return `
     <div class="settings-row">
       <div class="settings-row__label">
-        <div class="settings-row__label-primary">Nicht aktiv</div>
-        <div class="settings-row__label-secondary">Bedarfs-Anzeige folgt aktuell einem anderen User</div>
+        <div class="settings-row__label-primary">Details</div>
+        <div class="settings-row__label-secondary">Weitere Einstellungen im Einrichtungsassistent ändern</div>
       </div>
       <button class="settings-action-btn"
               type="button"
-              data-action="set-active">
-        Als aktiv setzen
+              data-action="edit-in-wizard">
+        Ändern
+      </button>
+    </div>
+  `;
+}
+
+function renderActiveToggleRow(isActive) {
+  return `
+    <div class="settings-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Aktives Profil</div>
+        <div class="settings-row__label-secondary">Bedarfs-Anzeige im Dashboard folgt diesem User</div>
+      </div>
+      <button class="m3-switch" type="button" role="switch"
+              data-action="toggle-active"
+              aria-checked="${isActive}"
+              aria-label="Als aktives Profil setzen">
+        <span class="m3-switch__thumb" aria-hidden="true"></span>
       </button>
     </div>
   `;
@@ -393,6 +482,24 @@ function renderDinnerRow() {
   `;
 }
 
+// Abendessen-Pill mit kcal-Range plus ein wertloser Slider drunter, der
+// den Wert direkt uebersteuern kann. Genutzt fuer Standard- und User-Profil.
+// Slider-Position folgt beim Rendern dem aktuellen dinnerTarget (Override
+// oder berechnet). Sobald der User zieht, uebernimmt dinnerKcalOverride.
+function renderUserDinnerField() {
+  const dinner = dinnerTarget(currentProfile);
+  const sliderVal = dinner ?? Math.round((DINNER_KCAL_MIN + DINNER_KCAL_MAX) / 2);
+  return `
+    <div class="settings-field">
+      ${renderDinnerRow()}
+      <input type="range" class="settings-slider"
+             data-action="dinner-override-change"
+             min="${DINNER_KCAL_MIN}" max="${DINNER_KCAL_MAX}" step="${MEAL_KCAL_STEP}" value="${sliderVal}"
+             aria-label="Abendessen in Kilokalorien" />
+    </div>
+  `;
+}
+
 function renderShowBarRow() {
   const pressed = currentProfile.showCalorieBar !== false;
   return `
@@ -440,19 +547,82 @@ function attachHandlers() {
   });
   rootEl.querySelector('[data-action="close"]').addEventListener('click', closeProfileDetailSheet);
 
-  // Als-aktiv-setzen-Button: verschiebt das Profil an profiles[0]. Damit ist
-  // es aktiv (Bedarfs-Anzeige folgt). Re-render, damit die Info-Zeile
-  // "Aktuell aktives Profil" erscheint.
-  const activeBtn = rootEl.querySelector('[data-action="set-active"]');
-  if (activeBtn) activeBtn.addEventListener('click', () => {
-    setActiveProfileId(currentProfile.id);
+  // Reset-Button: setzt manuell ueberschriebene Werte zurueck auf die
+  // Standard-Berechnung. Fuer Standard-Profil: Gender + Age auf Fabrik-Defaults,
+  // dazu die abgeleiteten Biometrie-Werte. Fuer normale Profile: nur das
+  // Tagesziel-Override (der einzige Slider-Wert der "berechnete Vorschlaege"
+  // ueberschreibt) — Wizard-Werte fuer Biometrie/Meal bleiben.
+  // Reset: setzt das Profil auf den Snapshot beim Sheet-Open zurueck. Damit
+  // sind auch Wizard-Werte inkl. Fr/Mi/Overrides in ihrem Ausgangszustand.
+  // Undo-Stack wird geleert (nach Reset kein sinnvolles "rueckgaengig" mehr).
+  const resetBtn = rootEl.querySelector('[data-action="reset"]');
+  if (resetBtn) resetBtn.addEventListener('click', () => {
+    restoreProfile(initialProfile);
+    undoStack = [];
+    renderShell();
+    rootEl.querySelector('.profile-detail-overlay')?.classList.add('is-open');
+    onExternalChange();
+  });
+
+  // Undo: setzt das Profil auf den letzten Snapshot zurueck (Snapshot vor
+  // jeder Slider-/Chip-Aenderung). Bei leerem Stack disabled.
+  const undoBtn = rootEl.querySelector('[data-action="undo"]');
+  if (undoBtn) {
+    undoBtn.disabled = undoStack.length === 0;
+    undoBtn.addEventListener('click', () => {
+      if (undoStack.length === 0) return;
+      restoreProfile(undoStack.pop());
+      renderShell();
+      rootEl.querySelector('.profile-detail-overlay')?.classList.add('is-open');
+      onExternalChange();
+    });
+  }
+
+  // Aktives-Profil-Toggle: an → dieses Profil aktiv setzen; aus → nur wenn
+  // mehr als ein Profil da ist (dann rueckt profiles[1] als neuer Aktiver
+  // nach), sonst Toast. Re-render, damit der Aria-Zustand + evtl. weitere
+  // Rows synchron sind.
+  const activeToggle = rootEl.querySelector('[data-action="toggle-active"]');
+  if (activeToggle) activeToggle.addEventListener('click', () => {
+    const wasActive = state.settings.profiles[0]?.id === currentProfile.id;
+    if (wasActive) {
+      if (state.settings.profiles.length <= 1) {
+        showToast('Mindestens ein Profil muss aktiv sein.');
+        return;
+      }
+      // Naechstes Profil in der Reihenfolge aktiv setzen.
+      const nextId = state.settings.profiles.find((p) => p.id !== currentProfile.id)?.id;
+      if (nextId) setActiveProfileId(nextId);
+    } else {
+      setActiveProfileId(currentProfile.id);
+    }
     onExternalChange();
     renderShell();
+    rootEl.querySelector('.profile-detail-overlay')?.classList.add('is-open');
+  });
+
+  // Edit-in-Wizard: schliesst Detail-Sheet, oeffnet Wizard fuer dieses Profil.
+  // Wizard schreibt beim Fertigstellen direkt in profiles[i].
+  const editWizardBtn = rootEl.querySelector('[data-action="edit-in-wizard"]');
+  if (editWizardBtn) editWizardBtn.addEventListener('click', () => {
+    const id = currentProfile.id;
+    closeProfileDetailSheet();
+    openOnboardingWizard({ editProfileId: id });
+  });
+
+  // "Profil anlegen" im Standard-Profil-Sheet (nur sichtbar wenn noch kein
+  // User-Profil existiert): schliesst Standard-Sheet, oeffnet Wizzard im
+  // addProfile-Modus. Wizzard erstellt bei Fertig das erste User-Profil.
+  const addFromDefaultBtn = rootEl.querySelector('[data-action="add-profile-from-default"]');
+  if (addFromDefaultBtn) addFromDefaultBtn.addEventListener('click', () => {
+    closeProfileDetailSheet();
+    openOnboardingWizard({ addProfile: true });
   });
 
   // Name
   const nameInput = rootEl.querySelector('[data-action="name-change"]');
   if (nameInput) {
+    nameInput.addEventListener('focus', pushUndo);
     nameInput.addEventListener('input', () => {
       const v = nameInput.value.trim();
       currentProfile.name = v === '' ? null : v;
@@ -465,10 +635,21 @@ function attachHandlers() {
     btn.addEventListener('click', () => {
       const key = btn.dataset.gender;
       if (currentProfile.gender === key) return;
+      pushUndo();
+      markProfileChanged();
       currentProfile.gender = key;
+      // Standard-Profil hat keine sichtbaren Height/Weight-Slider — wir setzen
+      // sie auf Bevoelkerungs-Median je Geschlecht, damit die kcal-Berechnung
+      // konsistente Standard-Werte liefert. Manuellen Dinner-Override clearen,
+      // damit der Gender-Wechsel sichtbar wirkt.
+      if (currentProfile.id === '_default') {
+        applyDefaultBiometrics();
+        currentProfile.dinnerKcalOverride = null;
+      }
       rootEl.querySelectorAll('[data-gender]').forEach((o) => o.setAttribute('aria-pressed', String(o.dataset.gender === key)));
       updateDailyTargetFromProfile();
       updateDinnerDisplay();
+      syncDinnerOverrideSlider();
       onExternalChange();
     });
   });
@@ -477,6 +658,8 @@ function attachHandlers() {
   rootEl.querySelectorAll('[data-pref-toggle]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.prefToggle;
+      pushUndo();
+      markProfileChanged();
       if (!currentProfile.preferences) currentProfile.preferences = { meat: false, fish: false, vegetarian: false };
       currentProfile.preferences[key] = !currentProfile.preferences[key];
       btn.setAttribute('aria-pressed', String(!!currentProfile.preferences[key]));
@@ -488,6 +671,8 @@ function attachHandlers() {
   rootEl.querySelectorAll('[data-cuisine-toggle]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.cuisineToggle;
+      pushUndo();
+      markProfileChanged();
       if (!currentProfile.cuisines) currentProfile.cuisines = { asian: false, mediterranean: false, middleEast: false, americas: false };
       currentProfile.cuisines[key] = !currentProfile.cuisines[key];
       btn.setAttribute('aria-pressed', String(!!currentProfile.cuisines[key]));
@@ -500,10 +685,16 @@ function attachHandlers() {
     btn.addEventListener('click', () => {
       const key = btn.dataset.goal;
       if (currentProfile.goal === key) return;
+      pushUndo();
+      markProfileChanged();
       currentProfile.goal = key;
       rootEl.querySelectorAll('[data-goal]').forEach((o) => o.setAttribute('aria-pressed', String(o.dataset.goal === key)));
+      // Ziel aendert die kcal-Kalkulation — manuellen Dinner-Override clearen,
+      // damit der neue Wert sichtbar wird, und Slider zur neuen Position ziehen.
+      currentProfile.dinnerKcalOverride = null;
       updateDailyTargetFromProfile();
       updateDinnerDisplay();
+      syncDinnerOverrideSlider();
       onExternalChange();
     });
   });
@@ -515,12 +706,19 @@ function attachHandlers() {
   const applyAge = (delta) => {
     const cur = currentProfile.age ?? AGE_DEFAULT;
     const next = Math.max(AGE_MIN, Math.min(AGE_MAX, cur + delta));
+    if (next === cur) return;
+    pushUndo();
+    markProfileChanged();
     currentProfile.age = next;
     ageValEl.textContent = String(next);
     if (ageMinus) ageMinus.disabled = next <= AGE_MIN;
     if (agePlus) agePlus.disabled = next >= AGE_MAX;
+    // Standard-Profil: Alterswechsel soll die kcal-Kalkulation neu greifen
+    // lassen, deshalb einen ggf. gesetzten Override aufheben.
+    if (currentProfile.id === '_default') currentProfile.dinnerKcalOverride = null;
     updateDailyTargetFromProfile();
     updateDinnerDisplay();
+    syncDinnerOverrideSlider();
     onExternalChange();
   };
   if (ageMinus) ageMinus.addEventListener('click', () => applyAge(-1));
@@ -560,10 +758,25 @@ function attachHandlers() {
   bindMealSlider('breakfast', 'breakfastKcal');
   bindMealSlider('lunch', 'lunchKcal');
 
+  // Standard-Profil-Slider: uebersteuert Abendessen direkt via
+  // dinnerKcalOverride. Keine sichtbare Wert-Anzeige — die Pill oben zeigt
+  // den daraus abgeleiteten kcalRange.
+  const dinnerOverrideSlider = rootEl.querySelector('[data-action="dinner-override-change"]');
+  if (dinnerOverrideSlider) {
+    dinnerOverrideSlider.addEventListener('pointerdown', pushUndo);
+    dinnerOverrideSlider.addEventListener('input', () => {
+      const v = parseInt(dinnerOverrideSlider.value, 10);
+      currentProfile.dinnerKcalOverride = v;
+      updateDinnerDisplay();
+    });
+    dinnerOverrideSlider.addEventListener('change', () => onExternalChange());
+  }
+
   // Show-Bar-Switch
   const barBtn = rootEl.querySelector('[data-action="toggle-calorie-bar"]');
   if (barBtn) {
     barBtn.addEventListener('click', () => {
+      pushUndo();
       const next = currentProfile.showCalorieBar === false;
       currentProfile.showCalorieBar = next;
       barBtn.setAttribute('aria-checked', String(next));
@@ -592,12 +805,18 @@ function bindProfileSlider(action, stateKey, formatter, onFinalChange) {
   const slider = rootEl.querySelector(`[data-action="${action}-change"]`);
   const valEl = rootEl.querySelector(`[data-role="${action}-value"]`);
   if (!slider) return;
+  slider.addEventListener('pointerdown', () => { pushUndo(); markProfileChanged(); });
   slider.addEventListener('input', () => {
     const v = parseInt(slider.value, 10);
     currentProfile[stateKey] = v;
     if (valEl) valEl.textContent = formatter(v);
     if (onFinalChange) onFinalChange();
+    // Biometrie/Aktivitaet aendert die kcal-Kalkulation — manuellen
+    // Dinner-Override clearen, damit der neue Wert sichtbar wird, und Slider
+    // zur neuen Position nachziehen.
+    currentProfile.dinnerKcalOverride = null;
     updateDinnerDisplay();
+    syncDinnerOverrideSlider();
   });
   slider.addEventListener('change', () => onExternalChange());
 }
@@ -606,6 +825,7 @@ function bindMealSlider(action, stateKey) {
   const slider = rootEl.querySelector(`[data-action="${action}-change"]`);
   const valEl = rootEl.querySelector(`[data-role="${action}-value"]`);
   if (!slider) return;
+  slider.addEventListener('pointerdown', () => { pushUndo(); markProfileChanged(); });
   slider.addEventListener('input', () => {
     const v = parseInt(slider.value, 10);
     currentProfile[stateKey] = v;
@@ -620,6 +840,16 @@ function updateDinnerDisplay() {
   if (!el) return;
   const val = dinnerTarget(currentProfile);
   el.innerHTML = val == null ? '—' : formatRange(val);
+}
+
+// Standard-Profil-Slider auf den aktuellen dinnerTarget setzen. Wird nach
+// Gender/Age-Wechsel gerufen, damit der Slider zur neuen Kalkulation
+// nachrutscht (statt beim alten Override-Wert stehenzubleiben).
+function syncDinnerOverrideSlider() {
+  const s = rootEl?.querySelector('[data-action="dinner-override-change"]');
+  if (!s) return;
+  const val = dinnerTarget(currentProfile);
+  if (val != null) s.value = String(val);
 }
 
 // Wenn Biometrie / Ziel geaendert: Override aufheben, Vorschlag neu rechnen,
@@ -648,7 +878,7 @@ function format(n) {
   return n.toLocaleString('de-DE');
 }
 function formatRange(val) {
-  const range = kcalRange(val);
+  const range = kcalRangeRounded(val);
   if (!range) return '—';
   const [lo, hi] = range;
   return `${format(lo)}&thinsp;–&thinsp;${format(hi)} kcal`;

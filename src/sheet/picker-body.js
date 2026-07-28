@@ -338,9 +338,13 @@ function filteredDishes(session) {
   for (const d of result) {
     const isCurrent = d.id === currentDishId;
     const isUsed = used.has(d.id);
-    if (isCurrent || isUsed) {
-      const plannedDay = isUsed ? used.get(d.id) : null;
-      const lockedByShopping = !isCurrent && state.selected[plannedDay] === true;
+    if (isCurrent) {
+      // Aktueller Tag landet immer in "Bereits geplant" (ausgegraut) — er
+      // ist der Slot in den man gerade pickt, kein sinnvolles Ziel.
+      overflow.push(d);
+    } else if (isUsed) {
+      const plannedDay = used.get(d.id);
+      const lockedByShopping = state.selected[plannedDay] === true;
       if (lockedByShopping) {
         overflow.push(d);
       } else if (passesFilter(d)) {
@@ -352,7 +356,8 @@ function filteredDishes(session) {
       selectable.push(d);
     }
   }
-  const byWeekday = (a, b) => DAYS.indexOf(used.get(a.id)) - DAYS.indexOf(used.get(b.id));
+  const dayForOverflow = (id) => id === currentDishId ? session.day : used.get(id);
+  const byWeekday = (a, b) => DAYS.indexOf(dayForOverflow(a.id)) - DAYS.indexOf(dayForOverflow(b.id));
   overflow.sort(byWeekday);
   return { main: selectable, overflow };
 }
@@ -415,10 +420,11 @@ function renderResults(main, overflow, currentDishId, used) {
 function renderTile(dish, isCurrent, usedMap) {
   const otherDay = isCurrent ? null : (usedMap.get(dish.id) ?? null);
   const otherDayLocked = !!otherDay && state.selected[otherDay] === true;
-  const isDisabled = otherDayLocked;
+  // isCurrent = das aktuell fuer session.day zugewiesene Gericht. Wird wie
+  // die anderen bereits-geplanten Tiles ausgegraut behandelt.
+  const isDisabled = otherDayLocked || isCurrent;
   const displayDay = isCurrent ? currentDay : otherDay;
   const cls = ['picker-tile'];
-  if (isCurrent) cls.push('picker-tile--current');
   if (isDisabled) cls.push('picker-tile--disabled');
   const disabledAttr = isDisabled ? 'aria-disabled="true" tabindex="-1"' : '';
   const dayBadge = displayDay
@@ -430,10 +436,13 @@ function renderTile(dish, isCurrent, usedMap) {
   const openCount = openIngredientCount(dish);
   const isInCart = isDishInCart(dish.id);
   const shopCls = 'picker-tile__shop' + (isInCart ? ' picker-tile__shop--active' : '');
-  const shopPill = openCount > 0
-    ? `<span class="${shopCls}" aria-label="${openCount} offene Zutaten">
-         ${ICON_SHOPPING}
+  // Pill zeigen wenn Gericht im Cart ist (auch bei 0 offenen Zutaten — Signal
+  // "alle Zutaten schon gekauft") oder wenn außerhalb des Carts noch Zutaten
+  // fehlen (unveraendertes Verhalten). Reihenfolge: Zahl vor Icon.
+  const shopPill = (isInCart || openCount > 0)
+    ? `<span class="${shopCls}" aria-label="${openCount === 0 ? 'Alle Zutaten gekauft' : `${openCount} offene Zutaten`}">
          <span class="picker-tile__shop-count">${openCount}</span>
+         ${ICON_SHOPPING}
        </span>`
     : '';
   const favOn = isFavorite(dish.id);

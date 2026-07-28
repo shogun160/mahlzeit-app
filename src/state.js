@@ -131,14 +131,14 @@ export const state = {
     },
     // Multi-Profile: profiles[] ist die primaere Quelle, activeProfileId
     // markiert den aktiven User (Basis fuer Bedarfs-Pille + Naehrwert-Balken).
-    // profile bleibt als Rollback-Mirror des aktiven Users im Storage — wird
-    // bei jedem saveState() aus getActiveProfile() gespiegelt, damit ein
-    // Downgrade zur Vorgaenger-App-Version (die nur `profile` kennt) nicht
-    // kaputt geht. In-Memory wird `profile` nicht mehr gelesen — alle
-    // Callsites gehen ueber getActiveProfile().
-    profiles: [blankProfile('u1')],
-    activeProfileId: 'u1',
-    profile: blankProfile('u1'),
+    // Fresh Install startet mit leerem profiles[] — bis der User den Wizzard
+    // durchlaeuft. Solange greift getActiveProfile() auf standardProfile
+    // zurueck. profile-Mirror ist ein Rollback-Slot fuer Downgrades auf die
+    // Vorgaenger-App-Version (die nur `profile` kannte) — wird bei
+    // saveState() aus getActiveProfile() gespiegelt.
+    profiles: [],
+    activeProfileId: null,
+    profile: null,
     // Standard-Profil: globaler Fallback fuer Kochmengen wenn Personenzahl
     // groesser als profiles.length. Editierbar in Settings, nicht loeschbar.
     // Wird beim Load aus DEFAULT_USER initialisiert (siehe defaults.js).
@@ -146,6 +146,8 @@ export const state = {
     // getStandardProfile() fuellt aus DEFAULT_USER.
     standardProfile: null,
     theme: 'auto',        // 'auto' | 'light' | 'dark' — noch nicht funktional
+    showDashboardMakros: true,  // Toggle: kcal+P/KH/F-Pillen unten auf jeder Day-Card
+    showDashboardCalorieBar: true,  // Toggle: Bedarfs-Pille oben (Trigger fuer Makro-Popup)
   },
 };
 
@@ -175,15 +177,15 @@ export function setView(next) {
 // Drag&Drop in der Settings-Liste (oder "Als aktiv setzen" im Detail-Sheet)
 // die Reihenfolge aendern. activeProfileId bleibt als State-Slot gemirrort
 // auf profiles[0].id fuer Rollback-Kompatibilitaet und Storage-Konsistenz.
-// Notfall (leere Liste): Blank-Profil anlegen — sollte praktisch nie passieren.
+//
+// Wenn noch kein User eingerichtet ist (profiles leer), fallen wir auf das
+// Standard-Profil zurueck — alle Consumer (Bedarfs-Pille, Skalierung,
+// Makro-Popup, ...) rechnen dann mit DGE-Standardwerten. Read-only:
+// Mutations am Standard-Profil sollen NICHT ueber diesen Pfad passieren.
 export function getActiveProfile() {
   const profiles = state.settings.profiles;
   if (Array.isArray(profiles) && profiles.length > 0) return profiles[0];
-  console.warn('[state] settings.profiles ist leer — Notfall-Profil u1 angelegt.');
-  const fresh = blankProfile('u1');
-  state.settings.profiles = [fresh];
-  state.settings.activeProfileId = fresh.id;
-  return fresh;
+  return getStandardProfile();
 }
 
 export function getProfileById(id) {
@@ -218,14 +220,22 @@ export function addProfile(patch = {}) {
 //   - wenn es das aktive Profil (profiles[0]) ist — der User muss vorher ein
 //     anderes Profil per Drag&Drop oder "Als aktiv setzen" nach vorne bringen
 // Rueckgabe true bei Erfolg, false wenn abgelehnt oder unbekannte ID.
-export function removeProfile(id) {
+// Guards: standardmaessig kein Loeschen wenn nur ein Profil uebrig ist und
+// auch nicht wenn das aktive Profil selbst geloescht werden soll (User muss
+// vorher umschalten). force:true umgeht beide — wird vom Wizzard-Rollback
+// genutzt, wo ein frisch angelegtes Profil beim Abbrechen wieder verschwinden
+// soll (auch wenn's das einzige waere → profiles=[], greift Standard-Profil).
+export function removeProfile(id, { force = false } = {}) {
   const profiles = state.settings.profiles;
-  if (!Array.isArray(profiles) || profiles.length <= 1) return false;
-  if (profiles[0]?.id === id) return false; // aktives Profil geschuetzt
+  if (!Array.isArray(profiles)) return false;
   const idx = profiles.findIndex((p) => p && p.id === id);
   if (idx === -1) return false;
+  if (!force) {
+    if (profiles.length <= 1) return false;
+    if (profiles[0]?.id === id) return false;
+  }
   profiles.splice(idx, 1);
-  state.settings.activeProfileId = profiles[0].id;
+  state.settings.activeProfileId = profiles.length > 0 ? profiles[0].id : null;
   return true;
 }
 
@@ -271,9 +281,13 @@ function createStandardProfileDefaults() {
     weightKg: 75,
     activityLevel: 3,
     goal: 'maintain',
-    dailyTargetOverride: 2200,
-    breakfastKcal: 550,
-    lunchKcal: 770,
+    // Standard-Profil hat kein Tagesziel-Override — daily wird aus Biometrie
+    // automatisch berechnet. Frueh/Mittag null = Standard-Modus (Dinner =
+    // 35 % des Tagesbedarfs, siehe dinnerTarget).
+    dailyTargetOverride: null,
+    breakfastKcal: null,
+    lunchKcal: null,
+    dinnerKcalOverride: null,
     showCalorieBar: false,
     macroPreset: 'balanced',
     macroTargets: null,
@@ -410,6 +424,16 @@ export function loadState() {
     // die Migration schon gelaufen — wir uebernehmen sie 1:1. Sonst bauen wir
     // profiles[0] aus dem alten Single-profile-Slot. loadedProfile wird durch
     // dieselbe Feld-fuer-Feld-Sanierung geschickt wie im Legacy-Pfad.
+    // Legacy-Wizard schrieb 550 kcal Frueh / 770 kcal Mittag als Fabrik-Defaults.
+    // Diese Werte waren nicht bewusst gesetzt — nach Umstellung auf 35 %-Regel
+    // migrieren wir sie auf null. Alle anderen Werte bleiben (User-eigene
+    // Einstellung → Profi-Modus).
+    const migrateMealKcal = (raw, legacyDefault, isLegacy) => {
+      if (isLegacy) return null;
+      if (raw == null) return null;
+      if (raw === legacyDefault) return null;
+      return raw;
+    };
     const normalizeProfile = (raw, id) => ({
       id,
       name:                 isLegacyPreOnboarding ? null : (raw.name ?? null),
@@ -420,8 +444,13 @@ export function loadState() {
       activityLevel:        isLegacyPreOnboarding ? null : (raw.activityLevel ?? null),
       goal:                 isLegacyPreOnboarding ? null : (raw.goal ?? null),
       dailyTargetOverride:  raw.dailyTargetOverride ?? null,
-      breakfastKcal:        isLegacyPreOnboarding ? null : (raw.breakfastKcal ?? null),
-      lunchKcal:            isLegacyPreOnboarding ? null : (raw.lunchKcal ?? null),
+      // Migration: legacy Wizard-Defaults (Fr 550 / Mi 770) waren Fabrik-
+      // Standards, kein bewusst gesetzter User-Wert → auf null migrieren,
+      // damit das neue System die 35 %-Regel greifen laesst. Nur user-eigene
+      // Werte (nicht 550/770) bleiben — dort bleibt der Profi-Modus aktiv.
+      breakfastKcal:        migrateMealKcal(raw.breakfastKcal, 550, isLegacyPreOnboarding),
+      lunchKcal:            migrateMealKcal(raw.lunchKcal, 770, isLegacyPreOnboarding),
+      dinnerKcalOverride:   raw.dinnerKcalOverride ?? null,
       showCalorieBar:       raw.showCalorieBar ?? true,
       macroPreset:          raw.macroPreset ?? 'balanced',
       macroTargets:         raw.macroTargets ?? null,
@@ -466,9 +495,10 @@ export function loadState() {
           americas:      !!legacyGlobalCuisines.americas,
         };
       }
-    } else {
-      // Legacy oder Fresh Install: aus altem profile-Slot bauen. Bei Fresh
-      // Install ist loadedProfile leer -> normalizeProfile liefert Blank u1.
+    } else if (!isLegacyPreOnboarding && loadedProfile && Object.keys(loadedProfile).length > 0) {
+      // Legacy Single-Profile State: aus dem alten profile-Slot bauen. Nur
+      // wenn die Werte nicht-leer sind — sonst starten wir mit []
+      // (Fresh Install → getActiveProfile faellt auf standardProfile).
       profiles = [normalizeProfile(loadedProfile, 'u1')];
       const legacyGlobalPrefs = loadedSettings.preferences;
       if (legacyGlobalPrefs) {
@@ -487,19 +517,22 @@ export function loadState() {
           americas:      !!legacyGlobalCuisines.americas,
         };
       }
+    } else {
+      // Fresh Install: kein Profil. Wizzard erstellt das erste bei "Fertig".
+      profiles = [];
     }
     // Aktives Profil = profiles[0]. Wenn ein alter State activeProfileId auf
     // ein anderes Profil zeigt, verschieben wir dieses an Position 0 damit
     // die neue Reihenfolgen-Semantik konsistent bleibt.
     const legacyActive = loadedSettings.activeProfileId;
-    if (legacyActive && profiles[0]?.id !== legacyActive) {
+    if (legacyActive && profiles.length > 0 && profiles[0]?.id !== legacyActive) {
       const idx = profiles.findIndex((p) => p.id === legacyActive);
       if (idx > 0) {
         const [p] = profiles.splice(idx, 1);
         profiles.unshift(p);
       }
     }
-    const activeProfileId = profiles[0].id;
+    const activeProfileId = profiles.length > 0 ? profiles[0].id : null;
 
     state.settings = {
       defaultPortions: loadedSettings.defaultPortions ?? legacyGlobalPortions ?? 1,
@@ -522,7 +555,7 @@ export function loadState() {
       // gespiegelt. Fuer die aktuelle In-Memory-Session initial gleich der
       // aktive Profil-Eintrag; ein direkter Read (den es nicht mehr geben
       // sollte) wuerde damit dennoch plausible Werte finden.
-      profile: profiles.find((p) => p.id === activeProfileId) ?? profiles[0],
+      profile: profiles.find((p) => p.id === activeProfileId) ?? profiles[0] ?? null,
       // Standard-Profil: aus Storage laden falls vorhanden (via normalize
       // durchgeschickt damit alle Felder sanitized sind), sonst frische
       // Defaults aus DEFAULT_USER.
@@ -530,6 +563,8 @@ export function loadState() {
         ? { ...createStandardProfileDefaults(), ...normalizeProfile(loadedSettings.standardProfile, '_default') }
         : createStandardProfileDefaults(),
       theme: loadedSettings.theme ?? 'auto',
+      showDashboardMakros: loadedSettings.showDashboardMakros ?? true,
+      showDashboardCalorieBar: loadedSettings.showDashboardCalorieBar ?? true,
     };
     return true;
   } catch (_) {

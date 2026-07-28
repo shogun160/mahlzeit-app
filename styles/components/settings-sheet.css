@@ -1025,17 +1025,18 @@
   background: color-mix(in srgb, var(--md-sys-color-primary) 88%, black);
 }
 
-/* Standard-Profil-Row: visuell abgesetzt von den echten User-Profilen —
-   dashed border in primary, damit klar ist dass es der Fallback-Diner
-   ist, kein normaler User. */
+/* Standard-Profil-Row: matcht das Layout einer normalen User-Row inkl.
+   Drag-Handle links und kcal-Meta-Zeile. Einzige Unterschiede: gestrichelte
+   Border (Signal: Fallback-Diner) und deaktivierter Drag-Handle. */
 .settings-profile-row--default {
   border-style: dashed;
-  border-color: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-outline);
   color: var(--md-sys-color-on-surface);
   margin-top: 4px;
 }
-.settings-profile-row--default .settings-profile-row__name {
-  color: var(--md-sys-color-primary);
+.settings-profile-row--default .settings-profile-row__drag {
+  cursor: default;
+  pointer-events: none;
 }
 
 /* Rezepte-Import-Row: Status + Refresh-Icon rechts, kompakt gruppiert.

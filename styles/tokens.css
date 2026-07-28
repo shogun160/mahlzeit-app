@@ -17,12 +17,12 @@
   --md-sys-color-primary-track: color-mix(in srgb, var(--md-sys-color-primary) 20%, var(--md-sys-color-surface-container-highest));
 
   /* Chart-Farben für Makro-Bars — klassisch aus Fitness-App-Konvention.
-     KH Amber (Getreide), P Rot (Muskel/Fleisch), F Blau (Öl). Bewusst
-     off-theme, weil Charts eigene visuelle Kategorien brauchen und die
-     App sonst nur Teal-Töne hat (keine klare Trennung möglich). */
+     KH Amber (Getreide), P Blau (klare Kategorie), F Rot (Fettwarnung).
+     Bewusst off-theme, weil Charts eigene visuelle Kategorien brauchen und
+     die App sonst nur Teal-Töne hat (keine klare Trennung möglich). */
   --chart-color-kh: #D97706;
-  --chart-color-p:  #B91C1C;
-  --chart-color-f:  #2563EB;
+  --chart-color-p:  #2563EB;
+  --chart-color-f:  #B91C1C;
   /* Semantische Ok-Farbe für Ø-Anzeige (grün = im Zielkorridor).
      "Off" nutzt on-surface-variant — bewusst leise, kein Alarm. */
   --chart-color-ok: #15803D;
@@ -90,8 +90,8 @@
      Werte hier permanent = Light-Palette-Primary/Chart-Colors. */
   --md-sys-color-on-glass: #0F766E;
   --chart-color-kh-on-glass: #D97706;
-  --chart-color-p-on-glass:  #B91C1C;
-  --chart-color-f-on-glass:  #2563EB;
+  --chart-color-p-on-glass:  #2563EB;
+  --chart-color-f-on-glass:  #B91C1C;
 }
 
 
@@ -119,8 +119,8 @@
   --md-sys-color-outline-variant: #3A3F3D;
 
   --chart-color-kh: #FBBF24;
-  --chart-color-p:  #F87171;
-  --chart-color-f:  #60A5FA;
+  --chart-color-p:  #60A5FA;
+  --chart-color-f:  #F87171;
   --chart-color-ok: #4ADE80;
 
   --frosted-glass: rgba(0, 0, 0, 0.4);

@@ -1,4 +1,4 @@
-import { PORTIONS_MIN, PORTIONS_MAX, isFavorite } from '../state.js';
+import { state, PORTIONS_MIN, PORTIONS_MAX, isFavorite } from '../state.js';
 import { getScaleForDish } from '../nutrition/scale.js';
 import { resolveDishImage, bindDishImage } from '../data/dish-image.js';
 import { isNewDish } from '../data/dishes.js';
@@ -86,12 +86,14 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
           <button class="stepper__btn" data-action="portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
         </div>
       </div>
+      ${state.settings.showDashboardMakros === false ? '' : `
       <div class="day-card__makros">
         <span class="makro-pill makro-pill--kcal" aria-hidden="true">${kcal}<span class="unit"> kcal</span></span>
         <span class="makro-pill makro-pill--p" aria-hidden="true">${protein}<span class="unit"> g P</span></span>
         <span class="makro-pill makro-pill--kh" aria-hidden="true">${carbs}<span class="unit"> g KH</span></span>
         <span class="makro-pill makro-pill--f" aria-hidden="true">${fat}<span class="unit"> g F</span></span>
       </div>
+      `}
     </div>
     <div class="day-card__body">
       <div class="day-card__header-row">

@@ -1,6 +1,6 @@
-import { state, DAYS } from '../state.js';
+import { state, DAYS, getActiveProfile } from '../state.js';
 import { dishesById } from '../data/dishes.js';
-import { hasProfile, isProfileComplete, dinnerTarget, kcalRange } from '../nutrition/target.js';
+import { hasProfile, isProfileComplete, dinnerTarget, kcalRangeRounded } from '../nutrition/target.js';
 import { getScaleForDish } from '../nutrition/scale.js';
 
 // Kompakte Bedarfs-Bar zwischen Header und Card-Grid im Dashboard.
@@ -12,8 +12,9 @@ import { getScaleForDish } from '../nutrition/scale.js';
 //   state.selected[day] — der User-Kontext für die Einkaufsliste.
 // Ohne vollständiges Profil: leerer String (kein DOM-Element).
 export function renderCalorieBar() {
-  const { profile } = state.settings;
-  if (profile.showCalorieBar === false) return '';
+  const profile = getActiveProfile();
+  if (state.settings.showDashboardCalorieBar === false) return '';
+  if (!profile || profile.showCalorieBar === false) return '';
 
   // Unvollständiges Profil: Placeholder-Pille als Wizard-Trigger.
   // Ausnahme: showCalorieBar false (oben) → gar keine Pille.
@@ -30,7 +31,7 @@ export function renderCalorieBar() {
 
   const target = dinnerTarget(profile);
   if (target == null || target <= 0) return '';
-  const [low, high] = kcalRange(target);
+  const [low, high] = kcalRangeRounded(target);
 
   const selectedDays = DAYS.filter((d) => state.selected[d]);
   const selectedCount = selectedDays.length;

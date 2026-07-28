@@ -8,7 +8,8 @@ import {
   COOKTIME_STEP,
 } from '../state.js';
 import { changeDefaultPortions } from '../dashboard/portions.js';
-import { GOALS } from '../nutrition/target.js';
+import { dinnerTarget, kcalRangeRounded } from '../nutrition/target.js';
+import { rerollAll } from '../dashboard/reroll.js';
 import { showToast } from '../util/toast.js';
 import { renderRezepteSectionBody, buildRezepteSummary, wireRezepteSection } from './rezepte-section.js';
 import { openUpdateSheet } from './update-sheet.js';
@@ -160,7 +161,30 @@ function renderShell() {
                 </button>
               </div>
             </div>
-            <p class="settings-section__note settings-section__note--soft">Akzentfarbe kommt in einer späteren Iteration</p>
+            <div class="settings-row">
+              <div class="settings-row__label">
+                <div class="settings-row__label-primary">Bedarfs-Pille im Dashboard</div>
+                <div class="settings-row__label-secondary">Wochen-Übersicht + Zugang zu Nährstoff-Details</div>
+              </div>
+              <button class="m3-switch" type="button" role="switch"
+                      data-action="toggle-dashboard-caloriebar"
+                      aria-checked="${state.settings.showDashboardCalorieBar !== false}"
+                      aria-label="Bedarfs-Pille im Dashboard anzeigen">
+                <span class="m3-switch__thumb" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="settings-row">
+              <div class="settings-row__label">
+                <div class="settings-row__label-primary">Makros im Dashboard</div>
+                <div class="settings-row__label-secondary">kcal- und P/KH/F-Pillen unter jedem Gericht</div>
+              </div>
+              <button class="m3-switch" type="button" role="switch"
+                      data-action="toggle-dashboard-makros"
+                      aria-checked="${state.settings.showDashboardMakros !== false}"
+                      aria-label="Makros im Dashboard anzeigen">
+                <span class="m3-switch__thumb" aria-hidden="true"></span>
+              </button>
+            </div>
           `)}
 
           ${section('daten', 'Daten', `
@@ -219,7 +243,7 @@ function renderShell() {
 }
 
 function formatCookTime(min) {
-  return min >= COOKTIME_MAX ? 'egal' : `${min} Min`;
+  return min >= COOKTIME_MAX ? 'unbegrenzt' : `${min} Min`;
 }
 
 // Header + Body als FLACHE Geschwister direkt im .settings-body — kein
@@ -328,7 +352,7 @@ function renderProfileList() {
   const plusDisabled = defaultPortions >= PORTIONS_MAX;
   // Hinweis-Text: informiert wenn portions > profiles.length ist, damit klar
   // ist dass die fehlenden Personen ueber das Standard-Profil gerechnet werden.
-  const hint = 'Für alle Tage der Woche';
+  const hint = 'Für wieviele kochst du normalerweise?';
   // Standard-Profil-Row: separater Marker, nicht loeschbar. Editierbar ueber
   // dasselbe Detail-Sheet (id '_default' erkennt der Sheet). Optisch abgesetzt
   // via .settings-profile-row--default (dashed border in primary).
@@ -337,19 +361,19 @@ function renderProfileList() {
   return `
     <div class="settings-profile-list">
       ${rows}
+      ${stdRowHtml}
       <button class="settings-profile-add"
               type="button"
               data-action="add-profile">
         <span class="settings-profile-add__icon" aria-hidden="true">+</span>
         <span class="settings-profile-add__label">Profil hinzufügen</span>
       </button>
-      ${stdRowHtml}
       <div class="settings-row settings-profile-portions">
         <div class="settings-row__label">
-          <div class="settings-row__label-primary">Standard-Personenzahl</div>
+          <div class="settings-row__label-primary">Personen</div>
           <div class="settings-row__label-secondary" data-role="portions-hint">${hint}</div>
         </div>
-        <div class="stepper stepper--compact" role="group" aria-label="Standard-Personenzahl">
+        <div class="stepper stepper--compact" role="group" aria-label="Personen">
           <button class="stepper__btn" data-action="portions-minus" aria-label="Weniger" ${minusDisabled ? 'disabled' : ''}>−</button>
           <span class="stepper__value" data-role="portions-value">${defaultPortions}</span>
           <button class="stepper__btn" data-action="portions-plus" aria-label="Mehr" ${plusDisabled ? 'disabled' : ''}>+</button>
@@ -367,15 +391,29 @@ function renderProfileList() {
 }
 
 function renderStandardProfileRow(profile) {
+  // Standard-Profil zeigt statt Alter/Groesse/Gewicht/Ziel nur den Abendessen-
+  // kcal-Bereich — ein Standard-Diner ist definiert durch seinen Bedarf, nicht
+  // durch demografische Daten. Berechnung identisch zum Rest der App
+  // (dinnerTarget + kcalRange). Layout matcht die normalen User-Rows inkl.
+  // Drag-Handle-Slot (visuell da, ohne Funktion — Standard-Profil laesst sich
+  // nicht umsortieren, sitzt immer als Fallback am Ende).
+  const kcalLabel = profileKcalLine(profile) ?? 'Noch nicht eingerichtet';
   return `
     <div class="settings-profile-row settings-profile-row--default"
          role="button"
          tabindex="0"
          data-action="open-profile-detail"
          data-profile-id="${profile.id}">
+      <button class="settings-profile-row__drag"
+              type="button"
+              disabled
+              aria-hidden="true"
+              tabindex="-1">
+        <svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M360-160q-33 0-56.5-23.5T280-240q0-33 23.5-56.5T360-320q33 0 56.5 23.5T440-240q0 33-23.5 56.5T360-160Zm240 0q-33 0-56.5-23.5T520-240q0-33 23.5-56.5T600-320q33 0 56.5 23.5T680-240q0 33-23.5 56.5T600-160ZM360-400q-33 0-56.5-23.5T280-480q0-33 23.5-56.5T360-560q33 0 56.5 23.5T440-480q0 33-23.5 56.5T360-400Zm240 0q-33 0-56.5-23.5T520-480q0-33 23.5-56.5T600-560q33 0 56.5 23.5T680-480q0 33-23.5 56.5T600-400ZM360-640q-33 0-56.5-23.5T280-720q0-33 23.5-56.5T360-800q33 0 56.5 23.5T440-720q0 33-23.5 56.5T360-640Zm240 0q-33 0-56.5-23.5T520-720q0-33 23.5-56.5T600-800q33 0 56.5 23.5T680-720q0 33-23.5 56.5T600-640Z"/></svg>
+      </button>
       <span class="settings-profile-row__label">
         <span class="settings-profile-row__name">Standard-Profil</span>
-        <span class="settings-profile-row__meta">${escapeHtml(profileMetaLine(profile))}</span>
+        <span class="settings-profile-row__meta">${escapeHtml(kcalLabel)}</span>
       </span>
       <svg class="settings-profile-row__chevron" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
     </div>
@@ -405,7 +443,7 @@ function renderProfileRow(profile, isActive) {
       </button>
       <span class="settings-profile-row__label">
         <span class="settings-profile-row__name">${escapeHtml(name)}</span>
-        <span class="settings-profile-row__meta">${escapeHtml(profileMetaLine(profile))}</span>
+        <span class="settings-profile-row__meta">${escapeHtml(profileKcalLine(profile) ?? 'Noch nicht eingerichtet')}</span>
       </span>
       ${activeBadge}
       <svg class="settings-profile-row__chevron" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M504-480 320-664l56-56 240 240-240 240-56-56 184-184Z"/></svg>
@@ -416,15 +454,13 @@ function renderProfileRow(profile, isActive) {
 // Meta-Zeile fuer die Profil-Row: kompakte Zusammenfassung der wichtigsten
 // Kennzahlen. Bei leerem Profil (frisch angelegt, noch nicht editiert):
 // dezenter Hinweis-Text statt eine Reihe von "—".
-function profileMetaLine(p) {
-  const parts = [];
-  if (p.age != null) parts.push(`${p.age} J.`);
-  if (p.heightCm != null) parts.push(`${p.heightCm} cm`);
-  if (p.weightKg != null) parts.push(`${p.weightKg} kg`);
-  const goal = GOALS.find((g) => g.key === p.goal);
-  if (goal) parts.push(goal.label);
-  if (parts.length === 0) return 'Noch nicht eingerichtet';
-  return parts.join(' · ');
+// Abendessen-kcal-Bereich fuer die Profil-Row. Gleiche Berechnung wie bei
+// der Standard-Profil-Row + Bedarfs-Pillen im Dashboard.
+function profileKcalLine(profile) {
+  const dinner = dinnerTarget(profile);
+  const range = dinner != null ? kcalRangeRounded(dinner) : null;
+  if (!range) return null;
+  return `${range[0]}–${range[1]} kcal`;
 }
 
 function escapeHtml(s) {
@@ -476,6 +512,32 @@ function attachHandlers() {
       onExternalThemeChange();
     });
   });
+
+  // Dashboard-Makros-Switch: schaltet die kcal+P/KH/F-Pillen unter jedem
+  // Gericht ein/aus. onExternalChange feuert refresh(), sodass die Cards
+  // sofort ohne Sheet-Schliessen aktualisiert werden.
+  const makrosBtn = rootEl.querySelector('[data-action="toggle-dashboard-makros"]');
+  if (makrosBtn) {
+    makrosBtn.addEventListener('click', () => {
+      const next = state.settings.showDashboardMakros === false;
+      state.settings.showDashboardMakros = next;
+      makrosBtn.setAttribute('aria-checked', String(next));
+      onExternalChange();
+    });
+  }
+
+  // Bedarfs-Pille-Switch: schaltet die Wochen-Bedarfs-Pille oben im Dashboard
+  // (Trigger fuer Nährstoff-Detail-Popup) ein/aus. Global — unabhaengig vom
+  // per-Profil showCalorieBar; beide muessen aktiv sein damit die Pille zeigt.
+  const barBtn = rootEl.querySelector('[data-action="toggle-dashboard-caloriebar"]');
+  if (barBtn) {
+    barBtn.addEventListener('click', () => {
+      const next = state.settings.showDashboardCalorieBar === false;
+      state.settings.showDashboardCalorieBar = next;
+      barBtn.setAttribute('aria-checked', String(next));
+      onExternalChange();
+    });
+  }
 
   // Scroll-Listener am Body: aktualisiert die --sticky-Klasse an allen
   // Section-Toggles. Die Summary-Pille wird per CSS nur bei --sticky sichtbar,
@@ -543,6 +605,7 @@ function attachHandlers() {
   // frisch mit neuer Grenze zieht.
   slider.addEventListener('change', () => {
     state.dishBag = {};
+    rerollAll();
     onExternalChange();
   });
 
@@ -887,7 +950,7 @@ function handlePortions(delta) {
   if (valueEl) valueEl.textContent = defaultPortions;
   if (minusBtn) minusBtn.disabled = defaultPortions <= PORTIONS_MIN;
   if (plusBtn) plusBtn.disabled = defaultPortions >= PORTIONS_MAX;
-  if (hintEl) hintEl.textContent = 'Für alle Tage der Woche';
+  if (hintEl) hintEl.textContent = 'Für wieviele kochst du normalerweise?';
   updateSectionSummary('profile');
   onExternalChange();
 }

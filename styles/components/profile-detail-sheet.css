@@ -27,7 +27,7 @@
 .profile-detail-sheet {
   width: 100%;
   max-width: 640px;
-  max-height: 92vh;
+  height: 88vh;
   background: var(--md-sys-color-surface-container-lowest);
   color: var(--md-sys-color-on-surface);
   border-top-left-radius: 24px;
@@ -52,11 +52,39 @@
 }
 .profile-detail-header {
   display: grid;
-  grid-template-columns: 36px 1fr 36px;
+  grid-template-columns: 80px 1fr 36px;
   align-items: center;
   padding: 8px 16px 12px;
   border-bottom: 1px solid var(--md-sys-color-outline-variant);
   flex-shrink: 0;
+  gap: 8px;
+}
+.profile-detail-header__actions {
+  grid-column: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.profile-detail-icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-detail-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.profile-detail-icon-btn svg {
+  width: 18px;
+  height: 18px;
 }
 .profile-detail-title {
   grid-column: 2;
@@ -81,6 +109,24 @@
   align-items: center;
   justify-content: center;
 }
+.profile-detail-reset {
+  grid-column: 1;
+  justify-self: start;
+  width: 36px;
+  height: 36px;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-primary) 12%, var(--md-sys-color-surface-container-lowest));
+  color: var(--md-sys-color-on-primary-container);
+  border-radius: 50%;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.profile-detail-reset svg {
+  width: 18px;
+  height: 18px;
+}
 .profile-detail-body {
   flex: 1 1 auto;
   overflow-y: auto;
@@ -95,8 +141,8 @@
   border: 1px solid var(--md-sys-color-outline-variant);
   background: var(--md-sys-color-surface-container);
   color: var(--md-sys-color-on-surface);
-  border-radius: 10px;
-  padding: 8px 12px;
+  border-radius: var(--radius-pill);
+  padding: 8px 16px;
   font-size: 0.9375rem;
   min-width: 140px;
   max-width: 220px;

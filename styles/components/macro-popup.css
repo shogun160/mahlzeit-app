@@ -24,7 +24,7 @@
   position: relative;
   width: 100%;
   max-width: 720px;
-  max-height: 92vh;
+  height: 88vh;
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
   border-top-left-radius: 20px;
@@ -70,7 +70,7 @@
 .macro-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
   padding: 8px 20px 4px;
 }
 
@@ -79,6 +79,31 @@
   font-size: 1.0625rem;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
+}
+.macro-title__kcal {
+  margin-left: auto;
+  padding: 4px 14px;
+  border-radius: var(--radius-pill);
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  width: 200px;
+  text-align: center;
+  box-sizing: border-box;
+}
+.macro-title__kcal:empty {
+  display: none;
+}
+/* Inaktiv-Look — gleiche Schrift + Primary-Farbe, aber transparente
+   Fuellung mit Primary-Border. Signal: "das ist die Referenz, nicht der
+   Aktivwert". */
+.macro-title__kcal--inactive {
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  border: 1px solid var(--md-sys-color-primary);
 }
 
 .macro-close {
@@ -103,7 +128,7 @@
   padding: 12px 20px 20px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
 }
 
 /* SVG-Chart: nimmt volle Breite, Höhe folgt aus viewBox-Aspect. */
@@ -294,8 +319,9 @@
 .macro-controls {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  padding-top: 8px;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 20px;
   border-top: 1px solid var(--md-sys-color-outline-variant);
 }
 .macro-controls__header {
@@ -374,4 +400,96 @@
 .macro-controls--disabled .settings-slider {
   opacity: 0.5;
   pointer-events: none;
+}
+
+/* Makro-Slider im Popup: pro Makro (p/kh/f) eigene Track- und Wert-Farbe,
+   damit die Verbindung zum Kreisdiagramm und den Ist-Pills visuell ist.
+   accent-color faerbt Track + Thumb in modernen Browsern (inkl. Chromium
+   Android WebView 105+). Der Wert rechts erbt seine Farbe von der Row. */
+.macro-slider--p .settings-slider  { accent-color: var(--chart-color-p); }
+.macro-slider--kh .settings-slider { accent-color: var(--chart-color-kh); }
+.macro-slider--f .settings-slider  { accent-color: var(--chart-color-f); }
+
+.macro-slider--p  .settings-row__value { color: var(--chart-color-p); }
+.macro-slider--kh .settings-row__value { color: var(--chart-color-kh); }
+.macro-slider--f  .settings-row__value { color: var(--chart-color-f); }
+
+/* Fallback-Modus (kein Tag ausgewaehlt): Ist-Pillen dezenter, damit klar
+   ist dass es Ø aus allen Tagen ist statt einer bewussten User-Auswahl. */
+.macro-avg-row--muted {
+  opacity: 0.55;
+}
+
+/* Kreisdiagramm der Ist-Werte (Durchschnitt der ausgewaehlten Tage). Zentriert
+   ueber den 4 Ist-Pillen. Fallback (kein Tag gewaehlt) → dezenter, damit klar
+   ist dass es die Ø aus allen Tagen ist. */
+.macro-donut-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+/* Donut-Slot innerhalb der macro-row: eigene Kontraktion des macro-row-gap
+   (16px) reicht schon — kein extra Margin. */
+.macro-donut-slot .onboarding-macro-row {
+  margin-top: 0;
+}
+.macro-donut-slot--muted {
+  opacity: 0.55;
+}
+.macro-donut-slot .onboarding-macro-row {
+  gap: 16px;
+}
+
+/* Slider im Popup sind reine Anzeige — Thumb ausblenden, damit nicht der
+   Eindruck entsteht der Wert liesse sich am Slider ziehen. Der farbige Track
+   allein zeigt den Wert visuell. */
+.macro-controls .settings-slider--readonly::-webkit-slider-thumb {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.macro-controls .settings-slider--readonly::-moz-range-thumb {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  border: none;
+}
+
+/* Intro ueber dem Balken-Chart: Label + Sollwert-Pille (in Flucht mit der
+   kcal-Pille im Header) links, Hinweistext klein darunter. */
+.macro-chart-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: -20px;
+}
+.macro-chart-intro__row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  /* Ausgleich fuer den fehlenden X-Icon rechts (40px + 12px gap zum Pille) —
+     damit die Sollwert-Pille horizontal in Flucht mit der kcal-Pille im
+     Header endet. */
+  padding-right: 52px;
+}
+.macro-chart-intro__label {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
+}
+.macro-chart-intro__row .macro-title__kcal {
+  margin-left: auto;
+  font-size: 1.0625rem;
+}
+.macro-chart-intro__hint {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Label ueber den Makro-Preset-Chips: dezent wie der Hinweistext oberhalb
+   des Balken-Charts. Kein Fett — nur kleiner Untertitel-Charakter. */
+.macro-controls__preset-label {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
 }

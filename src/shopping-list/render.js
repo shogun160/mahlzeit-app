@@ -220,10 +220,20 @@ function playFlip(root, oldRects) {
 }
 
 function renderGroup(cat, groupItems, stackIdx) {
-  const total = groupItems.length;
-  // Zählung konsistent zur Progress-Bar oben: "N offen von M gesamt".
-  // Zeigt auf einen Blick, wieviel noch zu erledigen ist.
-  const openCount = groupItems.filter((i) => !state.checkedShopping.has(i.key)).length;
+  // Zählung im positiven Framing "erledigt/gesamt". Leftover-Zutaten (Gericht
+  // abgewählt, Zeile "Nicht mehr im Plan") zählen NICHT im Soll — Soll = nur
+  // aktuelle Zutaten mit Gerichtszuordnung. Haben-Zähler:
+  //  - Fall 1: mindestens eine aktuelle Zutat noch offen → nur die abgehakten
+  //    aktuellen zählen (Leftover werden ignoriert).
+  //  - Fall 2: keine aktuelle offen → alle abgehakten zählen (inkl. Leftover),
+  //    damit auch "was ich losgeworden bin" sichtbar bleibt. Ergibt z. B. 4/0
+  //    für eine Kategorie mit ausschließlich Leftover-Zeilen.
+  const currentItems = groupItems.filter((i) => !i.isLeftover);
+  const total = currentItems.length;
+  const currentOpen = currentItems.filter((i) => !state.checkedShopping.has(i.key)).length;
+  const doneCount = currentOpen > 0
+    ? currentItems.length - currentOpen
+    : groupItems.filter((i) => state.checkedShopping.has(i.key)).length;
   const collapsed = isCollapsed(cat);
   const sorted = sortItems(groupItems);
   const rows = sorted.map(renderRow).join('');
@@ -251,7 +261,7 @@ function renderGroup(cat, groupItems, stackIdx) {
         </svg>
       </span>
       <span class="shop-group__title">${CAT_LABELS[cat]}</span>
-      <span class="shop-group__count" aria-label="${openCount} von ${total} offen">${openCount}/${total}</span>
+      <span class="shop-group__count" aria-label="${doneCount} von ${total} erledigt">${doneCount}/${total}</span>
     </div>
     <ul class="shop-list ${collapsed ? 'shop-list--collapsed' : ''}" data-cat="${cat}" style="--stack-idx: ${stackIdx};">${rows}</ul>
   `;
