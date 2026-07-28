@@ -39,12 +39,12 @@ function cuisineWeight(id) {
 }
 
 // Prüft, ob ein Dish alle aktiven Ernährungspräferenzen erfüllt.
-// vegan/vegetarian sind stärkere Über-Filter (schließen mehrere contains-Tags
-// gleichzeitig aus), die einzelnen noMeat/noFish-Flags bleiben aber unabhängig
-// aktivierbar für User, die z. B. nur Fleisch weglassen wollen.
-// Semantik der Ernährungspräferenzen (identisch zum Picker): Diät-Gruppe
-// (meat/fish/vegetarian) = OR-Verknüpfung. Wenn eine oder mehrere aktiv,
-// muss Dish mindestens eine erfüllen. Keine aktiv = neutral (jedes Dish).
+// Semantik: Wenn mindestens eine Diät-Pref aktiv ist, gelten die INAKTIVEN
+// als HARTE Ausschlüsse. Beispiel: prefs = { meat: true, fish: false,
+// vegetarian: true } → Rezepte mit contains-fish werden gefiltert, auch
+// wenn sie zusätzlich contains-meat tragen (z. B. Paella mit Hähnchen +
+// Garnelen). So respektiert der Filter explizit gesetzte Ausschlüsse.
+// Wenn alle Prefs aus sind: neutral, jedes Rezept passiert.
 function matchesPreferences(dish, prefs) {
   const tags = dish.tags || [];
   const has = (t) => tags.includes(t);
@@ -52,20 +52,24 @@ function matchesPreferences(dish, prefs) {
   const isFish = has('contains-fish');
   const isVeg  = !isMeat && !isFish;
 
-  const dietChecks = [];
-  if (prefs.meat)       dietChecks.push(isMeat);
-  if (prefs.fish)       dietChecks.push(isFish);
-  if (prefs.vegetarian) dietChecks.push(isVeg);
-  if (dietChecks.length > 0 && !dietChecks.some(Boolean)) return false;
+  const anyDietActive = prefs.meat || prefs.fish || prefs.vegetarian;
+  if (!anyDietActive) return true;
+
+  if (!prefs.meat && isMeat) return false;
+  if (!prefs.fish && isFish) return false;
+  if (!prefs.vegetarian && isVeg) return false;
 
   return true;
 }
 
-// Gerichte, die den Filter des Users passieren. Zweistufige Fallback-Kaskade,
-// damit der User sich nicht in einen leeren Pool klicken kann:
+// Gerichte, die den Filter des Users passieren. Kaskade:
 //   1. cooktime + diet + cuisine (Küche ist Hard-Filter, wenn aktiv)
 //   2. cooktime + diet         (Küche gedroppt, wenn Stufe 1 < DAYS liefert)
-//   3. allDishIds              (letzte Rettung — auch cooktime/diet gedroppt)
+// Diät-Filter ist HART und wird NIE gedroppt — wenn der User "kein Fisch"
+// setzt, darf auch bei knappem Pool kein Fisch-Rezept einsickern. Wenn Stufe
+// 2 selbst < DAYS liefert, geben wir den kleinen Pool trotzdem zurück; die
+// Consumer (rerollAll, refillBag) sind auf < DAYS vorbereitet und erlauben
+// dann Duplikate — akzeptabel gegenüber einem Diät-Bruch.
 // Küche als Hard-Filter statt Weighted: bevorzugte Buckets liefern verbindlich,
 // solange genug Kandidaten für die Woche existieren. Bei kleinen Buckets
 // (z. B. "Amerika" mit nur 2 Rezepten und "vegetarisch" aktiv → evtl. 0 Treffer)
@@ -86,7 +90,7 @@ export function eligibleDishIds() {
   });
 
   if (activeCuisines.length === 0) {
-    return withoutCuisine.length >= DAYS.length ? withoutCuisine : allDishIds;
+    return withoutCuisine;
   }
 
   const withCuisine = withoutCuisine.filter((id) => {
@@ -94,8 +98,7 @@ export function eligibleDishIds() {
     return activeCuisines.includes(dish.cuisineGroup);
   });
   if (withCuisine.length >= DAYS.length) return withCuisine;
-  if (withoutCuisine.length >= DAYS.length) return withoutCuisine;
-  return allDishIds;
+  return withoutCuisine;
 }
 
 // Zaehlt wie viele Nachbarn (Vortag/Nachtag) dieselbe proteinCategory haben
