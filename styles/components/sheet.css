@@ -260,6 +260,19 @@
   border-bottom-color: var(--md-sys-color-primary);
 }
 
+/* Body-Slot ist der flex-container fuer den Body-Bereich (unter Hero + Info).
+   Nimmt den restlichen vertikalen Platz und dient als flex-parent fuer die
+   Body-Renderer (detail-body: tabs + sheet-body + macro-footer; picker-body:
+   picker-body). Ohne diese Zwischenstufe wuerde die flex-Kette brechen und
+   die inneren scroll-container koennten nicht wachsen. */
+.sheet-body-slot {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
 /* Body ist der scroll-clip; Track hält beide Panels nebeneinander (200% breit)
    und wird per translateX verschoben. Jedes Panel scrollt intern eigenständig. */
 .sheet-body {
