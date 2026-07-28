@@ -9,6 +9,7 @@
 
 import { allDishIds, dishesById, shuffled } from '../src/data/dishes.js';
 import { optimizeAssignment } from '../src/dashboard/optimizer.js';
+import { dinnerTarget, dinnerMacroTargets, dishScale } from '../src/nutrition/target.js';
 import { DAYS } from '../src/state.js';
 
 const ROUNDS = 10;
@@ -37,9 +38,38 @@ function buildProfile(daily, preset) {
   };
 }
 
+function weeklyDelta(assignment, profile) {
+  const dinner = dinnerTarget(profile);
+  const macros = dinnerMacroTargets(profile);
+  const target = {
+    kcal: dinner * DAYS.length,
+    p:    macros.p * DAYS.length,
+    kh:   macros.kh * DAYS.length,
+    f:    macros.f * DAYS.length,
+  };
+  const actual = { kcal: 0, p: 0, kh: 0, f: 0 };
+  for (const day of DAYS) {
+    const dish = dishesById.get(assignment[day]);
+    if (!dish) continue;
+    const scale = dishScale(dish.kcal, dinner);
+    actual.kcal += dish.kcal * scale;
+    actual.p    += dish.p    * scale;
+    actual.kh   += dish.kh   * scale;
+    actual.f    += dish.f    * scale;
+  }
+  return {
+    kcal: actual.kcal - target.kcal,
+    p:    actual.p - target.p,
+    kh:   actual.kh - target.kh,
+    f:    actual.f - target.f,
+    target,
+  };
+}
+
 function simulate(profile) {
   const counts = new Map();
   for (const id of allDishIds) counts.set(id, 0);
+  const weeklyDeltas = [];
   let history = [];
   let previousIds = new Set();
 
@@ -59,6 +89,7 @@ function simulate(profile) {
       const id = optimized[day];
       counts.set(id, counts.get(id) + 1);
     }
+    weeklyDeltas.push(weeklyDelta(optimized, profile));
 
     // History-Logic wie in rerollAll: letztes Assignment in History schieben,
     // previousIds aus aktuellem + alle History-Assignments aufbauen.
@@ -70,10 +101,10 @@ function simulate(profile) {
       for (const id of Object.values(hist)) previousIds.add(id);
     }
   }
-  return counts;
+  return { counts, weeklyDeltas };
 }
 
-function printReport(label, counts) {
+function printReport(label, counts, weeklyDeltas) {
   const rows = [];
   for (const [id, count] of counts.entries()) {
     const dish = dishesById.get(id);
@@ -90,6 +121,24 @@ function printReport(label, counts) {
   console.log(`Insgesamt gezogen: ${total} Slots ueber ${ROUNDS} Wochen (${ROUNDS * DAYS.length} = ${ROUNDS} × ${DAYS.length})`);
   console.log(`Verschiedene Rezepte gezogen: ${drawn.length} / ${rows.length}`);
   console.log(`Nicht gezogen: ${missing.length}\n`);
+
+  // Wochen-Abweichung vom Sollwert: min / max / Ø (signiert), Ø |absolut|.
+  const target = weeklyDeltas[0].target;
+  console.log('Wochen-Abweichung vom Sollwert (signiert: negativ = unter Soll):');
+  console.log(`  Soll/Woche: kcal=${target.kcal.toFixed(0)}  P=${target.p.toFixed(0)}  KH=${target.kh.toFixed(0)}  F=${target.f.toFixed(0)}`);
+  for (const metric of ['kcal', 'p', 'kh', 'f']) {
+    const values = weeklyDeltas.map((d) => d[metric]);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const avg = values.reduce((a, b) => a + b, 0) / values.length;
+    const absAvg = values.reduce((a, b) => a + Math.abs(b), 0) / values.length;
+    const unit = metric === 'kcal' ? 'kcal' : 'g';
+    console.log(
+      `  ${metric.padEnd(4)}  min=${min.toFixed(1).padStart(8)}${unit}  max=${max.toFixed(1).padStart(8)}${unit}` +
+      `  Ø=${avg.toFixed(1).padStart(8)}${unit}  Ø|Δ|=${absAvg.toFixed(1).padStart(7)}${unit}`,
+    );
+  }
+  console.log('');
 
   console.log('Gezogene Rezepte (absteigend):');
   for (const r of drawn) {
@@ -110,6 +159,6 @@ console.log(`Pool-Groesse: ${allDishIds.length} Rezepte.`);
 
 for (const p of PROFILES) {
   const profile = buildProfile(p.daily, p.preset);
-  const counts = simulate(profile);
-  printReport(p.label, counts);
+  const { counts, weeklyDeltas } = simulate(profile);
+  printReport(p.label, counts, weeklyDeltas);
 }
