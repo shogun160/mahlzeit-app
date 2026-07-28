@@ -1,14 +1,18 @@
 # Handoff — Session 25 → 26 (Mahlzeit-App)
 
-## Fokus Session 25: Sheet-Rebuild Pass 1 + 2 (Design-Doc → laufender Code auf main)
+## Fokus Session 25: Sheet-Rebuild komplett (Pass 1–3) + Stable-Release 1.4.6
 
-Session 24 hatte den Rebuild geplant und einen Design-Doc auf `sheet-rebuild` gelegt. Session 25 hat Pass 1 (neue Module anlegen) und Pass 2 (Caller umstellen) durchgezogen, den Rebuild live-getestet und alle Regressionen gefixt. Beta-APK 1.4.6-beta wurde gebaut, freigegeben, und via `beta → main` fast-forward auf `main` gemergt. Alte Sheet-Module sind noch physisch im Repo, aber nicht mehr aufgerufen — Pass 3 (Löschen) ist offen.
+Session 24 hatte den Rebuild geplant und einen Design-Doc auf `sheet-rebuild` gelegt. Session 25 hat Pass 1 (neue Module anlegen), Pass 2 (Caller umstellen) und Pass 3 (alte Module physisch löschen) durchgezogen. Der Rebuild wurde live-getestet, alle Regressionen wurden gefixt. Zuerst Beta-APK 1.4.6-beta gebaut und freigegeben, danach Stable-APK 1.4.6 (versionCode 19) aus main. `sheet-rebuild`-Branch ist gelöscht.
 
 ## Commits auf `main` (session 25)
 
-Fast-forward-Merge von `beta` auf `main`, letzter Commit ist `e383000`:
+Letzter Commit ist `f5f1ac8` (Merge-Commit für Pass 3 + Version-Bump). Die relevanten Commits in umgekehrter chronologischer Reihenfolge:
 
 ```
+f5f1ac8 merge: pass 3 (alte module geloescht) + version 1.4.6 stable
+a5460df chore(release): version 1.4.6 stable (versionCode 19)
+83828af feat(sheet): pass 3 — alte sheet-module physisch geloescht
+ae6b117 docs(handoff): session 25 -> 26 (sheet-rebuild pass 1+2 auf main)
 e383000 refactor(sheet): in-place hero-update nach tile-pick statt outerHTML-swap
 4f40e79 fix(sheet): hero + info folgen dem neuen dish nach picker-tile-pick
 1cf6d85 fix(sheet): hero-pill-clicks nicht vom swipe-handler geschluckt
@@ -65,42 +69,46 @@ Der neue `.sheet-body-slot`-Wrapper hatte kein Flex/Overflow-Setup — die Flex-
 - **Keine Slide-down/Slide-up-Übergänge** zwischen Detail und Picker mehr — Hero+Info bleiben stehen, nur Body-Slot wird ausgetauscht (`switchMode`).
 - `instant`-Flag komplett entfallen — wird nicht mehr gebraucht.
 
-### 5. Release
-- Version `1.4.6-beta` (versionCode 18) — Commit `b59bfaf`.
-- Beta-APK aus `beta` gebaut, live-getestet.
-- `sheet-rebuild → beta` (2 Merge-Commits `f5cf03d`, `5d5044d`), dann `beta → main` per fast-forward.
+### 5. Beta-Release (Commit `b59bfaf`)
+- Version `1.4.6-beta` (versionCode 18).
+- Beta-APK aus `beta` gebaut, live-getestet, freigegeben.
+- `sheet-rebuild → beta` (Merge-Commits `f5cf03d`, `5d5044d`), dann `beta → main` per fast-forward.
+- `sheet-rebuild`-Branch lokal + remote gelöscht (inhaltlich = main via Cherry-Picks).
+
+### 6. Pass 3: alte Module physisch gelöscht (Commit `83828af`)
+- `src/detail-sheet/render.js` — 464 Zeilen weg.
+- `src/dish-picker/render.js` — 1170 Zeilen weg. Leerer Ordner `src/dish-picker/` mit entfernt.
+- `src/detail-sheet/ingredients.js` + `src/detail-sheet/recipe.js` bleiben (werden weiter von `src/sheet/detail-body.js` importiert).
+- Grep vor Löschung: keine externen Referenzen mehr, nur die interne von `detail-sheet/render.js` zu `dish-picker/render.js`.
+- Bundle-Größe nach Löschung unverändert (Module waren seit Pass 2 schon tree-shaken).
+
+### 7. Stable-Release 1.4.6 (Commits `a5460df` + Merge `f5f1ac8`)
+- Version-Bump `1.4.6-beta` / 18 → `1.4.6` / 19 auf `beta`.
+- `beta → main` per no-ff-Merge (main hatte den Handoff-Commit `ae6b117` exklusiv, kein ff möglich).
+- `main → beta` ff-Sync (damit beta nicht hinter main hängt).
+- Stable-APK 1.4.6 aus `main` gebaut.
 
 ## Branch-State beim Session-Ende
 
-- **`main`** = **`beta`** = **`origin/main`** = **`origin/beta`** = **`e383000`**
-- **`sheet-rebuild`** = **`origin/sheet-rebuild`** = **`32157f2`** — inhaltlich identisch zu beta/main, aber lineare Cherry-Pick-Historie ohne die Merge-Commits.
+- **`main`** = **`beta`** = **`origin/main`** = **`origin/beta`** = **`f5f1ac8`**
+- **`sheet-rebuild`** — **gelöscht** (lokal + remote).
 - Working tree clean auf allen Branches.
 
 ## APK-Zustand
 
-- **Beta-APK 1.4.6-beta** (versionCode 18) gebaut, live-getestet, freigegeben. Datei: `android/app/build/outputs/apk/debug/app-debug.apk`.
-- Diese APK ist **inhaltlich identisch mit main** (fast-forward-merge, keine main-only Änderungen).
-- Version im Gradle steht weiter auf `1.4.6-beta` — falls Session 26 eine **Stable-APK** baut: Bump auf `1.4.6` / versionCode 19, `chore(release): version 1.4.6`-Commit, APK aus main.
+- **Beta-APK 1.4.6-beta** (versionCode 18) wurde in Session 25 gebaut + live-getestet. Nicht mehr aktuell.
+- **Stable-APK 1.4.6** (versionCode 19) aus main gebaut. Datei: `android/app/build/outputs/apk/debug/app-debug.apk`. Enthält den kompletten Sheet-Rebuild inkl. Pass 3.
+- Für ein Upgrade der Beta-APK auf Stable: deinstallieren + neu installieren (versionCode ist zwar höher, aber Debug-Signatur unterscheidet sich ggf. nicht — Reinstall ist sowieso sauber).
 
 ## Offen für Session 26
 
-### Pass 3: alte Module physisch löschen
-- `src/detail-sheet/render.js` — komplett löschen.
-- `src/dish-picker/render.js` — komplett löschen.
-- `src/detail-sheet/ingredients.js` + `src/detail-sheet/recipe.js` — **bleiben**, werden von `src/sheet/detail-body.js` importiert.
-- CSS: `styles/components/dish-picker.css` bleibt (Filter, Grid, Tile-Styles werden weiter genutzt). `sheet.css` bleibt. Evtl. Aufräumen was nur der alte Detail-Sheet-Header war (`.picker-handle`, `.picker-header`, `.picker-close` sind schon in Session 24 raus).
-- Nach Löschung: build-check dass keine dangling imports.
-
-### Pass 4: Live-Test aller Flows
-Der Beta-Test in Session 25 hat die Haupt-Flows abgedeckt (Card öffnet Detail/Picker, Reroll, Fav, List, Portion, Day-Swipe, Close-Swipe, Info-Pill → Detail, Edit-Pill → Picker, Tile-Klick, Filter). Was noch NICHT explizit bestätigt wurde:
+### Pass 4: Live-Test der Rest-Flows
+Der Beta-Test in Session 25 hat die Haupt-Flows abgedeckt (Card öffnet Detail/Picker, Reroll, Fav, List, Portion, Day-Swipe, Close-Swipe, Info-Pill → Detail, Edit-Pill → Picker, Tile-Klick, Filter). Was noch NICHT explizit bestätigt wurde — beim ersten Live-Test der Stable-APK mit abhaken:
 - Macro-Popup öffnet Detail-Sheet für ein Rezept
 - Onboarding-Wizard-Flows (öffnet der Wizard das Sheet? Zu prüfen — Callers-Inventar in Session 24 hatte "Onboarding? Zu prüfen." offen)
 - Multi-User-Szenarien (Multi-Diner Zutaten-Skalierung im Detail-Mode)
 - Remote-Rezept-Import + Neu-Marker im Picker
 - Empty-States (Favoriten-Filter ohne Favoriten, is-new ohne neue Rezepte)
-
-### Stable-APK 1.4.6
-Wenn gewünscht: Version-Bump + APK aus main. Der Rebuild ist stable genug (Beta-Test war umfangreich).
 
 ### Roadmap-Rest (unverändert)
 Alle Punkte aus [`session-23-to-24.md`](session-23-to-24.md) "Bekannte Rest-Punkte" sind noch offen (Standard-Profil, Einkaufsliste-Feinschliff, Nährstoff-Details, etc.).
@@ -109,10 +117,9 @@ Alle Punkte aus [`session-23-to-24.md`](session-23-to-24.md) "Bekannte Rest-Punk
 
 ## Skill-Empfehlungen für Session 26
 
-- **Pass 3 ist rein mechanisch** (löschen + build-check) — keine Skill nötig.
-- **`superpowers:verification-before-completion`** vor jedem "Rebuild fertig!"-Statement.
 - Wenn Bugs im Live-Test: **`superpowers:systematic-debugging`**.
 - Bei Rezept-Änderungen: CLAUDE.md-Regel "Rezept-Bestätigung" beachten.
+- Für neue Features (z.B. Roadmap-Rest): **`superpowers:brainstorming`** vor Implementation.
 
 ## Sonstige Notizen
 
@@ -121,4 +128,6 @@ Alle Punkte aus [`session-23-to-24.md`](session-23-to-24.md) "Bekannte Rest-Punk
 - **Neue Roots im index.html:** nur `#sheet-root`. `#detail-sheet-root` + `#dish-picker-root` sind raus.
 - **Overlay-Blur:** funktioniert für alle Sheets. Die Liste in `overlay-blur.js` ist auf dem aktuellen Stand.
 - **CSS-Änderungen an `styles/components/sheet.css`:** Neuer Selektor `.sheet-body-slot` (Flex-Container). Kein Refactor darüber hinaus.
+- **CSS-Bestand:** `styles/components/dish-picker.css` bleibt (Filter, Grid, Tile-Styles werden weiter genutzt). Kein Cleanup nötig.
 - **Push-Flow:** direkter Push auf `main` per fast-forward funktioniert wenn beta ihn davor bekommt. Merge-Guard verlangt explizite Zustimmung, siehe CLAUDE.md.
+- **Feedback-Muster (Session 25):** Fixes werden zuerst auf `beta` committed, dann via cherry-pick oder merge auf `main` gespiegelt — beide Branches sollen inhaltlich synchron bleiben.
