@@ -1,6 +1,7 @@
 // Berechnungslogik für persönliches Tageskalorien-Ziel und Wochen-Ist.
-// Reine Funktionen ohne State- oder DOM-Abhängigkeit — bewusst isoliert,
-// damit sich Formeln ohne UI-Kopplung testen und austauschen lassen.
+// Die meisten Funktionen sind ohne State- oder DOM-Abhängigkeit — bewusst
+// isoliert, damit sich Formeln ohne UI-Kopplung testen lassen. Ausnahme:
+// getTargetProfile() greift auf state.js zu (Convenience-Shim für Consumer).
 
 import { getActiveProfile, getStandardProfile } from '../state.js';
 
@@ -251,7 +252,7 @@ export function isWholeUnit(unit) {
 }
 
 // Berechnet den Skalierungsfaktor, mit dem ein Gericht auf sein Abendessen-Ziel
-// gebracht wird. Faktor gerundet auf SCALE_STEP (0.25) — hält Rezept-Vielfalt
+// gebracht wird. Faktor gerundet auf SCALE_STEP (0.125) — hält Rezept-Vielfalt
 // aufrecht statt jedes Gericht exakt aufs Ziel zu snappen. Geklemmt auf
 // [SCALE_MIN, SCALE_MAX].
 export function dishScale(dishKcal, targetKcal) {
