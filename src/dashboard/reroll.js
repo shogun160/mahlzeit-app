@@ -1,6 +1,8 @@
 import { state, DAYS } from '../state.js';
 import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
 import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount } from '../nutrition/preferences.js';
+import { getTargetProfile } from '../nutrition/target.js';
+import { optimizeAssignment, dayScopeFitness } from './optimizer.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
@@ -79,11 +81,47 @@ export function eligibleDishIds() {
   return allDishIds;
 }
 
-// Baut den Card-spezifischen Bag neu: alle IDs außer der aktuell auf DIESER Karte gezeigten,
-// zufällig geordnet — nur aus dem eligible Pool (Kochzeit-Filter greift auch beim Reroll).
+// Bag-Refill mit Fitness-Boost: Kandidaten die den Wochen-Kontext naeher
+// an die Ziele bringen bekommen exponentielles Extra-Gewicht ontop des
+// bestehenden Cuisine-Faktors. Fitness bezieht sich auf die aktuell
+// markierten Tage plus den Reroll-Tag — der Ø den der User im
+// Naehrstoff-Sheet sieht. Zufall bleibt drin: User kann mehrfach rollen
+// bis was gefaellt.
 function refillBag(day) {
   const currentId = state.assignment[day];
-  state.dishBag[day] = weightedShuffle(eligibleDishIds(), cuisineWeight).filter((id) => id !== currentId);
+  const profile = getTargetProfile();
+  const pool = eligibleDishIds().filter((id) => id !== currentId);
+
+  // Scope: alle selected Tage + der Reroll-Tag. Bei 0 selected wird nur
+  // dieser eine Tag gegen 1x dinnerTarget bewertet (Einzel-Rezept-Match).
+  const selectedDays = DAYS.filter((d) => d !== day && state.selected[d]);
+  const scopeDays = [...selectedDays, day];
+  const dayCount = scopeDays.length;
+
+  // Fitness pro Kandidat: wie gut waere der Wochen-Scope wenn dieser
+  // Kandidat am Reroll-Tag landet.
+  const scores = new Map();
+  for (const id of pool) {
+    const trial = {};
+    for (const d of scopeDays) trial[d] = (d === day) ? id : state.assignment[d];
+    scores.set(id, dayScopeFitness(trial, dayCount, profile));
+  }
+  const minScore = scores.size > 0 ? Math.min(...scores.values()) : 0;
+
+  // Combined-Weight: (a) Cuisine-Bonus (1 oder 1+3xVoters), (b) Fitness-
+  // Boost exp(-(score-minScore)/TAU). TAU steuert wie stark Fitness
+  // dominiert. 0.02 empirisch: Kandidaten mit doppelt so hohem Delta
+  // bekommen ~1/e = 37% Gewicht — klein genug damit Fitness fuehrt, gross
+  // genug damit Zufall drin bleibt.
+  const TAU = 0.02;
+  const combined = (id) => {
+    const cuisine = cuisineWeight(id);
+    const s = scores.get(id) ?? 0;
+    const boost = Math.exp(-(s - minScore) / TAU);
+    return cuisine * boost;
+  };
+
+  state.dishBag[day] = weightedShuffle(pool, combined);
 }
 
 export function rerollDay(day) {
@@ -127,11 +165,22 @@ export function rerollAll() {
   let shuffledPool = weightedShuffle(pool, cuisineWeight).filter((id) => !previousIds.has(id));
   if (shuffledPool.length < DAYS.length) {
     // Fallback: nimm auch bekannte Gerichte, damit wir 7 zusammenbekommen.
-    // Weighted bleibt aktiv — Präferenzen sollen auch im Fallback wirken.
+    // Weighted bleibt aktiv — Praeferenzen sollen auch im Fallback wirken.
     shuffledPool = weightedShuffle(pool, cuisineWeight);
   }
-  DAYS.forEach((day, i) => {
-    state.assignment[day] = shuffledPool[i];
+
+  // Random-Start (Cuisine-gewichtet, previousIds gemieden).
+  const startAssignment = {};
+  DAYS.forEach((day, i) => { startAssignment[day] = shuffledPool[i]; });
+
+  // Ziel-orientierte Optimierung: Greedy-Swap gegen Wochen-Sollwerte.
+  // Bei unvollstaendigem Profil greift getTargetProfile auf Standard-
+  // Profil zurueck — Optimizer laeuft immer.
+  const profile = getTargetProfile();
+  const optimized = optimizeAssignment(startAssignment, pool, profile);
+
+  DAYS.forEach((day) => {
+    state.assignment[day] = optimized[day];
     state.selected[day] = false;
     // Portionen springen auf den User-Standard (settings.defaultPortions).
     state.portions[day] = state.settings.defaultPortions;
@@ -139,6 +188,6 @@ export function rerollAll() {
   state.dishBag = {};
   // checkedShopping bleibt unangetastet — bereits gekaufte Artikel bleiben
   // erhalten, auch wenn die neuen Gerichte sie evtl. nicht mehr enthalten
-  // (dann als Leftover sichtbar). Für einen echten Reset gibt es den
+  // (dann als Leftover sichtbar). Fuer einen echten Reset gibt es den
   // separaten Reset-Button in der Einkaufsliste.
 }
