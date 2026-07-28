@@ -1,11 +1,18 @@
-import { state, DAYS, isFavorite, toggleFavorite, saveState } from '../state.js';
+import { state, DAYS, PORTIONS_MIN, PORTIONS_MAX, isFavorite, toggleFavorite, saveState } from '../state.js';
 import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount, isFavoriteAnyDiner, favoriteLikesCount } from '../nutrition/preferences.js';
 import { getScaleForDish } from '../nutrition/scale.js';
-import { allDishes, isNewDish } from '../data/dishes.js';
+import { allDishes, dishesById, isNewDish } from '../data/dishes.js';
 import { resolveDishImage, bindDishImage } from '../data/dish-image.js';
+import { changePortion } from '../dashboard/portions.js';
+import { toggleSelected } from '../dashboard/selection.js';
+import { rerollDay } from '../dashboard/reroll.js';
 
 // Material Symbol shopping_bag — identisches Icon wie in Card + Bottom-Nav.
 const ICON_SHOPPING = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
+// Material Symbol shopping_bag (Fill) — Aktiv-Zustand fuer Liste-Pill im Hero.
+const ICON_SHOPPING_FILLED = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm160-640h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720Z"/></svg>`;
+// Material Symbol refresh — Reroll-Pill im Hero (analog Detail-Sheet).
+const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
 // Material Symbol close — X-Icon für den Filter-Reset-Button im Picker-Header.
 const ICON_CLOSE = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M256-200l-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>`;
 // Material Symbols favorite — Outline fuer nicht-favorisiert, Fill fuer On.
@@ -112,6 +119,7 @@ const FLIP_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
 
 let rootEl = null;
 let onExternalPick = null;
+let onExternalChange = null;
 let currentDay = null;
 let activeFilters = new Set();
 // Collapse-State der Filter-Section — modul-lokal (transient, verliert sich
@@ -122,9 +130,13 @@ let filtersCollapsed = false;
 // (z. B. vom Detail-Sheet, um sich mit dem neuen Gericht wieder zu oeffnen).
 let afterPickCallback = null;
 
-export function mountDishPicker(el, { onPick } = {}) {
+export function mountDishPicker(el, { onPick, onChange } = {}) {
   rootEl = el;
   onExternalPick = onPick || (() => {});
+  // onChange feuert bei Reroll/Fav/List/Portion aus dem Hero — im Gegensatz
+  // zu onPick OHNE die "neuen Dish gewaehlt"-Nebenwirkungen (Auto-Select,
+  // Doppelbelegung aufloesen). Ruft im Standard-Setup einfach refresh() auf.
+  onExternalChange = onChange || (() => {});
   rootEl.innerHTML = '';
   rootEl.hidden = true;
 }
@@ -134,9 +146,10 @@ export function openDishPicker(day, { onAfterPick } = {}) {
   currentDay = day;
   afterPickCallback = onAfterPick || null;
   activeFilters = deriveInitialFilters();
-  // Frisch öffnen → Filter-Section standardmäßig aufgeklappt zeigen. Der User
-  // muss die aktiven Chips sehen bevor er weiter interagiert.
-  filtersCollapsed = false;
+  // Frisch öffnen → Filter-Section standardmaessig eingeklappt. Der aktiv/
+  // gesamt-Zaehler im Header zeigt was gerade wirkt; der User klappt bewusst
+  // auf, wenn er umstellen will.
+  filtersCollapsed = true;
   renderShell();
   rootEl.hidden = false;
   // Doppel-rAF für Slide-up-Animation (initial translateY(100%) → 0).
@@ -471,12 +484,8 @@ function renderShell() {
   rootEl.innerHTML = `
     <div class="picker-overlay ${wasOpen ? 'is-open' : ''}" data-role="backdrop">
       <div class="picker-sheet" role="dialog" aria-modal="true" aria-labelledby="picker-title">
-        <div class="picker-handle" aria-hidden="true"></div>
+        ${renderHero(currentDishId)}
         <div class="picker-body">
-          <div class="picker-header">
-            <h2 class="picker-title" id="picker-title">${currentDay} — Gericht wählen</h2>
-            <button class="picker-close" data-action="close" aria-label="Schließen">✕</button>
-          </div>
           ${renderFiltersSection()}
           ${renderResults(main, overflow, currentDishId, used)}
         </div>
@@ -489,6 +498,71 @@ function renderShell() {
   // korrekt sind. Betrifft die nowrap-Küchen-Zeile — die bestimmt die minimale
   // Schriftgröße für alle Filter-Chips.
   requestAnimationFrame(fitFilterFontSize);
+}
+
+// Hero + Info-Section analog zum Detail-Sheet (siehe detail-sheet/render.js).
+// Bewusst OHNE Edit-Pill (im Picker ist Edit == "Picker oeffnen" — redundant)
+// und OHNE horizontal-Swipe auf dem Bild (siehe attachHandlers).
+function renderHero(currentDishId) {
+  const dish = dishesById.get(currentDishId);
+  if (!dish) return '';
+  const day = currentDay;
+  const portions = state.portions[day];
+  const minusDisabled = portions <= PORTIONS_MIN;
+  const plusDisabled = portions >= PORTIONS_MAX;
+  const favOn = isFavorite(dish.id);
+  const favLabel = favOn ? 'Favorit entfernen' : 'Als Favorit markieren';
+  const isSelected = !!state.selected[day];
+  const listLabel = isSelected ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
+  const newBadge = isNewDish(dish.id)
+    ? `<span class="sheet-hero__new" aria-label="Neu importiert" title="Neu importiert">${ICON_NEW_STAR}</span>`
+    : '';
+  return `
+    <div class="sheet-hero">
+      <img class="sheet-hero__image" alt="" aria-hidden="true" data-role="hero-image" />
+      <div class="sheet-handle sheet-hero__handle" aria-hidden="true"></div>
+      <div class="day-card__edit-overlay">
+        <button class="edit-pill" data-action="reroll-day" aria-label="Neues Gericht für ${day} auslosen" title="Neues Gericht auslosen">
+          ${ICON_REFRESH}
+        </button>
+      </div>
+      <div class="day-card__portion-overlay">
+        ${newBadge}
+        <button class="fav-pill ${favOn ? 'is-on' : ''}"
+                type="button"
+                data-action="toggle-fav-hero"
+                aria-pressed="${favOn}"
+                aria-label="${favLabel}"
+                title="${favLabel}">
+          ${favOn ? ICON_FAV_FILL : ICON_FAV_OUTLINE}
+        </button>
+        <button class="fav-pill ${isSelected ? 'is-on' : ''}"
+                type="button"
+                data-action="toggle-list"
+                aria-pressed="${isSelected}"
+                aria-label="${listLabel}"
+                title="${listLabel}">
+          ${isSelected ? ICON_SHOPPING_FILLED : ICON_SHOPPING}
+        </button>
+      </div>
+      <span class="sheet-hero__day">${day}</span>
+      <div class="sheet-hero__stepper-overlay">
+        <div class="stepper stepper--pill" role="group" aria-label="Portionen für ${day}">
+          <svg class="stepper__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <button class="stepper__btn" data-action="picker-portion-minus" aria-label="Weniger Personen für ${day}" ${minusDisabled ? 'disabled' : ''}>−</button>
+          <span class="stepper__value">${portions}</span>
+          <button class="stepper__btn" data-action="picker-portion-plus" aria-label="Mehr Personen für ${day}" ${plusDisabled ? 'disabled' : ''}>+</button>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-info">
+      <div class="sheet-info__meta">~${dish.cooktime} Min. · ${dish.cuisine}</div>
+      <h2 class="sheet-info__title" id="picker-title">${dish.name}</h2>
+    </div>
+  `;
 }
 
 // Rendert den Ergebnis-Bereich: Wrapper .picker-grids analog zum Filter-
@@ -663,7 +737,78 @@ function attachHandlers() {
   overlay.addEventListener('click', (ev) => {
     if (ev.target === overlay) closeDishPicker();
   });
-  rootEl.querySelector('[data-action="close"]').addEventListener('click', closeDishPicker);
+
+  // Hero-Bild async binden — analog Detail-Sheet (bundled sofort, Remote-URI
+  // aus Cache asynchron nach). Hero fehlt wenn kein currentDishId — skip dann.
+  const heroImg = rootEl.querySelector('[data-role="hero-image"]');
+  if (heroImg) bindDishImage(heroImg, state.assignment[currentDay]);
+
+  // Reroll-Pill im Hero: neues Gericht fuer currentDay auslosen. Bei Erfolg
+  // renderShell neu (Hero-Bild, Meta, Fav-Status, Grid-Ranking aendern sich
+  // alle). onExternalChange (nicht onPick!) — rerollDay hat eigene Semantik
+  // (selected=false), onPick wuerde die mit Auto-Select ueberschreiben.
+  const rerollBtn = rootEl.querySelector('[data-action="reroll-day"]');
+  if (rerollBtn) {
+    rerollBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const beforeId = state.assignment[currentDay];
+      rerollDay(currentDay);
+      const nextId = state.assignment[currentDay];
+      if (nextId !== beforeId) {
+        saveState();
+        onExternalChange();
+        renderShell();
+      }
+    });
+  }
+
+  // Fav-Toggle im Hero (fuer das aktuelle Gericht). In-place-Update, plus
+  // Grid neu rendern damit die Tile-Fav-Badges + Fav-Ranking mitziehen.
+  const heroFavBtn = rootEl.querySelector('[data-action="toggle-fav-hero"]');
+  if (heroFavBtn) {
+    heroFavBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      const id = state.assignment[currentDay];
+      if (id == null) return;
+      toggleFavorite(id);
+      saveState();
+      const on = isFavorite(id);
+      heroFavBtn.classList.toggle('is-on', on);
+      heroFavBtn.setAttribute('aria-pressed', String(on));
+      const label = on ? 'Favorit entfernen' : 'Als Favorit markieren';
+      heroFavBtn.setAttribute('aria-label', label);
+      heroFavBtn.setAttribute('title', label);
+      heroFavBtn.innerHTML = on ? ICON_FAV_FILL : ICON_FAV_OUTLINE;
+      onExternalChange();
+      updateGrid({ preserveScroll: true, animate: true });
+    });
+  }
+
+  // Liste-Toggle im Hero: state.selected[currentDay] togglen. In-place-Update,
+  // Grid nachziehen (Shop-Pille auf dem currentDish-Tile aendert sich).
+  const listBtn = rootEl.querySelector('[data-action="toggle-list"]');
+  if (listBtn) {
+    listBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      toggleSelected(currentDay);
+      saveState();
+      const on = !!state.selected[currentDay];
+      listBtn.classList.toggle('is-on', on);
+      listBtn.setAttribute('aria-pressed', String(on));
+      const label = on ? 'Für Einkaufsliste abwählen' : 'Für Einkaufsliste auswählen';
+      listBtn.setAttribute('aria-label', label);
+      listBtn.setAttribute('title', label);
+      listBtn.innerHTML = on ? ICON_SHOPPING_FILLED : ICON_SHOPPING;
+      onExternalChange();
+      updateGrid({ preserveScroll: true });
+    });
+  }
+
+  // Portion-Stepper im Hero.
+  const portionMinusBtn = rootEl.querySelector('[data-action="picker-portion-minus"]');
+  const portionPlusBtn = rootEl.querySelector('[data-action="picker-portion-plus"]');
+  if (portionMinusBtn) portionMinusBtn.addEventListener('click', () => handlePickerPortion(-1));
+  if (portionPlusBtn) portionPlusBtn.addEventListener('click', () => handlePickerPortion(1));
 
   // Filter-Chip Klick: toggle Filter + Grid neu bauen. Wir ersetzen NUR body-
   // Inneres, nicht das ganze Sheet — spart Reflow und lässt Scroll-Position stehen.
@@ -803,9 +948,27 @@ function attachHandlers() {
   attachCloseSwipe();
 }
 
-// Runter-Swipe auf Handle oder Header schließt das Picker-Sheet — identisches
-// Pattern wie in Detail-/Settings-Sheet. Body (scrollbar) und interaktive
-// Elemente sind ausgenommen, damit Klicks/Scroll dort nicht als Swipe zählen.
+// Portion-Stepper im Hero: state.portions[currentDay] veraendern und in-place
+// nur den Stepper aktualisieren. Grid/Meta haengen nicht an per-Tag-Portionen,
+// daher kein Re-render noetig. onExternalPick triggert Dashboard-Refresh.
+function handlePickerPortion(delta) {
+  changePortion(currentDay, delta);
+  saveState();
+  const portions = state.portions[currentDay];
+  const val = rootEl.querySelector('.sheet-hero .stepper__value');
+  const minus = rootEl.querySelector('[data-action="picker-portion-minus"]');
+  const plus = rootEl.querySelector('[data-action="picker-portion-plus"]');
+  if (val) val.textContent = portions;
+  if (minus) minus.disabled = portions <= PORTIONS_MIN;
+  if (plus) plus.disabled = portions >= PORTIONS_MAX;
+  onExternalChange();
+}
+
+// Runter-Swipe auf Hero oder Info-Zeile schließt das Picker-Sheet — analog
+// Detail-/Settings-Sheet. Body (scrollbar) und interaktive Elemente (Buttons,
+// Stepper, Filter-Chips) sind ausgenommen. Kein horizontal-Swipe auf dem
+// Hero-Bild (kein Wechsel des Wochentags) — bewusste Abweichung zum Detail-
+// Sheet, wo swipeleft/right zum Nachbartag springt.
 function attachCloseSwipe() {
   const sheet = rootEl.querySelector('.picker-sheet');
   if (!sheet) return;
@@ -813,11 +976,10 @@ function attachCloseSwipe() {
 
   sheet.addEventListener('pointerdown', (ev) => {
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
-    if (ev.target.closest('button, .picker-filter-chip, [data-action="toggle-fav"]')) return;
-    // Body-Inhalt (scrollbar) ist ausgenommen — aber .picker-header darin ist
-    // erlaubt, weil er als sticky Titel-Zeile die klassische Drag-Handle-Funktion
-    // mit übernimmt (analog Detail-/Settings-Sheet).
-    if (ev.target.closest('.picker-body') && !ev.target.closest('.picker-header')) return;
+    if (ev.target.closest('button, .picker-filter-chip, .stepper, [data-action="toggle-fav"]')) return;
+    // Body-Inhalt (scrollbar) ist ausgenommen — Hero/Info sitzen als Siblings
+    // ausserhalb der .picker-body, dort greift der Handler direkt.
+    if (ev.target.closest('.picker-body')) return;
     s.startX = ev.clientX;
     s.startY = ev.clientY;
     s.tracking = true;

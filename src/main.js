@@ -222,6 +222,7 @@ mountOnboardingWizard(onboardingRoot, {
 // alle anderen Tage, die dasselbe Gericht hatten, automatisch neu — sonst wäre
 // das Gericht zweifach im Dashboard.
 mountDishPicker(pickerRoot, {
+  onChange: refresh,
   onPick: (day, dishId) => {
     state.assignment[day] = dishId;
     // Auto-Select: bewusstes Umwählen ist ein starkes Signal, dass der User
