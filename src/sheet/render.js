@@ -404,10 +404,19 @@ function notifyBodyDishChange() {
 // Hero-Swipe: horizontal → Day-Wechsel (fuer beide Modi), vertikal-runter →
 // Close. Buttons + Stepper ausgenommen. StopPropagation im pointerdown haelt
 // den .sheet-weiten attachCloseSwipe raus.
+//
+// setPointerCapture wird ERST gerufen, sobald der Finger sich um mindestens
+// SWIPE_CAPTURE_THRESHOLD_PX bewegt hat. Vorher waere ein kurzer Tap auf eine
+// Pill (edit, info, refresh, fav, list) — wenn die touch-koordinaten minimal
+// neben dem visuellen pill-rand landen — vom hero abgefangen worden und der
+// browser haette den click auf die pill verschluckt (pointer war captured am
+// hero). Mit dem verzoegerten capture bleibt der klick fuer echte taps immer
+// beim button-target.
 function attachHeroSwipe() {
   const hero = rootEl.querySelector('.sheet-hero');
   if (!hero) return;
-  const track = { startX: 0, startY: 0, tracking: false };
+  const track = { startX: 0, startY: 0, tracking: false, captured: false, pointerId: -1 };
+  const SWIPE_CAPTURE_THRESHOLD_PX = 8;
   hero.addEventListener('pointerdown', (ev) => {
     if (ev.pointerType === 'mouse' && ev.button !== 0) return;
     if (ev.target.closest('button, .stepper')) return;
@@ -415,12 +424,24 @@ function attachHeroSwipe() {
     track.startX = ev.clientX;
     track.startY = ev.clientY;
     track.tracking = true;
-    try { hero.setPointerCapture(ev.pointerId); } catch (e) {}
+    track.captured = false;
+    track.pointerId = ev.pointerId;
+  });
+  hero.addEventListener('pointermove', (ev) => {
+    if (!track.tracking || track.captured) return;
+    const dx = ev.clientX - track.startX;
+    const dy = ev.clientY - track.startY;
+    if (Math.abs(dx) < SWIPE_CAPTURE_THRESHOLD_PX && Math.abs(dy) < SWIPE_CAPTURE_THRESHOLD_PX) return;
+    track.captured = true;
+    try { hero.setPointerCapture(track.pointerId); } catch (e) {}
   });
   hero.addEventListener('pointerup', (ev) => {
     if (!track.tracking) return;
     track.tracking = false;
-    try { hero.releasePointerCapture(ev.pointerId); } catch (e) {}
+    if (track.captured) {
+      try { hero.releasePointerCapture(track.pointerId); } catch (e) {}
+      track.captured = false;
+    }
     const dx = ev.clientX - track.startX;
     const dy = ev.clientY - track.startY;
     const absDx = Math.abs(dx);
@@ -433,7 +454,10 @@ function attachHeroSwipe() {
       closeSheet();
     }
   });
-  hero.addEventListener('pointercancel', () => { track.tracking = false; });
+  hero.addEventListener('pointercancel', () => {
+    track.tracking = false;
+    track.captured = false;
+  });
 }
 
 function goToNeighborDay(delta) {
