@@ -101,6 +101,56 @@
   cursor: grabbing;
 }
 
+/* Im Detail-Hero ersetzt eine 7-Punkt-Wochenanzeige die Balken-Pille.
+   Aufsummierend: bis inkl. aktuellem Tag gefuellt, aktueller Tag zusaetzlich
+   groesser als der Rest. Farben weiss-basiert wie die alte Pille, damit sie
+   auf Bildern lesbar bleibt. */
+.sheet-hero__handle::before {
+  display: none;
+}
+
+.sheet-day-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 10px;
+}
+
+.sheet-day-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  transition: width 120ms ease, height 120ms ease, background 120ms ease;
+}
+
+.sheet-day-dot.is-active {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Aktueller Tag: in beiden Themes die Primary-Farbe — bewusster Akzent
+   statt neutralem Weiss/Schwarz. */
+.sheet-day-dot.is-current {
+  width: 10px;
+  height: 10px;
+  background: var(--md-sys-color-primary);
+}
+
+:root[data-theme="dark"] .sheet-day-dot {
+  background: rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+:root[data-theme="dark"] .sheet-day-dot.is-active {
+  background: rgba(0, 0, 0, 0.85);
+}
+
+:root[data-theme="dark"] .sheet-day-dot.is-current {
+  background: var(--md-sys-color-primary);
+}
+
 /* Edit-Overlay im Sheet-Hero enthaelt 2 Buttons nebeneinander (Edit + Reroll),
    die Dashboard-Regel definiert nur position — hier Flex-Layout mit gap. */
 .sheet-hero .day-card__edit-overlay {

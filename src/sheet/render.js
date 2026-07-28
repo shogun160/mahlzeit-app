@@ -224,7 +224,19 @@ function renderHero() {
   return `
     <div class="sheet-hero">
       <img class="sheet-hero__image" alt="" aria-hidden="true" data-role="hero-image" />
-      <div class="sheet-handle sheet-hero__handle" aria-hidden="true"></div>
+      <div class="sheet-handle sheet-hero__handle" aria-hidden="true">
+        <div class="sheet-day-indicator">
+          ${DAYS.map((_, i) => {
+            const dayIdx = DAYS.indexOf(day);
+            const isActive = i <= dayIdx;
+            const isCurrent = i === dayIdx;
+            const cls = ['sheet-day-dot'];
+            if (isActive) cls.push('is-active');
+            if (isCurrent) cls.push('is-current');
+            return `<span class="${cls.join(' ')}"></span>`;
+          }).join('')}
+        </div>
+      </div>
       <div class="day-card__edit-overlay" data-role="hero-mode-pills">
         ${renderModePill(day)}
         <button class="edit-pill" data-action="reroll-day" aria-label="Neues Gericht für ${day} auslosen" title="Neues Gericht auslosen">
