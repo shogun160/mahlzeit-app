@@ -70,6 +70,7 @@ function simulate(profile) {
   const counts = new Map();
   for (const id of allDishIds) counts.set(id, 0);
   const weeklyDeltas = [];
+  const weeklyConflicts = [];
   let history = [];
   let previousIds = new Set();
 
@@ -107,6 +108,17 @@ function simulate(profile) {
     }
     weeklyDeltas.push(weeklyDelta(optimized, profile));
 
+    // Nachbarschafts-Konflikte fuer diese Woche.
+    let conflictsThisWeek = 0;
+    for (let i = 0; i < DAYS.length - 1; i++) {
+      const dishA = dishesById.get(optimized[DAYS[i]]);
+      const dishB = dishesById.get(optimized[DAYS[i + 1]]);
+      if (dishA && dishB && dishA.proteinCategory && dishA.proteinCategory === dishB.proteinCategory) {
+        conflictsThisWeek++;
+      }
+    }
+    weeklyConflicts.push(conflictsThisWeek);
+
     // History-Cap auf 6 (statt 2), previousIds aus ersten 2.
     history.unshift({ ...optimized });
     while (history.length > 6) history.pop();
@@ -116,10 +128,10 @@ function simulate(profile) {
       for (const id of Object.values(hist)) previousIds.add(id);
     }
   }
-  return { counts, weeklyDeltas };
+  return { counts, weeklyDeltas, weeklyConflicts };
 }
 
-function printReport(label, counts, weeklyDeltas) {
+function printReport(label, counts, weeklyDeltas, weeklyConflicts) {
   const rows = [];
   for (const [id, count] of counts.entries()) {
     const dish = dishesById.get(id);
@@ -153,6 +165,9 @@ function printReport(label, counts, weeklyDeltas) {
       `  Ø=${avg.toFixed(1).padStart(8)}${unit}  Ø|Δ|=${absAvg.toFixed(1).padStart(7)}${unit}`,
     );
   }
+  const totalConflicts = weeklyConflicts.reduce((a, b) => a + b, 0);
+  const maxConflicts = Math.max(...weeklyConflicts);
+  console.log(`Nachbarschafts-Konflikte: total ${totalConflicts} ueber ${ROUNDS} Wochen (max in einer Woche: ${maxConflicts}, Ø ${(totalConflicts/ROUNDS).toFixed(1)}/Woche)`);
   console.log('');
 
   console.log('Gezogene Rezepte (absteigend):');
@@ -174,6 +189,6 @@ console.log(`Pool-Groesse: ${allDishIds.length} Rezepte.`);
 
 for (const p of PROFILES) {
   const profile = buildProfile(p.daily, p.preset);
-  const { counts, weeklyDeltas } = simulate(profile);
-  printReport(p.label, counts, weeklyDeltas);
+  const { counts, weeklyDeltas, weeklyConflicts } = simulate(profile);
+  printReport(p.label, counts, weeklyDeltas, weeklyConflicts);
 }

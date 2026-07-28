@@ -2,7 +2,7 @@ import { state, DAYS } from '../state.js';
 import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
 import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount } from '../nutrition/preferences.js';
 import { getTargetProfile } from '../nutrition/target.js';
-import { optimizeAssignment, dayScopeFitness } from './optimizer.js';
+import { optimizeAssignment, dayScopeFitness, NEIGHBOR_PENALTY } from './optimizer.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
@@ -98,6 +98,24 @@ export function eligibleDishIds() {
   return allDishIds;
 }
 
+// Zaehlt wie viele Nachbarn (Vortag/Nachtag) dieselbe proteinCategory haben
+// wie das Kandidat-Rezept. Linear: Mo hat keinen linken Nachbarn, So keinen
+// rechten. Max 2 Konflikte.
+function neighborConflictsForDay(dishId, day) {
+  const dish = dishesById.get(dishId);
+  if (!dish || !dish.proteinCategory) return 0;
+  const dayIdx = DAYS.indexOf(day);
+  let conflicts = 0;
+  for (const neighborIdx of [dayIdx - 1, dayIdx + 1]) {
+    if (neighborIdx < 0 || neighborIdx >= DAYS.length) continue;
+    const neighborDish = dishesById.get(state.assignment[DAYS[neighborIdx]]);
+    if (neighborDish && neighborDish.proteinCategory === dish.proteinCategory) {
+      conflicts++;
+    }
+  }
+  return conflicts;
+}
+
 // Bag-Refill mit Fitness-Boost: Kandidaten die den Wochen-Kontext naeher
 // an die Ziele bringen bekommen exponentielles Extra-Gewicht ontop des
 // bestehenden Cuisine-Faktors. Fitness bezieht sich auf die aktuell
@@ -126,11 +144,13 @@ function refillBag(day) {
   const minScore = scores.size > 0 ? Math.min(...scores.values()) : 0;
 
   // Combined-Weight: (a) Cuisine-Bonus (1 oder 1+3xVoters), (b) Fitness-
-  // Boost exp(-(score-minScore)/TAU).
+  // Boost exp(-(score-minScore)/TAU), (c) Nachbarschafts-Penalty fuer
+  // Kandidaten die dieselbe proteinCategory wie ein Nachbartag haetten.
   const combined = (id) => {
     const cuisine = cuisineWeight(id);
     const s = scores.get(id) ?? 0;
-    const boost = Math.exp(-(s - minScore) / TAU);
+    const neighborPenalty = neighborConflictsForDay(id, day) * NEIGHBOR_PENALTY;
+    const boost = Math.exp(-(s + neighborPenalty - minScore) / TAU);
     return cuisine * boost;
   };
 

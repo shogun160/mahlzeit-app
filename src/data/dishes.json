@@ -61,7 +61,8 @@
         "Sojasauce + Sesamöl zu Dressing verrühren.",
         "Reis in Bowl anrichten, Lachs, Edamame, Karotte, Gurke verteilen, Dressing darüber, mit Sesam und Frühlingszwiebel bestreuen."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "fish"
     },
     {
       "id": 2,
@@ -129,7 +130,8 @@
         "Blumenkohlreis kurz andünsten, Spinat unterheben bis zusammengefallen.",
         "Anrichten."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "poultry"
     },
     {
       "id": 3,
@@ -192,7 +194,8 @@
         "Zucchininudeln kurz mitschwenken.",
         "Pasta unterheben, mit Zitronensaft, gehackten Mandeln, Feta und Petersilie servieren."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "shellfish"
     },
     {
       "id": 4,
@@ -249,7 +252,8 @@
         "Bohnen und Mais abtropfen, mit gewürfelter Paprika und Zwiebel mischen.",
         "Filet in Scheiben auf dem Salat anrichten, Chimichurri darüber."
       ],
-      "cuisineGroup": "americas"
+      "cuisineGroup": "americas",
+      "proteinCategory": "beef"
     },
     {
       "id": 5,
@@ -304,7 +308,8 @@
         "Couscous mit heißem Wasser übergießen, quellen lassen.",
         "Anrichten, Feta darüberbröckeln."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "poultry"
     },
     {
       "id": 6,
@@ -352,7 +357,8 @@
         "In separater Pfanne 3–4 Min. pro Seite braten.",
         "Fenchel-Bohnen anrichten, Lachs darauf, mit Zitronensaft und Petersilie servieren."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "fish"
     },
     {
       "id": 7,
@@ -409,7 +415,8 @@
         "Mariniertes Fleisch in heißer Pfanne 2–3 Min. braten.",
         "Mit Reis, Gurkenscheiben, Kimchi und Sesam anrichten."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "beef"
     },
     {
       "id": 8,
@@ -463,7 +470,8 @@
         "Couscous mit heißer Flüssigkeit übergießen, quellen lassen.",
         "Mandeln kurz rösten, darüberstreuen."
       ],
-      "cuisineGroup": "middleEast"
+      "cuisineGroup": "middleEast",
+      "proteinCategory": "poultry"
     },
     {
       "id": 9,
@@ -514,7 +522,8 @@
         "Avocado zerdrücken, mit Limettensaft und Petersilie zu Guacamole verarbeiten.",
         "Tortillas erwärmen, Fajita-Mix und Guacamole darin anrichten."
       ],
-      "cuisineGroup": "americas"
+      "cuisineGroup": "americas",
+      "proteinCategory": "shellfish"
     },
     {
       "id": 10,
@@ -559,7 +568,8 @@
         "Kartoffeln mit Skyr und etwas Kochwasser zu cremigem Stampf verarbeiten.",
         "Fisch auf dem Stampf mit restlichem Skyr als Sauce servieren."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "fish"
     },
     {
       "id": 11,
@@ -615,7 +625,8 @@
         "Pak Choi kurz andünsten.",
         "Ente in Scheiben, mit Glasur bestreichen, Sesam darüber, mit Reis und Pak Choi servieren."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "poultry"
     },
     {
       "id": 12,
@@ -663,7 +674,8 @@
         "Kartoffeln kochen.",
         "Spieße mit Sauce und Kartoffeln servieren."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "pork"
     },
     {
       "id": 13,
@@ -722,7 +734,8 @@
         "Hitze reduzieren, Skyr einrühren (nicht kochen), Erdnüsse grob hacken.",
         "Reis kochen, Curry darauf anrichten. Chili (falls verwendet: immer mit Kernen) nach Geschmack zugeben."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "shellfish"
     },
     {
       "id": 14,
@@ -780,7 +793,8 @@
         "Hähnchen und Erbsen nach halber Garzeit zugeben.",
         "Garnelen in den letzten 3–4 Min. zugeben, bis gar."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "poultry"
     },
     {
       "id": 15,
@@ -844,7 +858,8 @@
         "Eier separat als Spiegeleier braten.",
         "Dal mit Spiegeleiern und einem Klecks Skyr servieren."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "legume"
     },
     {
       "id": 16,
@@ -893,7 +908,8 @@
         "Pak Choi kurz andünsten oder dämpfen.",
         "Reis als Boden, Pak Choi seitlich, Lachs darauf anrichten."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "fish"
     },
     {
       "id": 17,
@@ -957,7 +973,8 @@
         "Joghurt kurz vor Ende unterrühren (nicht kochen).",
         "Mit Basmatireis servieren."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "beef"
     },
     {
       "id": 18,
@@ -1060,7 +1077,8 @@
         "Hitze reduzieren, Skyr einrühren (nicht mehr kochen).",
         "Spinat unterheben, mit Garam Masala, Petersilie und Zitrone servieren."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "poultry"
     },
     {
       "id": 19,
@@ -1163,7 +1181,8 @@
         "Lachs Haut-Seite zuerst kross braten, wenden, Za'atar nur auf Fleischseite.",
         "Lachs auf Kräuter-Freekeh mit Joghurt, Pinienkernen, Granatapfel und Sumach anrichten."
       ],
-      "cuisineGroup": "middleEast"
+      "cuisineGroup": "middleEast",
+      "proteinCategory": "fish"
     },
     {
       "id": 20,
@@ -1250,7 +1269,8 @@
         "Filet in rauchheißer Pfanne je 2 Min. pro Seite braten, 5 Min. ruhen lassen.",
         "Auf Rucola und Avocado mit Bohnen-Mix, Schafkäse und aufgeschnittenem Filet anrichten."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "beef"
     },
     {
       "id": 21,
@@ -1337,7 +1357,8 @@
         "Quinoa, Rotkohl, Gurke, Karotte, Sellerie, blanchierten Brokkoli und Avocado zur Bowl schichten.",
         "Lachs obenauf, Dressing, Chili-Topping und Petersilie darüber."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "fish"
     },
     {
       "id": 22,
@@ -1434,7 +1455,8 @@
         "Dressing als Basis, Rucola, Gemüse, Kichererbsen, Zwiebel, Kapern, Hähnchen und Ei-Viertel darauf schichten.",
         "Mit Petersilie und Sumach vollenden."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "poultry"
     },
     {
       "id": 23,
@@ -1539,7 +1561,8 @@
         "Babyspinat einrühren, mit Zitrone abschmecken.",
         "Skyr-Raita (Skyr, Salz, Zitronenabrieb) obendrauf, Minze zum Finish."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "legume"
     },
     {
       "id": 24,
@@ -1628,7 +1651,8 @@
         "Spinat und Rucola unterheben, mit Zitrone und Kapern abschmecken.",
         "Skyr-Aioli separat (Skyr, Knoblauch, Dijon, Zitrone, Salz) als Dip reichen."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "shellfish"
     },
     {
       "id": 25,
@@ -1729,7 +1753,8 @@
         "Edamame und Glaze unterheben, kurz schwenken.",
         "Auf Reis anrichten, mit Sesamöl, Sesamsamen und Frühlingszwiebeln vollenden."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "tofu"
     },
     {
       "id": 26,
@@ -1819,7 +1844,8 @@
         "Choriatiki mischen (Tomaten, Gurke, Zwiebel, Oliven, Öl, Zitrone, Oregano), Feta obenauf.",
         "Brot rösten, alles anrichten, mit Sumach und Minze vollenden."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "poultry"
     },
     {
       "id": 27,
@@ -1931,7 +1957,8 @@
         "Mit Sesamöl, weißem Pfeffer und Zitronensaft abschmecken.",
         "Mit Frühlingszwiebel-Grün, Sesam und Thai-Basilikum vollenden, mit Reis und Ei servieren."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "shellfish"
     },
     {
       "id": 28,
@@ -2021,7 +2048,8 @@
         "Spinat einfallen lassen, Hitze runter, Skyr temperiert einrühren (nicht kochen).",
         "Mit Garam Masala abschmecken, Basmati Vollkorn und Raita aus restlichem Skyr servieren."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "poultry"
     },
     {
       "id": 29,
@@ -2094,7 +2122,8 @@
         "Schafskäse zerbröseln, Ei vierteln.",
         "Salat mit Lachs, Ei und Feta anrichten, Skyr als Dressing darüber."
       ],
-      "cuisineGroup": "mediterranean"
+      "cuisineGroup": "mediterranean",
+      "proteinCategory": "fish"
     },
     {
       "id": 30,
@@ -2168,7 +2197,8 @@
         "Ponzu verrühren (Sojasauce, Limettensaft, Reisessig, Wasser, Ingwer).",
         "Quinoa als Basis, Thunfisch fächern, Gemüse und Avocado anrichten, Ponzu darüber, mit Frühlingszwiebel vollenden."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "fish"
     },
     {
       "id": 31,
@@ -2250,7 +2280,8 @@
         "Tahini, Skyr, Zitronensaft und etwas Wasser glattrühren.",
         "Bulgur, Rucola, Falafel und Granatapfelkerne anrichten, Sauce darüber."
       ],
-      "cuisineGroup": "middleEast"
+      "cuisineGroup": "middleEast",
+      "proteinCategory": "legume"
     },
     {
       "id": 32,
@@ -2328,7 +2359,8 @@
         "Hitze runter, Skyr und Limettensaft einrühren (nicht mehr kochen).",
         "Honig am Ende unterrühren, mit Reis servieren."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "shellfish"
     },
     {
       "id": 33,
@@ -2416,7 +2448,8 @@
         "Tomate, Gurke und Paprika fein würfeln, mit Zitronensaft und restlichem Olivenöl (3 g) vermengen. Mit Salz und Chili abschmecken.",
         "Bulgur, Köfte und Ezme-Salat auf den Teller, Feta darüber zerbröckeln."
       ],
-      "cuisineGroup": "middleEast"
+      "cuisineGroup": "middleEast",
+      "proteinCategory": "poultry"
     },
     {
       "id": 34,
@@ -2506,7 +2539,8 @@
         "Skyr mit einer Prise Salz, 3 g Limettensaft und gehackter Minze verrühren (Dip).",
         "Reis, Bohnen, Steak, Pico de Gallo und Avocado in Bowl anrichten, Skyr-Dip dazu."
       ],
-      "cuisineGroup": "americas"
+      "cuisineGroup": "americas",
+      "proteinCategory": "beef"
     },
     {
       "id": 35,
@@ -2599,7 +2633,8 @@
         "Eier in Non-Stick-Pfanne als Spiegelei braten.",
         "Dal auf Reis anrichten, Spiegelei obenauf, Petersilie darüber."
       ],
-      "cuisineGroup": "asian"
+      "cuisineGroup": "asian",
+      "proteinCategory": "legume"
     }
   ]
 }

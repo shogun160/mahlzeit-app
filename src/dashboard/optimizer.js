@@ -19,6 +19,13 @@ import { dinnerTarget, dinnerMacroTargets, dishScale } from '../nutrition/target
 // was unterschiedliche Wochen-Lineups auch bei stark biased Presets ergibt.
 const SWAP_TOLERANCE = 0.15;
 
+// Penalty pro Nachbarschafts-Konflikt (Vortag oder Nachtag hat dieselbe
+// proteinCategory). Wird ins Fitness-Score addiert. Linear ueber die Woche
+// (Mo hat nur Nachbar Di, So nur Nachbar Sa) — max 6 Konflikte, max 0.6
+// Score-Delta. Klein genug damit die 4 Kernmetriken (kcal, P, KH, F) fuehren,
+// gross genug damit Nachbarschafts-Ausgleich sichtbar wird.
+export const NEIGHBOR_PENALTY = 0.1;
+
 // Fitness gegen dayCount × Ziel. Verwendet vom rerollDay-Boost mit dem
 // aktuellen Selected-Scope, und von weekFitness (dayCount = 7).
 export function dayScopeFitness(assignment, dayCount, profile) {
@@ -55,9 +62,29 @@ export function dayScopeFitness(assignment, dayCount, profile) {
        + deltaSq(actual.f,    target.f);
 }
 
-// Wochen-Fitness fuer rerollAll: dayCount = 7.
+// Zaehlt Nachbarschafts-Konflikte im Assignment. Linear: Mo hat Nachbar Di,
+// So hat Nachbar Sa (kein Wrap-around). Zaehlt Paare — bei gleicher Kategorie
+// in Mo+Di gibt es EIN Konflikt-Paar, nicht zwei. So kommen wir auf max 6
+// (bei allen 6 Paaren gleiche Kategorie).
+function countNeighborConflicts(assignment) {
+  let conflicts = 0;
+  for (let i = 0; i < DAYS.length - 1; i++) {
+    const dishA = dishesById.get(assignment[DAYS[i]]);
+    const dishB = dishesById.get(assignment[DAYS[i + 1]]);
+    if (!dishA || !dishB) continue;
+    if (dishA.proteinCategory && dishA.proteinCategory === dishB.proteinCategory) {
+      conflicts++;
+    }
+  }
+  return conflicts;
+}
+
+// Wochen-Fitness fuer rerollAll: dayCount = 7. Addiert Nachbarschafts-Penalty
+// ontop der 4 Metrik-Fitness — dayScopeFitness bleibt sauber.
 export function weekFitness(assignment, profile) {
-  return dayScopeFitness(assignment, DAYS.length, profile);
+  const base = dayScopeFitness(assignment, DAYS.length, profile);
+  const penalty = countNeighborConflicts(assignment) * NEIGHBOR_PENALTY;
+  return base + penalty;
 }
 
 // Greedy Swap: startet vom aktuellen Assignment, prueft fuer jeden Tag ob
