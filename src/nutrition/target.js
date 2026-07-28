@@ -2,6 +2,8 @@
 // Reine Funktionen ohne State- oder DOM-Abhängigkeit — bewusst isoliert,
 // damit sich Formeln ohne UI-Kopplung testen und austauschen lassen.
 
+import { getActiveProfile, getStandardProfile } from '../state.js';
+
 // Tagesziel und Abendessen-Ziel werden nicht als Punkt, sondern als Range mit
 // diesem Fenster (±) rund um den berechneten Wert dargestellt. 125 kcal ≈ ein
 // mittleres Extra (Apfel, Handvoll Nüsse), stellt aber trotzdem eine sichtbare
@@ -223,13 +225,15 @@ export function effectiveMacroTargets(profile) {
 }
 
 // Skalierungs-Grenzen und -Stufen für die automatische Rezept-Anpassung.
-// 0.25-Stufen erhalten die Rezept-Vielfalt: unterschiedliche Basis-Gerichte
-// landen bei unterschiedlichen kcal-Werten (fließend würde alle exakt aufs
-// Ziel bringen — Card-Werte wären identisch). SCALE_MAX bei 2.5, damit auch
-// kleine Basis-Gerichte (~700 kcal) hohe Ziele (1700+) erreichen.
+// 0.125-Stufen erhalten die Rezept-Vielfalt: unterschiedliche Basis-Gerichte
+// landen bei unterschiedlichen kcal-Werten (fliessend wuerde alle exakt aufs
+// Ziel bringen — Card-Werte waeren identisch). Feineres Raster als 0.25 gibt
+// dem Ziel-Reroll-Optimizer mehr Spielraum ohne Card-Kollaps. SCALE_MAX bei
+// 2.5, damit auch kleine Basis-Gerichte (~700 kcal) hohe Ziele (1700+)
+// erreichen.
 export const SCALE_MIN = 0.5;
 export const SCALE_MAX = 2.5;
-export const SCALE_STEP = 0.25;
+export const SCALE_STEP = 0.125;
 
 // Einheiten, deren Menge nach dem Skalieren auf ganze Stück gerundet werden
 // muss (typisch: Eier — halbes Ei macht in Rezepten keinen Sinn).
@@ -278,4 +282,14 @@ export function scaledGrams(ing, multiplier) {
     return count * ing.size;
   }
   return raw;
+}
+
+// Liefert das Profil fuer Ziel-Berechnungen. Wenn das aktive Profil
+// unvollstaendig ist (Wizzard nicht durchgelaufen), faellt es auf das
+// Standard-Profil zurueck, damit Optimizer + Fitness-Boost trotzdem
+// mit sinnvollen DGE-Werten arbeiten statt zu skippen.
+export function getTargetProfile() {
+  const active = getActiveProfile();
+  if (isProfileComplete(active)) return active;
+  return getStandardProfile();
 }
