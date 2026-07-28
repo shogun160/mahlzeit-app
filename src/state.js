@@ -102,6 +102,11 @@ export const state = {
   // persistiert (Guardrail 2 bleibt intakt — nur zusaetzliche Felder, kein
   // Storage-Key-Wechsel). Sets werden wie collapsedCategories als Array
   // serialisiert.
+  // Reroll-Historie: die letzten N Assignments vor dem aktuellen. Wird beim
+  // rerollAll als erweiterter previousIds-Filter genutzt — verhindert das
+  // "jede zweite Woche gleiche Gerichte"-Muster bei stark biased Presets.
+  // unshift() pusht das alte Assignment vor Reroll; pop() dropt aeltere.
+  rerollHistory: [],
   remoteDishes: [],                // Dish[] wie in dishes.json (ohne enrichment — beim Load wird angereichert)
   remoteIngredients: {},           // { key -> Ingredient } wie in ingredients.json
   remoteUpdatedAt: null,           // ISO-String vom letzten erfolgreichen Fetch
@@ -159,6 +164,7 @@ export function initState(assignment) {
   state.selected = {};
   state.portions = {};
   state.dishBag = {};
+  state.rerollHistory = [];
   for (const day of DAYS) {
     state.selected[day] = false;
     state.portions[day] = state.settings.defaultPortions;
@@ -356,6 +362,7 @@ export function saveState() {
       portions: state.portions,
       checkedShopping: Array.from(state.checkedShopping),
       dishBag: state.dishBag,
+      rerollHistory: state.rerollHistory,
       view: state.view,
       collapsedCategories: Array.from(state.collapsedCategories),
       remoteDishes: state.remoteDishes,
@@ -401,6 +408,7 @@ export function loadState() {
     state.portions = parsed.portions || {};
     state.checkedShopping = new Set(Array.isArray(parsed.checkedShopping) ? parsed.checkedShopping : []);
     state.dishBag = parsed.dishBag || {};
+    state.rerollHistory = Array.isArray(parsed.rerollHistory) ? parsed.rerollHistory : [];
     state.view = VIEWS.includes(parsed.view) ? parsed.view : 'dashboard';
     state.collapsedCategories = new Set(Array.isArray(parsed.collapsedCategories) ? parsed.collapsedCategories : []);
     state.remoteDishes = Array.isArray(parsed.remoteDishes) ? parsed.remoteDishes : [];

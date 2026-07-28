@@ -15,6 +15,12 @@ const CUISINE_PREFERENCE_WEIGHT = 3;
 // Fitness fuehrt, gross genug damit Zufall drin bleibt.
 const TAU = 0.02;
 
+// Anzahl vergangener Assignments die zusaetzlich zum aktuellen als
+// previousIds gelten. HISTORY_LENGTH = 2 → previousIds = aktuelles + 2
+// alte Assignments = ~21 IDs im Ausschluss (bei 7 Slots pro Assignment).
+// Bei Pool < 7 greift Fallback und erlaubt previousIds wieder.
+const HISTORY_LENGTH = 2;
+
 // Gewicht einer Dish-ID für den Weighted-Reroll bei Multi-User: proportional
 // zur Anzahl der mitkochenden Diner, die diese cuisineGroup als Praeferenz
 // gewaehlt haben. Basis 1, +CUISINE_PREFERENCE_WEIGHT pro Voter. Bei Solo /
@@ -162,7 +168,15 @@ export function rerollDay(day) {
 }
 
 export function rerollAll() {
-  const previousIds = new Set(Object.values(state.assignment));
+  // Snapshot des aktuellen Assignments — wird nach dem Reroll in die History
+  // geschoben. Vorherige Weeks (state.rerollHistory) tragen ebenfalls zu
+  // previousIds bei.
+  const oldAssignment = { ...state.assignment };
+  const previousIds = new Set(Object.values(oldAssignment));
+  for (const historyAssignment of state.rerollHistory) {
+    for (const id of Object.values(historyAssignment)) previousIds.add(id);
+  }
+
   const pool = eligibleDishIds();
   let shuffledPool = weightedShuffle(pool, cuisineWeight).filter((id) => !previousIds.has(id));
   let optimizePool = pool.filter((id) => !previousIds.has(id));
@@ -191,6 +205,12 @@ export function rerollAll() {
     state.portions[day] = state.settings.defaultPortions;
   });
   state.dishBag = {};
+
+  // History aktualisieren: das alte Assignment wird "letzte Woche". Cap
+  // auf HISTORY_LENGTH — aeltere Wochen fallen raus.
+  state.rerollHistory.unshift(oldAssignment);
+  while (state.rerollHistory.length > HISTORY_LENGTH) state.rerollHistory.pop();
+
   // checkedShopping bleibt unangetastet — bereits gekaufte Artikel bleiben
   // erhalten, auch wenn die neuen Gerichte sie evtl. nicht mehr enthalten
   // (dann als Leftover sichtbar). Fuer einen echten Reset gibt es den

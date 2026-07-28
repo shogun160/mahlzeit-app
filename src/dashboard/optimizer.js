@@ -13,9 +13,11 @@ import { dinnerTarget, dinnerMacroTargets, dishScale } from '../nutrition/target
 // Toleranz fuer den Swap-Loop: unter allen verbessernden Kandidaten wird
 // zufaellig einer aus dem Toleranzband gewaehlt. Ohne diesen Random-Anteil
 // terminiert der Greedy-Swap immer im selben lokalen Optimum — jeder
-// Reroll liefert dieselben Gerichte. 5 % Toleranz gibt sichtbare Vielfalt
-// ohne die Ziel-Naehe signifikant zu verschlechtern.
-const SWAP_TOLERANCE = 0.05;
+// Reroll liefert dieselben Gerichte. 15 % Toleranz statt 5 % akzeptiert
+// eine kleine Ziel-Naehe-Einbusse, kauft dafuer deutlich mehr Vielfalt:
+// der Optimizer waehlt bei jedem Swap aus einem breiteren Kandidatenfeld,
+// was unterschiedliche Wochen-Lineups auch bei stark biased Presets ergibt.
+const SWAP_TOLERANCE = 0.15;
 
 // Fitness gegen dayCount × Ziel. Verwendet vom rerollDay-Boost mit dem
 // aktuellen Selected-Scope, und von weekFitness (dayCount = 7).
