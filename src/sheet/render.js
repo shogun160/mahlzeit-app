@@ -331,7 +331,15 @@ function attachHeroHandlers() {
   // Hero-Bild async binden — bundled sofort, Cache-URI fuer Remote-Rezepte
   // nach dem naechsten Frame.
   const heroImg = rootEl.querySelector('[data-role="hero-image"]');
-  if (heroImg) bindDishImage(heroImg, state.assignment[session.day]);
+  if (heroImg) {
+    bindDishImage(heroImg, state.assignment[session.day]);
+    // Klick aufs Bild im Detail-Mode schliesst das Sheet — zweite Close-
+    // Affordance neben Runter-Swipe und Backdrop-Tap. Im Picker-Mode nicht,
+    // dort ist das Bild reine Vorschau.
+    heroImg.addEventListener('click', () => {
+      if (session && session.mode === 'detail') closeSheet();
+    });
+  }
 
   // Portion-Stepper.
   rootEl.querySelector('[data-action="sheet-portion-minus"]').addEventListener('click', () => handleSheetPortion(-1));
