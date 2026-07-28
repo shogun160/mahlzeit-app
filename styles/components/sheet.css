@@ -17,14 +17,14 @@
   pointer-events: auto;
 }
 
-/* Der Sheet selbst: 85vh, sitzt initial unten außerhalb (translateY 100%),
+/* Der Sheet selbst: 88vh, sitzt initial unten außerhalb (translateY 100%),
    schiebt sich beim Öffnen hoch. Max-Breite matcht das Card-Layout.
    position:relative ist Anker für die floating Portion-Pille. */
 .sheet {
   position: relative;
   width: 100%;
   max-width: 640px;
-  height: 85vh;
+  height: 88vh;
   background: var(--md-sys-color-surface-container-lowest);
   border-radius: 22px 22px 0 0;
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.14);
