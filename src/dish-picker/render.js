@@ -141,7 +141,7 @@ export function mountDishPicker(el, { onPick, onChange } = {}) {
   rootEl.hidden = true;
 }
 
-export function openDishPicker(day, { onAfterPick } = {}) {
+export function openDishPicker(day, { onAfterPick, instant = false } = {}) {
   if (!rootEl) throw new Error('Dish-Picker nicht gemountet.');
   currentDay = day;
   afterPickCallback = onAfterPick || null;
@@ -152,10 +152,27 @@ export function openDishPicker(day, { onAfterPick } = {}) {
   filtersCollapsed = true;
   renderShell();
   rootEl.hidden = false;
-  // Doppel-rAF für Slide-up-Animation (initial translateY(100%) → 0).
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => rootEl.querySelector('.picker-overlay').classList.add('is-open'));
-  });
+  // instant: Slide-up ueberspringen (Wechsel Detail-Sheet → Picker, Hero
+  // identisch). Sonst Doppel-rAF fuer die Slide-up-Animation
+  // (initial translateY(100%) → 0).
+  if (instant) {
+    rootEl.querySelector('.picker-overlay').classList.add('is-open');
+    rootEl.querySelector('.picker-sheet').style.transform = 'translateY(0)';
+    rootEl.querySelector('.picker-sheet').style.transition = 'none';
+    // Transition nach 1 Frame wieder herstellen, damit spaeteres Close
+    // wieder animiert schliesst.
+    requestAnimationFrame(() => {
+      const sheet = rootEl?.querySelector('.picker-sheet');
+      if (sheet) {
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+      }
+    });
+  } else {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => rootEl.querySelector('.picker-overlay').classList.add('is-open'));
+    });
+  }
   document.addEventListener('keydown', handleEsc);
 }
 

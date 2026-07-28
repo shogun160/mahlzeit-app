@@ -59,15 +59,24 @@ export function openDetailSheet(dishId, tab, day) {
   document.addEventListener('keydown', handleEscape);
 }
 
-export function closeDetailSheet() {
+export function closeDetailSheet({ instant = false } = {}) {
   if (!rootEl || rootEl.hidden) return;
-  const overlay = rootEl.querySelector('.sheet-overlay');
-  if (overlay) overlay.classList.remove('is-open');
   document.removeEventListener('keydown', handleEscape);
   if (typeof rootEl.__closeSwipeCleanup === 'function') {
     rootEl.__closeSwipeCleanup();
     rootEl.__closeSwipeCleanup = null;
   }
+  // instant: direkt verstecken ohne Slide-down. Wird beim Wechsel Detail-Sheet
+  // → Picker (Edit-Pill) genutzt — Hero-Header ist identisch, jede Animation
+  // wuerde als Flackern wirken.
+  if (instant) {
+    rootEl.hidden = true;
+    rootEl.innerHTML = '';
+    currentContext = null;
+    return;
+  }
+  const overlay = rootEl.querySelector('.sheet-overlay');
+  if (overlay) overlay.classList.remove('is-open');
   setTimeout(() => {
     // Nur wirklich verstecken, wenn nicht in der Zwischenzeit wieder geöffnet.
     if (rootEl && !rootEl.querySelector('.sheet-overlay.is-open')) {
@@ -206,8 +215,11 @@ function attachHandlers() {
       ev.stopPropagation();
       const day = currentContext.day;
       const tab = currentContext.tab;
-      closeDetailSheet();
+      // Hero-Header ist im Picker identisch mit dem Detail-Sheet — Slide-down
+      // + Slide-up wuerde als Flackern wirken. Deshalb beide instant.
+      closeDetailSheet({ instant: true });
       openDishPicker(day, {
+        instant: true,
         onAfterPick: (pickedDay, newDishId) => openDetailSheet(newDishId, tab, pickedDay),
       });
     });
