@@ -83,7 +83,23 @@ function simulate(profile) {
 
     const start = {};
     DAYS.forEach((d, i) => { start[d] = shuffledPool[i]; });
-    const optimized = optimizeAssignment(start, optimizePool, profile);
+    let optimized = optimizeAssignment(start, optimizePool, profile);
+
+    // Wildcard-Einstreu wie in rerollAll.
+    const usedInRecency = new Set(Object.values(optimized));
+    for (const hist of history) {
+      for (const id of Object.values(hist)) usedInRecency.add(id);
+    }
+    const forgotten = allDishIds.filter((id) => !usedInRecency.has(id));
+    if (forgotten.length > 0) {
+      const wildcardId = forgotten[Math.floor(Math.random() * forgotten.length)];
+      const targetDay = DAYS[Math.floor(Math.random() * DAYS.length)];
+      const wildcardAssignment = { ...optimized, [targetDay]: wildcardId };
+      const lockedDays = new Set([targetDay]);
+      let finalPool = allDishIds.filter((id) => !previousIds.has(id));
+      if (finalPool.length < DAYS.length) finalPool = allDishIds;
+      optimized = optimizeAssignment(wildcardAssignment, finalPool, profile, { lockedDays });
+    }
 
     for (const day of DAYS) {
       const id = optimized[day];
@@ -91,13 +107,12 @@ function simulate(profile) {
     }
     weeklyDeltas.push(weeklyDelta(optimized, profile));
 
-    // History-Logic wie in rerollAll: letztes Assignment in History schieben,
-    // previousIds aus aktuellem + alle History-Assignments aufbauen.
+    // History-Cap auf 6 (statt 2), previousIds aus ersten 2.
     history.unshift({ ...optimized });
-    while (history.length > 2) history.pop();
+    while (history.length > 6) history.pop();
     const oldAssignment = optimized;
     previousIds = new Set(Object.values(oldAssignment));
-    for (const hist of history) {
+    for (const hist of history.slice(0, 2)) {
       for (const id of Object.values(hist)) previousIds.add(id);
     }
   }

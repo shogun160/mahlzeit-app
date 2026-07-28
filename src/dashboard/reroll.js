@@ -15,11 +15,16 @@ const CUISINE_PREFERENCE_WEIGHT = 3;
 // Fitness fuehrt, gross genug damit Zufall drin bleibt.
 const TAU = 0.02;
 
-// Anzahl vergangener Assignments die zusaetzlich zum aktuellen als
-// previousIds gelten. HISTORY_LENGTH = 2 → previousIds = aktuelles + 2
-// alte Assignments = ~21 IDs im Ausschluss (bei 7 Slots pro Assignment).
-// Bei Pool < 7 greift Fallback und erlaubt previousIds wieder.
-const HISTORY_LENGTH = 2;
+// Anzahl Historieneintraege die als previousIds-Filter im Optimizer wirken.
+// Die restlichen History-Eintraege dienen NUR dem Wiederentdeckungs-Check
+// (Wildcard-Einstreu — siehe unten).
+const HISTORY_FILTER_LENGTH = 2;
+
+// Gesamte Historien-Laenge. Aeltere Wochen werden nur zum Recency-Tracking
+// genutzt, nicht mehr als previousIds gefiltert. So bleibt der Optimizer-
+// Pool gross genug fuer Ziel-Naehe, gleichzeitig sehen wir welche Rezepte
+// laenger nicht dran waren und koennen sie gezielt einstreuen.
+const HISTORY_LENGTH = 6;
 
 // Gewicht einer Dish-ID für den Weighted-Reroll bei Multi-User: proportional
 // zur Anzahl der mitkochenden Diner, die diese cuisineGroup als Praeferenz
@@ -173,7 +178,7 @@ export function rerollAll() {
   // previousIds bei.
   const oldAssignment = { ...state.assignment };
   const previousIds = new Set(Object.values(oldAssignment));
-  for (const historyAssignment of state.rerollHistory) {
+  for (const historyAssignment of state.rerollHistory.slice(0, HISTORY_FILTER_LENGTH)) {
     for (const id of Object.values(historyAssignment)) previousIds.add(id);
   }
 
@@ -196,7 +201,28 @@ export function rerollAll() {
   // Vermeidung wieder rein. Bei unvollstaendigem Profil greift
   // getTargetProfile auf Standard-Profil zurueck.
   const profile = getTargetProfile();
-  const optimized = optimizeAssignment(startAssignment, optimizePool, profile);
+  let optimized = optimizeAssignment(startAssignment, optimizePool, profile);
+
+  // Wildcard-Einstreu: 1 Rezept das in den letzten HISTORY_LENGTH Wochen nie
+  // dran war (inklusive aktuellem Assignment) wird zufaellig in einen Slot
+  // gesetzt, danach optimiert der Optimizer die anderen 6 Slots um das
+  // gelockte Rezept herum. So kommt garantiert jede Woche ein "vergessenes"
+  // Rezept zurueck, ohne die Woche komplett aus dem Ziel-Korridor zu werfen.
+  const usedInRecency = new Set(Object.values(optimized));
+  for (const historyAssignment of state.rerollHistory.slice(0, HISTORY_LENGTH)) {
+    for (const id of Object.values(historyAssignment)) usedInRecency.add(id);
+  }
+  const forgotten = eligibleDishIds().filter((id) => !usedInRecency.has(id) && !Object.values(optimized).includes(id));
+
+  if (forgotten.length > 0) {
+    const wildcardId = forgotten[Math.floor(Math.random() * forgotten.length)];
+    const targetDay = DAYS[Math.floor(Math.random() * DAYS.length)];
+    const wildcardAssignment = { ...optimized, [targetDay]: wildcardId };
+    const lockedDays = new Set([targetDay]);
+    const finalPool = eligibleDishIds().filter((id) => !previousIds.has(id));
+    const finalOptimizePool = finalPool.length >= DAYS.length ? finalPool : eligibleDishIds();
+    optimized = optimizeAssignment(wildcardAssignment, finalOptimizePool, profile, { lockedDays });
+  }
 
   DAYS.forEach((day) => {
     state.assignment[day] = optimized[day];

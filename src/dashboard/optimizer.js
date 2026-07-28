@@ -70,8 +70,12 @@ export function weekFitness(assignment, profile) {
 // - assignment: { [day]: dishId } — Start-Assignment, wird nicht mutiert
 // - pool: number[] — eligible Dish-IDs (Kochzeit + Diaet + Cuisine gefiltert)
 // - profile: Target-Profil (via getTargetProfile im Aufrufer)
-// - maxRounds: Sicherheits-Cap, praktisch nach 3-8 Runden fertig
-export function optimizeAssignment(assignment, pool, profile, maxRounds = 50) {
+// - options.maxRounds: Sicherheits-Cap, praktisch nach 3-8 Runden fertig
+// - options.lockedDays: Set<string> von Tagen die NICHT geswappt werden
+//   duerfen. Genutzt vom Wiederentdeckungs-Mechanismus: der Wildcard-Slot
+//   bleibt fix, damit die anderen 6 Slots sich um ihn herum optimieren.
+export function optimizeAssignment(assignment, pool, profile, options = {}) {
+  const { maxRounds = 50, lockedDays = new Set() } = options;
   const current = { ...assignment };
   let bestScore = weekFitness(current, profile);
   if (bestScore === 0) return current; // Perfektes Match — Loop unnoetig.
@@ -79,6 +83,7 @@ export function optimizeAssignment(assignment, pool, profile, maxRounds = 50) {
   for (let round = 0; round < maxRounds; round++) {
     let improvedThisRound = false;
     for (const day of DAYS) {
+      if (lockedDays.has(day)) continue;
       const currentUsed = new Set(Object.values(current));
       currentUsed.delete(current[day]);
 
