@@ -122,8 +122,10 @@ function refresh() {
       refresh();
       // Nach dem Neu-Rollen der Woche zurueck an den Anfang scrollen —
       // sonst bleibt der User auf einer beliebigen Card-Position stehen
-      // und sieht die neue Woche nur teilweise.
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // und sieht die neue Woche nur teilweise. Scroll passiert auf dem
+      // View-Element, weil body/main overflow:hidden haben (siehe base.css).
+      const view = document.getElementById('view-dashboard');
+      if (view) view.scrollTo({ top: 0, behavior: 'smooth' });
     },
     onToggleAllSelected: () => {
       toggleAllSelected();
