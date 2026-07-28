@@ -35,8 +35,9 @@ function blankProfile(id) {
     // Alle Wizard-Slots starten null. Der Onboarding-Wizard ist die einzige
     // Eingabequelle beim First-Run. hasProfile() bleibt der biometrische
     // Check (Gender+Age+Height+Weight), isProfileComplete() ergänzt um
-    // activityLevel/goal/breakfastKcal/lunchKcal für die Placeholder-Pille-
-    // Entscheidung. Name ist optional und in beiden Checks nicht enthalten.
+    // activityLevel/goal für die Placeholder-Pille-Entscheidung.
+    // breakfastKcal/lunchKcal sind optionale Overrides (Profi-Modus) und
+    // NICHT Teil des Complete-Checks. Name ist ebenfalls optional.
     name: null,
     gender: null,
     age: null,

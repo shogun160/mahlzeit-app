@@ -64,18 +64,18 @@ export function hasProfile(profile) {
   );
 }
 
-// True, wenn ALLE Onboarding-Wizard-Felder gesetzt sind (Biometrie + Alltag +
-// Mahlzeiten). Ergänzt hasProfile() um activityLevel, goal, breakfastKcal,
-// lunchKcal. Name ist nicht Teil — er ist optional (leerer Name → Copy fällt
-// auf unpersönlichen Ton zurück). Steuert die Placeholder-Pille-Entscheidung
-// im Dashboard.
+// True, wenn ALLE Pflicht-Wizzard-Felder gesetzt sind (Biometrie + Alltag).
+// Ergänzt hasProfile() um activityLevel und goal. breakfastKcal/lunchKcal
+// sind seit Session 26 optionale Overrides (im Profi-Modus) — bei null
+// greift die 35 %-Regel via dinnerTarget, das Profil bleibt trotzdem
+// vollständig. Name ist nicht Teil — er ist optional (leerer Name → Copy
+// fällt auf unpersönlichen Ton zurück). Steuert die Placeholder-Pille-
+// Entscheidung im Dashboard.
 export function isProfileComplete(profile) {
   if (!hasProfile(profile)) return false;
   return (
     typeof profile.activityLevel === 'number' &&
-    (profile.goal === 'maintain' || profile.goal === 'lose' || profile.goal === 'gain') &&
-    typeof profile.breakfastKcal === 'number' &&
-    typeof profile.lunchKcal === 'number'
+    (profile.goal === 'maintain' || profile.goal === 'lose' || profile.goal === 'gain')
   );
 }
 
