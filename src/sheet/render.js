@@ -38,6 +38,9 @@ let rootEl = null;
 let onExternalChange = () => {};
 let onExternalPick = () => {};
 let session = null;
+// Wird von attachHeroSwipe auf true gesetzt sobald ein Swipe capture'd wurde;
+// der Hero-Click-Handler resettet + ignoriert einmalig.
+let heroSwipeCaptured = false;
 // = { day, mode: 'detail'|'picker', detailTab: 'zutaten'|'rezept',
 //     pickerAfterPickCallback: null }
 
@@ -338,11 +341,17 @@ function attachHeroHandlers() {
   // Hero (nicht am Bild), weil Overlays (Handle, Wochentag-Label, Makro-Row)
   // ueber dem Bild sitzen und den Klick sonst schlucken. Buttons und Stepper
   // sind per closest-Filter ausgenommen — gleiche Regel wie attachHeroSwipe.
+  //
+  // Swipe-Suppress: attachHeroSwipe setzt heroSwipeCaptured=true sobald der
+  // Finger sich bewegt hat. Der browser feuert nach einem captured Swipe
+  // je nach Plattform trotzdem einen click — den ignorieren wir hier, sonst
+  // wuerde ein Day- oder Close-Swipe zusaetzlich noch closeSheet triggern.
   const hero = rootEl.querySelector('.sheet-hero');
   if (hero) {
     hero.addEventListener('click', (ev) => {
       if (!session || session.mode !== 'detail') return;
       if (ev.target.closest('button, .stepper')) return;
+      if (heroSwipeCaptured) { heroSwipeCaptured = false; return; }
       closeSheet();
     });
   }
@@ -501,6 +510,8 @@ function attachHeroSwipe() {
     track.tracking = true;
     track.captured = false;
     track.pointerId = ev.pointerId;
+    // Neuer Pointer-Zyklus — Flag aus vorherigem Swipe zuruecksetzen.
+    heroSwipeCaptured = false;
   });
   hero.addEventListener('pointermove', (ev) => {
     if (!track.tracking || track.captured) return;
@@ -508,6 +519,8 @@ function attachHeroSwipe() {
     const dy = ev.clientY - track.startY;
     if (Math.abs(dx) < SWIPE_CAPTURE_THRESHOLD_PX && Math.abs(dy) < SWIPE_CAPTURE_THRESHOLD_PX) return;
     track.captured = true;
+    // Ab hier ist es eine Geste — folgender click darf nicht als Close zaehlen.
+    heroSwipeCaptured = true;
     try { hero.setPointerCapture(track.pointerId); } catch (e) {}
   });
   hero.addEventListener('pointerup', (ev) => {
