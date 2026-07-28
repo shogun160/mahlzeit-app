@@ -1,7 +1,7 @@
 import { state, getActiveProfile } from '../state.js';
 import { buildConsolidatedList } from './consolidate.js';
 import { toggleChecked } from './check.js';
-import { toggleCollapsed, expandCategory, isCollapsed } from './collapse.js';
+import { toggleCollapsed, expandCategory, isCollapsed, isCheckedExpanded, toggleCheckedExpanded } from './collapse.js';
 import { renderProgress } from './progress.js';
 import { CAT_ORDER, CAT_LABELS } from './categories.js';
 import { formatQuantity } from '../util/format.js';
@@ -63,6 +63,21 @@ export function renderShoppingList(root, { onChange }) {
     });
   });
 
+  // Sub-Divider innerhalb einer Kategorie (>=4 abgehakt): klappt den abgehakten
+  // Teil auf/zu. Keyboard-Toggle wie Kategorie-Header.
+  root.querySelectorAll('.shop-checked-divider').forEach((el) => {
+    const handler = () => {
+      toggleCheckedExpanded(el.dataset.checkedDividerCat);
+      onChange();
+    };
+    el.addEventListener('click', handler);
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key !== 'Enter' && ev.key !== ' ') return;
+      ev.preventDefault();
+      handler();
+    });
+  });
+
   // Expand-All: alle gerenderten Kategorien aufklappen — auch die vollstaendig
   // erledigten. Der Button erscheint auch im Done-State (alles abgehakt +
   // collapsed) und muss dort tatsaechlich alles wieder oeffnen koennen.
@@ -70,6 +85,11 @@ export function renderShoppingList(root, { onChange }) {
   if (expandAllBtn) {
     expandAllBtn.addEventListener('click', () => {
       for (const it of items) state.collapsedCategories.delete(it.cat);
+      // Sub-Collapse der erledigten Bereiche bleibt bewusst auf Default —
+      // Expand-All klappt nur die KATEGORIEN auf, nicht die erledigten Items
+      // in ihnen. Falls der User zuvor "N erledigt" in einer Kat manuell
+      // ausgeklappt hatte, wird das hier zurueckgesetzt.
+      state.expandedCheckedCategories.clear();
       onChange();
     });
   }
@@ -236,7 +256,32 @@ function renderGroup(cat, groupItems, stackIdx) {
     : groupItems.filter((i) => state.checkedShopping.has(i.key)).length;
   const collapsed = isCollapsed(cat);
   const sorted = sortItems(groupItems);
-  const rows = sorted.map(renderRow).join('');
+
+  // Sub-Collapse fuer den "abgehakt"-Bereich innerhalb einer Kategorie: sobald
+  // >=4 Zutaten abgehakt sind UND noch mindestens eine offen ist, wird der
+  // abgehakte Teil unter einen klickbaren "N erledigt"-Divider geklappt.
+  // Edge-Case openCount==0 laeuft ueber syncAutoCollapse — dann greift bereits
+  // das Auto-Collapse der GANZEN Kategorie, kein zweiter Divider noetig.
+  const checkedCount = groupItems.filter((i) => state.checkedShopping.has(i.key)).length;
+  const openCountGrp = groupItems.length - checkedCount;
+  const subCollapseActive = checkedCount >= 4 && openCountGrp > 0;
+  const showChecked = !subCollapseActive || isCheckedExpanded(cat);
+
+  // Rows-Aufbau: offene zuerst, dann optional Divider, dann abgehakte (wenn
+  // ausgeklappt) oder leer (wenn eingeklappt). sortItems liefert bereits die
+  // Reihenfolge offen→abgehakt, wir splitten am ersten abgehakten Item.
+  const rowsParts = [];
+  let dividerInserted = false;
+  for (const item of sorted) {
+    const isChecked = state.checkedShopping.has(item.key);
+    if (subCollapseActive && isChecked && !dividerInserted) {
+      rowsParts.push(renderCheckedDivider(cat, checkedCount, showChecked));
+      dividerInserted = true;
+    }
+    if (subCollapseActive && isChecked && !showChecked) continue;
+    rowsParts.push(renderRow(item));
+  }
+  const rows = rowsParts.join('');
 
   // FLACHE Struktur: Header und Liste liegen als Geschwister direkt im
   // .shop-groups-Container — das ist der Sticky-Scope. Nur so bleiben alle
@@ -277,6 +322,26 @@ function sortItems(items) {
     if (aChecked !== bChecked) return aChecked - bChecked;
     return collator.compare(a.label, b.label);
   });
+}
+
+// Klickbarer Divider innerhalb einer Kategorie: klappt den abgehakten Teil
+// (>=4 Items) auf/zu. Chevron rotiert wie beim Kategorie-Header.
+function renderCheckedDivider(cat, checkedCount, expanded) {
+  const label = `${checkedCount} erledigt`;
+  return `
+    <li class="shop-checked-divider ${expanded ? 'shop-checked-divider--expanded' : ''}"
+        role="button"
+        tabindex="0"
+        data-checked-divider-cat="${cat}"
+        aria-expanded="${expanded}">
+      <span class="shop-checked-divider__chevron" aria-hidden="true">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="6 8 10 12 14 8"></polyline>
+        </svg>
+      </span>
+      <span class="shop-checked-divider__label">${label}</span>
+    </li>
+  `;
 }
 
 function renderRow(item) {
