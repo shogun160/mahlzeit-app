@@ -51,6 +51,36 @@
    .sheet-hero mit Bild + Overlays direkt oben im Sheet (analog Detail-Sheet).
    Handle-Optik wandert damit ins .sheet-hero__handle (Weiss auf Bild). */
 
+/* Meta-Row im Picker-Hero: EIN Flex-Container mit 5 flachen Siblings —
+   kcal, P, KH, F und Stepper. Beim Wrappen auf schmalen Screens springen
+   die Pills einzeln um (justify-content: flex-end haelt den letzten Rest
+   rechtsbuendig). Day-Pill bleibt separat unten-links (eigene absolute
+   Positionierung, siehe sheet.css). max-width laesst ~60 px Platz fuer
+   die Day-Pill links, damit sich beide nicht ueberlagern. */
+.sheet-hero__meta-row {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  z-index: 2;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 6px;
+  max-width: calc(100% - 20px - 60px);
+}
+
+/* Stepper braucht Frosted-Glass explizit — die Regel aus sheet.css haengt
+   an .sheet-hero__stepper-overlay, den Wrapper haben wir hier weggelassen,
+   um alle 5 Pills als flache Siblings zu haben. */
+.sheet-hero__meta-row .stepper--pill {
+  background: var(--card-pill-glass);
+  backdrop-filter: blur(14px) saturate(1.5);
+  -webkit-backdrop-filter: blur(14px) saturate(1.5);
+  color: var(--md-sys-color-on-glass);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
 /* Scroll-Container: haelt die beiden sticky-Ebenen (Filter-Header, Grids-
    Header) und den scrollbaren Content. Hero + Info sitzen jetzt als flex-
    shrink: 0 Sibling ausserhalb der picker-body — der Header-Stack innerhalb
