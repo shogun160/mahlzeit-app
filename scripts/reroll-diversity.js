@@ -108,11 +108,13 @@ function simulate(profile) {
     }
     weeklyDeltas.push(weeklyDelta(optimized, profile));
 
-    // Nachbarschafts-Konflikte fuer diese Woche.
+    // Nachbarschafts-Konflikte fuer diese Woche. Zyklisch: 7 Paare inkl.
+    // So-Mo als Wrap-around.
     let conflictsThisWeek = 0;
-    for (let i = 0; i < DAYS.length - 1; i++) {
+    for (let i = 0; i < DAYS.length; i++) {
+      const next = (i + 1) % DAYS.length;
       const dishA = dishesById.get(optimized[DAYS[i]]);
-      const dishB = dishesById.get(optimized[DAYS[i + 1]]);
+      const dishB = dishesById.get(optimized[DAYS[next]]);
       if (dishA && dishB && dishA.proteinCategory && dishA.proteinCategory === dishB.proteinCategory) {
         conflictsThisWeek++;
       }

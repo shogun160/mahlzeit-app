@@ -120,6 +120,10 @@ function refresh() {
     onRerollAll: () => {
       rerollAll();
       refresh();
+      // Nach dem Neu-Rollen der Woche zurueck an den Anfang scrollen —
+      // sonst bleibt der User auf einer beliebigen Card-Position stehen
+      // und sieht die neue Woche nur teilweise.
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     onToggleAllSelected: () => {
       toggleAllSelected();

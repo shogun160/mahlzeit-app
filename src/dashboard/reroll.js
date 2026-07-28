@@ -99,15 +99,16 @@ export function eligibleDishIds() {
 }
 
 // Zaehlt wie viele Nachbarn (Vortag/Nachtag) dieselbe proteinCategory haben
-// wie das Kandidat-Rezept. Linear: Mo hat keinen linken Nachbarn, So keinen
-// rechten. Max 2 Konflikte.
+// wie das Kandidat-Rezept. Zyklisch: Mo hat als Vortag den So, So hat als
+// Nachtag den Mo — beide Nachbarn immer vorhanden. Max 2 Konflikte.
 function neighborConflictsForDay(dishId, day) {
   const dish = dishesById.get(dishId);
   if (!dish || !dish.proteinCategory) return 0;
   const dayIdx = DAYS.indexOf(day);
+  const prevIdx = (dayIdx - 1 + DAYS.length) % DAYS.length;
+  const nextIdx = (dayIdx + 1) % DAYS.length;
   let conflicts = 0;
-  for (const neighborIdx of [dayIdx - 1, dayIdx + 1]) {
-    if (neighborIdx < 0 || neighborIdx >= DAYS.length) continue;
+  for (const neighborIdx of [prevIdx, nextIdx]) {
     const neighborDish = dishesById.get(state.assignment[DAYS[neighborIdx]]);
     if (neighborDish && neighborDish.proteinCategory === dish.proteinCategory) {
       conflicts++;
