@@ -252,9 +252,27 @@ function filteredDishes(session) {
   const activeKcal    = FILTERS.filter((f) => f.group === 'kcal'    && activeFilters.has(f.key));
   const activeMacro   = FILTERS.filter((f) => f.group === 'macro'   && activeFilters.has(f.key));
 
+  // Diaet-Filter: konsistent zum Dashboard-Reroll AND-Exclude-Semantik.
+  // Wenn min. ein Diaet-Chip aktiv ist, gelten die inaktiven als HARTE
+  // Ausschluesse. Beispiel: Fleisch + Vegetarisch aktiv, Fisch inaktiv →
+  // Rezepte mit contains-fish werden gefiltert, auch wenn sie zusaetzlich
+  // contains-meat tragen (Paella mit Huhn + Garnelen). Keine Diaet-Chip
+  // aktiv → neutral, jedes Rezept passiert.
+  const activeDietKeys = new Set(activeDiet.map((f) => f.key));
+  const passesDiet = (d) => {
+    if (activeDietKeys.size === 0) return true;
+    const isMeat = d.tags.includes('contains-meat');
+    const isFish = d.tags.includes('contains-fish');
+    const isVeg  = !isMeat && !isFish;
+    if (!activeDietKeys.has('meat') && isMeat) return false;
+    if (!activeDietKeys.has('fish') && isFish) return false;
+    if (!activeDietKeys.has('veg')  && isVeg)  return false;
+    return true;
+  };
+
   const passesFilter = (d) => {
     if (activeFilters.size === 0) return true;
-    const dietOk    = activeDiet.length    === 0 || activeDiet.some((f) => f.test(d));
+    const dietOk    = passesDiet(d);
     const cuisineOk = activeCuisine.length === 0 || activeCuisine.some((f) => f.test(d));
     const attrOk    = activeAttr.every((f) => f.test(d));
     const kcalOk    = activeKcal.length    === 0 || activeKcal.some((f) => f.test(d));

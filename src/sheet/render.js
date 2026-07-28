@@ -38,6 +38,9 @@ let rootEl = null;
 let onExternalChange = () => {};
 let onExternalPick = () => {};
 let session = null;
+// Wird von attachHeroSwipe auf true gesetzt sobald ein Swipe capture'd wurde;
+// der Hero-Click-Handler resettet + ignoriert einmalig.
+let heroSwipeCaptured = false;
 // = { day, mode: 'detail'|'picker', detailTab: 'zutaten'|'rezept',
 //     pickerAfterPickCallback: null }
 
@@ -224,7 +227,19 @@ function renderHero() {
   return `
     <div class="sheet-hero">
       <img class="sheet-hero__image" alt="" aria-hidden="true" data-role="hero-image" />
-      <div class="sheet-handle sheet-hero__handle" aria-hidden="true"></div>
+      <div class="sheet-handle sheet-hero__handle" aria-hidden="true">
+        <div class="sheet-day-indicator">
+          ${DAYS.map((_, i) => {
+            const dayIdx = DAYS.indexOf(day);
+            const isActive = i <= dayIdx;
+            const isCurrent = i === dayIdx;
+            const cls = ['sheet-day-dot'];
+            if (isActive) cls.push('is-active');
+            if (isCurrent) cls.push('is-current');
+            return `<span class="${cls.join(' ')}"></span>`;
+          }).join('')}
+        </div>
+      </div>
       <div class="day-card__edit-overlay" data-role="hero-mode-pills">
         ${renderModePill(day)}
         <button class="edit-pill" data-action="reroll-day" aria-label="Neues Gericht für ${day} auslosen" title="Neues Gericht auslosen">
@@ -320,6 +335,26 @@ function attachHeroHandlers() {
   // nach dem naechsten Frame.
   const heroImg = rootEl.querySelector('[data-role="hero-image"]');
   if (heroImg) bindDishImage(heroImg, state.assignment[session.day]);
+
+  // Klick auf den Hero-Bereich im Detail-Mode schliesst das Sheet — zweite
+  // Close-Affordance neben Runter-Swipe und Backdrop-Tap. Handler am ganzen
+  // Hero (nicht am Bild), weil Overlays (Handle, Wochentag-Label, Makro-Row)
+  // ueber dem Bild sitzen und den Klick sonst schlucken. Buttons und Stepper
+  // sind per closest-Filter ausgenommen — gleiche Regel wie attachHeroSwipe.
+  //
+  // Swipe-Suppress: attachHeroSwipe setzt heroSwipeCaptured=true sobald der
+  // Finger sich bewegt hat. Der browser feuert nach einem captured Swipe
+  // je nach Plattform trotzdem einen click — den ignorieren wir hier, sonst
+  // wuerde ein Day- oder Close-Swipe zusaetzlich noch closeSheet triggern.
+  const hero = rootEl.querySelector('.sheet-hero');
+  if (hero) {
+    hero.addEventListener('click', (ev) => {
+      if (!session || session.mode !== 'detail') return;
+      if (ev.target.closest('button, .stepper')) return;
+      if (heroSwipeCaptured) { heroSwipeCaptured = false; return; }
+      closeSheet();
+    });
+  }
 
   // Portion-Stepper.
   rootEl.querySelector('[data-action="sheet-portion-minus"]').addEventListener('click', () => handleSheetPortion(-1));
@@ -475,6 +510,8 @@ function attachHeroSwipe() {
     track.tracking = true;
     track.captured = false;
     track.pointerId = ev.pointerId;
+    // Neuer Pointer-Zyklus — Flag aus vorherigem Swipe zuruecksetzen.
+    heroSwipeCaptured = false;
   });
   hero.addEventListener('pointermove', (ev) => {
     if (!track.tracking || track.captured) return;
@@ -482,6 +519,8 @@ function attachHeroSwipe() {
     const dy = ev.clientY - track.startY;
     if (Math.abs(dx) < SWIPE_CAPTURE_THRESHOLD_PX && Math.abs(dy) < SWIPE_CAPTURE_THRESHOLD_PX) return;
     track.captured = true;
+    // Ab hier ist es eine Geste — folgender click darf nicht als Close zaehlen.
+    heroSwipeCaptured = true;
     try { hero.setPointerCapture(track.pointerId); } catch (e) {}
   });
   hero.addEventListener('pointerup', (ev) => {

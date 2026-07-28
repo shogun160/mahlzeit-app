@@ -145,13 +145,20 @@ export function createDayCard({ day, dish, portions, isSelected, openIngredients
     });
   }
 
-  // Content-Bereich (Body außerhalb Stepper und Actions) öffnet ebenfalls den Rezept-Tab.
-  // Kein separater Wrapper — Klick-Filter via closest().
+  // Body-Klick (Wochentag, Titel, Meta) togglet die Einkaufslisten-Auswahl.
+  // Rezept-Tab öffnet man über das Bild. Stepper/Actions bleiben ausgenommen.
   const body = article.querySelector('.day-card__body');
   body.addEventListener('click', (ev) => {
     if (ev.target.closest('.stepper, .day-card__actions')) return;
-    handlers.onOpenDetail('rezept');
+    handlers.onToggleSelected();
   });
+
+  // Makro-Pillen-Reihe (kcal, P, KH, F) im Bild-Wrap oeffnet den Rezept-Tab —
+  // gleiches Ziel wie Bild-Klick, damit die Werte-Pillen nicht "tot" wirken.
+  const makrosEl = article.querySelector('.day-card__makros');
+  if (makrosEl) {
+    makrosEl.addEventListener('click', () => handlers.onOpenDetail('rezept'));
+  }
 
   return article;
 }

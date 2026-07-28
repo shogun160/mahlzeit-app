@@ -42,12 +42,26 @@ export function dinerScalesForDish(dish, portions) {
   }));
 }
 
+// Aromageber-Einheiten die bei Multi-Person-Skalierung gedaempft werden:
+// bund (Petersilie, Fruehlingszwiebel), el/tl (Oele, Sauce, Gewuerze,
+// Paste). 8 EL Oel fuer 8 Personen laeuft ueber die Pfanne — sqrt-Daempfung
+// bringt das auf ~3 EL. Fuer 1 Person keine Aenderung.
+function shouldDampPortions(ing) {
+  return ing.unit === 'bund' || ing.displayUnit === 'el' || ing.displayUnit === 'tl';
+}
+
 // Wrapper für scaledGrams: rechnet die Kochmenge einer Zutat fuer die
 // gegebene Personenzahl. Multi-Profile: aggregiert ueber alle Diner via
 // totalFactorForDish. Bei diskreten Einheiten (Eier, Stück) wird auf ganze
-// Stück gerundet.
+// Stück gerundet. Aromageber (bund/el/tl) werden mit sqrt gedaempft —
+// bei 4 Personen nur ~2x statt 4x, weil Kraeuter/Oele/Gewuerze nicht
+// linear mitwachsen muessen. Dishscale (kcal-Ziel) bleibt ungedaempft.
 export function scaledGramsForDay(ing, portions, dish) {
-  return scaledGrams(ing, totalFactorForDish(dish, portions));
+  const totalFactor = totalFactorForDish(dish, portions);
+  const damping = shouldDampPortions(ing) && portions > 1
+    ? Math.sqrt(portions) / portions
+    : 1;
+  return scaledGrams(ing, totalFactor * damping);
 }
 
 // Durchschnittlicher Skalierungsfaktor pro Person ueber alle mitkochenden

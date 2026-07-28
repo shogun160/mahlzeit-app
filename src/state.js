@@ -89,6 +89,7 @@ function blankProfile(id) {
 //   dishBag          { [day: string]: number[] } // pro Karte: Shuffle-Bag-Queue
 //   view             'dashboard' | 'shopping'    // aktive Screen-Ansicht
 //   collapsedCategories Set<string>              // eingeklappte Einkaufslisten-Kategorien
+//   expandedCheckedCategories Set<string>        // Kategorien wo abgehakter Teil (>=4) explizit sichtbar
 //   settings         { ... }                     // User-Settings (Sheet)
 export const state = {
   assignment: {},
@@ -98,6 +99,7 @@ export const state = {
   dishBag: {},
   view: 'dashboard',
   collapsedCategories: new Set(),
+  expandedCheckedCategories: new Set(),
   // Remote-Rezept-Import (Session 21). Alle Slots werden in mahlzeit-state-v2
   // persistiert (Guardrail 2 bleibt intakt — nur zusaetzliche Felder, kein
   // Storage-Key-Wechsel). Sets werden wie collapsedCategories als Array
@@ -365,6 +367,7 @@ export function saveState() {
       rerollHistory: state.rerollHistory,
       view: state.view,
       collapsedCategories: Array.from(state.collapsedCategories),
+      expandedCheckedCategories: Array.from(state.expandedCheckedCategories),
       remoteDishes: state.remoteDishes,
       remoteIngredients: state.remoteIngredients,
       remoteUpdatedAt: state.remoteUpdatedAt,
@@ -411,6 +414,7 @@ export function loadState() {
     state.rerollHistory = Array.isArray(parsed.rerollHistory) ? parsed.rerollHistory : [];
     state.view = VIEWS.includes(parsed.view) ? parsed.view : 'dashboard';
     state.collapsedCategories = new Set(Array.isArray(parsed.collapsedCategories) ? parsed.collapsedCategories : []);
+    state.expandedCheckedCategories = new Set(Array.isArray(parsed.expandedCheckedCategories) ? parsed.expandedCheckedCategories : []);
     state.remoteDishes = Array.isArray(parsed.remoteDishes) ? parsed.remoteDishes : [];
     state.remoteIngredients = (parsed.remoteIngredients && typeof parsed.remoteIngredients === 'object') ? parsed.remoteIngredients : {};
     state.remoteUpdatedAt = typeof parsed.remoteUpdatedAt === 'string' ? parsed.remoteUpdatedAt : null;
