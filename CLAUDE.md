@@ -141,7 +141,7 @@ Diese Regeln gelten übergreifend — nicht ändern ohne bewusste Rückfrage:
 
 - **Zutaten-Katalog:** [`docs/zutaten-katalog.md`](docs/zutaten-katalog.md) — Übersicht aller Zutaten mit Werten pro 100g. Vor jedem neuen Rezept dort nachschauen.
 - **Rebuild-Design-Doc:** [`docs/redesign/2026-07-25-rebuild-design.md`](docs/redesign/2026-07-25-rebuild-design.md)
-- **Session-Handoffs:** [`docs/redesign/handoffs/`](docs/redesign/handoffs/) — letzter: `session-26-to-27.md`
+- **Session-Handoffs:** [`docs/redesign/handoffs/`](docs/redesign/handoffs/) — lokal gepflegt, nicht im git-Tracking
 - **Backlog:** [`docs/redesign/backlog.md`](docs/redesign/backlog.md)
 - **Feature-Design-Docs:** [`docs/redesign/2026-07-26-kalender-export-design.md`](docs/redesign/2026-07-26-kalender-export-design.md), [`docs/redesign/2026-07-26-onboarding-design.md`](docs/redesign/2026-07-26-onboarding-design.md)
 - **GitHub-Repo:** https://github.com/shogun160/mahlzeit-app
