@@ -164,7 +164,7 @@
   padding: 8px;
   border-radius: 8px;
   border: 1px solid var(--md-sys-color-outline-variant, #ccc);
-  background: var(--md-sys-color-surface-variant, #f5f5f5);
+  background: var(--md-sys-color-surface-container);
   color: var(--md-sys-color-on-surface-variant, #444);
 }
 .import-sheet__hint {
@@ -178,7 +178,7 @@
   padding: 10px;
   border-radius: 12px;
   border: 1px solid var(--md-sys-color-outline-variant, #ccc);
-  background: var(--md-sys-color-surface-variant, #f5f5f5);
+  background: var(--md-sys-color-surface-container);
   color: var(--md-sys-color-on-surface, #111);
   font-family: monospace;
   font-size: 12px;
