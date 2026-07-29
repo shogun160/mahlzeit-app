@@ -1,6 +1,7 @@
 import { state, getActiveProfile, getProfileById, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { renderMacros } from '../onboarding/result.js';
+import { rerollAll } from './reroll.js';
 import {
   hasProfile,
   dinnerTarget,
@@ -250,7 +251,12 @@ function renderShell() {
         <div class="macro-handle" aria-hidden="true"></div>
         <div class="macro-header">
           <h2 class="macro-title" id="macro-title">Deine Woche</h2>
-          <span class="macro-title__kcal" data-role="header-kcal">${formatHeaderKcal(avg)}</span>
+          <div class="macro-title__kcal">
+            <button class="macro-title__kcal-reset" type="button" data-action="reroll-all-confirm" aria-label="Alle Gerichte wechseln" title="Alle Gerichte wechseln">
+              ${ICON_REFRESH}
+            </button>
+            <span data-role="header-kcal">${formatHeaderKcal(avg)}</span>
+          </div>
           <button class="macro-close" data-action="close" aria-label="Schließen">✕</button>
         </div>
         <div class="macro-body">
@@ -258,6 +264,7 @@ function renderShell() {
           ${renderChartIntro(rangeLow, rangeHigh)}
           <div data-role="chart-slot">${renderChart(target, rangeLow, rangeHigh, avg)}</div>
           <div data-role="donut-slot" class="macro-donut-slot">${renderIstMacros(avg)}</div>
+          <div class="macro-donut-hint">Zutaten beim Kochen bitte bei Bedarf anpassen</div>
           ${renderControls()}
         </div>
       </div>
@@ -266,7 +273,28 @@ function renderShell() {
 
   attachHandlers();
   // Font-Fitter erst nach Layout (rAF), sonst sind scrollWidth/clientWidth null.
-  requestAnimationFrame(fitAvgFontSize);
+  requestAnimationFrame(() => {
+    fitAvgFontSize();
+    syncKcalPillWidths();
+  });
+}
+
+// Synchronisiert die Breite der Header-kcal-Pille und der Sollwert-Pille im
+// Chart-Intro: misst die natuerliche Breite beider und setzt beide auf die
+// GROESSERE. Damit sind sie immer visuell gleich lang, egal welcher Wert
+// gerade laenger ist.
+function syncKcalPillWidths() {
+  if (!rootEl) return;
+  const header = rootEl.querySelector('.macro-header .macro-title__kcal');
+  const soll = rootEl.querySelector('.macro-chart-intro__row .macro-title__kcal');
+  if (!header || !soll) return;
+  // Alte inline min-width zuerst zuruecksetzen, damit wir die natuerliche
+  // Breite messen (sonst waere der vorherige Sync-Wert noch drauf).
+  header.style.minWidth = '';
+  soll.style.minWidth = '';
+  const w = Math.max(header.offsetWidth, soll.offsetWidth);
+  header.style.minWidth = `${w}px`;
+  soll.style.minWidth = `${w}px`;
 }
 
 // Pills-Zeile ueber dem Chart: pro Profil eine Toggle-Pille. Klick togglet die
@@ -652,6 +680,7 @@ function refreshChartAndAvg() {
   }
   if (headerKcal) headerKcal.textContent = formatHeaderKcal(avg);
   bindBarHits();
+  requestAnimationFrame(syncKcalPillWidths);
 }
 
 // Intro-Zeile ueber dem Balken-Chart: Sollwert-Range in Kcal + Hinweistext.
@@ -673,11 +702,11 @@ function renderChartIntro(rangeLow, rangeHigh) {
   `;
 }
 
-// Header-kcal: "Ø Woche · 1032 kcal" — Ø ist immer aus allen 7 Tagen, egal ob
-// der User Tage fuer die Einkaufsliste ausgewaehlt hat.
+// Header-kcal-Pille: nur Ø-Symbol vor dem kcal-Wert. Kompakter als vorher
+// ('Ø Woche · X kcal'), macht Platz fuer die Reset-Pille daneben.
 function formatHeaderKcal(avg) {
   if (!avg) return '';
-  return `Ø Woche · ${Math.round(avg.kcal).toLocaleString('de-DE')} kcal`;
+  return `Ø ${Math.round(avg.kcal).toLocaleString('de-DE')} kcal`;
 }
 
 // Ist-Werte-Ausgabe wie in der Wizzard-Zusammenfassung: Kreisdiagramm links,
@@ -722,6 +751,20 @@ function attachHandlers() {
     if (ev.target === overlay) closeMacroPopup();
   });
   rootEl.querySelector('[data-action="close"]').addEventListener('click', closeMacroPopup);
+
+  // Reset-Pille im Header: rerollAll mit Confirm. Nach Bestaetigung wird die
+  // ganze Woche neu ausgelost, Chart + Ø + Slider werden neu gerendert und
+  // das Dashboard bekommt via onExternalChange Bescheid (state save + refresh).
+  const resetBtn = rootEl.querySelector('[data-action="reroll-all-confirm"]');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      if (!window.confirm('Alle Gerichte wechseln?')) return;
+      rerollAll();
+      onExternalChange();
+      refreshChartAndAvg();
+    });
+  }
 
   // Profil-Pills: Klick togglet die Auswahl. Kein Persist — reine Anzeige-
   // Praeferenz. Nach Toggle wird das Popup komplett re-rendered damit auch die
@@ -852,6 +895,7 @@ function refreshAvgOnly() {
     donutSlot.classList.remove('macro-donut-slot--muted');
   }
   if (headerKcal) headerKcal.textContent = formatHeaderKcal(avg);
+  requestAnimationFrame(syncKcalPillWidths);
 }
 
 function attachCloseSwipe() {

@@ -82,7 +82,13 @@
 }
 .macro-title__kcal {
   margin-left: auto;
-  padding: 4px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 4px 20px;
+  /* min-width wird per JS gesetzt (syncKcalPillWidths) — Header-Pille und
+     Sollwert-Pille bekommen jeweils die Breite der GROESSEREN. */
   border-radius: var(--radius-pill);
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
@@ -90,9 +96,46 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  width: 200px;
   text-align: center;
   box-sizing: border-box;
+}
+
+/* Header-Pille hat links den Reset-Icon-Chip. Icon sitzt links buendig,
+   Text nimmt den Rest der Pille (zentriert im uebrigen Raum). */
+.macro-header .macro-title__kcal {
+  padding-left: 8px;
+  justify-content: flex-start;
+}
+.macro-header .macro-title__kcal [data-role="header-kcal"] {
+  flex: 1;
+  text-align: center;
+}
+
+/* Reset-Icon INNERHALB der kcal-Pille (links). Nur das SVG, transparenter
+   Button — keine eigene Fuellung, das Icon liegt direkt auf der Primary-
+   Pille. Klick loest rerollAll mit Confirm-Popup aus. */
+.macro-title__kcal-reset {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--md-sys-color-on-primary);
+  border-radius: 50%;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 120ms ease;
+}
+.macro-title__kcal-reset:active {
+  transform: scale(0.9);
+}
+.macro-title__kcal-reset svg {
+  width: 18px;
+  height: 18px;
 }
 .macro-title__kcal:empty {
   display: none;
@@ -437,6 +480,15 @@
 .macro-donut-slot--muted {
   opacity: 0.55;
 }
+
+/* Hinweis unter dem Ist-Makros-Donut: erinnert daran dass die Werte auf
+   Basis der Rezept-Angaben berechnet sind — Kochpraxis kann abweichen. */
+.macro-donut-hint {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+  text-align: center;
+  margin: 8px 0 4px;
+}
 .macro-donut-slot .onboarding-macro-row {
   gap: 16px;
 }
@@ -496,4 +548,5 @@
 .macro-controls__preset-label {
   font-size: 0.75rem;
   color: var(--md-sys-color-on-surface-variant);
+  margin-top: 12px;
 }
