@@ -2,7 +2,7 @@ import { createDayCard } from './card.js';
 import { renderCalorieBar } from './calorie-bar.js';
 import { state, DAYS, initState, toggleFavorite } from '../state.js';
 import { dishesById, shuffled } from '../data/dishes.js';
-import { rerollDay, eligibleDishIds } from './reroll.js';
+import { rerollDay, rerollAll, eligibleDishIds } from './reroll.js';
 import { changePortion } from './portions.js';
 import { toggleSelected } from './selection.js';
 
@@ -44,6 +44,20 @@ export function renderDashboard(root, onChange, onOpenDetail, onOpenPicker, onOp
     const onboardingTrigger = barEl.matches('[data-action="open-onboarding"]') ? barEl : barEl.querySelector('[data-action="open-onboarding"]');
     if (onboardingTrigger && onOpenOnboarding) {
       onboardingTrigger.addEventListener('click', () => onOpenOnboarding());
+    }
+    // Reset-Pille links: rerollAll mit Confirm-Popup. Der Confirm nutzt
+    // window.confirm — nativer Browser-Dialog, in Capacitor-WebView voll
+    // funktional und semantisch klar (Bestaetigen/Abbrechen).
+    const resetTrigger = barEl.querySelector('[data-action="reroll-all-confirm"]');
+    if (resetTrigger) {
+      resetTrigger.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if (!window.confirm('Alle Gerichte wechseln?')) return;
+        rerollAll();
+        onChange();
+        const view = document.getElementById('view-dashboard');
+        if (view) view.scrollTo({ top: 0, behavior: 'smooth' });
+      });
     }
   }
 

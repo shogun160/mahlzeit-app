@@ -1,17 +1,59 @@
-/* Kompakte Wochen-Kalorien-Bar als Pill, sitzt im Dashboard über dem Card-Grid.
-   Drei-Segment-Layout: Label links, Ist/Ziel mittig-prominent, Ø rechts.
-   - Sticky-Header: klebt beim Scrollen oben an .view--dashboard, damit der
-     User bedarf-vs-ist auch beim durchstöbern der Woche sehen kann.
-   - Hintergrund wie die inaktive Day-Card (surface-container-low), damit die
-     Pille sich als Teil der Card-Sprache liest statt als Overlay. Blur bleibt
-     als visueller Puffer, wenn Content durchscrollt.
-   - Nur sichtbar wenn Profil ausgefüllt (siehe dashboard/calorie-bar.js). */
-.calorie-bar {
+/* Row-Container: Sticky-Wrapper fuer Reset-Pille + Bedarfs-Pille. Der Sticky-
+   Effekt sitzt hier statt an .calorie-bar, damit beide Pillen zusammen kleben. */
+.calorie-bar-row {
   position: sticky;
   top: 0;
   z-index: 5;
   display: flex;
-  width: 100%;
+  align-items: stretch;
+  gap: 8px;
+}
+
+/* Reset-Pille links: kreisrunder Icon-Button, gleiche Farb-Sprache wie die
+   Bedarfs-Pille. Feste Groesse, kein flex — Bedarfs-Pille daneben nimmt den
+   Rest der Breite. */
+.calorie-bar-reset {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: color-mix(in srgb, var(--md-sys-color-surface-container-low) 80%, transparent);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 50%;
+  color: var(--md-sys-color-on-surface-variant);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: background 120ms ease, color 120ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.calorie-bar-reset:hover {
+  background: color-mix(in srgb, var(--md-sys-color-surface-container) 80%, transparent);
+  color: var(--md-sys-color-on-surface);
+}
+.calorie-bar-reset:active {
+  transform: scale(0.94);
+}
+.calorie-bar-reset svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* Kompakte Wochen-Kalorien-Bar als Pill, sitzt im Dashboard über dem Card-Grid.
+   Drei-Segment-Layout: Label links, Ist/Ziel mittig-prominent, Ø rechts.
+   - Hintergrund wie die inaktive Day-Card (surface-container-low), damit die
+     Pille sich als Teil der Card-Sprache liest statt als Overlay. Blur bleibt
+     als visueller Puffer, wenn Content durchscrollt.
+   - Nur sichtbar wenn Profil ausgefüllt (siehe dashboard/calorie-bar.js).
+   - Sticky-Position sitzt jetzt am .calorie-bar-row-Wrapper. */
+.calorie-bar {
+  display: flex;
+  flex: 1;
+  min-width: 0;
   align-items: baseline;
   gap: 10px;
   padding: 10px 16px;
