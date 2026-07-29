@@ -1030,7 +1030,7 @@
    Border (Signal: Fallback-Diner) und deaktivierter Drag-Handle. */
 .settings-profile-row--default {
   border-style: dashed;
-  border-color: var(--md-sys-color-outline);
+  border-color: var(--md-sys-color-outline-variant);
   color: var(--md-sys-color-on-surface);
   margin-top: 4px;
 }
