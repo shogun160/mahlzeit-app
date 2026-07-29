@@ -1,6 +1,6 @@
 import { state, getActiveProfile } from '../state.js';
 import { buildConsolidatedList } from './consolidate.js';
-import { toggleChecked } from './check.js';
+import { toggleChecked, resetChecked, checkAll } from './check.js';
 import { toggleCollapsed, expandCategory, isCollapsed, isCheckedExpanded, toggleCheckedExpanded } from './collapse.js';
 import { renderProgress } from './progress.js';
 import { CAT_ORDER, CAT_LABELS } from './categories.js';
@@ -104,6 +104,30 @@ export function renderShoppingList(root, { onChange }) {
     });
   }
 
+  // Reset-All bzw. Check-All: sitzt links neben Expand/Collapse in der Progress-
+  // Zeile. Reset entfernt alle Haken (und oeffnet ggf. eingeklappte Kategorien
+  // gleich mit — siehe resetChecked). Check-All hakt alle Zutaten der aktuellen
+  // Liste ab.
+  const resetShoppingBtn = root.querySelector('[data-action="reset-checked-shopping"]');
+  if (resetShoppingBtn) {
+    resetShoppingBtn.addEventListener('click', () => {
+      resetChecked();
+      onChange();
+    });
+  }
+  const checkAllShoppingBtn = root.querySelector('[data-action="check-all-shopping"]');
+  if (checkAllShoppingBtn) {
+    checkAllShoppingBtn.addEventListener('click', () => {
+      checkAll(items.map((i) => i.key));
+      // Alle betroffenen Kategorien collapsen — die Liste ist erledigt,
+      // eingeklappt spart Scrollflaeche und signalisiert den Zustand klar.
+      for (const cat of new Set(items.map((i) => i.cat).filter(Boolean))) {
+        state.collapsedCategories.add(cat);
+      }
+      onChange();
+    });
+  }
+
   root.querySelectorAll('.shop-group__header').forEach((btn) => {
     // Keyboard-Toggle fuer div[role=button] (Enter/Space).
     btn.addEventListener('keydown', (ev) => {
@@ -122,6 +146,11 @@ export function renderShoppingList(root, { onChange }) {
       const listVisible = list && isListVisibleBelow(list, btn);
       if (sticky && !listVisible) {
         expandCategory(cat);
+        // Manueller Expand ueber Sticky-Header — auch abgehakter Sub-Bereich
+        // sichtbar. Wichtig fuer den Fall 'ganze Kat war fertig-collapsed →
+        // aufklappen, dann was uncheck': erledigt-Divider bleibt expanded
+        // statt sofort wieder zu schliessen.
+        state.expandedCheckedCategories.add(cat);
         onChange();
         requestAnimationFrame(() => {
           const newList = root.querySelector(`ul.shop-list[data-cat="${cat}"]`);
@@ -143,7 +172,14 @@ export function renderShoppingList(root, { onChange }) {
           const scrolledPast = rootTop - listTop; // >0 wenn ul über root-top rausgescrollt
           compensation = Math.max(0, Math.min(scrolledPast, listSpace));
         }
+        // Wenn wir gerade EXPANDIEREN (vorher collapsed), auch den Sub-Bereich
+        // fuer erledigte Zutaten expandet halten — passend zum Nutzer-Intent
+        // 'ich will hier reinsehen'. Ohne diese Zeile wuerde nach einem uncheck
+        // in der frisch aufgeklappten Kat der 'N erledigt'-Divider sofort
+        // zuklappen und die abgehakten Items verstecken.
+        const wasCollapsed = isCollapsed(cat);
         toggleCollapsed(cat);
+        if (wasCollapsed) state.expandedCheckedCategories.add(cat);
         onChange();
         if (compensation > 0) {
           root.scrollTop = Math.max(0, root.scrollTop - compensation);
