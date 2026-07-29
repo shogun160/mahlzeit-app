@@ -1,5 +1,16 @@
 apply plugin: 'com.android.application'
 
+// Signing-Config aus android/keystore.properties laden. Datei ist gitignored,
+// enthaelt Store/Key-Passwoerter. Fehlt sie (z.B. auf CI ohne Secrets), faellt
+// der Release-Build zurueck auf 'kein signingConfig' — dann waere die APK
+// unsigned und nicht installierbar. Fuer lokale Release-Builds pflegen wir
+// keystore.properties.
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
 android {
     namespace = "com.mahlzeit.myapp"
     compileSdk = rootProject.ext.compileSdkVersion
@@ -16,10 +27,40 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                storeFile = rootProject.file(keystoreProperties['storeFile'])
+                storePassword = keystoreProperties['storePassword']
+                keyAlias = keystoreProperties['keyAlias']
+                keyPassword = keystoreProperties['keyPassword']
+            }
+        }
+    }
     buildTypes {
         release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (keystorePropertiesFile.exists()) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+    // Zwei Kanaele parallel installierbar auf demselben Geraet:
+    //   - stable: applicationId com.mahlzeit.myapp (der bisherige Default)
+    //   - beta:   applicationId com.mahlzeit.myapp.beta, App-Name "Mahlzeit Beta"
+    // Build-Commands: assembleStableRelease / assembleBetaRelease (oder Debug).
+    flavorDimensions "channel"
+    productFlavors {
+        stable {
+            dimension "channel"
+        }
+        beta {
+            dimension "channel"
+            applicationIdSuffix ".beta"
+            versionNameSuffix "-beta"
+            // App-Name-Override via src/beta/res/values/strings.xml.
         }
     }
 }

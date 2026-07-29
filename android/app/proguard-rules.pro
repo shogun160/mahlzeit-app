@@ -1,21 +1,37 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ProGuard/R8-Regeln fuer den Release-Build. Aktiviert via minifyEnabled true
+# in build.gradle. Ziel: alles rausminifizieren was nicht ueber Reflection/JNI
+# oder JS-Bridge angesprochen wird. Die Rules unten schuetzen die Bereiche
+# die R8 sonst zerlegt.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# --- Line-Numbers fuer verstaendliche Stack-Traces bewahren.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# --- Capacitor-Core: Plugin-Klassen + Bridge-Reflection.
+-keep public class * extends com.getcapacitor.Plugin
+-keep @com.getcapacitor.annotation.CapacitorPlugin public class *
+-keep class com.getcapacitor.** { *; }
+-keep class com.getcapacitor.plugin.** { *; }
+-keepclassmembers class * {
+    @com.getcapacitor.PluginMethod public *;
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# --- Cordova-Plugin-Layer (Capacitor nutzt die Cordova-Bridge fuer manche Plugins).
+-keep class org.apache.cordova.** { *; }
+
+# --- Eigene App-Klassen (MainActivity + Manifest-Referenzen).
+-keep class com.mahlzeit.myapp.** { *; }
+
+# --- MLKit Barcode Scanning + TFLite-Modelle.
+-keep class com.google.mlkit.** { *; }
+-keep class com.google.android.gms.tflite.** { *; }
+-keep class com.google.android.gms.internal.mlkit_** { *; }
+-dontwarn com.google.mlkit.**
+
+# --- AndroidX AppCompat (WebView-Activity-Basis).
+-keep class androidx.appcompat.app.AppCompatActivity { *; }
+
+# --- JavaScript-Interface (WebView -> Native calls).
+-keepclassmembers class * {
+    @android.webkit.JavascriptInterface <methods>;
+}
