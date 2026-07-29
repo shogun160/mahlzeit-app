@@ -177,6 +177,7 @@ function renderShell() {
           ${renderDefaultInfoRow()}
           ${renderGenderRow()}
           ${renderAgeRow()}
+          ${renderActivityRow()}
           ${renderUserDinnerField()}
           ` : `
           ${renderActiveToggleRow(isActive)}
