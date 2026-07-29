@@ -444,7 +444,7 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  margin-top: 8px;
+  margin-top: 20px;
 }
 .onboarding-macro-ring {
   width: 96px;
@@ -453,19 +453,19 @@
   display: block;
 }
 .onboarding-macro-legend {
-  margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.onboarding-macro-legend__row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto auto;
   align-items: baseline;
-  gap: 16px;
+  column-gap: 16px;
+  row-gap: 6px;
   font-size: 0.9375rem;
 }
-.onboarding-macro-legend__row .onboarding-macro__key {
-  min-width: 108px;
+/* Die __row-Wrapper verschwinden als Grid-Item — ihre Kinder (Key + Value)
+   werden direkt Grid-Cells. So sitzen alle Values buendig links-aligned in
+   Spalte 2, unabhaengig davon wie breit der Key-Text ist (Kohlenhydrate war
+   breiter als 108px min-width und schob die Zeile vorher raus). */
+.onboarding-macro-legend__row {
+  display: contents;
 }
 .onboarding-macro-legend__value {
   font-weight: 600;
@@ -475,11 +475,16 @@
   text-align: right;
 }
 /* Zahlenspalten mit fester Breite: 2- vs 3-stellig veraendert nicht das
-   Layout, und der ·-Trenner sitzt in allen Zeilen an derselben Position. */
+   Layout, und der ·-Trenner sitzt in allen Zeilen an derselben Position.
+   Nach dem Trennzeichen (%-Wert) reichen 2ch — %-Anteile sind realistisch
+   2-stellig, 3ch wuerde 1ch Extra-Padding wirken wie ein doppeltes Space. */
 .onboarding-macro-legend__num {
   display: inline-block;
   min-width: 3ch;
   text-align: right;
+}
+.onboarding-macro-legend__sep + .onboarding-macro-legend__num {
+  min-width: 2ch;
 }
 .onboarding-macro-legend__sep {
   display: inline-block;
