@@ -522,3 +522,29 @@ Kombination A + C wäre robust: pro Zutat den Skalierungs-Modus + optionalen Max
 - **UI-Feedback**: sichtbar machen wenn Reroll die Wochenkomposition explizit auf Ziele bringt (kleine Toast „Wochenplan auf Zielwerte optimiert" o. ä.).
 
 **Priorität: hoch** — direkt verantwortlich für die Delta-Soll-Ist-Diskrepanz im Nährstoff-Sheet die der User bemängelt hat.
+
+## Smart Shopping-List Expand/Collapse — Toggle in Settings
+
+**Idee:** Das aktuelle Verhalten der Einkaufsliste (Auto-Collapse voller Kategorien via `syncAutoCollapse`, Sub-Collapse ab 4 abgehakten via `expandedCheckedCategories`) unter einem Settings-Toggle `smartShoppingCollapse` steuerbar machen. Zwei Modi:
+
+- **Smart = ON (aktueller Stand):** Kategorien collapsen automatisch wenn alle abgehakt sind, Sub-Bereich (`N erledigt`) klappt ab 4 abgehakten automatisch zu, Reset öffnet alles, Check-All collapsed alle. Der User bekommt eine "aufgeräumte" Liste ohne selbst zu klicken.
+- **Smart = OFF:** App startet immer mit allen Kategorien expandiert (auch nach Wochen-Reroll / neuem Assignment). Keine automatischen Sub-Collapses. Sonst gilt: letzter manueller Zustand bleibt erhalten. Der User hat die volle Kontrolle.
+
+**State-Skizze:** `state.settings.smartShoppingCollapse: boolean` (Default: `true`). Alle drei Auto-Collapse-Punkte (`syncAutoCollapse`, `subCollapseActive`-Check in `renderGroup`, `checkAll`-Handler) prüfen den Flag und überspringen die Auto-Logik wenn OFF.
+
+**Warum später:** Kein Muss — die Smart-Variante trifft für die meisten User gut. Für Power-User die den Kontroll-Verlust nicht wollen ist der Toggle aber ein nettes Ventil. Braucht Settings-Sheet-Erweiterung und einmalige Migration (default true).
+
+## App-Größe weiter reduzieren
+
+**Kontext:** Nach dem Release-Build-Setup (v1.5.4, `assembleStableRelease`) sind die APKs auf ~29 MB (von 33 MB Debug). Die größten verbleibenden Blöcke sind Native-Libs (~19 MB MLKit) und `classes.dex` (~3 MB). Detail-Analyse siehe frühere Session (Session-Analyse APK-Größe).
+
+**Nächste Hebel — Reihenfolge nach Nutzen/Aufwand:**
+
+- **Per-ABI-APKs / `abiFilters "arm64-v8a"`** (~−10-14 MB, minimal-invasiv). Eine Zeile in `android/app/build.gradle`. Trade-off: läuft dann nicht mehr auf x86-Emulatoren oder 32-bit-Alt-Geräten — für Solo-User egal.
+- **QR-Scanner ersetzen** (~−15-20 MB, größter absoluter Hebel). `@capacitor-mlkit/barcode-scanning` gegen `@capacitor-community/barcode-scanner` (ZXing, ~2-3 MB) oder JS-only-Lösung (`jsQR`, fast 0 MB). Refactoring in `src/profile-share/scanner.js` nötig, QR-Qualität leicht schlechter — bei sauberen Codes irrelevant.
+- **Dish-Bilder auf WebP** (~−2-3 MB, trivial). Alle 33 JPEGs mit `cwebp -q 82` konvertieren, Dateinamen in `dishes.json` anpassen oder Fallback-Loader schreiben.
+- **Android-Ressourcen ausdünnen** (~−0,5 MB): mdpi/hdpi/xhdpi-Icon-Varianten droppen, nur xxhdpi + xxxhdpi behalten.
+
+**Ziel:** Nach abiFilters + WebP: ~15-17 MB. Nach zusätzlich QR-Scanner-Refactor: ~5-8 MB.
+
+**Warum später:** 29 MB ist nicht kritisch, aber halbiert wäre für Erstinstallationen und Downloads spürbar besser. Nach Bau-Iterationen in bestehender Session sinnvoll frisch anzugehen.
