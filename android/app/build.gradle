@@ -18,8 +18,8 @@ android {
         applicationId "com.mahlzeit.myapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 26
-        versionName "1.5.5"
+        versionCode 27
+        versionName "1.5.6"
         // Nur arm64-v8a bauen — spart ~14,7 MB APK-Groesse (armeabi-v7a + x86 + x86_64 raus).
         // Wir verteilen APKs direkt (nicht ueber Play Store), Ziel-Geraete sind alle 64-Bit-ARM.
         // Fuer 32-Bit-ARM oder x86-Emulatoren muesste dieser Filter zurueck.
