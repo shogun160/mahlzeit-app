@@ -1,9 +1,8 @@
 import { renderHeader } from './dashboard/header.js';
 import { renderDashboard } from './dashboard/render.js';
-import { rerollAll, rerollDay } from './dashboard/reroll.js';
+import { rerollDay } from './dashboard/reroll.js';
 import { toggleAllSelected } from './dashboard/selection.js';
 import { renderShoppingList } from './shopping-list/render.js';
-import { resetChecked, checkAll } from './shopping-list/check.js';
 import { mountSheet, openSheet } from './sheet/render.js';
 import { mountSettingsSheet, openSettingsSheet, refreshProfileListInOpenSheet } from './settings/render.js';
 import { mountMacroPopup, openMacroPopup } from './dashboard/macro-popup.js';
@@ -117,35 +116,12 @@ function refresh() {
   // Header ist view-abhängig — Dashboard-Actions vs. Shopping-Reset.
   renderHeader(headerRoot, {
     view: state.view,
-    onRerollAll: () => {
-      rerollAll();
-      refresh();
-      // Nach dem Neu-Rollen der Woche zurueck an den Anfang scrollen —
-      // sonst bleibt der User auf einer beliebigen Card-Position stehen
-      // und sieht die neue Woche nur teilweise. Scroll passiert auf dem
-      // View-Element, weil body/main overflow:hidden haben (siehe base.css).
-      const view = document.getElementById('view-dashboard');
-      if (view) view.scrollTo({ top: 0, behavior: 'smooth' });
-    },
     onToggleAllSelected: () => {
       toggleAllSelected();
       refresh();
     },
     onOpenSettings: () => {
       openSettingsSheet();
-    },
-    onResetChecked: () => {
-      resetChecked();
-      refresh();
-    },
-    onCheckAll: (keys, cats) => {
-      checkAll(keys);
-      // Alle betroffenen Kategorien collapsen — die Liste ist erledigt,
-      // eingeklappt spart Scrollflaeche und signalisiert den Zustand klar.
-      if (Array.isArray(cats)) {
-        for (const c of cats) state.collapsedCategories.add(c);
-      }
-      refresh();
     },
     onGoDashboard: () => {
       setView('dashboard');
