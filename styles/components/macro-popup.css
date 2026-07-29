@@ -461,8 +461,12 @@
 .macro-chart-intro {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: -20px;
+  /* Groesserer Gap zwischen Sollwert-Zeile und Hint — Hint sitzt tiefer,
+     naeher am Chart. */
+  gap: 14px;
+  /* Staerker negativer Margin zieht das Chart-SVG weiter hoch, weil die
+     Sollwert-Zeile visuell weit oben bleibt. */
+  margin-bottom: -32px;
 }
 .macro-chart-intro__row {
   display: flex;

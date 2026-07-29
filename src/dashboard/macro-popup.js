@@ -213,16 +213,14 @@ function dinnerMacroTargets() {
   };
 }
 
-// Ø-Werte. Bei mindestens einem ausgewaehlten Tag: nur diese fliessen ein
-// (Bedarfs-Pille-Semantik). Ohne Auswahl: Fallback = Durchschnitt ueber
-// ALLE 7 Tage, isFallback=true → Balken wird ausgegraut gerendert.
+// Ø-Werte immer aus ALLEN 7 Tagen — die Wochen-Zusammenfassung ist die Woche,
+// unabhaengig davon welche Tage der User fuer die Einkaufsliste ausgewaehlt hat.
+// Die Selection beeinflusst nur die visuelle Daempfung der Tages-Balken im Chart,
+// nicht mehr die Ø-Berechnung.
 function averageMacros() {
-  const selectedDays = DAYS.filter((d) => state.selected[d]);
-  const isFallback = selectedDays.length === 0;
-  const days = isFallback ? DAYS : selectedDays;
   const sum = { p: 0, kh: 0, f: 0, kcal: 0 };
   let count = 0;
-  for (const day of days) {
+  for (const day of DAYS) {
     const m = dayMacros(day);
     if (!m) continue;
     sum.p += m.p;
@@ -237,7 +235,6 @@ function averageMacros() {
     kh: sum.kh / count,
     f: sum.f / count,
     kcal: sum.kcal / count,
-    isFallback,
   };
 }
 
@@ -260,7 +257,7 @@ function renderShell() {
           ${renderProfilePills()}
           ${renderChartIntro(rangeLow, rangeHigh)}
           <div data-role="chart-slot">${renderChart(target, rangeLow, rangeHigh, avg)}</div>
-          <div data-role="donut-slot" class="macro-donut-slot ${avg?.isFallback ? 'macro-donut-slot--muted' : ''}">${renderIstMacros(avg)}</div>
+          <div data-role="donut-slot" class="macro-donut-slot">${renderIstMacros(avg)}</div>
           ${renderControls()}
         </div>
       </div>
@@ -424,7 +421,7 @@ function renderChart(target, rangeLow, rangeHigh, avg) {
     barsSvg.push(`<rect class="macro-chart__bar-hit" data-day="${d.day}" x="${x}" y="${stackTop}" width="${barW}" height="${khH + pH + fH}" />`);
     // Wochentag-Label (nur erster Buchstabe — Platz). Bei nicht-selektierten
     // Tagen dieselbe Dämpfung (opacity) wie beim Bar.
-    labelsSvg.push(`<text class="macro-chart__day-label${mutedCls ? ' macro-chart__day-label--muted' : ''}" x="${x + barW / 2}" y="${chartBottom + 16}" text-anchor="middle">${d.day.charAt(0)}</text>`);
+    labelsSvg.push(`<text class="macro-chart__day-label${mutedCls ? ' macro-chart__day-label--muted' : ''}" x="${x + barW / 2}" y="${chartBottom + 16}" text-anchor="middle">${d.day.substring(0, 2)}</text>`);
   });
 
   // Ø-Balken rechts (nur wenn avg != null). Ausgewogen-Zone 22-42% als grünes
@@ -438,10 +435,8 @@ function renderChart(target, rangeLow, rangeHigh, avg) {
     const pH = scaleY(avg.p * 4);
     const fH = scaleY(avg.f * 9);
     const avgTopKey = fH > 0.5 ? 'f' : (pH > 0.5 ? 'p' : 'kh');
-    // Fallback (kein Tag ausgewaehlt) → gleiche Damping wie die nicht-
-    // selektierten Wochentag-Bars, damit sichtbar ist: das ist nur ein
-    // Referenzwert, nicht die User-Auswahl.
-    const avgMutedCls = avg.isFallback ? ' macro-chart__bar--muted' : '';
+    // Ø-Balken ist immer die Wochen-Zusammenfassung — nie mehr gedaempft.
+    const avgMutedCls = '';
     const avgSeg = (key, y, h, colorCls) => {
       if (h <= 0) return '';
       const cls = `macro-chart__bar macro-chart__bar--${colorCls}${avgMutedCls}`;
@@ -653,14 +648,15 @@ function refreshChartAndAvg() {
   if (chartSlot) chartSlot.innerHTML = renderChart(target, rangeLow, rangeHigh, avg);
   if (donutSlot) {
     donutSlot.innerHTML = renderIstMacros(avg);
-    donutSlot.classList.toggle('macro-donut-slot--muted', !!avg?.isFallback);
+    donutSlot.classList.remove('macro-donut-slot--muted');
   }
   if (headerKcal) headerKcal.textContent = formatHeaderKcal(avg);
   bindBarHits();
 }
 
-// Intro-Zeile ueber dem Balken-Chart: Sollwert-Range in Kcal + Hinweistext
-// dass Ø-Werte auf markierten Gerichten basieren (Fallback: alle 7 Tage).
+// Intro-Zeile ueber dem Balken-Chart: Sollwert-Range in Kcal + Hinweistext.
+// Layout so justiert dass der Hint nah am Chart sitzt und das Chart selbst
+// dennoch weit oben Platz bekommt (via negativem margin-bottom im CSS).
 function renderChartIntro(rangeLow, rangeHigh) {
   if (rangeLow == null || rangeHigh == null) return '';
   const round10 = (n) => Math.round(n / 10) * 10;
@@ -672,19 +668,16 @@ function renderChartIntro(rangeLow, rangeHigh) {
         <span class="macro-chart-intro__label">Sollwert</span>
         <span class="macro-title__kcal macro-title__kcal--inactive">${lo}&thinsp;–&thinsp;${hi} kcal</span>
       </div>
-      <div class="macro-chart-intro__hint">Die Ø Ist-Werte berechnen sich auf Basis der markierten Gerichte.</div>
+      <div class="macro-chart-intro__hint">Die Ø Ist-Werte berechnen sich aus den Gerichten deiner Woche.</div>
     </div>
   `;
 }
 
-// Header-kcal: "Ø n/7 · 1032 kcal" — vor dem Wert steht wieviele Tage der
-// User gewaehlt hat (Fallback = 0/7 → Ø ist aus allen Tagen berechnet und
-// wird visuell dezenter angezeigt).
+// Header-kcal: "Ø Woche · 1032 kcal" — Ø ist immer aus allen 7 Tagen, egal ob
+// der User Tage fuer die Einkaufsliste ausgewaehlt hat.
 function formatHeaderKcal(avg) {
   if (!avg) return '';
-  const selectedCount = DAYS.filter((d) => state.selected[d]).length;
-  const kcalStr = `${Math.round(avg.kcal).toLocaleString('de-DE')} kcal`;
-  return `Ø ${selectedCount}/${DAYS.length} · ${kcalStr}`;
+  return `Ø Woche · ${Math.round(avg.kcal).toLocaleString('de-DE')} kcal`;
 }
 
 // Ist-Werte-Ausgabe wie in der Wizzard-Zusammenfassung: Kreisdiagramm links,
@@ -856,7 +849,7 @@ function refreshAvgOnly() {
   const headerKcal = rootEl.querySelector('[data-role="header-kcal"]');
   if (donutSlot) {
     donutSlot.innerHTML = renderIstMacros(avg);
-    donutSlot.classList.toggle('macro-donut-slot--muted', !!avg?.isFallback);
+    donutSlot.classList.remove('macro-donut-slot--muted');
   }
   if (headerKcal) headerKcal.textContent = formatHeaderKcal(avg);
 }
