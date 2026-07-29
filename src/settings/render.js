@@ -30,10 +30,10 @@ let onExternalChange = () => {};
 let onExternalOpenOnboarding = () => {};
 let onExternalThemeChange = () => {};
 // Zugeklappte Sections (transient — verliert sich beim App-Restart, überlebt
-// aber Sheet-Close/Reopen weil das Modul lebt). Beim ersten Oeffnen sind nur
-// "profile" und "darstellung" auf — die taeglich relevanten Sections. Daten,
+// aber Sheet-Close/Reopen weil das Modul lebt). Beim ersten Oeffnen ist nur
+// "profile" auf — die taeglich relevante Section. Darstellung, Daten,
 // Rezepte und Ueber sind default zu und muessen bewusst ausgeklappt werden.
-const collapsedSections = new Set(['daten', 'rezepte', 'ueber']);
+const collapsedSections = new Set(['darstellung', 'daten', 'rezepte', 'ueber']);
 // Zähler für sticky-Stack-Position der Section-Header. Wird bei jedem
 // renderShell() zurückgesetzt und pro section()-Aufruf inkrementiert.
 // Analog zu stackIdx in shopping-list/render.js — jeder Header klebt gestaffelt
