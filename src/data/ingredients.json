@@ -1571,6 +1571,215 @@
         "kh": 21,
         "f": 1.5
       }
+    },
+    "oel_neutral": {
+      "label": "Öl, neutral (Raps/Sonnenblume)",
+      "cat": "oel",
+      "unit": "vorrat",
+      "per100g": {
+        "kcal": 884,
+        "p": 0,
+        "kh": 0,
+        "f": 100
+      }
+    },
+    "reispapier": {
+      "label": "Reispapier (Banh Trang)",
+      "cat": "trocken",
+      "unit": "g",
+      "per100g": {
+        "kcal": 333,
+        "p": 1.0,
+        "kh": 78,
+        "f": 0.2
+      }
+    },
+    "reisnudeln_duenn": {
+      "label": "Reisnudeln, dünn (trocken)",
+      "cat": "trocken",
+      "unit": "g",
+      "per100g": {
+        "kcal": 364,
+        "p": 1.1,
+        "kh": 83,
+        "f": 0.2
+      }
+    },
+    "mango": {
+      "label": "Mango",
+      "cat": "frisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 60,
+        "p": 0.8,
+        "kh": 15,
+        "f": 0.4
+      }
+    },
+    "schnittlauch": {
+      "label": "Schnittlauch",
+      "cat": "frisch",
+      "unit": "bund",
+      "per100g": {
+        "kcal": 30,
+        "p": 3.0,
+        "kh": 4.4,
+        "f": 0.7
+      }
+    },
+    "kopfsalat": {
+      "label": "Kopfsalat / Romana",
+      "cat": "frisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 17,
+        "p": 1.2,
+        "kh": 3.0,
+        "f": 0.3
+      }
+    },
+    "erdnussbutter": {
+      "label": "Erdnussbutter (natur, ungesüßt)",
+      "cat": "sonstig",
+      "unit": "g",
+      "per100g": {
+        "kcal": 588,
+        "p": 25,
+        "kh": 20,
+        "f": 50
+      }
+    },
+    "sriracha": {
+      "label": "Sriracha-Sauce",
+      "cat": "sonstig",
+      "unit": "ml",
+      "per100g": {
+        "kcal": 93,
+        "p": 2.0,
+        "kh": 19,
+        "f": 1.0
+      }
+    },
+    "kalb_loin": {
+      "label": "Kalbsmedaillons (Loin, roh)",
+      "cat": "fleisch_fisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 127,
+        "p": 21.3,
+        "kh": 0,
+        "f": 4.2
+      }
+    },
+    "champignons": {
+      "label": "Champignons",
+      "cat": "frisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 22,
+        "p": 3.1,
+        "kh": 3.3,
+        "f": 0.3
+      }
+    },
+    "butter": {
+      "label": "Butter",
+      "cat": "kuehlung",
+      "unit": "g",
+      "per100g": {
+        "kcal": 717,
+        "p": 0.9,
+        "kh": 0.1,
+        "f": 81
+      }
+    },
+    "weisswein_trocken": {
+      "label": "Weißwein, trocken (zum Kochen)",
+      "cat": "sonstig",
+      "unit": "ml",
+      "per100g": {
+        "kcal": 83,
+        "p": 0.1,
+        "kh": 2.6,
+        "f": 0
+      }
+    },
+    "zander": {
+      "label": "Zanderfilet (Wildfang, roh)",
+      "cat": "fleisch_fisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 91,
+        "p": 18.6,
+        "kh": 0,
+        "f": 1.0
+      }
+    },
+    "senf_mittelscharf": {
+      "label": "Senf, mittelscharf",
+      "cat": "sonstig",
+      "unit": "g",
+      "per100g": {
+        "kcal": 88,
+        "p": 5.6,
+        "kh": 7.4,
+        "f": 5.0
+      }
+    },
+    "sardinen": {
+      "label": "Sardinen, roh (Wildfang, Filet)",
+      "cat": "fleisch_fisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 208,
+        "p": 24.6,
+        "kh": 0,
+        "f": 11.4
+      }
+    },
+    "daikon": {
+      "label": "Daikon (Rettich)",
+      "cat": "frisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 18,
+        "p": 0.6,
+        "kh": 4.1,
+        "f": 0.1
+      }
+    },
+    "achiote_paste": {
+      "label": "Achiote-Paste",
+      "cat": "sonstig",
+      "unit": "g",
+      "per100g": {
+        "kcal": 240,
+        "p": 3.0,
+        "kh": 40,
+        "f": 6.0
+      }
+    },
+    "orangensaft": {
+      "label": "Orangensaft",
+      "cat": "frisch",
+      "unit": "ml",
+      "per100g": {
+        "kcal": 45,
+        "p": 0.7,
+        "kh": 10.4,
+        "f": 0.2
+      }
+    },
+    "rotweinessig": {
+      "label": "Rotweinessig",
+      "cat": "sonstig",
+      "unit": "ml",
+      "per100g": {
+        "kcal": 19,
+        "p": 0.1,
+        "kh": 0.3,
+        "f": 0
+      }
     }
   }
 }
