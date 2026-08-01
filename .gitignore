@@ -36,6 +36,10 @@ releases/
 # Session-Handoffs bleiben lokal — nicht mehr im public repo tracken.
 docs/redesign/handoffs/
 
+# Implementation-Plans sind kurzlebige Artefakte pro Feature — Design-Docs
+# unter docs/superpowers/specs/ bleiben committed (dauerhafte Design-Historie).
+docs/superpowers/plans/
+
 # Android Release-Signing: Keystore + Passwoerter niemals committen.
 android/keystore.properties
 android/keystore/
