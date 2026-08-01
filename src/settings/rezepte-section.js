@@ -5,6 +5,17 @@
 import { state } from '../state.js';
 import { canManualFetch } from '../data/remote-updates.js';
 import { ICON_REFRESH } from '../dashboard/header.js';
+import { buildExportPayload, countExportableMeals } from '../calendar/export-json.js';
+import { copyToClipboard } from '../calendar/clipboard.js';
+
+// Copy-to-clipboard Icon: zwei versetzte Rechtecke (klassisches Symbol).
+// Stroke-Style analog zu ICON_REFRESH (currentColor, gleiche Stroke-Width).
+const ICON_COPY = `
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect>
+    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+  </svg>
+`;
 
 // Kurz-Status fuer die collapsed Summary rechts im Section-Header.
 export function buildRezepteSummary() {
@@ -32,6 +43,12 @@ export function renderRezepteSectionBody() {
       statusHtml = `<span class="rezepte-import__status">${status}</span>`;
     }
   }
+  const exportCount = countExportableMeals();
+  const exportSecondary = exportCount > 0
+    ? `${exportCount} ${exportCount === 1 ? 'Rezept' : 'Rezepte'} markiert`
+    : 'Keine Rezepte markiert';
+  const exportDisabled = exportCount === 0;
+
   return `
     <div class="settings-row rezepte-import-row">
       <div class="settings-row__label">
@@ -46,6 +63,22 @@ export function renderRezepteSectionBody() {
                 aria-label="Nach neuen Rezepten suchen"
                 title="Nach neuen Rezepten suchen">
           ${ICON_REFRESH}
+        </button>
+      </span>
+    </div>
+    <div class="settings-row rezepte-export-row">
+      <div class="settings-row__label">
+        <div class="settings-row__label-primary">Rezepte exportieren</div>
+        <div class="settings-row__label-secondary">${exportSecondary}</div>
+      </div>
+      <span class="settings-row__value">
+        <button type="button"
+                class="icon-btn"
+                data-action="rezepte-export"
+                ${exportDisabled ? 'disabled' : ''}
+                aria-label="Markierte Rezepte in die Zwischenablage kopieren"
+                title="Markierte Rezepte in die Zwischenablage kopieren">
+          ${ICON_COPY}
         </button>
       </span>
     </div>
@@ -92,6 +125,29 @@ export function wireRezepteSection(root, callbacks = {}) {
       onOpenUpdateSheet?.();
     });
   }
+
+  const exportBtn = root.querySelector('[data-action="rezepte-export"]');
+  if (exportBtn) {
+    exportBtn.addEventListener('click', async () => {
+      if (exportBtn.disabled) return; // Safety-Belt fuer den Disabled-State
+      const payload = buildExportPayload();
+      const count = payload.meals.length;
+      if (count === 0) {
+        // Sollte durch disabled unerreichbar sein, aber defensiv:
+        // falls das disabled-Attribut aus dem Template entfernt wird, bleibt
+        // dieser Block als letzte Absicherung.
+        onToast?.('Keine Rezepte markiert.');
+        return;
+      }
+      const json = JSON.stringify(payload, null, 2);
+      const ok = await copyToClipboard(json);
+      if (ok) {
+        onToast?.(`${count} ${count === 1 ? 'Rezept' : 'Rezepte'} kopiert — ab in den Claude-Chat.`);
+      } else {
+        onToast?.('Zwischenablage nicht erreichbar. Nochmal probieren?');
+      }
+    });
+  }
 }
 
 // Aktualisiert die Row-DOM im offenen Settings-Sheet ohne renderShell().
@@ -100,14 +156,25 @@ export function wireRezepteSection(root, callbacks = {}) {
 // No-op wenn die Row nicht (mehr) im DOM ist.
 export function refreshRezepteRow() {
   if (!lastWireCallbacks?.root) return;
-  const oldRow = lastWireCallbacks.root.querySelector('.rezepte-import-row');
-  if (!oldRow) return;
+  const root = lastWireCallbacks.root;
+  const oldImport = root.querySelector('.rezepte-import-row');
+  const oldExport = root.querySelector('.rezepte-export-row');
+  if (!oldImport) return;
   const wrapper = document.createElement('div');
   wrapper.innerHTML = renderRezepteSectionBody().trim();
-  const newRow = wrapper.firstElementChild;
-  if (!newRow) return;
-  oldRow.replaceWith(newRow);
-  wireRezepteSection(lastWireCallbacks.root, {
+  const newRows = Array.from(wrapper.children);
+  const newImport = newRows.find((el) => el.classList.contains('rezepte-import-row'));
+  const newExport = newRows.find((el) => el.classList.contains('rezepte-export-row'));
+  if (!newImport || !newExport) return;
+  oldImport.replaceWith(newImport);
+  if (oldExport) {
+    oldExport.replaceWith(newExport);
+  } else {
+    // Migration: erster Refresh nach dem Update — alte DOM hat nur die
+    // Import-Row. Danach ist die Export-Row im DOM und der if-Zweig greift.
+    newImport.insertAdjacentElement('afterend', newExport);
+  }
+  wireRezepteSection(root, {
     onOpenUpdateSheet: lastWireCallbacks.onOpenUpdateSheet,
     onToast: lastWireCallbacks.onToast,
   });
