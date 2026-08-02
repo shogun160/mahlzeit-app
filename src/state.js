@@ -1,5 +1,7 @@
 // Zentraler In-Memory-State inkl. Persistenz nach localStorage.
 
+import { BUNDLED_NEW_IDS } from './data/bundled-new-ids.js';
+
 export const DAYS = [
   'Montag',
   'Dienstag',
@@ -582,5 +584,15 @@ export function loadState() {
     return true;
   } catch (_) {
     return false;
+  } finally {
+    // Fresh-Install oder User-ohne-Remote-Check: seede BUNDLED_NEW_IDS in
+    // remoteNewIds, damit die aktuellen Bundled-Neuen im Picker als "Neu"
+    // erscheinen. Ein spaeterer User-Import (Settings > Rezepte importieren)
+    // ueberschreibt remoteNewIds mit den survived-IDs — dann greift die
+    // normale Remote-Logik. size===0-Check verhindert Ueberschreiben, falls
+    // aus irgendeinem Grund schon was drin ist.
+    if (state.remoteUpdatedAt === null && state.remoteNewIds.size === 0) {
+      state.remoteNewIds = new Set(BUNDLED_NEW_IDS);
+    }
   }
 }
