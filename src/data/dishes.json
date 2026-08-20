@@ -5,11 +5,11 @@
       "id": 1,
       "name": "Wildlachs-Bowl",
       "cuisine": "Asiatisch-Fusion",
-      "cooktime": 35,
-      "kcal": 922,
+      "cooktime": 40,
+      "kcal": 924,
       "p": 74,
-      "kh": 78,
-      "f": 36,
+      "kh": 77,
+      "f": 35,
       "tags": [
         "contains-fish",
         "contains-gluten"
@@ -20,7 +20,7 @@
           "grams": 220
         },
         {
-          "key": "reis_schwarz",
+          "key": "reis_basmati_vollkorn",
           "grams": 80
         },
         {
@@ -69,10 +69,10 @@
       "name": "Hähnchen-Skyr-Tikka",
       "cuisine": "Indisch",
       "cooktime": 40,
-      "kcal": 862,
+      "kcal": 861,
       "p": 84,
-      "kh": 77,
-      "f": 24,
+      "kh": 75,
+      "f": 25,
       "tags": [
         "contains-meat",
         "contains-lactose"
@@ -88,7 +88,7 @@
           "note": "Becher à 500 g"
         },
         {
-          "key": "reis_basmati",
+          "key": "reis_basmati_vollkorn",
           "grams": 60
         },
         {
@@ -125,7 +125,7 @@
       "steps": [
         "Hähnchen würfeln, mit Gewürzmischung, Knoblauch, Ingwer, halbem Skyr marinieren (mind. 20 Min.).",
         "Blumenkohl im Blitzhacker zu „Reis“ verarbeiten.",
-        "Basmatireis kochen.",
+        "Vollkorn-Basmati kochen.",
         "Hähnchen in Öl anbraten, restlichen Skyr + Spritzer Wasser zugeben, 8–10 Min. köcheln.",
         "Blumenkohlreis kurz andünsten, Spinat unterheben bis zusammengefallen.",
         "Anrichten."
@@ -169,7 +169,7 @@
           "grams": 6
         },
         {
-          "key": "zitrone_saft",
+          "key": "zitrone",
           "grams": 10
         },
         {
@@ -241,7 +241,7 @@
           "grams": 15
         },
         {
-          "key": "zitrone_saft",
+          "key": "zitrone",
           "grams": 8
         }
       ],
@@ -342,7 +342,7 @@
           "grams": 20
         },
         {
-          "key": "zitrone_saft",
+          "key": "zitrone",
           "grams": 8
         },
         {
@@ -365,10 +365,10 @@
       "name": "Bulgogi-Rind",
       "cuisine": "Koreanisch",
       "cooktime": 40,
-      "kcal": 866,
-      "p": 67,
-      "kh": 78,
-      "f": 29,
+      "kcal": 865,
+      "p": 68,
+      "kh": 74,
+      "f": 31,
       "tags": [
         "contains-meat",
         "contains-gluten"
@@ -379,7 +379,7 @@
           "grams": 270
         },
         {
-          "key": "reis_jasmin",
+          "key": "reis_basmati_vollkorn",
           "grams": 90
         },
         {
@@ -576,10 +576,10 @@
       "name": "Entenbrust Sesam-Orange",
       "cuisine": "Asiatisch-French",
       "cooktime": 40,
-      "kcal": 838,
-      "p": 70,
-      "kh": 80,
-      "f": 25,
+      "kcal": 837,
+      "p": 71,
+      "kh": 77,
+      "f": 27,
       "tags": [
         "contains-meat",
         "contains-gluten"
@@ -590,7 +590,7 @@
           "grams": 300
         },
         {
-          "key": "reis_jasmin",
+          "key": "reis_basmati_vollkorn",
           "grams": 80
         },
         {
@@ -681,11 +681,11 @@
       "id": 13,
       "name": "Thai-Curry Garnelen Süßkartoffel",
       "cuisine": "Thailändisch",
-      "cooktime": 35,
-      "kcal": 882,
-      "p": 77,
-      "kh": 101,
-      "f": 19,
+      "cooktime": 40,
+      "kcal": 881,
+      "p": 78,
+      "kh": 99,
+      "f": 20,
       "tags": [
         "contains-fish",
         "contains-lactose"
@@ -715,7 +715,7 @@
           "note": "aus Vorratspackung"
         },
         {
-          "key": "reis_jasmin",
+          "key": "reis_basmati_vollkorn",
           "grams": 55
         },
         {
@@ -865,11 +865,11 @@
       "id": 16,
       "name": "Wildlachs Miso Pak Choi",
       "cuisine": "Japanisch",
-      "cooktime": 30,
-      "kcal": 887,
-      "p": 72,
-      "kh": 96,
-      "f": 23,
+      "cooktime": 40,
+      "kcal": 886,
+      "p": 73,
+      "kh": 92,
+      "f": 25,
       "tags": [
         "contains-fish",
         "contains-gluten"
@@ -880,7 +880,7 @@
           "grams": 270
         },
         {
-          "key": "reis_jasmin",
+          "key": "reis_basmati_vollkorn",
           "grams": 100
         },
         {
@@ -916,10 +916,10 @@
       "name": "Rind Rogan Josh",
       "cuisine": "Nordindisch",
       "cooktime": 45,
-      "kcal": 912,
-      "p": 64,
-      "kh": 89,
-      "f": 32,
+      "kcal": 911,
+      "p": 65,
+      "kh": 86,
+      "f": 34,
       "tags": [
         "contains-meat",
         "contains-lactose"
@@ -930,7 +930,7 @@
           "grams": 250
         },
         {
-          "key": "reis_basmati",
+          "key": "reis_basmati_vollkorn",
           "grams": 85
         },
         {
@@ -971,7 +971,7 @@
         "Gewürzmischung kurz mitrösten, passierte Tomaten zugeben.",
         "Mit Wasser/Brühe auffüllen, 35–40 Min. köcheln bis Rind zart.",
         "Joghurt kurz vor Ende unterrühren (nicht kochen).",
-        "Mit Basmatireis servieren."
+        "Mit Vollkorn-Basmati servieren."
       ],
       "cuisineGroup": "asian",
       "proteinCategory": "beef"
@@ -1333,7 +1333,7 @@
           "grams": 4
         },
         {
-          "key": "zitrone_saft",
+          "key": "zitrone",
           "grams": 48
         },
         {
@@ -1656,11 +1656,11 @@
       "id": 25,
       "name": "Tofu-Tempeh-Bowl asiatisch",
       "cuisine": "Asiatisch-vegetarisch",
-      "cooktime": 35,
+      "cooktime": 40,
       "kcal": 1182,
       "p": 82,
-      "kh": 84,
-      "f": 65,
+      "kh": 83,
+      "f": 66,
       "tags": [
         "contains-gluten"
       ],
@@ -1690,7 +1690,7 @@
           "grams": 80
         },
         {
-          "key": "reis_basmati",
+          "key": "reis_basmati_vollkorn",
           "grams": 30
         },
         {
@@ -1726,7 +1726,7 @@
           "grams": 5
         },
         {
-          "key": "limette_saft",
+          "key": "limette",
           "grams": 10
         },
         {
@@ -1770,7 +1770,7 @@
       ],
       "ingredients": [
         {
-          "key": "putenhack",
+          "key": "putenbrust",
           "grams": 200
         },
         {
@@ -1913,7 +1913,7 @@
           "grams": 10
         },
         {
-          "key": "zitrone_saft",
+          "key": "zitrone",
           "grams": 15
         },
         {
@@ -2166,7 +2166,7 @@
           "grams": 20
         },
         {
-          "key": "limette_saft",
+          "key": "limette",
           "grams": 10
         },
         {
@@ -2261,7 +2261,7 @@
           "grams": 1
         },
         {
-          "key": "zitrone_saft",
+          "key": "zitrone",
           "grams": 15
         },
         {
@@ -2332,7 +2332,7 @@
           "grams": 20
         },
         {
-          "key": "limette_saft",
+          "key": "limette",
           "grams": 10
         },
         {
@@ -2430,7 +2430,7 @@
           "note": "rot"
         },
         {
-          "key": "zitrone_saft",
+          "key": "zitrone",
           "grams": 10
         },
         {
@@ -2492,7 +2492,7 @@
           "note": "für Pico de Gallo"
         },
         {
-          "key": "limette_saft",
+          "key": "limette",
           "grams": 15,
           "note": "12 g Pico de Gallo, 3 g Skyr-Dip"
         },
@@ -2643,29 +2643,108 @@
       "p": 59,
       "kh": 98,
       "f": 23,
-      "tags": ["contains-meat", "contains-lactose"],
+      "tags": [
+        "contains-meat",
+        "contains-lactose"
+      ],
       "ingredients": [
-        { "key": "haehnchenbrust", "grams": 130 },
-        { "key": "oel_neutral", "grams": 5, "note": "zum Anbraten" },
-        { "key": "reispapier", "grams": 63, "note": "7 Blatt à 9 g" },
-        { "key": "reisnudeln_duenn", "grams": 20 },
-        { "key": "karotte", "grams": 55 },
-        { "key": "gurke", "grams": 60 },
-        { "key": "mango", "grams": 30 },
-        { "key": "minze", "grams": 5 },
-        { "key": "thai_basilikum", "grams": 5 },
-        { "key": "schnittlauch", "grams": 5 },
-        { "key": "chili_frisch", "grams": 10, "note": "5 g Ringe in die Rollen, 5 g mit Kernen in Dip 1" },
-        { "key": "erdnuesse", "grams": 15, "note": "geröstet, gehackt (Topping)" },
-        { "key": "erdnussbutter", "grams": 10, "note": "Dip 1" },
-        { "key": "sriracha", "grams": 10, "note": "Dip 1" },
-        { "key": "sojasauce", "grams": 15, "note": "Marinade + Dip 1" },
-        { "key": "limette_saft", "grams": 15, "note": "Marinade, Dip 1 + Dip 2" },
-        { "key": "knoblauch", "grams": 4, "note": "Marinade + Dip 1" },
-        { "key": "ingwer", "grams": 8, "note": "Marinade + Dip 1 + Dip 2" },
-        { "key": "skyr", "grams": 150, "note": "Dip 2 (Miso-Skyr)" },
-        { "key": "miso", "grams": 8, "note": "Dip 2" },
-        { "key": "sesam", "grams": 3, "note": "Dip 2" }
+        {
+          "key": "haehnchenbrust",
+          "grams": 130
+        },
+        {
+          "key": "oel_neutral",
+          "grams": 5,
+          "note": "zum Anbraten"
+        },
+        {
+          "key": "reispapier",
+          "grams": 63,
+          "note": "7 Blatt à 9 g"
+        },
+        {
+          "key": "reisnudeln_duenn",
+          "grams": 20
+        },
+        {
+          "key": "karotte",
+          "grams": 55
+        },
+        {
+          "key": "gurke",
+          "grams": 60
+        },
+        {
+          "key": "mango",
+          "grams": 30
+        },
+        {
+          "key": "minze",
+          "grams": 5
+        },
+        {
+          "key": "thai_basilikum",
+          "grams": 5
+        },
+        {
+          "key": "schnittlauch",
+          "grams": 5
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 10,
+          "note": "5 g Ringe in die Rollen, 5 g mit Kernen in Dip 1"
+        },
+        {
+          "key": "erdnuesse",
+          "grams": 15,
+          "note": "geröstet, gehackt (Topping)"
+        },
+        {
+          "key": "erdnussbutter",
+          "grams": 10,
+          "note": "Dip 1"
+        },
+        {
+          "key": "sriracha",
+          "grams": 10,
+          "note": "Dip 1"
+        },
+        {
+          "key": "sojasauce",
+          "grams": 15,
+          "note": "Marinade + Dip 1"
+        },
+        {
+          "key": "limette",
+          "grams": 15,
+          "note": "Marinade, Dip 1 + Dip 2"
+        },
+        {
+          "key": "knoblauch",
+          "grams": 4,
+          "note": "Marinade + Dip 1"
+        },
+        {
+          "key": "ingwer",
+          "grams": 8,
+          "note": "Marinade + Dip 1 + Dip 2"
+        },
+        {
+          "key": "skyr",
+          "grams": 150,
+          "note": "Dip 2 (Miso-Skyr)"
+        },
+        {
+          "key": "miso",
+          "grams": 8,
+          "note": "Dip 2"
+        },
+        {
+          "key": "sesam",
+          "grams": 3,
+          "note": "Dip 2"
+        }
       ],
       "steps": [
         "Sojasauce, die Hälfte des Limettensafts, Knoblauch und Ingwer verrühren. Hähnchen in dünne Streifen schneiden und 10 Min. darin marinieren.",
@@ -2688,27 +2767,99 @@
       "p": 61,
       "kh": 114,
       "f": 20,
-      "tags": ["contains-fish", "contains-lactose"],
+      "tags": [
+        "contains-fish",
+        "contains-lactose"
+      ],
       "ingredients": [
-        { "key": "garnelen", "grams": 160, "note": "Wildfang" },
-        { "key": "oel_neutral", "grams": 6, "note": "zum Anbraten" },
-        { "key": "edamame", "grams": 60, "note": "gegart" },
-        { "key": "reispapier", "grams": 63, "note": "7 Blatt à 9 g" },
-        { "key": "reisnudeln_duenn", "grams": 35 },
-        { "key": "karotte", "grams": 60 },
-        { "key": "gurke", "grams": 70 },
-        { "key": "kopfsalat", "grams": 30 },
-        { "key": "minze", "grams": 5 },
-        { "key": "thai_basilikum", "grams": 5 },
-        { "key": "schnittlauch", "grams": 5 },
-        { "key": "chili_frisch", "grams": 13, "note": "5 g Ringe in die Rollen, 6 g Dip 1, 2 g Dip 2" },
-        { "key": "erdnuesse", "grams": 18, "note": "geröstet, gehackt" },
-        { "key": "fischsauce", "grams": 13, "note": "10 g Dip 1, 3 g Dip 2" },
-        { "key": "limette_saft", "grams": 23, "note": "15 g Dip 1, 8 g Dip 2" },
-        { "key": "honig", "grams": 10, "note": "Dip 1 + Dip 2" },
-        { "key": "knoblauch", "grams": 4, "note": "Dip 1" },
-        { "key": "skyr", "grams": 100, "note": "Dip 2 (Skyr-Limetten)" },
-        { "key": "ingwer", "grams": 3, "note": "Dip 2" }
+        {
+          "key": "garnelen",
+          "grams": 160,
+          "note": "Wildfang"
+        },
+        {
+          "key": "oel_neutral",
+          "grams": 6,
+          "note": "zum Anbraten"
+        },
+        {
+          "key": "edamame",
+          "grams": 60,
+          "note": "gegart"
+        },
+        {
+          "key": "reispapier",
+          "grams": 63,
+          "note": "7 Blatt à 9 g"
+        },
+        {
+          "key": "reisnudeln_duenn",
+          "grams": 35
+        },
+        {
+          "key": "karotte",
+          "grams": 60
+        },
+        {
+          "key": "gurke",
+          "grams": 70
+        },
+        {
+          "key": "kopfsalat",
+          "grams": 30
+        },
+        {
+          "key": "minze",
+          "grams": 5
+        },
+        {
+          "key": "thai_basilikum",
+          "grams": 5
+        },
+        {
+          "key": "schnittlauch",
+          "grams": 5
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 13,
+          "note": "5 g Ringe in die Rollen, 6 g Dip 1, 2 g Dip 2"
+        },
+        {
+          "key": "erdnuesse",
+          "grams": 18,
+          "note": "geröstet, gehackt"
+        },
+        {
+          "key": "fischsauce",
+          "grams": 13,
+          "note": "10 g Dip 1, 3 g Dip 2"
+        },
+        {
+          "key": "limette",
+          "grams": 23,
+          "note": "15 g Dip 1, 8 g Dip 2"
+        },
+        {
+          "key": "honig",
+          "grams": 10,
+          "note": "Dip 1 + Dip 2"
+        },
+        {
+          "key": "knoblauch",
+          "grams": 4,
+          "note": "Dip 1"
+        },
+        {
+          "key": "skyr",
+          "grams": 100,
+          "note": "Dip 2 (Skyr-Limetten)"
+        },
+        {
+          "key": "ingwer",
+          "grams": 3,
+          "note": "Dip 2"
+        }
       ],
       "steps": [
         "Garnelen mit etwas Salz würzen. Öl in einer Pfanne erhitzen, Garnelen 2–3 Min. anbraten, bis sie rosa und durch sind. Auskühlen lassen und längs halbieren.",
@@ -2731,18 +2882,57 @@
       "p": 78,
       "kh": 67,
       "f": 26,
-      "tags": ["contains-meat", "contains-lactose", "high-protein"],
+      "tags": [
+        "contains-meat",
+        "contains-lactose",
+        "high-protein"
+      ],
       "ingredients": [
-        { "key": "kalb_loin", "grams": 250 },
-        { "key": "kartoffeln", "grams": 300, "note": "für Püree" },
-        { "key": "champignons", "grams": 150 },
-        { "key": "schalotte", "grams": 25 },
-        { "key": "petersilie", "grams": 10 },
-        { "key": "oel_neutral", "grams": 6, "note": "zum Anbraten" },
-        { "key": "butter", "grams": 10, "note": "Sauce" },
-        { "key": "dijon_senf", "grams": 15 },
-        { "key": "skyr", "grams": 100, "note": "statt Sahne" },
-        { "key": "weisswein_trocken", "grams": 30, "note": "zum Ablöschen" }
+        {
+          "key": "kalb_loin",
+          "grams": 250
+        },
+        {
+          "key": "kartoffeln",
+          "grams": 300,
+          "note": "für Püree"
+        },
+        {
+          "key": "champignons",
+          "grams": 150
+        },
+        {
+          "key": "schalotte",
+          "grams": 25
+        },
+        {
+          "key": "petersilie",
+          "grams": 10
+        },
+        {
+          "key": "oel_neutral",
+          "grams": 6,
+          "note": "zum Anbraten"
+        },
+        {
+          "key": "butter",
+          "grams": 10,
+          "note": "Sauce"
+        },
+        {
+          "key": "dijon_senf",
+          "grams": 15
+        },
+        {
+          "key": "skyr",
+          "grams": 100,
+          "note": "statt Sahne"
+        },
+        {
+          "key": "weisswein_trocken",
+          "grams": 30,
+          "note": "zum Ablöschen"
+        }
       ],
       "steps": [
         "Kartoffeln schälen, in Salzwasser 15–20 Min. weich kochen.",
@@ -2765,19 +2955,64 @@
       "p": 95,
       "kh": 67,
       "f": 32,
-      "tags": ["contains-fish", "contains-lactose", "high-protein"],
+      "tags": [
+        "contains-fish",
+        "contains-lactose",
+        "high-protein"
+      ],
       "ingredients": [
-        { "key": "zander", "grams": 350, "note": "Süßwasser-Wildfang, Filet" },
-        { "key": "kartoffeln", "grams": 280, "note": "für Bratkartoffeln" },
-        { "key": "zwiebel", "grams": 40 },
-        { "key": "gurke", "grams": 150, "note": "für Gurkensalat" },
-        { "key": "schnittlauch", "grams": 8 },
-        { "key": "petersilie", "grams": 7 },
-        { "key": "butter", "grams": 18, "note": "Braten + Mandelbutter" },
-        { "key": "mandeln", "grams": 25, "note": "Blättchen, geröstet" },
-        { "key": "skyr", "grams": 140, "note": "60 g Gurkensalat-Dressing, 80 g Kräutersauce" },
-        { "key": "senf_mittelscharf", "grams": 10, "note": "Kräutersauce" },
-        { "key": "zitrone_saft", "grams": 15, "note": "Gurkensalat + Kräutersauce" }
+        {
+          "key": "zander",
+          "grams": 350,
+          "note": "Süßwasser-Wildfang, Filet"
+        },
+        {
+          "key": "kartoffeln",
+          "grams": 280,
+          "note": "für Bratkartoffeln"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 40
+        },
+        {
+          "key": "gurke",
+          "grams": 150,
+          "note": "für Gurkensalat"
+        },
+        {
+          "key": "schnittlauch",
+          "grams": 8
+        },
+        {
+          "key": "petersilie",
+          "grams": 7
+        },
+        {
+          "key": "butter",
+          "grams": 18,
+          "note": "Braten + Mandelbutter"
+        },
+        {
+          "key": "mandeln",
+          "grams": 25,
+          "note": "Blättchen, geröstet"
+        },
+        {
+          "key": "skyr",
+          "grams": 140,
+          "note": "60 g Gurkensalat-Dressing, 80 g Kräutersauce"
+        },
+        {
+          "key": "senf_mittelscharf",
+          "grams": 10,
+          "note": "Kräutersauce"
+        },
+        {
+          "key": "zitrone",
+          "grams": 15,
+          "note": "Gurkensalat + Kräutersauce"
+        }
       ],
       "steps": [
         "Kartoffeln in Scheiben schneiden. In einer Pfanne mit einem Teil der Butter und den fein gewürfelten Zwiebeln 15–20 Min. knusprig braten.",
@@ -2794,25 +3029,75 @@
       "id": 40,
       "name": "Iwashi Shioyaki mit Daikon, Ponzu und Miso-Skyr-Dip",
       "cuisine": "Japanisch",
-      "cooktime": 25,
-      "kcal": 796,
+      "cooktime": 40,
+      "kcal": 795,
       "p": 65,
-      "kh": 67,
-      "f": 27,
-      "tags": ["contains-fish", "contains-lactose", "high-protein"],
+      "kh": 65,
+      "f": 28,
+      "tags": [
+        "contains-fish",
+        "contains-lactose",
+        "high-protein"
+      ],
       "ingredients": [
-        { "key": "sardinen", "grams": 140, "note": "Wildfang, Filet" },
-        { "key": "oel_neutral", "grams": 2.5, "note": "zum Braten" },
-        { "key": "reis_basmati", "grams": 55 },
-        { "key": "edamame", "grams": 110, "note": "gegart" },
-        { "key": "daikon", "grams": 100, "note": "gerieben" },
-        { "key": "fruehlingszwiebel", "grams": 10 },
-        { "key": "sojasauce", "grams": 15, "note": "Ponzu" },
-        { "key": "limette_saft", "grams": 20, "note": "15 g Ponzu, 5 g Dip" },
-        { "key": "skyr", "grams": 150, "note": "Miso-Skyr-Dip" },
-        { "key": "miso", "grams": 8, "note": "Miso-Skyr-Dip (weiße Shiro-Miso)" },
-        { "key": "ingwer", "grams": 3, "note": "Dip" },
-        { "key": "sesam", "grams": 3, "note": "Dip / Topping" }
+        {
+          "key": "sardinen",
+          "grams": 140,
+          "note": "Wildfang, Filet"
+        },
+        {
+          "key": "oel_neutral",
+          "grams": 2.5,
+          "note": "zum Braten"
+        },
+        {
+          "key": "reis_basmati_vollkorn",
+          "grams": 55
+        },
+        {
+          "key": "edamame",
+          "grams": 110,
+          "note": "gegart"
+        },
+        {
+          "key": "daikon",
+          "grams": 100,
+          "note": "gerieben"
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "grams": 10
+        },
+        {
+          "key": "sojasauce",
+          "grams": 15,
+          "note": "Ponzu"
+        },
+        {
+          "key": "limette",
+          "grams": 20,
+          "note": "15 g Ponzu, 5 g Dip"
+        },
+        {
+          "key": "skyr",
+          "grams": 150,
+          "note": "Miso-Skyr-Dip"
+        },
+        {
+          "key": "miso",
+          "grams": 8,
+          "note": "Miso-Skyr-Dip (weiße Shiro-Miso)"
+        },
+        {
+          "key": "ingwer",
+          "grams": 3,
+          "note": "Dip"
+        },
+        {
+          "key": "sesam",
+          "grams": 3,
+          "note": "Dip / Topping"
+        }
       ],
       "steps": [
         "Reis nach Packungsangabe kochen.",
@@ -2832,22 +3117,67 @@
       "cooktime": 40,
       "kcal": 909,
       "p": 83,
-      "kh": 94,
-      "f": 21,
-      "tags": ["contains-meat", "high-protein"],
+      "kh": 92,
+      "f": 22,
+      "tags": [
+        "contains-meat",
+        "high-protein"
+      ],
       "ingredients": [
-        { "key": "schweinefilet", "grams": 300, "note": "mager" },
-        { "key": "olivenoel", "grams": 8, "note": "Marinade + Anbraten" },
-        { "key": "achiote_paste", "grams": 18 },
-        { "key": "orangensaft", "grams": 30 },
-        { "key": "limette_saft", "grams": 15 },
-        { "key": "knoblauch", "grams": 6 },
-        { "key": "bohnen_schwarz", "grams": 160, "note": "Dose, abgetropft" },
-        { "key": "reis_basmati", "grams": 40 },
-        { "key": "rotkohl", "grams": 100, "note": "für Escabeche" },
-        { "key": "rote_zwiebel", "grams": 40, "note": "für Escabeche" },
-        { "key": "rotweinessig", "grams": 15 },
-        { "key": "gewuerz_koriander", "grams": 2, "note": "Koriandersamen, gemörsert" }
+        {
+          "key": "schweinefilet",
+          "grams": 300,
+          "note": "mager"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 8,
+          "note": "Marinade + Anbraten"
+        },
+        {
+          "key": "achiote_paste",
+          "grams": 18
+        },
+        {
+          "key": "orangensaft",
+          "grams": 30
+        },
+        {
+          "key": "limette",
+          "grams": 15
+        },
+        {
+          "key": "knoblauch",
+          "grams": 6
+        },
+        {
+          "key": "bohnen_schwarz",
+          "grams": 160,
+          "note": "Dose, abgetropft"
+        },
+        {
+          "key": "reis_basmati_vollkorn",
+          "grams": 40
+        },
+        {
+          "key": "rotkohl",
+          "grams": 100,
+          "note": "für Escabeche"
+        },
+        {
+          "key": "rote_zwiebel",
+          "grams": 40,
+          "note": "für Escabeche"
+        },
+        {
+          "key": "rotweinessig",
+          "grams": 15
+        },
+        {
+          "key": "gewuerz_koriander",
+          "grams": 2,
+          "note": "Koriandersamen, gemörsert"
+        }
       ],
       "steps": [
         "Rote Zwiebel in feine Ringe schneiden, mit Rotkohl (in Streifen), Rotweinessig und einer Prise Salz vermengen. Mind. 15 Min. ziehen lassen (Escabeche).",

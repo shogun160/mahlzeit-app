@@ -3,7 +3,7 @@
 **Auto-generiert aus `src/data/ingredients.json` — nicht manuell editieren.**
 Neu erzeugen: `node scripts/zutaten-katalog.js`
 
-**153 Zutaten** gesamt, sortiert nach Kategorie.
+**150 Zutaten** gesamt, sortiert nach Kategorie.
 
 ## Vor dem Anlegen einer neuen Zutat
 
@@ -12,7 +12,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 3. Bei Unit-Abweichung (Bund vs. g) trotzdem die bestehende Zutat nutzen, wenn semantisch dieselbe — Guardrail 8 verhindert Duplikate wie zwei Petersilie-Einträge, die die Einkaufsliste doppelt zeigen.
 4. Nur wenn wirklich neu → in `ingredients.json` anlegen, dann `node scripts/zutaten-katalog.js` ausführen.
 
-## Fleisch & Fisch (18)
+## Fleisch & Fisch (19)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -22,6 +22,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `kabeljau` | Kabeljau (Wildfang), Filet | g | 82 | 17.8 | 0 | 0.7 |
 | `kalb_loin` | Kalbsmedaillons (Loin, roh) | g | 127 | 21.3 | 0 | 4.2 |
 | `lammkeule` | Lammkeule, mager | g | 170 | 20 | 0 | 10 |
+| `putenbrust` | Putenbrust | g | 105 | 24 | 0 | 1 |
 | `putenhack` | Putenhack | g | 149 | 19.6 | 0 | 7.6 |
 | `rind_sirloin` | Rind (Sirloin/Flanksteak) | g | 137 | 21 | 0 | 5.4 |
 | `rinderfilet` | Rinderfilet | g | 143 | 21 | 0 | 6 |
@@ -51,64 +52,63 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `tempeh` | Soja-Tempeh | g | 193 | 19 | 9 | 11 |
 | `tofu_fest` | Tofu, fest | g | 144 | 15.8 | 2.8 | 8.7 |
 
-## Frisch (Gemüse, Kräuter, Obst) (52)
+## Frisch (Gemüse, Kräuter, Obst) (51)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
-| `aubergine` | Aubergine | g | 25 | 1 | 4 | 0.2 |
+| `aubergine` | Aubergine | stueck × 250 g | 25 | 1 | 4 | 0.2 |
 | `austernpilze` | Austernpilze | g | 33 | 3.3 | 6.1 | 0.4 |
 | `avocado` | Avocado | stueck × 150 g | 160 | 2 | 8.5 | 14.7 |
 | `spinat` | Baby-Spinat | g | 23 | 2.9 | 3.6 | 0.4 |
 | `blumenkohl` | Blumenkohl | stueck × 700 g | 25 | 2 | 5 | 0.3 |
-| `brokkoli` | Brokkoli | g | 28 | 3.4 | 2.7 | 0.4 |
+| `brokkoli` | Brokkoli | stueck × 400 g | 28 | 3.4 | 2.7 | 0.4 |
 | `buschbohnen` | Buschbohnen | g | 32 | 1.8 | 4 | 0.2 |
 | `champignons` | Champignons | g | 22 | 3.1 | 3.3 | 0.3 |
 | `cherry_tomate` | Cherry-Tomaten | g | 17 | 0.9 | 3.5 | 0.2 |
 | `chili_frisch` | Chili, frisch (mit Kernen) | stueck × 6 g | 40 | 1.9 | 8.8 | 0.4 |
 | `curryblatt` | Curryblätter, frisch | g | 108 | 6 | 18.7 | 1 |
-| `daikon` | Daikon (Rettich) | g | 18 | 0.6 | 4.1 | 0.1 |
+| `daikon` | Daikon (Rettich) | stueck × 400 g | 18 | 0.6 | 4.1 | 0.1 |
 | `fenchel` | Fenchel | stueck × 300 g | 31 | 1.2 | 7.3 | 0.2 |
 | `fruehlingszwiebel` | Frühlingszwiebel | bund × 80 g | 32 | 2 | 7 | 0 |
 | `galangal` | Galangal | g | 71 | 1.6 | 15 | 0.5 |
-| `paprika_gelb` | Gelbe Paprika | g | 28 | 1 | 5 | 0.3 |
+| `paprika_gelb` | Gelbe Paprika | stueck × 150 g | 28 | 1 | 5 | 0.3 |
 | `granatapfelkerne` | Granatapfelkerne | g | 83 | 1.7 | 18.7 | 1.2 |
 | `ingwer` | Ingwer | g | 80 | 1.8 | 18 | 0.8 |
 | `karotte` | Karotte | stueck × 70 g | 41 | 1 | 9.5 | 0.2 |
 | `karotten_bunt` | Karotten, bunt | stueck × 70 g | 41 | 0.9 | 9.6 | 0.2 |
 | `kartoffeln` | Kartoffeln | stueck × 150 g | 77 | 2 | 17 | 0.1 |
 | `knoblauch` | Knoblauch | zehe × 3 g | 148 | 6.7 | 33.3 | 0 |
-| `kopfsalat` | Kopfsalat / Romana | g | 17 | 1.2 | 3 | 0.3 |
+| `kopfsalat` | Kopfsalat / Romana | stueck × 300 g | 17 | 1.2 | 3 | 0.3 |
 | `kurkuma_frisch` | Kurkuma, frisch | g | 82 | 1.7 | 13.4 | 1.1 |
-| `lauch` | Lauch | g | 30 | 1.5 | 3.3 | 0.3 |
-| `limette` | Limette (für Saft) | stueck × 25 g | 25 | 0 | 8 | 0 |
-| `limette_saft` | Limettensaft | ml (el) | 25 | 0.4 | 8.4 | 0.1 |
+| `lauch` | Lauch | stueck × 200 g | 30 | 1.5 | 3.3 | 0.3 |
+| `limette` | Limette, Saft | stueck × 25 g | 25 | 0.4 | 8.4 | 0.1 |
 | `mais_kolben` | Maiskolben | stueck × 200 g | 108 | 3.3 | 21 | 1.5 |
-| `mango` | Mango | g | 60 | 0.8 | 15 | 0.4 |
+| `mango` | Mango | stueck × 300 g | 60 | 0.8 | 15 | 0.4 |
 | `minze` | Minze, frisch | g | 44 | 3.3 | 8.4 | 0.7 |
-| `orange` | Orange | g | 47 | 0.9 | 8.3 | 0.1 |
+| `orange` | Orange | stueck × 200 g | 47 | 0.9 | 8.3 | 0.1 |
 | `orangensaft` | Orangensaft | ml | 45 | 0.7 | 10.4 | 0.2 |
 | `pak_choi` | Pak Choi / Bok Choy | stueck × 200 g | 13 | 1.5 | 2.2 | 0.2 |
 | `paprika` | Paprika | stueck × 150 g | 31 | 1 | 6 | 0.3 |
 | `petersilie` | Petersilie | bund × 30 g | 36 | 4 | 6 | 0 |
 | `radieschen` | Radieschen | g | 16 | 0.7 | 3.4 | 0.1 |
 | `rosmarin_thymian` | Rosmarin & Thymian | g | 100 | 3 | 20 | 6 |
-| `rote_zwiebel` | Rote Zwiebel | g | 40 | 1.2 | 9.3 | 0.2 |
+| `rote_zwiebel` | Rote Zwiebel | stueck × 100 g | 40 | 1.2 | 9.3 | 0.2 |
 | `rotkohl` | Rotkohl | g | 21 | 1.5 | 3.5 | 0.2 |
 | `rucola` | Rucola | g | 25 | 2.6 | 2 | 0.7 |
 | `gurke` | Salatgurke | stueck × 300 g | 12 | 0.6 | 2.2 | 0.2 |
-| `schalotte` | Schalotte | g | 72 | 2.5 | 16 | 0.1 |
+| `schalotte` | Schalotte | stueck × 20 g | 72 | 2.5 | 16 | 0.1 |
 | `schnittlauch` | Schnittlauch | bund | 30 | 3 | 4.4 | 0.7 |
-| `paprika_spitz` | Spitzpaprika | g | 31 | 1 | 6 | 0.3 |
+| `paprika_spitz` | Spitzpaprika | stueck × 100 g | 31 | 1 | 6 | 0.3 |
 | `sellerie_stauden` | Staudensellerie | g | 16 | 1.2 | 2.2 | 0.3 |
 | `suesskartoffel` | Süßkartoffel | stueck × 250 g | 86 | 1.6 | 20 | 0.1 |
 | `thai_basilikum` | Thai-Basilikum | g | 22 | 3.2 | 2.7 | 0.6 |
-| `tomate` | Tomate | g | 18 | 0.9 | 3.9 | 0.2 |
+| `tomate` | Tomate | stueck × 100 g | 18 | 0.9 | 3.9 | 0.2 |
+| `zitrone` | Zitrone, Saft | stueck × 40 g | 22 | 0.4 | 6.9 | 0.2 |
 | `zitronengras` | Zitronengras | g | 99 | 1.8 | 25 | 0.5 |
-| `zitrone_saft` | Zitronensaft | ml (el) | 22 | 0.4 | 6.9 | 0.2 |
 | `zucchini` | Zucchini | stueck × 200 g | 17 | 1.2 | 3.1 | 0.3 |
 | `zwiebel` | Zwiebel | stueck × 100 g | 40 | 1 | 9.2 | 0 |
 
-## Trocken (Reis, Pasta, Bohnen, Nüsse) (32)
+## Trocken (Reis, Pasta, Bohnen, Nüsse) (29)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -128,10 +128,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `miso` | Miso-Paste | g (tl) | 199 | 12 | 26 | 6 |
 | `pinienkerne` | Pinienkerne | g | 673 | 14 | 13 | 68 |
 | `quinoa` | Quinoa (trocken) | g | 368 | 14.1 | 57.2 | 6.1 |
-| `reis_basmati` | Reis, Basmati | g | 356 | 7.2 | 77 | 0.7 |
-| `reis_jasmin` | Reis, Jasmin | g | 356 | 7 | 77 | 0.6 |
 | `reis_rundkorn` | Reis, Rundkorn/Bomba | g | 349 | 6.7 | 77.5 | 0.6 |
-| `reis_schwarz` | Reis, schwarz | g | 353 | 8.2 | 74 | 3.2 |
 | `reisnudeln_duenn` | Reisnudeln, dünn (trocken) | g | 364 | 1.1 | 83 | 0.2 |
 | `reispapier` | Reispapier (Banh Trang) | g | 333 | 1 | 78 | 0.2 |
 | `linsen_rot_trocken` | Rote Linsen (trocken) | g | 353 | 24.6 | 60.1 | 1.1 |
