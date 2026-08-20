@@ -4,8 +4,10 @@
 //  1. leere Auswahl → meals = []
 //  2. ein selected Day mit Rezept → 1 Meal mit korrekten Feldern
 //  3. mehrere Tage inkl. nicht selected → nur selected im Output
-//  4. Rezept mit Vorrat-Zutat ohne displayUnit → quantity = "Vorrat prüfen"
+//  4. Rezept mit Vorrat-Zutat ohne displayUnit → konkrete Kochmenge statt
+//     "Vorrat prüfen" (der Export ist eine Kochanleitung, keine Einkaufsliste)
 //  5. countExportableMeals stimmt mit meals.length ueberein
+//  6. quantity/grams sind deckungsgleich mit dem Detail-Sheet-Pfad
 //
 // Ausfuehren: node scripts/sim-calendar-export.mjs
 
@@ -78,10 +80,9 @@ reset();
 }
 
 // --- Case 4: Vorrat-Zutat ohne displayUnit -------------------------------
-// Wir brauchen ein Rezept mit einer Vorrat-Zutat ohne displayUnit. Die
-// meisten Vorrat-Zutaten (Salz, Pfeffer, Sesam) erfuellen das. Statt ein
-// spezifisches Rezept zu suchen, iterieren wir alle dishes und suchen einen
-// Kandidaten. Wenn keiner existiert: Test skippen mit Hinweis.
+// Vorrat-Zutaten (Salz, Pfeffer, Sesam) tragen im Einkaufs-Formatierer sum=0
+// und werden dort zu "Vorrat prüfen". Im Export ist das falsch: er ist eine
+// Kochanleitung, dort gehoert die konkrete Menge hin — genau wie im Rezept.
 reset();
 {
   const { dishesById } = await import('../src/data/dishes.js');
@@ -97,11 +98,50 @@ reset();
   } else {
     state.selected['Montag'] = true;
     state.assignment['Montag'] = candidateId;
+    const dish = dishesById.get(candidateId);
+    const vorratKeys = dish.ingredients.filter((i) => i.unit === 'vorrat' && !i.displayUnit);
     const payload = buildExportPayload();
     const meal = payload.meals[0];
-    const vorratItem = meal.ingredients.find((i) => i.quantity === 'Vorrat prüfen');
-    assertEq(vorratItem != null, true, `Case 4: Rezept ${meal.name} sollte "Vorrat pruefen" enthalten`);
+    const items = vorratKeys.map((ing) => meal.ingredients.find((i) => i.label === ing.label));
+    assertEq(
+      items.every((i) => i && i.quantity !== 'Vorrat prüfen' && i.grams > 0),
+      true,
+      `Case 4: Vorrat-Zutaten in ${meal.name} tragen eine Kochmenge`
+    );
   }
+}
+
+// --- Case 6: Mengen deckungsgleich mit dem Detail-Sheet -------------------
+// Der Export hat frueher formatQuantity benutzt — den Einkaufs-Formatierer,
+// der auf ganze Stueck aufrundet. Bei Faktor 1.125 wurde aus einer halben
+// Gurke "1 Stück", also die doppelte Menge. Hier gegen den Sheet-Pfad
+// (scaledGramsForDay + formatIngredientQuantity) gegenpruefen, ueber ALLE
+// Rezepte und mit portions > 1 (dort greift zusaetzlich die sqrt-Daempfung
+// fuer Aromageber).
+reset();
+{
+  const { dishesById } = await import('../src/data/dishes.js');
+  const { scaledGramsForDay } = await import('../src/nutrition/scale.js');
+  const { formatIngredientQuantity } = await import('../src/util/format.js');
+
+  const abweichungen = [];
+  for (const [id, dish] of dishesById) {
+    for (const portions of [1, 3]) {
+      state.selected['Montag'] = true;
+      state.assignment['Montag'] = id;
+      state.portions['Montag'] = portions;
+      const meal = buildExportPayload().meals[0];
+      dish.ingredients.forEach((ing, idx) => {
+        const grams = scaledGramsForDay(ing, portions, dish);
+        const soll = formatIngredientQuantity(ing, grams);
+        const ist = meal.ingredients[idx];
+        if (ist.quantity !== soll || ist.grams !== Math.round(grams)) {
+          abweichungen.push(`id ${id} p${portions} ${ing.label}: "${ist.quantity}" statt "${soll}"`);
+        }
+      });
+    }
+  }
+  assertEq(abweichungen.slice(0, 5), [], `Case 6: Export == Rezept-Anzeige (${dishesById.size} Rezepte)`);
 }
 
 // --- Case 5: countExportableMeals konsistent -----------------------------

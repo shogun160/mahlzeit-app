@@ -51,9 +51,9 @@ Struktur des Clipboard-Payloads:
       "cuisineGroup": "asian",
       "cooktime": 35,
       "ingredients": [
-        { "label": "Lachs (Sockeye)", "quantity": "440 g" },
-        { "label": "Reis (schwarz)",  "quantity": "160 g" },
-        { "label": "Sojasauce",       "quantity": "2 EL" }
+        { "label": "Lachs (Sockeye)", "quantity": "440 g",     "grams": 440 },
+        { "label": "Salatgurke",      "quantity": "½ Stück",   "grams": 150 },
+        { "label": "Sojasauce",       "quantity": "2 EL",      "grams": 30 }
       ],
       "steps": [
         "Reis nach Packungsanweisung kochen.",
@@ -68,7 +68,11 @@ Struktur des Clipboard-Payloads:
 
 - **`day`:** Wochentag-Vollname aus `DAYS` in `src/state.js` (`Montag`, `Dienstag`, `Mittwoch`, `Donnerstag`, `Freitag`, `Samstag`, `Sonntag`) — kein konkretes Datum. Zuordnung zum Kalenderdatum passiert erst beim Claude-Insert (siehe §7).
 - **`portions`:** aus `state.portions[day]` (Multi-Diner-Faktor bereits eingerechnet, wie in `consolidate.js` per `totalFactorForDish`).
-- **`ingredients[].quantity`:** vorformatierter String via bestehendes `formatQuantity()` (identisch zur Anzeige in der Shopping-Liste). Kein Doppel-Formatieren in der Claude-Session.
+- **`ingredients[].quantity`:** vorformatierter String via `formatIngredientQuantity()` auf `scaledGramsForDay()` — also exakt die Menge, die im Rezept-Sheet steht. Kein Doppel-Formatieren in der Claude-Session.
+
+  Bewusst **nicht** `formatQuantity()`: das ist der Einkaufs-Formatierer, der auf ganze Stück aufrundet (`Math.ceil`). Fuer den Einkauf ist das richtig — man kauft keine halbe Gurke —, fuer eine Kochanleitung nicht. Bis 2026-08-20 nutzte der Export ihn trotzdem, wodurch aus 175 g Blumenkohl „1 Stück" (700 g) wurde. Ueber den Katalog gerechnet lag der Export dadurch im Schnitt 172 kcal ueber dem, was die Karte anzeigt, im Extremfall +44 %. Aus demselben Grund tragen Vorrat-Zutaten (Salz, Sesam) jetzt ihre Kochmenge statt `"Vorrat prüfen"`.
+
+- **`ingredients[].grams`:** die exakte Kochmenge als Zahl. Ergaenzt `quantity`, weil die Anzeige Garnitur-Mengen aufs Viertel hebt („¼ Mango" statt 30 g) — wer rechnen will, nimmt `grams`.
 - **`cuisineGroup`:** wird von Claude fuer die Icon-Zuordnung genutzt (`asian` → 🍜, `italian` → 🍝, ...). Fallback 🍽 fuer unbekannte oder fehlende Werte.
 - **`cuisine`:** Freitext, nur zur Info im Body — nicht fuer Icon-Logik.
 - **`dishId`:** mitgeliefert fuer spaetere Erweiterungen (z. B. Deep-Link), im MVP nicht weiter verwendet. Kostet nichts.
