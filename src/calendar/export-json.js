@@ -8,18 +8,26 @@
 
 import { state, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
-import { ingredientRegistry } from '../data/ingredient-registry.js';
-import { totalFactorForDish } from '../nutrition/scale.js';
-import { formatQuantity } from '../util/format.js';
+import { scaledGramsForDay } from '../nutrition/scale.js';
+import { formatIngredientQuantity } from '../util/format.js';
 
 // Rueckgabe:
 //   { exportedAt, timezone, meals: Array<Meal> }
 // mit Meal = { day, portions, dishId, name, cuisine, cuisineGroup,
-//              cooktime, ingredients: [{label, quantity}], steps: [string] }
+//              cooktime, ingredients: [{label, quantity, grams}], steps: [string] }
+//
+// quantity ist der Anzeige-String wie im Rezept ("½ Stück", "3 EL", "225 g"),
+// grams die exakte Kochmenge dahinter. Beide braucht es: die Anzeige hebt
+// Garnitur-Mengen aufs Viertel (¼ Mango statt 30 g), gerechnet wird mit grams.
 //
 // Reihenfolge der meals: chronologisch nach DAYS (Mo, Di, ..., So).
-// Vorrats-Zutaten ohne displayUnit werden mit "Vorrat pruefen" als quantity
-// gefuehrt (analog zu formatQuantity, sum=0 bei diesen Zutaten).
+//
+// Mengen kommen aus demselben Pfad wie das Detail-Sheet: scaledGramsForDay
+// (0.25-Raster bei Stueck-Zutaten, Kleinmengen exakt, sqrt-Daempfung fuer
+// Aromageber) plus formatIngredientQuantity. Bewusst NICHT formatQuantity —
+// das ist der Einkaufs-Formatierer, der auf ganze Stueck aufrundet. Fuer den
+// Einkauf ist das richtig (man kauft keine halbe Gurke), fuer eine
+// Kochanleitung nicht: aus 175 g Blumenkohl wurde so "1 Stueck" (700 g).
 export function buildExportPayload() {
   const now = new Date();
   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -32,27 +40,15 @@ export function buildExportPayload() {
     if (!dish) continue;
 
     const portions = state.portions[day] || 1;
-    const dayFactor = totalFactorForDish(dish, portions);
 
+    // dish stammt aus dishesById, ist also bereits angereichert (label, unit,
+    // size, displayUnit) — kein Registry-Fallback noetig.
     const ingredients = dish.ingredients.map((ing) => {
-      const meta = ingredientRegistry[ing.key] || {};
-      // Vorrat-Zutaten ohne displayUnit tragen sum=0 → formatQuantity gibt
-      // dann "Vorrat pruefen" zurueck. Fuer alles andere: grams * dayFactor.
-      const contributesSum = ing.unit !== 'vorrat' || ing.displayUnit;
-      const sum = contributesSum ? ing.grams * dayFactor : 0;
-      const item = {
-        label: ing.label ?? meta.label ?? ing.key,
-        cat: ing.cat ?? meta.cat,
-        unit: ing.unit ?? meta.unit,
-        size: ing.size ?? meta.size,
-        displayUnit: ing.displayUnit ?? meta.displayUnit,
-        gramsPerUnit: ing.gramsPerUnit ?? meta.gramsPerUnit,
-        note: ing.note ?? meta.note,
-        sum,
-      };
+      const grams = scaledGramsForDay(ing, portions, dish);
       return {
-        label: item.label,
-        quantity: formatQuantity(item),
+        label: ing.label,
+        quantity: formatIngredientQuantity(ing, grams),
+        grams: Math.round(grams),
       };
     });
 

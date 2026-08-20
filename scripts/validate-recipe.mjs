@@ -5,6 +5,7 @@
 // - Bild-Files (Dimension, Groesse, Format) via sharp
 // - JSON-Struktur (Pflichtfelder, Enum, ID-Eindeutigkeit, Sanity)
 // - Ingredient-Keys existieren, Prefix-Kollision als Warnung
+// - Deklarierte Makros gegen die Zutatensumme (Drift-Guard)
 //
 // Rueckgabe: 0 bei Success, 1 bei Fehler. Fehler + Warnungen werden
 // als GitHub-Actions-Annotationen auf stdout ausgegeben:
@@ -17,6 +18,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
 import sharp from 'sharp';
+import { findMakroDrift, TOL_KCAL, TOL_MAKRO } from './lib/makro-drift.mjs';
 
 const CUISINE_GROUPS = ['mediterranean', 'asian', 'middleEast', 'americas'];
 const REQUIRED_DISH_FIELDS = ['id', 'name', 'cuisine', 'cuisineGroup', 'cooktime', 'kcal', 'p', 'kh', 'f', 'tags', 'ingredients', 'steps'];
@@ -87,6 +89,28 @@ async function main() {
     const calc = (d.p || 0) * 4 + (d.kh || 0) * 4 + (d.f || 0) * 9;
     if (Math.abs((d.kcal || 0) - calc) >= KCAL_SANITY_TOL) {
       err('src/data/dishes.json', 0, `Rezept "${d.name}" (id=${d.id}): kcal (${d.kcal}) weicht zu stark vom Makro-Rechner ab (${Math.round(calc)}).`);
+    }
+  }
+
+  // Makro-Drift: deklarierte kcal/p/kh/f gegen die Zutatensumme.
+  //
+  // Bewusst ueber ALLE Rezepte, nicht nur die neuen: eine Aenderung an
+  // ingredients.json verschiebt auch bestehende Gerichte, und genau so ist
+  // der Drift beim letzten Mal entstanden. Laeuft nur, wenn der PR eines der
+  // beiden Daten-Files angefasst hat — sonst kann sich nichts verschoben haben.
+  if (changedDishesJson || changedIngredientsJson) {
+    const drift = findMakroDrift(dishes?.dishes || [], ingredients?.ingredients || {});
+    for (const t of drift) {
+      const details = t.abweichungen
+        .map((a) => `${a.makro} ${a.ist} deklariert vs. ${a.soll.toFixed(0)} gerechnet (${(a.pct > 0 ? '+' : '') + a.pct.toFixed(1)} %)`)
+        .join(', ');
+      err(
+        'src/data/dishes.json',
+        0,
+        `Rezept "${t.name}" (id=${t.id}): Makros weichen von der Zutatensumme ab — ${details}. ` +
+        `Toleranz: kcal ${TOL_KCAL} %, p/kh/f ${TOL_MAKRO} %. Die App leitet den Portionsfaktor aus kcal ab, ` +
+        `ein falsches Feld skaliert die Kochmenge mit.`
+      );
     }
   }
 
