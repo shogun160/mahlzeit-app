@@ -6,14 +6,18 @@ import { state } from '../state.js';
 import { canManualFetch } from '../data/remote-updates.js';
 import { ICON_REFRESH } from '../dashboard/header.js';
 import { buildExportPayload, countExportableMeals } from '../calendar/export-json.js';
-import { copyToClipboard } from '../calendar/clipboard.js';
+import { shareExportText } from '../calendar/share.js';
 
-// Copy-to-clipboard Icon: zwei versetzte Rechtecke (klassisches Symbol).
+// Android-Teilen-Icon: drei Knoten, verbunden durch zwei Linien. Das System-
+// Symbol, das der User aus jeder Android-App kennt.
 // Stroke-Style analog zu ICON_REFRESH (currentColor, gleiche Stroke-Width).
-const ICON_COPY = `
+const ICON_SHARE = `
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-    <rect x="9" y="9" width="11" height="11" rx="2" ry="2"></rect>
-    <path d="M5 15V5a2 2 0 0 1 2-2h10"></path>
+    <circle cx="18" cy="5" r="3"></circle>
+    <circle cx="6" cy="12" r="3"></circle>
+    <circle cx="18" cy="19" r="3"></circle>
+    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
   </svg>
 `;
 
@@ -76,9 +80,9 @@ export function renderRezepteSectionBody() {
                 class="icon-btn"
                 data-action="rezepte-export"
                 ${exportDisabled ? 'disabled' : ''}
-                aria-label="Markierte Rezepte in die Zwischenablage kopieren"
-                title="Markierte Rezepte in die Zwischenablage kopieren">
-          ${ICON_COPY}
+                aria-label="Markierte Rezepte teilen"
+                title="Markierte Rezepte teilen">
+          ${ICON_SHARE}
         </button>
       </span>
     </div>
@@ -140,12 +144,20 @@ export function wireRezepteSection(root, callbacks = {}) {
         return;
       }
       const json = JSON.stringify(payload, null, 2);
-      const ok = await copyToClipboard(json);
-      if (ok) {
-        onToast?.(`${count} ${count === 1 ? 'Rezept' : 'Rezepte'} kopiert — ab in den Claude-Chat.`);
-      } else {
-        onToast?.('Zwischenablage nicht erreichbar. Nochmal probieren?');
+      const noun = count === 1 ? 'Rezept' : 'Rezepte';
+      const result = await shareExportText(json, {
+        title: 'Mahlzeit-Wochenplan',
+        dialogTitle: `${count} ${noun} teilen`,
+      });
+      if (result === 'shared') {
+        onToast?.(`${count} ${noun} geteilt.`);
+      } else if (result === 'copied') {
+        // Kein Share-Ziel verfuegbar (Desktop-Browser) — Clipboard sprang ein.
+        onToast?.(`${count} ${noun} kopiert — ab in den Claude-Chat.`);
+      } else if (result === 'failed') {
+        onToast?.('Teilen hat nicht geklappt. Nochmal probieren?');
       }
+      // result === 'canceled' → der User hat abgebrochen, kein Toast noetig.
     });
   }
 }
