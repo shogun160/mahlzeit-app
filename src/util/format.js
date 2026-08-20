@@ -24,6 +24,13 @@ export function formatIngredientQuantity(ing, grams) {
     return `${count} ${count === 1 ? 'Ei' : 'Eier'}`;
   }
   if (ing.size && (ing.unit === 'bund' || ing.unit === 'zehe' || ing.unit === 'stueck')) {
+    // Immer in Viertel-Schritten, mindestens ¼ — "¼ Mango" liest sich beim
+    // Kochen besser als "30 g Mango", weil man ohnehin vom Stück abschneidet.
+    //
+    // Bewusst NICHT deckungsgleich mit scaledGrams: dort bleiben Mengen unter
+    // einem Viertel exakt stehen, damit Makros und Einkaufsmenge stimmen. Hier
+    // wird nur die Anzeige aufs Viertel gehoben. Bei Garnitur-Mengen (13 g
+    // Lauch) zeigt das Rezept deshalb mehr an als es rechnet.
     const count = Math.max(0.25, Math.round((grams / ing.size) * 4) / 4);
     return `${formatQuarterCount(count)} ${labelForCountedUnit(ing.unit, count)}`;
   }

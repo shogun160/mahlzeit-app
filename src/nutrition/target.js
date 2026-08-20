@@ -279,7 +279,14 @@ export function scaledGrams(ing, multiplier) {
   if (HALFABLE_UNITS.has(ing.unit)) {
     // 0.25-Stufen erlauben ¼/½/¾-Portionen — praktikabel bei Gemüsen wie
     // Gurke oder Zwiebel, wo man selten ganze Stück braucht.
-    const count = Math.max(0.25, Math.round((raw / ing.size) * 4) / 4);
+    //
+    // Unterhalb eines Viertels wird NICHT gerundet: Garnitur-Mengen (30 g
+    // Mango, 13 g Lauch) würden sonst auf ein Viertel Stück hochgezogen und
+    // damit Kochmenge und Makros verfälschen. Solche Mengen schneidet man
+    // vom Stück ab — die Rezept-Anzeige bleibt dann in Gramm, die
+    // Einkaufsliste rundet trotzdem auf ganze Stück auf (formatQuantity).
+    if (raw / ing.size < 0.25) return raw;
+    const count = Math.round((raw / ing.size) * 4) / 4;
     return count * ing.size;
   }
   return raw;
