@@ -74,18 +74,23 @@ function runValidator(cwd) {
 }
 
 // -- Fall 1: sauberes neues Rezept -> exit 0
+// Die deklarierten Makros muessen zur Zutatensumme passen, sonst schlaegt der
+// Drift-Guard zu: 500 g Karotte à 41/0.9/9.6/0.2 pro 100 g = 205 kcal.
+const KAROTTE = { label: 'Karotte', cat: 'frisch', unit: 'g', per100g: { kcal: 41, p: 0.9, kh: 9.6, f: 0.2 } };
+const DISH_BASIS = { id: 1, name: 'Basis', cuisine: 'X', cuisineGroup: 'asian', cooktime: 10, kcal: 205, p: 5, kh: 48, f: 1, tags: [], ingredients: [{ key: 'karotte', grams: 500 }], steps: ['Kochen.'] };
 {
   const dir = makeRepo({
-    mainDishes: { schemaVersion: 1, dishes: [{ id: 1, name: 'Basis', cuisine: 'X', cuisineGroup: 'asian', cooktime: 10, kcal: 500, p: 20, kh: 60, f: 15, tags: [], ingredients: [{ key: 'karotte', grams: 100 }], steps: ['Kochen.'] }] },
-    mainIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'Karotte', cat: 'frisch', unit: 'g', per100g: { kcal: 41, p: 0.9, kh: 9.6, f: 0.2 } } } },
+    mainDishes: { schemaVersion: 1, dishes: [DISH_BASIS] },
+    mainIngredients: { schemaVersion: 1, ingredients: { karotte: KAROTTE } },
     prDishes: {
       schemaVersion: 1,
       dishes: [
-        { id: 1, name: 'Basis', cuisine: 'X', cuisineGroup: 'asian', cooktime: 10, kcal: 500, p: 20, kh: 60, f: 15, tags: [], ingredients: [{ key: 'karotte', grams: 100 }], steps: ['Kochen.'] },
-        { id: 2, name: 'Neu', cuisine: 'Y', cuisineGroup: 'mediterranean', cooktime: 20, kcal: 510, p: 30, kh: 50, f: 20, tags: [], ingredients: [{ key: 'karotte', grams: 200 }], steps: ['Braten.'] },
+        DISH_BASIS,
+        // 800 g Karotte = 328 kcal / 7.2 P / 76.8 KH / 1.6 F.
+        { id: 2, name: 'Neu', cuisine: 'Y', cuisineGroup: 'mediterranean', cooktime: 20, kcal: 328, p: 7, kh: 77, f: 2, tags: [], ingredients: [{ key: 'karotte', grams: 800 }], steps: ['Braten.'] },
       ],
     },
-    prIngredients: { schemaVersion: 1, ingredients: { karotte: { label: 'Karotte', cat: 'frisch', unit: 'g', per100g: { kcal: 41, p: 0.9, kh: 9.6, f: 0.2 } } } },
+    prIngredients: { schemaVersion: 1, ingredients: { karotte: KAROTTE } },
     // Echtes 800x800-JPEG aus dem Projekt verwenden, damit der Bild-Check besteht.
     realImageIds: { 2: 1 },
   });
@@ -195,6 +200,38 @@ function runValidator(cwd) {
   const res = runValidator(dir);
   check('Fall 8: falsche Bild-Dimension -> exit 1', res.status === 1, res.stdout);
   check('Fall 8: Text erwaehnt Dimension', res.stdout.includes('Dimension') || res.stdout.includes('800x800'), res.stdout);
+}
+
+// -- Fall 9: neues Rezept driftet von der Zutatensumme -> exit 1
+// 500 g Karotte sind 205 kcal, deklariert werden 900. Atwater ist dabei
+// konsistent (225*4 = 900), der alte Sanity-Check haette das durchgelassen.
+{
+  const dir = makeRepo({
+    mainDishes: { schemaVersion: 1, dishes: [] },
+    mainIngredients: { schemaVersion: 1, ingredients: { karotte: KAROTTE } },
+    prDishes: { schemaVersion: 1, dishes: [{ id: 5, name: 'Gedopt', cuisine: 'Y', cuisineGroup: 'asian', cooktime: 10, kcal: 900, p: 5, kh: 220, f: 1, tags: [], ingredients: [{ key: 'karotte', grams: 500 }], steps: ['Kochen.'] }] },
+    prIngredients: { schemaVersion: 1, ingredients: { karotte: KAROTTE } },
+    realImageIds: { 5: 1 },
+  });
+  const res = runValidator(dir);
+  check('Fall 9: Makro-Drift -> exit 1', res.status === 1, res.stdout);
+  check('Fall 9: Text erwaehnt Zutatensumme', res.stdout.includes('Zutatensumme'), res.stdout);
+}
+
+// -- Fall 10: bestehendes Rezept driftet durch geaenderte ingredients.json
+// Der reale Ausloeser: ein Zutaten-Wert wandert, die Rezepte bleiben stehen.
+// dishes.json ist hier unveraendert und es gibt kein neues Dish — der Guard
+// muss trotzdem greifen.
+{
+  const dir = makeRepo({
+    mainDishes: { schemaVersion: 1, dishes: [DISH_BASIS] },
+    mainIngredients: { schemaVersion: 1, ingredients: { karotte: KAROTTE } },
+    prDishes: { schemaVersion: 1, dishes: [DISH_BASIS] },
+    prIngredients: { schemaVersion: 1, ingredients: { karotte: { ...KAROTTE, per100g: { kcal: 100, p: 0.9, kh: 9.6, f: 0.2 } } } },
+  });
+  const res = runValidator(dir);
+  check('Fall 10: Zutaten-Aenderung laesst Bestandsrezept driften -> exit 1', res.status === 1, res.stdout);
+  check('Fall 10: Text nennt das Bestandsrezept', res.stdout.includes('Basis'), res.stdout);
 }
 
 if (failures > 0) { console.error(`\n${failures} FAILURES`); process.exit(1); }
