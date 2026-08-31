@@ -3,7 +3,7 @@
 **Auto-generiert aus `src/data/ingredients.json` — nicht manuell editieren.**
 Neu erzeugen: `node scripts/zutaten-katalog.js`
 
-**150 Zutaten** gesamt, sortiert nach Kategorie.
+**151 Zutaten** gesamt, sortiert nach Kategorie.
 
 ## Vor dem Anlegen einer neuen Zutat
 
@@ -172,7 +172,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `sesamoel` | Sesamöl | vorrat (tl) | 884 | 0 | 0 | 100 |
 | `tahini` | Tahini | g (el) | 595 | 17 | 21.2 | 53.8 |
 
-## Sonstige (20)
+## Sonstige (21)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -182,6 +182,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `dijon_senf` | Dijon-Senf | g (tl) | 60 | 4.4 | 5.3 | 3.4 |
 | `erdnussbutter` | Erdnussbutter (natur, ungesüßt) | g | 588 | 25 | 20 | 50 |
 | `fischsauce` | Fischsauce | ml (el) | 35 | 5 | 3.6 | 0 |
+| `gochujang` | Gochujang | g | 230 | 4 | 48 | 2 |
 | `honig` | Honig | vorrat (el) | 304 | 0 | 82.5 | 0 |
 | `kalamata_oliven` | Kalamata-Oliven | g | 115 | 0.8 | 6.3 | 10.7 |
 | `kapern` | Kapern (abgetropft) | g | 23 | 2.4 | 4.9 | 0.9 |

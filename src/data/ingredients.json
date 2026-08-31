@@ -1143,6 +1143,17 @@
         "f": 20.6
       }
     },
+    "gochujang": {
+      "label": "Gochujang",
+      "cat": "sonstig",
+      "unit": "g",
+      "per100g": {
+        "kcal": 230,
+        "p": 4,
+        "kh": 48,
+        "f": 2
+      }
+    },
     "tomatenpassata": {
       "label": "Tomaten Passata",
       "cat": "sonstig",

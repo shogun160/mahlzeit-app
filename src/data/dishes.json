@@ -3220,6 +3220,116 @@
       ],
       "cuisineGroup": "americas",
       "proteinCategory": "pork"
+    },
+    {
+      "id": 42,
+      "name": "Dubu-Kimchi-Pfanne mit Garnelen und Blumenkohl-Reis",
+      "cuisine": "Koreanisch",
+      "cooktime": 30,
+      "kcal": 911,
+      "p": 109,
+      "kh": 64,
+      "f": 29,
+      "tags": [
+        "contains-fish",
+        "contains-gluten",
+        "contains-lactose",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "key": "garnelen",
+          "grams": 280
+        },
+        {
+          "key": "tofu_fest",
+          "grams": 150
+        },
+        {
+          "key": "blumenkohl",
+          "grams": 300,
+          "note": "als Blumenkohl-Reis gehackt"
+        },
+        {
+          "key": "zucchini",
+          "grams": 200
+        },
+        {
+          "key": "paprika_gelb",
+          "grams": 150
+        },
+        {
+          "key": "kimchi",
+          "grams": 100
+        },
+        {
+          "key": "skyr",
+          "grams": 100,
+          "note": "Gochujang-Dip"
+        },
+        {
+          "key": "erbsen_tk",
+          "grams": 60
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "grams": 30
+        },
+        {
+          "key": "sojasauce",
+          "grams": 15
+        },
+        {
+          "key": "gochujang",
+          "grams": 11,
+          "note": "Dip"
+        },
+        {
+          "key": "knoblauch",
+          "grams": 9
+        },
+        {
+          "key": "reisessig",
+          "grams": 7,
+          "note": "Dip"
+        },
+        {
+          "key": "ingwer",
+          "grams": 6
+        },
+        {
+          "key": "olivenoel",
+          "grams": 6,
+          "note": "2 g Garnelen, 4 g Tofu"
+        },
+        {
+          "key": "sesam",
+          "grams": 5,
+          "note": "optional, geroestet"
+        },
+        {
+          "key": "gewuerz_chili",
+          "grams": 3,
+          "note": "Pul Biber"
+        },
+        {
+          "key": "sesamoel",
+          "grams": 3,
+          "note": "Finish"
+        }
+      ],
+      "steps": [
+        "Tofu 15 Min. zwischen Küchenpapier pressen, dann in 2-cm-Würfel schneiden.",
+        "Blumenkohl im Blitzhacker auf Reis-Körnung hacken, in trockener Pfanne 4–5 Min. anrösten, salzen, beiseitestellen.",
+        "Dip: Skyr, Gochujang und Reisessig verrühren, kalt stellen.",
+        "Garnelen trockentupfen, in 2 g Olivenöl 1–2 Min. pro Seite braten, herausnehmen.",
+        "Tofu im restlichen Olivenöl 6–8 Min. rundum knusprig braten, herausnehmen.",
+        "Knoblauch, Ingwer, Zucchini-Halbmonde und Paprika-Streifen mit Pul Biber 3 Min. scharf anbraten, Kimchi dazu, 2 Min. weiter.",
+        "Erbsen und Sojasauce dazu, 1 Min. Tofu und Garnelen zurück in die Pfanne, kurz schwenken. Vom Herd, Sesamöl darüber.",
+        "Auf Blumenkohl-Reis anrichten, Frühlingszwiebel und nach Wunsch gerösteten Sesam darüber, Dip daneben."
+      ],
+      "cuisineGroup": "asian",
+      "proteinCategory": "shellfish"
     }
   ]
 }
