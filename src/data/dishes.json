@@ -863,16 +863,17 @@
     },
     {
       "id": 16,
-      "name": "Wildlachs Miso Pak Choi",
+      "name": "Wildlachs Miso mit Rotkohl-Slaw und Goma-Dip",
       "cuisine": "Japanisch",
-      "cooktime": 40,
-      "kcal": 886,
-      "p": 73,
-      "kh": 92,
-      "f": 25,
+      "cooktime": 50,
+      "kcal": 1055,
+      "p": 90,
+      "kh": 111,
+      "f": 29,
       "tags": [
         "contains-fish",
-        "contains-gluten"
+        "contains-gluten",
+        "contains-lactose"
       ],
       "ingredients": [
         {
@@ -888,6 +889,11 @@
           "grams": 200
         },
         {
+          "key": "rotkohl",
+          "grams": 350,
+          "note": "fein gehobelt, als Slaw"
+        },
+        {
           "key": "miso",
           "grams": 25,
           "note": "Glas/Packung à 250 g"
@@ -899,14 +905,39 @@
         {
           "key": "honig",
           "grams": 10
+        },
+        {
+          "key": "skyr",
+          "grams": 90,
+          "note": "Goma-Dip"
+        },
+        {
+          "key": "reisessig",
+          "grams": 18,
+          "note": "15 g Slaw, 3 g Dip"
+        },
+        {
+          "key": "sesam",
+          "grams": 5,
+          "note": "geroestet und gemoersert"
+        },
+        {
+          "key": "sojasauce",
+          "grams": 5
+        },
+        {
+          "key": "ingwer",
+          "grams": 5,
+          "note": "frisch gerieben"
         }
       ],
       "steps": [
-        "Miso-Paste mit Honig und Sesamöl verrühren, Lachs damit bestreichen, 10 Min. ziehen lassen.",
-        "Bei 200 °C 10–12 Min. im Ofen garen (oder in der Pfanne).",
+        "Miso-Paste mit Honig und Sesamöl verrühren, Lachs damit bestreichen. 10 Min. reichen, 2–3 Std. im Kühlschrank sind besser (Saikyo-yaki).",
+        "Rotkohl fein hobeln, salzen, 5 Min. durchmassieren, mit Reisessig und etwas Sesam mischen. Zieht durch, gern vorab.",
+        "Sesam trocken rösten, mörsern, mit Skyr, Sojasauce, Reisessig und geriebenem Ingwer zum Goma-Dip verrühren. Kalt stellen.",
         "Reis kochen.",
-        "Pak Choi kurz andünsten oder dämpfen.",
-        "Reis als Boden, Pak Choi seitlich, Lachs darauf anrichten."
+        "Lachs bei 200 °C 10–12 Min. im Ofen garen, parallel Pak Choi 3 Min. dünsten.",
+        "Reis als Boden, Pak Choi seitlich, Lachs darauf. Slaw und Dip daneben."
       ],
       "cuisineGroup": "asian",
       "proteinCategory": "fish"
