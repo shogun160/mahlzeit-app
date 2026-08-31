@@ -117,6 +117,7 @@ export const state = {
   remoteHasUpdates: false,         // Auto-Check setzt true; cleared nur bei erfolgreichem Import oder wenn der naechste Auto-Check keine neuen mehr findet
   remoteLastFetchAt: null,         // ISO-String fuer 60s-Soft-Rate-Limit
   remoteNewIds: new Set(),         // IDs die aktuell als "Neu" gelten
+  bundledNewSeed: [],              // zuletzt geseedete BUNDLED_NEW_IDS — erkennt den Wechsel auf eine neue APK
   remoteImageFailures: new Set(),  // IDs deren Bild-Download failed hat (TTL 24h — beim Start gecleart)
   settings: {
     defaultPortions: 1,   // Default für neu ausgeloste Gerichte
@@ -376,6 +377,7 @@ export function saveState() {
       remoteHasUpdates: state.remoteHasUpdates,
       remoteLastFetchAt: state.remoteLastFetchAt,
       remoteNewIds: Array.from(state.remoteNewIds),
+      bundledNewSeed: state.bundledNewSeed,
       // remoteImageFailures wird bewusst NICHT persistiert (TTL 24h,
       // beim naechsten Start ohnehin cleared).
       settings: state.settings,
@@ -391,6 +393,9 @@ export function saveState() {
 // weitergehen. Multi-Profile-Migration: alter settings.profile-Slot wird zu
 // profiles[0] mit id "u1"; profiles[]/activeProfileId werden hinzugefuegt.
 export function loadState() {
+  // Merkt sich, ob der Storage das bundledNewSeed-Feld ueberhaupt kannte —
+  // steuert unten im finally, ob geseedet oder migriert wird.
+  let hadSeedField = false;
   try {
     // Remote-Slots immer zuruecksetzen, damit Fresh Install (kein Storage)
     // saubere Defaults hat statt veralteter In-Memory-Werte.
@@ -400,6 +405,7 @@ export function loadState() {
     state.remoteHasUpdates = false;
     state.remoteLastFetchAt = null;
     state.remoteNewIds = new Set();
+    state.bundledNewSeed = [];
     state.remoteImageFailures = new Set();
 
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -423,6 +429,8 @@ export function loadState() {
     state.remoteHasUpdates = parsed.remoteHasUpdates === true;
     state.remoteLastFetchAt = typeof parsed.remoteLastFetchAt === 'string' ? parsed.remoteLastFetchAt : null;
     state.remoteNewIds = new Set(Array.isArray(parsed.remoteNewIds) ? parsed.remoteNewIds : []);
+    hadSeedField = Array.isArray(parsed.bundledNewSeed);
+    state.bundledNewSeed = hadSeedField ? parsed.bundledNewSeed : [];
     state.remoteImageFailures = new Set();  // TTL 24h: beim Start immer frisch
 
     // Settings: mergen mit Defaults, damit neue Slots beim Migrate nicht undefined sind.
@@ -585,14 +593,26 @@ export function loadState() {
   } catch (_) {
     return false;
   } finally {
-    // Fresh-Install oder User-ohne-Remote-Check: seede BUNDLED_NEW_IDS in
-    // remoteNewIds, damit die aktuellen Bundled-Neuen im Picker als "Neu"
-    // erscheinen. Ein spaeterer User-Import (Settings > Rezepte importieren)
-    // ueberschreibt remoteNewIds mit den survived-IDs — dann greift die
-    // normale Remote-Logik. size===0-Check verhindert Ueberschreiben, falls
-    // aus irgendeinem Grund schon was drin ist.
-    if (state.remoteUpdatedAt === null && state.remoteNewIds.size === 0) {
-      state.remoteNewIds = new Set(BUNDLED_NEW_IDS);
+    // Seede BUNDLED_NEW_IDS in remoteNewIds, damit die Bundled-Neuen im
+    // Picker als "Neu" erscheinen. Ausloeser ist die Liste selbst, nicht der
+    // Fresh Install: performImport() ueberspringt gebundelte IDs (die stecken
+    // ja schon in der APK), also waere ein User, der die neue APK ueber seine
+    // bestehende Installation legt, sonst nie ueber neue Rezepte informiert.
+    const seedNow = [...BUNDLED_NEW_IDS].sort((a, b) => a - b);
+    const seedBefore = [...state.bundledNewSeed].sort((a, b) => a - b);
+    if (seedNow.join(',') !== seedBefore.join(',')) {
+      if (hadSeedField) {
+        // Normalfall: alten Seed abziehen, neuen dazu. Neu-Marker aus einem
+        // Remote-Import bleiben dabei unberuehrt.
+        for (const id of seedBefore) state.remoteNewIds.delete(id);
+        for (const id of seedNow) state.remoteNewIds.add(id);
+      } else {
+        // Fresh Install oder Storage von vor diesem Feld: der alte Seed ist
+        // nicht rekonstruierbar, also gilt allein die aktuelle Liste. Damit
+        // fallen die Marker frueherer Releases weg — gewollt.
+        state.remoteNewIds = new Set(seedNow);
+      }
+      state.bundledNewSeed = seedNow;
     }
   }
 }
