@@ -8,6 +8,8 @@ const ICON_UNFOLD_LESS = `<svg viewBox="0 -960 960 960" fill="currentColor" aria
 const ICON_REFRESH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"/></svg>`;
 // Material Symbol "done_all" — Doppel-Haken, fuer Check-All (alle abhaken).
 const ICON_DONE_ALL = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="m268-240-208-208 51-51 157 157 12 12-51 90Zm198 0L258-448l51-51 158 158 356-356 51 51-407 406Zm-1-199-52-51 205-205 51 51-204 205Z"/></svg>`;
+// Material Symbol "add" — Plus, fuer eigene Zutat hinzufuegen.
+const ICON_ADD = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>`;
 
 // Baut die Progress-Zeile für die Einkaufsliste als HTML-String.
 // items: Array<{ key, ... }> aus buildConsolidatedList → Object.values(...).
@@ -44,6 +46,11 @@ export function renderProgress(items) {
           <span class="shop-progress__of">von ${total} offen</span>
         </div>
         <div class="shop-progress__actions">
+          <button class="shop-progress__action"
+                  type="button"
+                  data-action="add-custom-item"
+                  aria-label="Eigene Zutat hinzufügen"
+                  title="Eigene Zutat hinzufügen">${ICON_ADD}</button>
           ${resetOrCheckHtml}
           ${hasCollapsed ? `
             <button class="shop-progress__action"

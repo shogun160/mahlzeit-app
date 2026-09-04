@@ -1,0 +1,123 @@
+/* Sheet zum Anlegen/Bearbeiten eigener Einkaufslisten-Zutaten.
+   Bewusst auto-height statt der 88vh der grossen Sheets — es ist ein kurzes
+   Formular, und die Tastatur soll oben Platz lassen. */
+
+.custom-item-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, .55);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+
+.custom-item-overlay.is-open {
+  opacity: 1;
+}
+
+.custom-item-sheet {
+  background: var(--md-sys-color-surface, #fff);
+  color: var(--md-sys-color-on-surface, #111);
+  width: 100%;
+  max-width: 480px;
+  border-radius: 24px 24px 0 0;
+  padding: 8px 20px max(24px, env(safe-area-inset-bottom, 24px));
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, .2);
+  transform: translateY(24px);
+  transition: transform .2s ease;
+  max-height: 92vh;
+  overflow: auto;
+}
+
+.custom-item-overlay.is-open .custom-item-sheet {
+  transform: translateY(0);
+}
+
+.custom-item-sheet__handle {
+  width: 36px;
+  height: 4px;
+  background: var(--md-sys-color-outline-variant, #ccc);
+  border-radius: 2px;
+  margin: 4px auto 12px;
+}
+
+.custom-item-sheet__title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 16px;
+}
+
+.custom-item-sheet__hint {
+  font-size: 0.8125rem;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 0 0 8px;
+}
+
+.custom-item-sheet__label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface-variant);
+  margin: 16px 0 6px;
+}
+
+.custom-item-sheet__optional {
+  font-weight: 400;
+}
+
+.custom-item-sheet__input {
+  width: 100%;
+  min-height: var(--touch-target-min, 48px);
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-on-surface);
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+.custom-item-sheet__input:focus {
+  outline: none;
+  border-color: var(--md-sys-color-primary);
+}
+
+/* Chip-Reihe fuer Vorschlaege und Kategorien. Umbruch statt Scroll — bei sieben
+   Kategorien passt sonst nichts auf ein schmales Display. Die einzelnen Chips
+   sind niedriger als 48 px; ueber die Reihe ist das Touch-Target erfuellt
+   (Guardrail 9), analog zu den Filter-Chips im Dish-Picker. */
+.custom-item-sheet__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.custom-item-chip {
+  min-height: 40px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 0.875rem;
+  font-family: inherit;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.custom-item-chip--active {
+  background: var(--md-sys-color-primary);
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+.custom-item-sheet__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 24px;
+}

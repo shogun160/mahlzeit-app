@@ -92,6 +92,8 @@ function blankProfile(id) {
 //   view             'dashboard' | 'shopping'    // aktive Screen-Ansicht
 //   collapsedCategories Set<string>              // eingeklappte Einkaufslisten-Kategorien
 //   expandedCheckedCategories Set<string>        // Kategorien wo abgehakter Teil (>=4) explizit sichtbar
+//   customItems      CustomItem[]                // eigene Einkaufslisten-Zutaten des Users
+//   recentCustomItems CustomItem[]               // MRU der zuletzt angelegten eigenen Zutaten
 //   settings         { ... }                     // User-Settings (Sheet)
 export const state = {
   assignment: {},
@@ -102,6 +104,19 @@ export const state = {
   view: 'dashboard',
   collapsedCategories: new Set(),
   expandedCheckedCategories: new Set(),
+  // Eigene Zutaten (Session 30): Eintraege die der User selbst auf die Liste
+  // setzt — vom Wocheneinkauf entkoppelt, haengen an keinem Gericht.
+  //   { id: string, label: string, cat: string, qty: string }
+  // qty ist bewusst Freitext ("2 Rollen", "1 Packung"), keine strukturierte
+  // Menge: eigene Eintraege sollen nicht in die Portions-Skalierung geraten.
+  // Der Listen-Key ist `custom:<id>` (siehe custom-items.js) — dadurch koennen
+  // sie ohne Sonderfall in checkedShopping liegen und kollidieren nie mit
+  // einem Registry-Key aus ingredients.json.
+  customItems: [],
+  // MRU der zuletzt angelegten eigenen Zutaten, max RECENT_CUSTOM_LIMIT.
+  // Getrennt von customItems: ein Vorschlag darf existieren, ohne dass die
+  // Zutat gerade auf der Liste steht.
+  recentCustomItems: [],
   // Remote-Rezept-Import (Session 21). Alle Slots werden in mahlzeit-state-v2
   // persistiert (Guardrail 2 bleibt intakt — nur zusaetzliche Felder, kein
   // Storage-Key-Wechsel). Sets werden wie collapsedCategories als Array
@@ -371,6 +386,8 @@ export function saveState() {
       view: state.view,
       collapsedCategories: Array.from(state.collapsedCategories),
       expandedCheckedCategories: Array.from(state.expandedCheckedCategories),
+      customItems: state.customItems,
+      recentCustomItems: state.recentCustomItems,
       remoteDishes: state.remoteDishes,
       remoteIngredients: state.remoteIngredients,
       remoteUpdatedAt: state.remoteUpdatedAt,
@@ -423,6 +440,15 @@ export function loadState() {
     state.view = VIEWS.includes(parsed.view) ? parsed.view : 'dashboard';
     state.collapsedCategories = new Set(Array.isArray(parsed.collapsedCategories) ? parsed.collapsedCategories : []);
     state.expandedCheckedCategories = new Set(Array.isArray(parsed.expandedCheckedCategories) ? parsed.expandedCheckedCategories : []);
+    // Eigene Zutaten: defensiv filtern statt blind uebernehmen. Ein Eintrag
+    // ohne id/label wuerde in der Liste als leere Zeile haengen, die der User
+    // nicht mehr loeschen kann.
+    state.customItems = Array.isArray(parsed.customItems)
+      ? parsed.customItems.filter((it) => it && typeof it.id === 'string' && typeof it.label === 'string')
+      : [];
+    state.recentCustomItems = Array.isArray(parsed.recentCustomItems)
+      ? parsed.recentCustomItems.filter((it) => it && typeof it.label === 'string')
+      : [];
     state.remoteDishes = Array.isArray(parsed.remoteDishes) ? parsed.remoteDishes : [];
     state.remoteIngredients = (parsed.remoteIngredients && typeof parsed.remoteIngredients === 'object') ? parsed.remoteIngredients : {};
     state.remoteUpdatedAt = typeof parsed.remoteUpdatedAt === 'string' ? parsed.remoteUpdatedAt : null;
