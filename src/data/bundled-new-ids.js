@@ -13,4 +13,4 @@
 
 // 16 ist nicht neu, aber mit Rotkohl-Slaw und Goma-Dip so stark ueberarbeitet,
 // dass es sich fuer den User wie ein neues Rezept anfuehlt.
-export const BUNDLED_NEW_IDS = [16, 42];
+export const BUNDLED_NEW_IDS = [16, 42, 43];
