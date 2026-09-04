@@ -1767,6 +1767,102 @@
         "kh": 6.9,
         "f": 0.2
       }
+    },
+    "bohnen_kidney_trocken": {
+      "label": "Kidneybohnen (trocken)",
+      "cat": "trocken",
+      "unit": "g",
+      "per100g": {
+        "kcal": 317,
+        "p": 24,
+        "kh": 40,
+        "f": 1.5
+      }
+    },
+    "knochenbruehe": {
+      "label": "Knochenbrühe",
+      "cat": "sonstig",
+      "unit": "ml",
+      "per100g": {
+        "kcal": 37,
+        "p": 8.4,
+        "kh": 0.4,
+        "f": 0.3
+      }
+    },
+    "grapefruit": {
+      "label": "Grapefruit",
+      "cat": "frisch",
+      "unit": "stueck",
+      "size": 300,
+      "per100g": {
+        "kcal": 42,
+        "p": 0.8,
+        "kh": 8.5,
+        "f": 0.1
+      }
+    },
+    "kokosmilch": {
+      "label": "Kokosmilch",
+      "cat": "sonstig",
+      "unit": "ml",
+      "per100g": {
+        "kcal": 180,
+        "p": 1.6,
+        "kh": 3,
+        "f": 18
+      }
+    },
+    "cashewkerne": {
+      "label": "Cashewkerne",
+      "cat": "trocken",
+      "unit": "g",
+      "note": "aus Vorratspackung",
+      "per100g": {
+        "kcal": 553,
+        "p": 18.2,
+        "kh": 30.2,
+        "f": 43.8
+      }
+    },
+    "gewuerz_curry_jamaika": {
+      "label": "Jamaican Curry Powder (selbst gemacht)",
+      "cat": "gewuerze",
+      "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
+      "per100g": {
+        "kcal": 325,
+        "p": 14.3,
+        "kh": 55.8,
+        "f": 14
+      }
+    },
+    "gewuerz_piment": {
+      "label": "Piment, gemahlen",
+      "cat": "gewuerze",
+      "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 2.5,
+      "per100g": {
+        "kcal": 263,
+        "p": 6.1,
+        "kh": 72.1,
+        "f": 8.7
+      }
+    },
+    "gewuerz_thymian": {
+      "label": "Thymian, getrocknet",
+      "cat": "gewuerze",
+      "unit": "g",
+      "displayUnit": "tl",
+      "gramsPerUnit": 1,
+      "per100g": {
+        "kcal": 276,
+        "p": 9.1,
+        "kh": 63.9,
+        "f": 7.4
+      }
     }
   }
 }

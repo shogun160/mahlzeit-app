@@ -3330,6 +3330,137 @@
       ],
       "cuisineGroup": "asian",
       "proteinCategory": "shellfish"
+    },
+    {
+      "id": 43,
+      "name": "Jamaikanisches Garnelen-Curry mit Kidneybohnen und Zitrus",
+      "cuisine": "Jamaikanisch",
+      "cooktime": 90,
+      "kcal": 1251,
+      "p": 115,
+      "kh": 120,
+      "f": 33,
+      "tags": [
+        "contains-fish",
+        "contains-lactose",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "key": "knochenbruehe",
+          "grams": 240,
+          "note": "zum Angießen"
+        },
+        {
+          "key": "garnelen",
+          "grams": 200
+        },
+        {
+          "key": "blumenkohl",
+          "grams": 200,
+          "note": "in Röschen"
+        },
+        {
+          "key": "tomaten_passiert",
+          "grams": 150
+        },
+        {
+          "key": "bohnen_kidney_trocken",
+          "grams": 100,
+          "note": "über Nacht eingeweicht"
+        },
+        {
+          "key": "skyr",
+          "grams": 100,
+          "note": "zum Schluss einrühren"
+        },
+        {
+          "key": "paprika",
+          "grams": 100,
+          "note": "rot, in Streifen"
+        },
+        {
+          "key": "orange",
+          "grams": 100,
+          "note": "filetiert, zum Schluss untergehoben"
+        },
+        {
+          "key": "grapefruit",
+          "grams": 100,
+          "note": "filetiert, zum Schluss untergehoben"
+        },
+        {
+          "key": "spinat",
+          "grams": 80,
+          "note": "Callaloo-Ersatz"
+        },
+        {
+          "key": "zwiebel",
+          "grams": 80
+        },
+        {
+          "key": "fruehlingszwiebel",
+          "grams": 30
+        },
+        {
+          "key": "kokosmilch",
+          "grams": 30
+        },
+        {
+          "key": "cashewkerne",
+          "grams": 20,
+          "note": "geröstet, gehackt, als Topping"
+        },
+        {
+          "key": "limette",
+          "grams": 15,
+          "note": "Marinade und Finish"
+        },
+        {
+          "key": "olivenoel",
+          "grams": 12
+        },
+        {
+          "key": "knoblauch",
+          "grams": 9
+        },
+        {
+          "key": "ingwer",
+          "grams": 8
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 8,
+          "note": "Scotch Bonnet, mit Kernen"
+        },
+        {
+          "key": "gewuerz_curry_jamaika",
+          "grams": 8,
+          "note": "selbst gemacht, siehe Schritt 2"
+        },
+        {
+          "key": "gewuerz_piment",
+          "grams": 2
+        },
+        {
+          "key": "gewuerz_thymian",
+          "grams": 2
+        }
+      ],
+      "steps": [
+        "Kidneybohnen über Nacht einweichen. Einweichwasser wegschütten, Bohnen abspülen und in frischem Wasser aufkochen — die ersten 10 Min. sprudelnd kochen, das baut das Phasin ab. Dann 50–80 Min. mit Deckel leise köcheln, erst am Ende salzen.",
+        "Currypulver währenddessen selbst rösten (Vorrat für 6–8 Gerichte): Koriandersaat, Senfkörner und Pimentkörner 1–2 Min. in trockener Pfanne rösten, bis die Senfkörner springen. Kreuzkümmel, Pfeffer und Bockshornklee 1 Min. dazu, dann sofort umfüllen — sonst wird der Bockshornklee bitter. Abkühlen lassen, portionsweise mörsern, mit Kurkumapulver mischen.",
+        "Cashewkerne in derselben trockenen Pfanne 2–3 Min. rösten, grob hacken, beiseitestellen.",
+        "Garnelen trockentupfen und mit der Hälfte des Currypulvers, etwas Limettensaft, Knoblauch und Salz 10 Min. marinieren.",
+        "Zwiebel und Paprika in Olivenöl anbraten. Ingwer, Chili mit Kernen, restliches Currypulver, Piment und Thymian kurz mitrösten.",
+        "Passierte Tomaten, Kokosmilch und Knochenbrühe angießen, offen 15–20 Min. einkochen lassen, bis die Sauce sämig ist.",
+        "Gekochte Bohnen und Blumenkohlröschen unterheben, 5–8 Min. ziehen lassen — der Blumenkohl soll Biss behalten.",
+        "Garnelen separat scharf anbraten (2–3 Min.) und erst ganz zum Schluss unterheben, sonst werden sie gummig.",
+        "Babyspinat unterheben und nur zusammenfallen lassen. Vom Herd nehmen, Skyr einrühren (nicht mehr kochen), abschmecken.",
+        "Orangen- und Grapefruitfilets mit dem austretenden Saft vorsichtig unterheben. Cashewkerne und Frühlingszwiebel darüber."
+      ],
+      "cuisineGroup": "americas",
+      "proteinCategory": "shellfish"
     }
   ]
 }

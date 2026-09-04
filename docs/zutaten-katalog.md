@@ -3,7 +3,7 @@
 **Auto-generiert aus `src/data/ingredients.json` — nicht manuell editieren.**
 Neu erzeugen: `node scripts/zutaten-katalog.js`
 
-**151 Zutaten** gesamt, sortiert nach Kategorie.
+**159 Zutaten** gesamt, sortiert nach Kategorie.
 
 ## Vor dem Anlegen einer neuen Zutat
 
@@ -52,7 +52,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `tempeh` | Soja-Tempeh | g | 193 | 19 | 9 | 11 |
 | `tofu_fest` | Tofu, fest | g | 144 | 15.8 | 2.8 | 8.7 |
 
-## Frisch (Gemüse, Kräuter, Obst) (51)
+## Frisch (Gemüse, Kräuter, Obst) (52)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -73,6 +73,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `galangal` | Galangal | g | 71 | 1.6 | 15 | 0.5 |
 | `paprika_gelb` | Gelbe Paprika | stueck × 150 g | 28 | 1 | 5 | 0.3 |
 | `granatapfelkerne` | Granatapfelkerne | g | 83 | 1.7 | 18.7 | 1.2 |
+| `grapefruit` | Grapefruit | stueck × 300 g | 42 | 0.8 | 8.5 | 0.1 |
 | `ingwer` | Ingwer | g | 80 | 1.8 | 18 | 0.8 |
 | `karotte` | Karotte | stueck × 70 g | 41 | 1 | 9.5 | 0.2 |
 | `karotten_bunt` | Karotten, bunt | stueck × 70 g | 41 | 0.9 | 9.6 | 0.2 |
@@ -108,7 +109,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `zucchini` | Zucchini | stueck × 200 g | 17 | 1.2 | 3.1 | 0.3 |
 | `zwiebel` | Zwiebel | stueck × 100 g | 40 | 1 | 9.2 | 0 |
 
-## Trocken (Reis, Pasta, Bohnen, Nüsse) (29)
+## Trocken (Reis, Pasta, Bohnen, Nüsse) (31)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -116,6 +117,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `reis_basmati_vollkorn` | Basmati Vollkorn (trocken) | g | 355 | 8 | 73 | 2.5 |
 | `bulgur` | Bulgur (trocken) | g | 342 | 12.3 | 63.4 | 1.3 |
 | `bohnen_cannellini` | Cannellini-Bohnen (trocken) | g | 333 | 22 | 60 | 1.7 |
+| `cashewkerne` | Cashewkerne | g | 553 | 18.2 | 30.2 | 43.8 |
 | `couscous` | Couscous | g | 376 | 12.8 | 72.4 | 0.6 |
 | `erdnuesse` | Erdnüsse, geröstet, ungesalzen | g | 585 | 24 | 21.3 | 50 |
 | `freekeh` | Freekeh (ganz) | g | 337 | 12.6 | 62 | 2.7 |
@@ -123,6 +125,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `kichererbsen_dose` | Kichererbsen (Abtropfgewicht) | g | 119 | 6.5 | 14 | 2.3 |
 | `kichererbsen_trocken` | Kichererbsen (trocken) | g | 364 | 19.3 | 61 | 6 |
 | `bohnen_kidney` | Kidneybohnen (Abtropfgewicht) | g | 127 | 8.7 | 22.8 | 0.5 |
+| `bohnen_kidney_trocken` | Kidneybohnen (trocken) | g | 317 | 24 | 40 | 1.5 |
 | `mais_dose` | Mais (Dose) | g | 86 | 3.2 | 19 | 1.2 |
 | `mandeln` | Mandeln | g | 579 | 20.8 | 21.7 | 50 |
 | `miso` | Miso-Paste | g (tl) | 199 | 12 | 26 | 6 |
@@ -142,7 +145,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `bohnen_weiss` | Weiße Bohnen (Dose) | g | 90 | 6.6 | 16 | 0.3 |
 | `bohnen_weiss_gek` | Weiße Bohnen (gekocht) | g | 139 | 9 | 25 | 0.6 |
 
-## Gewürze & Aromate (16)
+## Gewürze & Aromate (19)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -151,15 +154,18 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `gewuerz_curry` | Currypulver (mild) | g (tl) | 325 | 14.3 | 55.8 | 14 |
 | `gewuerz_garam` | Garam Masala | g (tl) | 380 | 15 | 45 | 15 |
 | `gewuerz_paprika_gerauch` | Geräuchertes Paprikapulver | g (tl) | 282 | 14 | 54 | 13 |
+| `gewuerz_curry_jamaika` | Jamaican Curry Powder (selbst gemacht) | g (tl) | 325 | 14.3 | 55.8 | 14 |
 | `gewuerz_koriander` | Koriandersamen, gemahlen | g (tl) | 300 | 12.4 | 55 | 17.8 |
 | `gewuerz_kreuzkuemmel` | Kreuzkümmel, gemahlen | g (tl) | 375 | 18 | 44 | 22 |
 | `gewuerz_kurkuma` | Kurkuma, gemahlen | g (tl) | 354 | 8 | 65 | 10 |
 | `gewuerz_paprika_edelsuess` | Paprikapulver, edelsüß | g (tl) | 282 | 14 | 54 | 13 |
+| `gewuerz_piment` | Piment, gemahlen | g (tl) | 263 | 6.1 | 72.1 | 8.7 |
 | `gewuerz_raselhanout` | Ras-el-Hanout | g (tl) | 320 | 12 | 45 | 10 |
 | `gewuerz_roganjosh` | Rogan-Josh-Gewürzmischung | vorrat (tl) | 300 | 10 | 40 | 10 |
 | `gewuerz_senfkoerner` | Senfkörner | g (tl) | 508 | 26.1 | 28.1 | 36.2 |
 | `sesam` | Sesam, Samen | vorrat (tl) | 572 | 17.5 | 23.8 | 50 |
 | `gewuerz_sumach` | Sumach | g (tl) | 310 | 8 | 62 | 6 |
+| `gewuerz_thymian` | Thymian, getrocknet | g (tl) | 276 | 9.1 | 63.9 | 7.4 |
 | `gewuerz_tikka` | Tikka-Gewürzmischung | vorrat (tl) | 300 | 10 | 40 | 10 |
 | `gewuerz_zaatar` | Za'atar | g (tl) | 350 | 10 | 30 | 20 |
 
@@ -172,7 +178,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `sesamoel` | Sesamöl | vorrat (tl) | 884 | 0 | 0 | 100 |
 | `tahini` | Tahini | g (el) | 595 | 17 | 21.2 | 53.8 |
 
-## Sonstige (21)
+## Sonstige (23)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -186,6 +192,8 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `honig` | Honig | vorrat (el) | 304 | 0 | 82.5 | 0 |
 | `kalamata_oliven` | Kalamata-Oliven | g | 115 | 0.8 | 6.3 | 10.7 |
 | `kapern` | Kapern (abgetropft) | g | 23 | 2.4 | 4.9 | 0.9 |
+| `knochenbruehe` | Knochenbrühe | ml | 37 | 8.4 | 0.4 | 0.3 |
+| `kokosmilch` | Kokosmilch | ml | 180 | 1.6 | 3 | 18 |
 | `reisessig` | Reisessig | ml (el) | 20 | 0.3 | 5 | 0 |
 | `rotweinessig` | Rotweinessig | ml | 19 | 0.1 | 0.3 | 0 |
 | `senf_mittelscharf` | Senf, mittelscharf | g | 88 | 5.6 | 7.4 | 5 |
