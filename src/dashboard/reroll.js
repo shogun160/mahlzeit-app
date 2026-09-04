@@ -3,6 +3,7 @@ import { allDishIds, dishesById, weightedShuffle } from '../data/dishes.js';
 import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount } from '../nutrition/preferences.js';
 import { getTargetProfile } from '../nutrition/target.js';
 import { optimizeAssignment, dayScopeFitness, NEIGHBOR_PENALTY } from './optimizer.js';
+import { resetChecked } from '../shopping-list/check.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
@@ -261,8 +262,13 @@ export function rerollAll() {
   state.rerollHistory.unshift(oldAssignment);
   while (state.rerollHistory.length > HISTORY_LENGTH) state.rerollHistory.pop();
 
-  // checkedShopping bleibt unangetastet — bereits gekaufte Artikel bleiben
-  // erhalten, auch wenn die neuen Gerichte sie evtl. nicht mehr enthalten
-  // (dann als Leftover sichtbar). Fuer einen echten Reset gibt es den
-  // separaten Reset-Button in der Einkaufsliste.
+  // Einkaufsliste zuruecksetzen: die komplette Woche ist neu, damit ist auch
+  // jedes Haekchen hinfaellig. Ohne Reset blieben die alten Keys als Leftover
+  // stehen und waeren beim naechsten Anhaken eines Tages faelschlich schon
+  // abgehakt — der User haette nie eingekauft. Gilt bewusst fuer ALLE
+  // rerollAll-Aufrufer (Reset-Pille, Makro-Popup, Kochzeit-Slider,
+  // Praeferenz-Aenderung, Onboarding), weil in jedem Fall die ganze Woche
+  // wechselt. Unterschied zu rerollDay: dort wechselt nur ein Tag, die
+  // uebrigen Gerichte brauchen ihre Haekchen weiter.
+  resetChecked();
 }
