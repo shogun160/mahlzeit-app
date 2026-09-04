@@ -4,6 +4,7 @@ import { getEffectivePreferences, getEffectiveCuisines, dishCuisineVoteCount } f
 import { getTargetProfile } from '../nutrition/target.js';
 import { optimizeAssignment, dayScopeFitness, NEIGHBOR_PENALTY } from './optimizer.js';
 import { resetChecked } from '../shopping-list/check.js';
+import { removeCheckedCustomItems } from '../shopping-list/custom-items.js';
 
 // Faktor für bevorzugte Küchen im Weighted-Shuffle. 3× ist spürbar (Bevorzugte
 // tauchen sichtbar häufiger auf), lässt aber genug Raum für Vielfalt. Siehe
@@ -270,5 +271,10 @@ export function rerollAll() {
   // Praeferenz-Aenderung, Onboarding), weil in jedem Fall die ganze Woche
   // wechselt. Unterschied zu rerollDay: dort wechselt nur ein Tag, die
   // uebrigen Gerichte brauchen ihre Haekchen weiter.
+  // Abgehakte eigene Zutaten sind eingekauft und damit erledigt — die neue
+  // Woche startet ohne sie. Offene bleiben stehen, die stehen ja noch aus.
+  // Reihenfolge zwingend vor resetChecked(): danach ist checkedShopping leer
+  // und es waere nicht mehr erkennbar, welche abgehakt waren.
+  removeCheckedCustomItems();
   resetChecked();
 }
