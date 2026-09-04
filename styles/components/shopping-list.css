@@ -412,11 +412,42 @@
   filter: brightness(0) invert(1);
 }
 
+/* Eigene Zutaten des Users: gestrichelte Kontur grenzt sie von den aus Rezepten
+   abgeleiteten Zeilen ab, ohne sie farblich hervorzuheben — sie sind gleichwertige
+   Eintraege, nur anderer Herkunft.
+   touch-action: pan-y ist funktional, nicht kosmetisch: vertikales Scrollen bleibt
+   beim Browser, horizontale Bewegung bekommt custom-gestures.js als Wisch. */
+.shop-item--custom {
+  border-style: dashed;
+  touch-action: pan-y;
+}
+
+/* Stift-Hinweis rechts: macht sichtbar, dass die Zeile eine eigene ist und
+   Gesten kennt. Wischen und Langdruck waeren sonst unauffindbar. */
+.shop-item__custom-hint {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 55%, transparent);
+}
+
+.shop-item__custom-hint svg {
+  width: 16px;
+  height: 16px;
+}
+
 /* Empty-State */
 .shop-empty {
   padding: 64px 24px 40px;
   text-align: center;
   color: var(--md-sys-color-on-surface-variant);
+}
+
+.shop-empty__add {
+  margin-top: 20px;
+  background: var(--md-sys-color-surface-container-lowest);
+  color: var(--md-sys-color-primary);
+  border: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .shop-empty__title {

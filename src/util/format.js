@@ -75,6 +75,10 @@ function formatQuarterCount(n) {
 // ganze Stück, ganze Löffel. displayUnit hat Priorität für nicht-vorrat-
 // Zutaten — konsistent zum Detail-Sheet ("3 EL Tahini" statt "45 g").
 export function formatQuantity(item) {
+  // Eigene Zutaten: qty ist Freitext ("2 Rollen") und laeuft durch keine
+  // Einheiten-Logik. Leer bleibt leer — ein Eintrag ohne Menge zeigt nur den
+  // Namen, statt eine erfundene Einheit zu behaupten.
+  if (item.isCustom) return item.qty || '';
   if (item.isLeftover) return 'Nicht mehr im Plan';
   const noteSuffix = item.note ? ` — ${item.note}` : '';
   // Vorrat ohne displayUnit: reines "Vorrat prüfen" (Gewürze, Sesam in Prisen).

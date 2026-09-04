@@ -12,6 +12,7 @@ import { mountProfileShareSheet } from './profile-share/share-sheet.js';
 import { mountProfileImportSheet, openProfileImportSheet } from './profile-share/import-sheet.js';
 import { mountAddChoiceSheet, openAddChoiceSheet } from './profile-share/add-choice-sheet.js';
 import { mountUpdateSheet, openUpdateSheet } from './settings/update-sheet.js';
+import { mountCustomItemSheet } from './shopping-list/custom-item-sheet.js';
 import { showToast } from './util/toast.js';
 import { attachViewSwipe } from './nav/swipe.js';
 import { renderBottomNav } from './nav/bottom.js';
@@ -37,6 +38,7 @@ const profileShareSheetRoot = document.getElementById('profile-share-sheet-root'
 const profileImportSheetRoot = document.getElementById('profile-import-sheet-root');
 const addChoiceSheetRoot = document.getElementById('add-choice-sheet-root');
 const updateSheetRoot = document.getElementById('update-sheet-root');
+const customItemSheetRoot = document.getElementById('custom-item-sheet-root');
 const bottomNavRoot = document.getElementById('bottom-nav');
 
 // Persistierten State laden. Wenn nichts gespeichert (oder JSON kaputt), würfelt
@@ -219,6 +221,7 @@ mountUpdateSheet(updateSheetRoot, {
   onChange: refresh,
   showToast: (msg) => showToast(msg),
 });
+mountCustomItemSheet(customItemSheetRoot, { onChange: refresh });
 mountMacroPopup(macroPopupRoot, {
   onOpenDetail: (_dishId, tab, day) => openSheet({ mode: 'detail', day, tab }),
   onChange: refresh,

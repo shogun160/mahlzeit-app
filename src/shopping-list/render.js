@@ -5,6 +5,10 @@ import { toggleCollapsed, expandCategory, isCollapsed, isCheckedExpanded, toggle
 import { renderProgress } from './progress.js';
 import { CAT_ORDER, CAT_LABELS } from './categories.js';
 import { formatQuantity } from '../util/format.js';
+import { escapeHtml } from '../util/escape.js';
+import { findCustomItemByKey, removeCustomItem } from './custom-items.js';
+import { openCustomItemSheet } from './custom-item-sheet.js';
+import { attachCustomGestures, consumeSuppressedClick } from './custom-gestures.js';
 
 const FLIP_DURATION_MS = 380;
 const FLIP_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
@@ -18,6 +22,9 @@ export function renderShoppingList(root, { onChange }) {
 
   if (items.length === 0) {
     root.innerHTML = renderEmptyState();
+    // Auch im Leerzustand muss "Eigene Zutat" erreichbar sein — sonst kaeme man
+    // ohne ausgewaehlte Gerichte gar nicht an die Funktion.
+    wireAddCustom(root);
     return;
   }
 
@@ -55,6 +62,9 @@ export function renderShoppingList(root, { onChange }) {
 
   root.querySelectorAll('.shop-item').forEach((el) => {
     el.addEventListener('click', () => {
+      // Wisch oder Long-Press auf einer eigenen Zutat: der Browser feuert
+      // danach trotzdem noch click — der darf nicht zusaetzlich abhaken.
+      if (consumeSuppressedClick(el)) return;
       const key = el.dataset.key;
       const cat = consolidated[key]?.cat;
       toggleChecked(key);
@@ -62,6 +72,21 @@ export function renderShoppingList(root, { onChange }) {
       onChange();
     });
   });
+
+  // Eigene Zutaten: wischen loescht, langer Druck oeffnet das Bearbeiten-Sheet.
+  root.querySelectorAll('.shop-item--custom').forEach((el) => {
+    const item = findCustomItemByKey(el.dataset.key);
+    if (!item) return;
+    attachCustomGestures(el, {
+      onDelete: () => {
+        removeCustomItem(item.id);
+        onChange();
+      },
+      onEdit: () => openCustomItemSheet(item),
+    });
+  });
+
+  wireAddCustom(root);
 
   // Sub-Divider innerhalb einer Kategorie (>=4 abgehakt): klappt den abgehakten
   // Teil auf/zu. Keyboard-Toggle wie Kategorie-Header.
@@ -380,22 +405,41 @@ function renderCheckedDivider(cat, checkedCount, expanded) {
   `;
 }
 
+// Verdrahtet jeden "Eigene Zutat"-Button im gerenderten Baum. Es gibt zwei
+// Fundstellen (Progress-Zeile und Leerzustand), die nie gleichzeitig
+// existieren — querySelectorAll deckt beide ab, ohne Fallunterscheidung.
+function wireAddCustom(root) {
+  root.querySelectorAll('[data-action="add-custom-item"]').forEach((btn) => {
+    btn.addEventListener('click', () => openCustomItemSheet());
+  });
+}
+
+// Kleiner Stift rechts in der Zeile — ohne Hinweis waeren Wischen und Langdruck
+// auf eigenen Zutaten unauffindbar.
+const ICON_EDIT_HINT = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>`;
+
 function renderRow(item) {
   const checked = state.checkedShopping.has(item.key);
   const cls = ['shop-item'];
   if (checked) cls.push('shop-item--checked');
   if (item.isLeftover) cls.push('shop-item--leftover');
+  if (item.isCustom) cls.push('shop-item--custom');
+  // escapeHtml auf Label und Menge: bei eigenen Zutaten ist das User-Text,
+  // bei Rezeptzutaten faengt es Sonderzeichen wie "&" in "Rosmarin & Thymian"
+  // korrekt ab.
+  const qty = formatQuantity(item);
   return `
-    <li class="${cls.join(' ')}" data-key="${item.key}">
+    <li class="${cls.join(' ')}" data-key="${escapeHtml(item.key)}">
       <span class="shop-item__check" aria-hidden="true">
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="4 10.5 8.5 15 16 6"></polyline>
         </svg>
       </span>
       <span class="shop-item__body">
-        <span class="shop-item__label">${item.label}</span>
-        <span class="shop-item__qty">${formatQuantity(item)}</span>
+        <span class="shop-item__label">${escapeHtml(item.label)}</span>
+        ${qty ? `<span class="shop-item__qty">${escapeHtml(qty)}</span>` : ''}
       </span>
+      ${item.isCustom ? `<span class="shop-item__custom-hint" aria-hidden="true">${ICON_EDIT_HINT}</span>` : ''}
     </li>
   `;
 }
@@ -418,6 +462,9 @@ function renderEmptyState() {
     <div class="shop-empty">
       <p class="shop-empty__title">Keine Zutaten in der Liste.</p>
       <p class="shop-empty__sub">Wähle Gerichte auf dem Dashboard über den Liste-Button aus.</p>
+      <button type="button" class="btn shop-empty__add" data-action="add-custom-item">
+        Eigene Zutat hinzufügen
+      </button>
     </div>
   `;
 }

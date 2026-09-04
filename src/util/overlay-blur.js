@@ -16,6 +16,7 @@ const OVERLAY_ROOT_IDS = [
   'update-sheet-root',
   'macro-popup-root',
   'onboarding-root',
+  'custom-item-sheet-root',
 ];
 
 export function installOverlayBlur() {

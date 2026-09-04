@@ -2,6 +2,7 @@ import { state, DAYS } from '../state.js';
 import { dishesById } from '../data/dishes.js';
 import { ingredientRegistry } from '../data/ingredient-registry.js';
 import { scaledGramsForDay } from '../nutrition/scale.js';
+import { customListEntries, isCustomKey } from './custom-items.js';
 
 // Aggregiert alle Zutaten der ausgewählten Tage in eine flache Map.
 // Rückgabe: { [key]: { key, label, cat, unit, size, note, sum, isLeftover } }
@@ -55,6 +56,11 @@ export function buildConsolidatedList() {
   // bis der User sie unhakt oder den Reset-Button drückt. Menge unbekannt.
   state.checkedShopping.forEach((key) => {
     if (consolidated[key]) return;
+    // Eigene Zutaten kommen unten aus customListEntries — hier wuerde sonst ein
+    // Leftover-Duplikat entstehen, sobald der User seinen Eintrag abhakt
+    // (ingredientRegistry kennt custom:-Keys ohnehin nicht, aber der Skip macht
+    // die Absicht explizit).
+    if (isCustomKey(key)) return;
     const meta = ingredientRegistry[key];
     if (!meta) return;
     consolidated[key] = {
@@ -63,6 +69,13 @@ export function buildConsolidatedList() {
       isLeftover: true,
     };
   });
+
+  // Eigene Zutaten des Users. Unabhaengig von selected/assignment — sie haengen
+  // an keinem Gericht und bleiben deshalb auch dann stehen, wenn kein Tag
+  // ausgewaehlt ist oder die Woche neu gewuerfelt wurde.
+  for (const entry of customListEntries()) {
+    consolidated[entry.key] = entry;
+  }
 
   return consolidated;
 }

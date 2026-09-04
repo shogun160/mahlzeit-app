@@ -155,6 +155,14 @@
   background: transparent;
   color: var(--md-sys-color-primary);
 }
+/* Destruktive Aktion (z. B. eigene Zutat loeschen). Bewusst Outline statt
+   gefuellt — der Loeschen-Button steht neben dem primaeren Speichern und soll
+   ihn nicht optisch schlagen. */
+.btn--danger {
+  background: transparent;
+  color: var(--md-sys-color-error, #b3261e);
+  border: 1px solid color-mix(in srgb, var(--md-sys-color-error, #b3261e) 40%, transparent);
+}
 .share-sheet__fallback {
   width: 100%;
   min-height: 96px;
