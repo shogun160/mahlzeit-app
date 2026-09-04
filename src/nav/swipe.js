@@ -16,6 +16,23 @@ export function attachViewSwipe(el, { onViewChange }) {
     'touchstart',
     (ev) => {
       if (ev.touches.length !== 1) return;
+      // Steht auf einer eigenen Einkaufslisten-Zutat der Bearbeiten/Loeschen-
+      // Bereich offen, gehoert der horizontale Wisch dieser Zeile: er schliesst
+      // sie wieder. Ohne die Ausnahme landet genau dieser Schliess-Wisch unten
+      // in `dx > 0 && idx > 0` und wechselt zur Dashboard-View.
+      //
+      // Bewusst nur im aufgedeckten Zustand (--revealed, nicht --custom): bei
+      // geschlossener Zeile soll der View-Wechsel normal funktionieren, auch
+      // wenn der Finger zufaellig auf einer eigenen Zutat aufsetzt.
+      //
+      // Der Wisch zum AUFDECKEN geht nach links und braucht keine Ausnahme,
+      // solange die Einkaufsliste die letzte View ist — `idx < VIEWS.length - 1`
+      // laeuft dann ins Leere. Kommt je eine View dahinter, muss diese
+      // Bedingung um den geschlossenen Fall erweitert werden.
+      if (ev.target.closest?.('.shop-item--revealed')) {
+        tracking = false;
+        return;
+      }
       startX = ev.touches[0].clientX;
       startY = ev.touches[0].clientY;
       tracking = true;
