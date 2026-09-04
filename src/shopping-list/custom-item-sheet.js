@@ -16,6 +16,7 @@ import {
 } from './custom-items.js';
 import { CAT_ORDER, CAT_LABELS } from './categories.js';
 import { escapeHtml } from '../util/escape.js';
+import { showToast } from '../util/toast.js';
 
 let mountRoot = null;
 let onChangeFn = null;
@@ -160,8 +161,14 @@ function wire() {
       labelInput?.focus();
       return;
     }
-    if (editing) updateCustomItem(editing.id, fields);
-    else addCustomItem(fields);
+    if (editing) {
+      const result = updateCustomItem(editing.id, fields);
+      // Beim Umbenennen wurde ein gleichnamiger Eintrag geschluckt — ohne
+      // Hinweis waere unklar, warum ploetzlich eine Zeile fehlt.
+      if (result?.merged) showToast(`Mit vorhandenem Eintrag „${result.item.label}" zusammengefasst.`);
+    } else {
+      addCustomItem(fields);
+    }
     close();
     onChangeFn?.();
   };

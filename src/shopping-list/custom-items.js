@@ -90,17 +90,46 @@ export function addCustomItem(input) {
   return { item, wasExisting: false };
 }
 
-// Aendert eine bestehende eigene Zutat (Long-Press → Sheet im Edit-Modus).
-// Der Listen-Key bleibt gleich, weil er an der id haengt — ein umbenanntes
-// Item behaelt damit seinen Haken.
+// Aendert eine bestehende eigene Zutat (Long-Press bzw. Stift → Sheet im
+// Edit-Modus). Der Listen-Key bleibt gleich, weil er an der id haengt — ein
+// umbenanntes Item behaelt damit seinen Haken.
+//
+// Rueckgabe: { item, merged } — merged ist true, wenn beim Umbenennen ein
+// gleichnamiger Eintrag geschluckt wurde. Der Aufrufer kann das melden, sonst
+// verschwaende eine Zeile ohne Erklaerung.
 export function updateCustomItem(id, input) {
   const item = state.customItems.find((it) => it.id === id);
   if (!item) return null;
   const fields = normalize(input);
   if (!fields.label) return null;
+
+  const oldLabel = item.label;
+
+  // Traegt eine ANDERE eigene Zutat den neuen Namen schon, werden beide
+  // zusammengefasst — zwei gleichnamige Zeilen auf einer Einkaufsliste sind
+  // immer ein Versehen, und sie erzeugten obendrein denselben Vorschlag
+  // doppelt. Das bearbeitete Item ueberlebt samt id, Haken und Formularwerten;
+  // der Aufrufer wird gerade daran gearbeitet haben.
+  const clash = state.customItems.find((it) => it.id !== id && sameLabel(it.label, fields.label));
+  if (clash) removeCustomItem(clash.id);
+
   Object.assign(item, fields);
+
+  // Beim Umbenennen den alten Namen aus den Vorschlaegen werfen. Typischer
+  // Fall ist die Tippfehler-Korrektur ("Sojamlich" → "Sojamilch") — der
+  // Vertipper darf danach nicht weiter vorgeschlagen werden.
+  //
+  // Unterschied zum Loeschen, das die MRU bewusst stehen laesst: dort bleibt
+  // der Name gueltig und man will ihn spaeter wieder anbieten. Hier war er nie
+  // gemeint.
+  if (!sameLabel(oldLabel, fields.label)) {
+    state.recentCustomItems = state.recentCustomItems.filter(
+      (r) => !sameLabel(r.label, oldLabel),
+    );
+  }
+
   rememberRecent(fields);
-  return item;
+  return { item, merged: !!clash };
 }
 
 // Entfernt eine eigene Zutat. Der Haken muss mitgehen, sonst bliebe ein
@@ -112,6 +141,25 @@ export function removeCustomItem(id) {
   state.customItems.splice(idx, 1);
   state.checkedShopping.delete(customKeyFor(id));
   return true;
+}
+
+// Entfernt alle eigenen Zutaten, die aktuell abgehakt sind. Gedacht fuer den
+// Wochenwechsel (rerollAll): abgehakt heisst eingekauft, und damit ist der
+// Eintrag erledigt. Nicht abgehakte bleiben stehen — die stehen ja noch aus.
+//
+// Muss VOR resetChecked() laufen, sonst ist checkedShopping schon leer und die
+// Funktion findet nichts mehr.
+// Rueckgabe: die entfernten Eintraege (fuer Toast/Log durch den Aufrufer).
+export function removeCheckedCustomItems() {
+  const removed = [];
+  state.customItems = state.customItems.filter((it) => {
+    const key = customKeyFor(it.id);
+    if (!state.checkedShopping.has(key)) return true;
+    state.checkedShopping.delete(key);
+    removed.push(it);
+    return false;
+  });
+  return removed;
 }
 
 // Schiebt einen Eintrag an den Kopf der MRU-Liste. Dedupe nach Label, damit
