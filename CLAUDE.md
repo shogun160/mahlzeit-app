@@ -46,7 +46,9 @@ vite.config.js
 www/                        ← Vite-Build-Output (npm run build)
 android/                    ← Capacitor-generiert, meist nicht direkt editieren
   app/src/main/res/         ← Icons, Splash, styles.xml, strings.xml
-  app/build.gradle          ← App-ID, Signing, SDK-Versionen
+  app/build.gradle          ← App-ID, Signing, SDK-Versionen, Flavors beta/stable
+  keystore.properties       ← Signing-Zugangsdaten, nicht im git
+releases/                   ← Archiv der ausgelieferten APKs, nicht im git
 capacitor.config.json       ← App-ID, App-Name, Plugin-Config
 ```
 
@@ -64,19 +66,38 @@ Code in src/ oder styles/ ändern
   → npm run dev              # lokaler Vite-Dev-Server mit Hot Reload (Browser)
   → npm run build            # Vite baut nach www/
   → npx cap sync             # kopiert www/ in android/app/src/main/assets/public
-  → APK bauen (siehe unten)
-  → auf Handy deinstallieren + neu installieren
+  → APK bauen + nach releases/ kopieren (siehe unten)
+  → auf Handy installieren (drüber-installieren reicht — gleicher Keystore)
 ```
 
-**Debug-APK per CLI:**
+**Zwei Kanäle als Product Flavors:** `beta` (App-ID `com.mahlzeit.myapp.beta`, Name „Mahlzeit Beta", versionName bekommt `-beta` angehängt) und `stable` (App-ID `com.mahlzeit.myapp`). Beide sind parallel auf demselben Gerät installierbar — für ein Beta-Update muss die stabile App also **nicht** deinstalliert werden.
+
+**APK per CLI — was verteilt wird, ist immer ein Release-Build:**
 
 ```bash
 cd android
-JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleDebug
-# Ergebnis: android/app/build/outputs/apk/debug/app-debug.apk
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ./gradlew assembleBetaRelease
+#                                                                               ...oder assembleStableRelease
+
+# Ergebnis: android/app/build/outputs/apk/beta/release/app-beta-release.apk
+# Danach ZWINGEND nach releases/ kopieren, Namensschema mahlzeit-<versionName>-<flavor>.apk:
+cd ..
+cp android/app/build/outputs/apk/beta/release/app-beta-release.apk releases/mahlzeit-1.6.0-beta.apk
 ```
 
-Alternativ Android Studio: Build → Generate App Bundles or APKs → Generate APKs.
+`releases/` ist das Archiv aller ausgelieferten APKs und liegt bewusst **außerhalb der Git-Verwaltung** (16 MB pro Datei). Eine APK, die dort nicht liegt, gilt als nicht ausgeliefert.
+
+Release-Builds sind signiert (Keystore über `android/keystore.properties`), laufen durch ProGuard (`minifyEnabled`, `shrinkResources`) und sind dadurch ~16 MB statt ~20 MB. **`assembleDebug` ist nicht der Auslieferungsweg** — die Debug-APK ist unsigniert, ungeschrumpft und baut beide Flavors gleichzeitig.
+
+Nach dem Bau verifizieren:
+
+```bash
+AAPT=$(ls "$HOME/Library/Android/sdk/build-tools/"*/aapt2 | tail -1)
+"$AAPT" dump badging releases/mahlzeit-1.6.0-beta.apk | grep -E "^package|application-label:"
+# erwartet: name='com.mahlzeit.myapp.beta' versionCode='30' versionName='1.6.0-beta'
+```
+
+Alternativ Android Studio: Build → Generate Signed App Bundle / APK → APK → Flavor + `release` wählen.
 
 **Config-Änderungen:**
 - App-Name: `android/app/src/main/res/values/strings.xml` + `capacitor.config.json`
@@ -119,8 +140,9 @@ Alternativ Android Studio: Build → Generate App Bundles or APKs → Generate A
 **APK-Bau:**
 - **Nur nach expliziter Ansage „APK bauen".** Auch nach abgeschlossenem Test nicht automatisch.
 - Vor Bau: Version-Bump in `android/app/build.gradle` mit User abstimmen (versionCode + versionName).
-- Beta-APK aus `beta`, Stable-APK aus `main`.
-- Vor Bau prüfen: `remote-config.js` zeigt auf `main` (Prod-Content-URL).
+- Beta-APK aus `beta` (`assembleBetaRelease`), Stable-APK aus `main` (`assembleStableRelease`).
+- Vor Bau prüfen: `remote-config.js` zeigt auf `main` (Prod-Content-URL), Working-Copy sauber.
+- **Nach dem Bau nach `releases/` kopieren** — `mahlzeit-<versionName>-<flavor>.apk`. Der Bau gilt erst dann als fertig.
 
 ## Guardrails
 
