@@ -315,6 +315,10 @@
   color: var(--md-sys-color-on-surface-variant);
   font-variant-numeric: tabular-nums;
   transition: color 180ms ease;
+  /* Haelt die Zeilenhoehe auch ohne Text: eine eigene Zutat ohne Mengenangabe
+     soll genauso hoch sein wie eine mit. Sonst springt die Listenhoehe je
+     nachdem, ob der User eine Menge eingetippt hat. */
+  min-height: 1.25em;
 }
 
 /* Checked-State: Check-Kreis füllt sich mit primary, Text ist durchgestrichen + gedimmt. */
@@ -415,25 +419,95 @@
 /* Eigene Zutaten des Users: gestrichelte Kontur grenzt sie von den aus Rezepten
    abgeleiteten Zeilen ab, ohne sie farblich hervorzuheben — sie sind gleichwertige
    Eintraege, nur anderer Herkunft.
-   touch-action: pan-y ist funktional, nicht kosmetisch: vertikales Scrollen bleibt
-   beim Browser, horizontale Bewegung bekommt custom-gestures.js als Wisch. */
+
+   Das Padding wandert auf .shop-item__surface: die Oberflaeche verschiebt sich
+   beim Wischen und muss den darunterliegenden Loeschen-Button vollstaendig
+   abdecken, auch im Randbereich.
+
+   touch-action: pan-y ist funktional, nicht kosmetisch: vertikales Scrollen
+   bleibt beim Browser, horizontale Bewegung bekommt custom-gestures.js. */
 .shop-item--custom {
   border-style: dashed;
   touch-action: pan-y;
+  position: relative;
+  overflow: hidden;
+  padding: 0;
 }
 
-/* Stift-Hinweis rechts: macht sichtbar, dass die Zeile eine eigene ist und
-   Gesten kennt. Wischen und Langdruck waeren sonst unauffindbar. */
-.shop-item__custom-hint {
+.shop-item__surface {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  min-height: calc(var(--touch-target-min) - 2px);
+  position: relative;
+  z-index: 1;
+  /* Deckt die Aktionsleiste ab. inherit statt fester Farbe, damit der
+     Checked-State (color-mix mit primary) mitgeht. */
+  background: inherit;
+  /* Bewusst NICHT inherit: mit eigener Rundung entstuende in jeder Ecke eine
+     Luecke, durch die der rote Loeschen-Button schimmert. Die Oberflaeche
+     bleibt rechteckig und deckt vollstaendig ab — die runde Optik macht das
+     overflow:hidden der Zeile. */
+  border-radius: 0;
+}
+
+/* Personen-Symbol als Herkunfts-Marker. Zurueckhaltend: es kennzeichnet nur,
+   es fordert nicht zum Tippen auf. */
+.shop-item__owner {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 55%, transparent);
 }
 
-.shop-item__custom-hint svg {
+.shop-item__owner svg {
   width: 16px;
   height: 16px;
+}
+
+/* Aktionsleiste, die beim Wischen nach links darunter hervorkommt: Bearbeiten
+   und Loeschen. Liegt dauerhaft im DOM und wird von der Oberflaeche verdeckt —
+   kein Einfuegen zur Laufzeit, damit die Breite immer zu REVEAL_WIDTH_PX in
+   custom-gestures.js passt. */
+.shop-item__actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 144px;
+  z-index: 0;
+  display: flex;
+}
+
+.shop-item__action {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.shop-item__action svg {
+  width: 22px;
+  height: 22px;
+}
+
+.shop-item__action:active {
+  filter: brightness(0.92);
+}
+
+.shop-item__action--edit {
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.shop-item__action--delete {
+  background: var(--md-sys-color-error, #b3261e);
+  color: var(--md-sys-color-on-error, #fff);
 }
 
 /* Empty-State */

@@ -8,7 +8,7 @@ import { formatQuantity } from '../util/format.js';
 import { escapeHtml } from '../util/escape.js';
 import { findCustomItemByKey, removeCustomItem } from './custom-items.js';
 import { openCustomItemSheet } from './custom-item-sheet.js';
-import { attachCustomGestures, consumeSuppressedClick } from './custom-gestures.js';
+import { attachCustomGestures, consumeSuppressedClick, isRevealed, closeReveal, closeAllReveals } from './custom-gestures.js';
 
 const FLIP_DURATION_MS = 380;
 const FLIP_EASING = 'cubic-bezier(0.2, 0, 0, 1)';
@@ -61,10 +61,22 @@ export function renderShoppingList(root, { onChange }) {
   updateProgressHeightVar(root);
 
   root.querySelectorAll('.shop-item').forEach((el) => {
-    el.addEventListener('click', () => {
+    el.addEventListener('click', (ev) => {
+      // Die aufgedeckten Aktions-Buttons haben ihre eigenen Handler.
+      if (ev.target.closest('.shop-item__actions')) return;
       // Wisch oder Long-Press auf einer eigenen Zutat: der Browser feuert
       // danach trotzdem noch click — der darf nicht zusaetzlich abhaken.
       if (consumeSuppressedClick(el)) return;
+      // Steht der Loeschen-Button offen, schliesst der Tap ihn erst wieder.
+      // Sonst waere die Zeile in einem scharfen Zustand und wuerde nebenbei
+      // abgehakt.
+      if (isRevealed(el)) {
+        closeReveal(el);
+        return;
+      }
+      // Tap auf eine andere Zeile schliesst einen offenen Loeschen-Button —
+      // wie in iOS-Listen.
+      closeAllReveals(root);
       const key = el.dataset.key;
       const cat = consolidated[key]?.cat;
       toggleChecked(key);
@@ -73,16 +85,24 @@ export function renderShoppingList(root, { onChange }) {
     });
   });
 
-  // Eigene Zutaten: wischen loescht, langer Druck oeffnet das Bearbeiten-Sheet.
+  // Eigene Zutaten: nach links wischen deckt den Loeschen-Button auf, langer
+  // Druck oeffnet das Bearbeiten-Sheet.
   root.querySelectorAll('.shop-item--custom').forEach((el) => {
     const item = findCustomItemByKey(el.dataset.key);
     if (!item) return;
     attachCustomGestures(el, {
-      onDelete: () => {
-        removeCustomItem(item.id);
-        onChange();
-      },
+      root,
       onEdit: () => openCustomItemSheet(item),
+    });
+    el.querySelector('[data-action="edit-custom"]')?.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      closeReveal(el);
+      openCustomItemSheet(item);
+    });
+    el.querySelector('[data-action="delete-custom"]')?.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      removeCustomItem(item.id);
+      onChange();
     });
   });
 
@@ -414,9 +434,23 @@ function wireAddCustom(root) {
   });
 }
 
-// Kleiner Stift rechts in der Zeile — ohne Hinweis waeren Wischen und Langdruck
-// auf eigenen Zutaten unauffindbar.
-const ICON_EDIT_HINT = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>`;
+// Personen-Symbol als Herkunfts-Marker: kennzeichnet Zeilen, die der User selbst
+// angelegt hat. Bewusst kein Button und kein Stift — ein Icon, das nach Aktion
+// aussieht, muss auch eine ausloesen, und die Aktionen liegen hier auf Wisch und
+// Langdruck.
+const ICON_OWNER = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M480-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Z"/></svg>`;
+
+// Material Symbol "edit" — Stift, fuer den aufgedeckten Bearbeiten-Button.
+const ICON_EDIT = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M200-200h57l391-391-57-57-391 391v57Zm-80 80v-170l528-527q12-11 26.5-17t30.5-6q16 0 31 6t26 18l55 56q12 11 17.5 26t5.5 30q0 16-5.5 30.5T817-647L290-120H120Zm640-584-56-56 56 56Zm-141 85-28-29 57 57-29-28Z"/></svg>`;
+// Material Symbol "delete" — Muelleimer, fuer den aufgedeckten Loeschen-Button.
+const ICON_TRASH = `<svg viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>`;
+
+const CHECK_MARK = `
+  <span class="shop-item__check" aria-hidden="true">
+    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="4 10.5 8.5 15 16 6"></polyline>
+    </svg>
+  </span>`;
 
 function renderRow(item) {
   const checked = state.checkedShopping.has(item.key);
@@ -428,18 +462,40 @@ function renderRow(item) {
   // bei Rezeptzutaten faengt es Sonderzeichen wie "&" in "Rosmarin & Thymian"
   // korrekt ab.
   const qty = formatQuantity(item);
+  const body = `
+    ${CHECK_MARK}
+    <span class="shop-item__body">
+      <span class="shop-item__label">${escapeHtml(item.label)}</span>
+      <span class="shop-item__qty">${escapeHtml(qty)}</span>
+    </span>`;
+
+  // Eigene Zutaten bekommen eine verschiebbare Oberflaeche, unter der der
+  // Loeschen-Button liegt. Rezeptzutaten behalten das flache Markup — sie
+  // kennen weder Wisch noch Loeschen.
+  if (!item.isCustom) {
+    return `<li class="${cls.join(' ')}" data-key="${escapeHtml(item.key)}">${body}</li>`;
+  }
+
   return `
     <li class="${cls.join(' ')}" data-key="${escapeHtml(item.key)}">
-      <span class="shop-item__check" aria-hidden="true">
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="4 10.5 8.5 15 16 6"></polyline>
-        </svg>
+      <span class="shop-item__surface">
+        ${body}
+        <span class="shop-item__owner" title="Eigene Zutat" aria-label="Eigene Zutat" role="img">${ICON_OWNER}</span>
       </span>
-      <span class="shop-item__body">
-        <span class="shop-item__label">${escapeHtml(item.label)}</span>
-        ${qty ? `<span class="shop-item__qty">${escapeHtml(qty)}</span>` : ''}
+      <span class="shop-item__actions">
+        <button type="button"
+                class="shop-item__action shop-item__action--edit"
+                data-action="edit-custom"
+                aria-label="Zutat bearbeiten"
+                title="Bearbeiten"
+                tabindex="-1">${ICON_EDIT}</button>
+        <button type="button"
+                class="shop-item__action shop-item__action--delete"
+                data-action="delete-custom"
+                aria-label="Zutat löschen"
+                title="Löschen"
+                tabindex="-1">${ICON_TRASH}</button>
       </span>
-      ${item.isCustom ? `<span class="shop-item__custom-hint" aria-hidden="true">${ICON_EDIT_HINT}</span>` : ''}
     </li>
   `;
 }

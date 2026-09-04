@@ -1,16 +1,24 @@
 // Touch-Gesten fuer eigene Einkaufslisten-Zutaten:
-//   horizontal wischen  → loeschen
+//   nach links wischen  → roten Loeschen-Button aufdecken (loescht noch NICHT)
+//   Loeschen antippen   → loeschen
 //   lange druecken      → bearbeiten
 //   kurz tippen         → abhaken (der normale Click-Handler der Liste)
 //
+// Zwei-Schritt statt Sofort-Loeschen wie in iOS-Listen: ein Wisch ist zu leicht
+// versehentlich ausgeloest, und eine eigene Zutat ist nicht wiederherstellbar.
+// Der aufgedeckte Button ist die Bestaetigung.
+//
 // Pointer-Events statt Touch-Events, damit dieselbe Implementierung im
-// Desktop-Browser testbar bleibt (npm run dev). Die drei Gesten teilen sich
-// einen Pointer-Down, deshalb liegen sie in einem Modul: erst der Verlauf der
-// Bewegung entscheidet, welche gemeint war.
+// Desktop-Browser testbar bleibt (npm run dev).
 
-// Ab dieser horizontalen Distanz gilt der Wisch als Loeschen. 80 px ist weit
-// genug, dass ein unruhiger Daumen beim Abhaken nichts loescht.
-const SWIPE_THRESHOLD_PX = 80;
+// Breite des aufgedeckten Aktionsbereichs: zwei Buttons (Bearbeiten, Loeschen)
+// à 72 px. Muss zur CSS-Breite von .shop-item__actions passen — sonst bleibt
+// ein Spalt oder ein Button wird angeschnitten. 72 px liegen ueber dem
+// 48-px-Minimum aus Guardrail 9.
+export const REVEAL_WIDTH_PX = 144;
+
+// Ab dieser Wischweite rastet die Zeile offen ein, darunter schnappt sie zu.
+const OPEN_THRESHOLD_PX = REVEAL_WIDTH_PX / 2;
 
 // Ab hier gilt die Bewegung als Wisch bzw. Scroll — vorher ist alles noch ein
 // potenzieller Long-Press.
@@ -28,19 +36,55 @@ function buzz() {
   }
 }
 
-// Haengt die Gesten an eine Zeile. `onDelete`/`onEdit` werden hoechstens einmal
-// pro Pointer-Down gefeuert.
+export function isRevealed(el) {
+  return el.classList.contains('shop-item--revealed');
+}
+
+export function closeReveal(el) {
+  el.classList.remove('shop-item--revealed');
+  const surface = el.querySelector('.shop-item__surface');
+  if (surface) {
+    surface.style.transition = '';
+    surface.style.transform = '';
+  }
+}
+
+// Schliesst alle offenen Zeilen ausser der uebergebenen. Immer nur eine Zeile
+// offen — sonst haette der User mehrere scharfe Loeschen-Buttons gleichzeitig.
+export function closeAllReveals(root, except = null) {
+  root.querySelectorAll('.shop-item--revealed').forEach((el) => {
+    if (el !== except) closeReveal(el);
+  });
+}
+
+function openReveal(el) {
+  el.classList.add('shop-item--revealed');
+  const surface = el.querySelector('.shop-item__surface');
+  if (surface) {
+    surface.style.transition = 'transform .18s ease';
+    surface.style.transform = `translateX(-${REVEAL_WIDTH_PX}px)`;
+  }
+}
+
+// Haengt die Gesten an eine Zeile.
+//   root    — Scroll-Container der Liste, fuer "nur eine Zeile offen"
+//   onEdit  — Long-Press
+// Das eigentliche Loeschen haengt am aufgedeckten Button und wird in render.js
+// verdrahtet, nicht hier.
 //
 // Click-Unterdrueckung: Nach einem Wisch oder Long-Press feuert der Browser
 // trotzdem noch ein click-Event — das wuerde die Zutat zusaetzlich abhaken.
 // Wir markieren das Element per data-suppress-click; der Click-Handler in
 // render.js liest und loescht das Flag.
-export function attachCustomGestures(el, { onDelete, onEdit }) {
+export function attachCustomGestures(el, { root, onEdit }) {
+  const surface = el.querySelector('.shop-item__surface');
+  if (!surface) return;
+
   let startX = 0;
   let startY = 0;
   let dx = 0;
   let dragging = false;
-  let resolved = false;   // Geste bereits ausgeloest → keine zweite Aktion
+  let resolved = false;   // Long-Press hat schon gefeuert
   let timer = null;
 
   const clearTimer = () => {
@@ -48,12 +92,6 @@ export function attachCustomGestures(el, { onDelete, onEdit }) {
       clearTimeout(timer);
       timer = null;
     }
-  };
-
-  const resetTransform = () => {
-    el.style.transition = '';
-    el.style.transform = '';
-    el.style.opacity = '';
   };
 
   const finish = () => {
@@ -65,12 +103,16 @@ export function attachCustomGestures(el, { onDelete, onEdit }) {
   el.addEventListener('pointerdown', (ev) => {
     // Nur primaerer Button/Finger. Rechtsklick und Zweitfinger ignorieren.
     if (ev.button !== 0) return;
+    // Auf den aufgedeckten Aktions-Buttons keine Geste starten — die wollen nur
+    // ihren Click.
+    if (ev.target.closest?.('.shop-item__actions')) return;
+
     startX = ev.clientX;
     startY = ev.clientY;
     dx = 0;
     dragging = true;
     resolved = false;
-    el.style.transition = 'none';
+    surface.style.transition = 'none';
 
     clearTimer();
     timer = setTimeout(() => {
@@ -79,7 +121,7 @@ export function attachCustomGestures(el, { onDelete, onEdit }) {
       resolved = true;
       el.dataset.suppressClick = '1';
       buzz();
-      resetTransform();
+      closeReveal(el);
       finish();
       onEdit();
     }, LONG_PRESS_MS);
@@ -90,10 +132,10 @@ export function attachCustomGestures(el, { onDelete, onEdit }) {
     const moveX = ev.clientX - startX;
     const moveY = ev.clientY - startY;
 
-    // Vertikal dominant → der User scrollt. Geste abbrechen und die Zeile
-    // zurueckschnappen lassen, damit sie nicht schief unter dem Finger klebt.
+    // Vertikal dominant → der User scrollt. Geste abbrechen und die Zeile in
+    // ihren Ausgangszustand zurueckbringen.
     if (Math.abs(moveY) > MOVE_TOLERANCE_PX && Math.abs(moveY) > Math.abs(moveX)) {
-      resetTransform();
+      if (isRevealed(el)) openReveal(el); else closeReveal(el);
       finish();
       return;
     }
@@ -106,13 +148,16 @@ export function attachCustomGestures(el, { onDelete, onEdit }) {
       if (el.hasPointerCapture?.(ev.pointerId) === false) {
         try { el.setPointerCapture(ev.pointerId); } catch (_) { /* egal */ }
       }
+      closeAllReveals(root, el);
     }
 
     dx = moveX;
-    el.style.transform = `translateX(${dx}px)`;
-    // Ausblenden proportional zur Wischweite — macht sichtbar, dass hier
-    // etwas verschwindet, und wo die Schwelle liegt.
-    el.style.opacity = String(Math.max(0.25, 1 - Math.abs(dx) / (SWIPE_THRESHOLD_PX * 2)));
+    // Basis ist der aktuelle Zustand: aus einer offenen Zeile heraus wischt man
+    // wieder zu. Nach links wird bei der Reveal-Breite gedeckelt, nach rechts
+    // bei 0 — die Zeile soll nicht nach rechts aus ihrem Rahmen wandern.
+    const base = isRevealed(el) ? -REVEAL_WIDTH_PX : 0;
+    const offset = Math.max(-REVEAL_WIDTH_PX, Math.min(0, base + dx));
+    surface.style.transform = `translateX(${offset}px)`;
   });
 
   const endGesture = (ev) => {
@@ -120,30 +165,24 @@ export function attachCustomGestures(el, { onDelete, onEdit }) {
       finish();
       return;
     }
-    const passed = Math.abs(dx) >= SWIPE_THRESHOLD_PX;
     try { el.releasePointerCapture?.(ev.pointerId); } catch (_) { /* egal */ }
 
-    if (passed) {
-      resolved = true;
-      el.dataset.suppressClick = '1';
-      finish();
-      onDelete();
-      return;
-    }
+    const base = isRevealed(el) ? -REVEAL_WIDTH_PX : 0;
+    const offset = base + dx;
 
-    // Unter der Schwelle: zurueckschnappen. Ein Wisch, der schon sichtbar war,
-    // darf danach nicht auch noch abhaken.
+    // Ein sichtbarer Wisch darf danach nicht auch noch abhaken.
     if (Math.abs(dx) > MOVE_TOLERANCE_PX) el.dataset.suppressClick = '1';
-    el.style.transition = 'transform .18s ease, opacity .18s ease';
-    el.style.transform = '';
-    el.style.opacity = '';
+
+    if (offset <= -OPEN_THRESHOLD_PX) openReveal(el);
+    else closeReveal(el);
+
     finish();
   };
 
   el.addEventListener('pointerup', endGesture);
   el.addEventListener('pointercancel', (ev) => {
-    resetTransform();
     try { el.releasePointerCapture?.(ev.pointerId); } catch (_) { /* egal */ }
+    if (isRevealed(el)) openReveal(el); else closeReveal(el);
     finish();
   });
 }
