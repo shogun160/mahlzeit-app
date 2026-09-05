@@ -85,6 +85,65 @@
   border-color: var(--md-sys-color-primary);
 }
 
+/* Traeger fuer das Suchdropdown. Muss position:relative sein, damit die Liste
+   am Feld haengt statt am Sheet. */
+.custom-item-sheet__field {
+  position: relative;
+}
+
+/* Zutaten-Suche unter dem Namensfeld. Bewusst absolut positioniert statt im
+   Fluss: sonst spraenge das halbe Formular bei jedem Tastendruck nach unten,
+   sobald sich die Trefferzahl aendert. */
+.custom-item-suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  border-radius: 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-high, var(--md-sys-color-surface));
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .28);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.custom-item-suggest[hidden] {
+  display: none;
+}
+
+/* min-height statt Padding-Rechnerei: die Zeile ist ein Touch-Target und muss
+   Guardrail 9 auch dann erfuellen, wenn Label und Kategorie kurz sind. */
+.custom-item-suggest__option {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--touch-target-min, 48px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.custom-item-suggest__option.is-active,
+.custom-item-suggest__option:hover {
+  background: var(--md-sys-color-surface-container-highest);
+}
+
+.custom-item-suggest__label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+.custom-item-suggest__meta {
+  font-size: 0.75rem;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
 /* Chip-Reihe fuer Vorschlaege und Kategorien. Umbruch statt Scroll — bei sieben
    Kategorien passt sonst nichts auf ein schmales Display. Die einzelnen Chips
    sind niedriger als 48 px; ueber die Reihe ist das Touch-Target erfuellt
