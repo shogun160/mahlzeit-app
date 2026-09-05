@@ -9,16 +9,21 @@ import { state } from '../state.js';
 const bundledIngredients = ingredientsData.ingredients;
 
 // Merged Ingredients (bundled + remote) — wird bei jedem rebuildDishes() neu
-// berechnet. Nur intern genutzt (fuer enrichIngredient). Consumer verwenden
-// die pro-dish enriched-Struktur.
-let mergedIngredients = { ...bundledIngredients };
+// berechnet. Primaer intern genutzt (fuer enrichIngredient); Consumer verwenden
+// normalerweise die pro-dish enriched-Struktur.
+//
+// Als Live-Binding exportiert fuer die Zutaten-Suche im Eigene-Zutat-Sheet.
+// Bewusst nicht ingredientRegistry: das kennt nur Zutaten, die in einem Gericht
+// vorkommen, und friert seinen Stand beim Modul-Load ein — Remote-Zutaten
+// fehlen dort. Hier sehen Importer nach rebuildDishes() den gemergten Stand.
+export let allIngredients = { ...bundledIngredients };
 
 // Dish-Ingredients werden beim Laden angereichert: das JSON speichert nur
 // {key, grams, note?}, hier werden label, cat, unit, size und die konkreten
 // Makros (per_100g × grams) aus der DB dazugelegt. Consumer (Card, Detail-Sheet,
 // Shopping-Liste) sehen weiterhin dieselben Felder wie vor der DB-Migration.
 function enrichIngredient(ing) {
-  const entry = mergedIngredients[ing.key];
+  const entry = allIngredients[ing.key];
   if (!entry) {
     // Sollte nach dem Big-Bang-Refactor nicht mehr vorkommen. Wenn doch:
     // hart failen macht den Fehler sichtbar statt still falsche Werte zu liefern.
@@ -79,8 +84,8 @@ export function rebuildDishes() {
     remoteDishes,
     remoteIngredients,
   });
-  // mergedIngredients zuerst setzen — enrichIngredient liest daraus.
-  mergedIngredients = merged.ingredients;
+  // allIngredients zuerst setzen — enrichIngredient liest daraus.
+  allIngredients = merged.ingredients;
   const enriched = enrichDishes(merged.dishes);
   allDishes = enriched;
   dishesById = new Map(enriched.map((d) => [d.id, d]));
