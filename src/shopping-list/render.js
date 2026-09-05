@@ -6,7 +6,7 @@ import { renderProgress } from './progress.js';
 import { CAT_ORDER, CAT_LABELS } from './categories.js';
 import { formatQuantity } from '../util/format.js';
 import { escapeHtml } from '../util/escape.js';
-import { findCustomItemByKey, removeCustomItem } from './custom-items.js';
+import { findCustomItemById, removeCustomItem } from './custom-items.js';
 import { openCustomItemSheet } from './custom-item-sheet.js';
 import { attachCustomGestures, consumeSuppressedClick, isRevealed, closeReveal, closeAllReveals } from './custom-gestures.js';
 
@@ -86,9 +86,11 @@ export function renderShoppingList(root, { onChange }) {
   });
 
   // Eigene Zutaten: nach links wischen deckt den Loeschen-Button auf, langer
-  // Druck oeffnet das Bearbeiten-Sheet.
-  root.querySelectorAll('.shop-item--custom').forEach((el) => {
-    const item = findCustomItemByKey(el.dataset.key);
+  // Druck oeffnet das Bearbeiten-Sheet. Gilt auch fuer Rezept-Zeilen mit
+  // eigenem Anteil — dort beziehen sich beide Aktionen auf diesen Anteil, die
+  // Rezept-Zeile selbst bleibt danach stehen.
+  root.querySelectorAll('[data-custom-id]').forEach((el) => {
+    const item = findCustomItemById(el.dataset.customId);
     if (!item) return;
     attachCustomGestures(el, {
       root,
@@ -454,30 +456,54 @@ const CHECK_MARK = `
 
 function renderRow(item) {
   const checked = state.checkedShopping.has(item.key);
+  // Eigener Anteil an einer Rezept-Zeile: der User hat eine Zutat angelegt, die
+  // diese Woche ohnehin durch ein Gericht auf der Liste steht (consolidate.js).
+  // Die Zeile bleibt eine Rezept-Zeile — sie bekommt nur den Zusatz und die
+  // Gesten, die zum eigenen Anteil gehoeren.
+  const extra = item.customExtra || null;
+  const customId = item.isCustom ? item.id : extra?.id;
+
   const cls = ['shop-item'];
   if (checked) cls.push('shop-item--checked');
   if (item.isLeftover) cls.push('shop-item--leftover');
   if (item.isCustom) cls.push('shop-item--custom');
+  // Traegt die Wisch-Mechanik. Getrennt von --custom, weil die gestrichelte
+  // Kontur nur den rein eigenen Zeilen gehoert: eine verschmolzene Zeile ist in
+  // erster Linie eine Rezept-Zeile.
+  if (customId) cls.push('shop-item--swipe');
+
   // escapeHtml auf Label und Menge: bei eigenen Zutaten ist das User-Text,
   // bei Rezeptzutaten faengt es Sonderzeichen wie "&" in "Rosmarin & Thymian"
   // korrekt ab.
   const qty = formatQuantity(item);
+  // Bewusst getrennt statt addiert: "450 g" und der Freitext "2 Stück" lassen
+  // sich nicht zusammenrechnen, und eine erfundene Summe waere schlechter als
+  // zwei ehrliche Angaben.
+  const extraLine = extra
+    ? `<span class="shop-item__extra">+ ${escapeHtml(extra.qty ? `${extra.qty} eigene` : 'eigene')}</span>`
+    : '';
+
   const body = `
     ${CHECK_MARK}
     <span class="shop-item__body">
       <span class="shop-item__label">${escapeHtml(item.label)}</span>
       <span class="shop-item__qty">${escapeHtml(qty)}</span>
+      ${extraLine}
     </span>`;
 
-  // Eigene Zutaten bekommen eine verschiebbare Oberflaeche, unter der der
-  // Loeschen-Button liegt. Rezeptzutaten behalten das flache Markup — sie
-  // kennen weder Wisch noch Loeschen.
-  if (!item.isCustom) {
+  // Zeilen ohne eigenen Anteil behalten das flache Markup — sie kennen weder
+  // Wisch noch Loeschen.
+  if (!customId) {
     return `<li class="${cls.join(' ')}" data-key="${escapeHtml(item.key)}">${body}</li>`;
   }
 
+  // data-key bleibt der Listen-Key der Zeile (bei verschmolzenen Zeilen also
+  // der Registry-Key) — daran haengt der Haken. Die Custom-ID steht separat,
+  // weil Bearbeiten und Loeschen den eigenen Anteil meinen, nicht die Zeile.
   return `
-    <li class="${cls.join(' ')}" data-key="${escapeHtml(item.key)}">
+    <li class="${cls.join(' ')}"
+        data-key="${escapeHtml(item.key)}"
+        data-custom-id="${escapeHtml(customId)}">
       <span class="shop-item__surface">
         ${body}
         <span class="shop-item__owner" title="Eigene Zutat" aria-label="Eigene Zutat" role="img">${ICON_OWNER}</span>

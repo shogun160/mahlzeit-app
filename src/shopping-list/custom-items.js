@@ -1,5 +1,6 @@
 import { state } from '../state.js';
 import { CAT_ORDER } from './categories.js';
+import { findIngredientKeyByLabel } from './ingredient-search.js';
 
 // Eigene Einkaufslisten-Zutaten: Eintraege, die der User selbst anlegt und die
 // an keinem Gericht haengen ("Klopapier", "Kaffee", "noch Zwiebeln").
@@ -44,13 +45,7 @@ export function customKeyFor(id) {
   return `${CUSTOM_KEY_PREFIX}${id}`;
 }
 
-export function customIdFromKey(key) {
-  return isCustomKey(key) ? key.slice(CUSTOM_KEY_PREFIX.length) : null;
-}
-
-export function findCustomItemByKey(key) {
-  const id = customIdFromKey(key);
-  if (!id) return null;
+export function findCustomItemById(id) {
   return state.customItems.find((it) => it.id === id) || null;
 }
 
@@ -154,7 +149,13 @@ export function removeCheckedCustomItems() {
   const removed = [];
   state.customItems = state.customItems.filter((it) => {
     const key = customKeyFor(it.id);
-    if (!state.checkedShopping.has(key)) return true;
+    // Ist die Zutat mit einer Rezept-Zeile verschmolzen (gleicher Name wie eine
+    // Zutat aus der App-Datenbank), haengt ihr Haken am Registry-Key statt am
+    // custom:-Key. Ohne diese zweite Pruefung ueberlebte sie den Wochenwechsel,
+    // obwohl der User sie abgehakt hat.
+    const ref = findIngredientKeyByLabel(it.label);
+    if (!state.checkedShopping.has(key) && !(ref && state.checkedShopping.has(ref))) return true;
+    // Nur den eigenen Key raeumen — der Registry-Key gehoert der Rezept-Zeile.
     state.checkedShopping.delete(key);
     removed.push(it);
     return false;
@@ -187,6 +188,11 @@ export function recentSuggestions() {
 // Als Consolidated-List-Eintraege. isCustom steuert Rendering (Badge, Gesten)
 // und formatQuantity; sum/unit bleiben leer, weil eigene Zutaten keine
 // Portions-Skalierung durchlaufen.
+//
+// `ref` ist der Key der gleichnamigen Zutat aus der App-Datenbank, sonst null.
+// Bewusst hier abgeleitet statt im State gespeichert: ein gespeicherter Bezug
+// koennte veralten (Remote-Import entfernt eine Zutat) und muesste beim
+// Umbenennen von Hand nachgezogen werden. Abgeleitet stimmt er immer.
 export function customListEntries() {
   return state.customItems.map((it) => ({
     key: customKeyFor(it.id),
@@ -194,6 +200,7 @@ export function customListEntries() {
     label: it.label,
     cat: it.cat,
     qty: it.qty,
+    ref: findIngredientKeyByLabel(it.label),
     sum: 0,
     isCustom: true,
     isLeftover: false,
