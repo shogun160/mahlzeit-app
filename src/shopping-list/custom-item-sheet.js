@@ -6,6 +6,12 @@
 //
 // Die Vorschlags-Chips fuellen nur das Formular, sie legen nichts direkt an —
 // so kann der User einen Vorschlag antippen und die Menge noch anpassen.
+//
+// Waehrend des Tippens blendet sich unter dem Namensfeld die Zutaten-Suche ein
+// (ingredient-search.js): App-Datenbank plus eigene Historie. Sie ersetzt die
+// Chips nicht, sondern ergaenzt sie — die Chips sind der Leerzustand, das
+// Dropdown die Reaktion auf Eingabe. In beiden Modi aktiv: der typische Edit
+// ist die Tippfehler-Korrektur, und genau da hilft die Vervollstaendigung.
 
 import {
   addCustomItem,
@@ -14,9 +20,29 @@ import {
   recentSuggestions,
   DEFAULT_CUSTOM_CAT,
 } from './custom-items.js';
+import { searchIngredients } from './ingredient-search.js';
 import { CAT_ORDER, CAT_LABELS } from './categories.js';
 import { escapeHtml } from '../util/escape.js';
 import { showToast } from '../util/toast.js';
+
+// Fallback-Platzhalter im Mengenfeld: bewusst ein Nicht-Lebensmittel, damit
+// klar ist, dass hier Freitext erlaubt ist und nicht nur Gramm.
+const QTY_PLACEHOLDER = 'z. B. 2 Rollen';
+
+// Nach Auswahl einer DB-Zutat zeigt der Platzhalter deren Einheit — das ist
+// der beste Hinweis darauf, in welcher Groessenordnung der User denken soll.
+// 'vorrat' und 'ei' bleiben beim Default: fuer die gibt es keine sinnvolle
+// Einkaufsmenge, die man vorschlagen koennte.
+function qtyPlaceholderFor(unit) {
+  switch (unit) {
+    case 'g': return 'z. B. 500 g';
+    case 'ml': return 'z. B. 250 ml';
+    case 'stueck': return 'z. B. 2 Stück';
+    case 'bund': return 'z. B. 1 Bund';
+    case 'zehe': return 'z. B. 2 Zehen';
+    default: return QTY_PLACEHOLDER;
+  }
+}
 
 let mountRoot = null;
 let onChangeFn = null;
@@ -25,6 +51,11 @@ let editing = null;
 // Kategorie-Auswahl lebt im Modul, nicht im DOM — Chips werden bei jedem
 // Wechsel neu gezeichnet.
 let selectedCat = DEFAULT_CUSTOM_CAT;
+// Aktueller Stand des Suchdropdowns. hits ist leer, solange nichts getippt
+// wurde; activeIdx ist -1, solange der User nicht mit den Pfeiltasten
+// navigiert hat (dann faengt Enter das Dropdown nicht ab).
+let hits = [];
+let activeIdx = -1;
 
 export function mountCustomItemSheet(root, { onChange }) {
   mountRoot = root;
@@ -35,6 +66,8 @@ export function openCustomItemSheet(item = null) {
   if (!mountRoot) return;
   editing = item;
   selectedCat = item?.cat || DEFAULT_CUSTOM_CAT;
+  hits = [];
+  activeIdx = -1;
   render();
 }
 
@@ -60,13 +93,24 @@ function render() {
         ` : ''}
 
         <label class="custom-item-sheet__label" for="custom-item-label">Zutat</label>
-        <input class="custom-item-sheet__input"
-               id="custom-item-label"
-               type="text"
-               maxlength="60"
-               autocomplete="off"
-               placeholder="z. B. Klopapier"
-               value="${escapeHtml(editing?.label || '')}" />
+        <div class="custom-item-sheet__field">
+          <input class="custom-item-sheet__input"
+                 id="custom-item-label"
+                 type="text"
+                 maxlength="60"
+                 autocomplete="off"
+                 role="combobox"
+                 aria-expanded="false"
+                 aria-autocomplete="list"
+                 aria-controls="custom-item-suggest"
+                 placeholder="z. B. Klopapier"
+                 value="${escapeHtml(editing?.label || '')}" />
+          <ul class="custom-item-suggest"
+              id="custom-item-suggest"
+              role="listbox"
+              aria-label="Zutaten-Vorschläge"
+              hidden></ul>
+        </div>
 
         <label class="custom-item-sheet__label" for="custom-item-qty">Menge <span class="custom-item-sheet__optional">(optional)</span></label>
         <input class="custom-item-sheet__input"
@@ -74,7 +118,7 @@ function render() {
                type="text"
                maxlength="30"
                autocomplete="off"
-               placeholder="z. B. 2 Rollen"
+               placeholder="${QTY_PLACEHOLDER}"
                value="${escapeHtml(editing?.qty || '')}" />
 
         <p class="custom-item-sheet__label">Kategorie</p>
@@ -119,6 +163,7 @@ function render() {
 function wire() {
   const labelInput = mountRoot.querySelector('#custom-item-label');
   const qtyInput = mountRoot.querySelector('#custom-item-qty');
+  const suggestBox = mountRoot.querySelector('#custom-item-suggest');
 
   const readForm = () => ({
     label: labelInput?.value || '',
@@ -155,6 +200,90 @@ function wire() {
     });
   });
 
+  // ---- Zutaten-Suche unter dem Namensfeld ----
+
+  const suggestOpen = () => !!suggestBox && !suggestBox.hidden;
+
+  const closeSuggest = () => {
+    hits = [];
+    activeIdx = -1;
+    if (!suggestBox) return;
+    suggestBox.hidden = true;
+    suggestBox.innerHTML = '';
+    labelInput?.setAttribute('aria-expanded', 'false');
+  };
+
+  // Zeichnet nur die Liste neu — das Namensfeld bleibt unangetastet, sonst
+  // verlaere der User bei jedem Tastendruck seine Cursor-Position.
+  const paintSuggest = () => {
+    if (!suggestBox) return;
+    if (hits.length === 0) {
+      closeSuggest();
+      return;
+    }
+    suggestBox.innerHTML = hits.map((hit, i) => `
+      <li class="custom-item-suggest__option ${i === activeIdx ? 'is-active' : ''}"
+          role="option"
+          aria-selected="${i === activeIdx}"
+          data-hit="${i}">
+        <span class="custom-item-suggest__label">${escapeHtml(hit.label)}</span>
+        <span class="custom-item-suggest__meta">${
+          hit.source === 'recent' ? 'zuletzt genutzt' : escapeHtml(CAT_LABELS[hit.cat] || '')
+        }</span>
+      </li>
+    `).join('');
+    suggestBox.hidden = false;
+    labelInput?.setAttribute('aria-expanded', 'true');
+  };
+
+  // Uebernimmt einen Treffer ins Formular. Fokus geht in die MENGE, nicht
+  // zurueck ins Namensfeld: die Zutat steht ja, offen ist nur noch wieviel.
+  const applyHit = (hit) => {
+    if (!hit) return;
+    if (labelInput) labelInput.value = hit.label;
+    applyCat(hit.cat || DEFAULT_CUSTOM_CAT);
+    if (qtyInput) {
+      // Historie bringt eine gemerkte Menge mit, die DB nicht — dort hilft
+      // stattdessen der Einheiten-Platzhalter.
+      if (hit.qty) qtyInput.value = hit.qty;
+      qtyInput.placeholder = qtyPlaceholderFor(hit.unit);
+    }
+    closeSuggest();
+    qtyInput?.focus();
+  };
+
+  const moveActive = (delta) => {
+    if (hits.length === 0) return;
+    const next = activeIdx + delta;
+    // Ueber den Rand hinaus faellt die Auswahl zurueck auf "keine" — von dort
+    // aus fuehrt der naechste Druck wieder an den jeweiligen Rand.
+    activeIdx = next < -1 ? hits.length - 1 : next >= hits.length ? -1 : next;
+    paintSuggest();
+  };
+
+  // Bewusst nur am input-Event, nicht am focus: beim Bearbeiten steht schon ein
+  // Name im Feld, und ein Dropdown, das sich beim blossen Antippen ueber die
+  // halbe Maske legt, waere im Weg.
+  labelInput?.addEventListener('input', () => {
+    hits = searchIngredients(labelInput.value);
+    activeIdx = -1;
+    paintSuggest();
+  });
+
+  // pointerdown statt click zum Schliessen verhindern: der Standard-Ablauf
+  // waere blur → Liste weg → click landet ins Leere. preventDefault haelt den
+  // Fokus im Feld, der click darunter feuert danach normal.
+  suggestBox?.addEventListener('pointerdown', (ev) => ev.preventDefault());
+  suggestBox?.addEventListener('click', (ev) => {
+    const option = ev.target.closest('[data-hit]');
+    if (!option) return;
+    applyHit(hits[Number(option.dataset.hit)]);
+  });
+
+  // Verlaesst der Fokus das Feld anders als ueber einen Treffer (Tab, Tap auf
+  // die Kategorie-Chips), soll die Liste nicht stehenbleiben.
+  labelInput?.addEventListener('blur', closeSuggest);
+
   const save = () => {
     const fields = readForm();
     if (!fields.label.trim()) {
@@ -176,10 +305,34 @@ function wire() {
   mountRoot.querySelector('[data-action="save"]')?.addEventListener('click', save);
 
   // Enter im Namensfeld springt in die Menge, Enter in der Menge speichert —
-  // eine Tastatur-Bedienung ohne Griff zum Button.
+  // eine Tastatur-Bedienung ohne Griff zum Button. Bei offenem Dropdown gehen
+  // Pfeiltasten, Enter und Escape zuerst an die Vorschlagsliste.
   labelInput?.addEventListener('keydown', (ev) => {
+    if (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') {
+      if (!suggestOpen()) return;
+      ev.preventDefault();
+      moveActive(ev.key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+    if (ev.key === 'Escape') {
+      if (!suggestOpen()) return;
+      // Nur die Liste schliessen, nicht das Sheet: stopPropagation haelt das
+      // Event vom document-Listener fern, der sonst alles zumachte.
+      ev.preventDefault();
+      ev.stopPropagation();
+      closeSuggest();
+      return;
+    }
     if (ev.key !== 'Enter') return;
     ev.preventDefault();
+    // Nur uebernehmen, wenn der User bewusst einen Treffer angesteuert hat.
+    // Ohne Navigation bleibt Enter das gewohnte "weiter zur Menge" — sonst
+    // ueberschriebe es den gerade getippten Namen mit dem ersten Vorschlag.
+    if (suggestOpen() && activeIdx >= 0) {
+      applyHit(hits[activeIdx]);
+      return;
+    }
+    closeSuggest();
     qtyInput?.focus();
   });
   qtyInput?.addEventListener('keydown', (ev) => {
@@ -215,6 +368,8 @@ function handleEsc(ev) {
 function close() {
   document.removeEventListener('keydown', handleEsc);
   editing = null;
+  hits = [];
+  activeIdx = -1;
   // is-open sofort entfernen, damit der Overlay-Blur wegkippt, bevor die
   // Slide-Down-Animation durch ist (siehe util/overlay-blur.js).
   const overlay = mountRoot?.querySelector('.custom-item-overlay');

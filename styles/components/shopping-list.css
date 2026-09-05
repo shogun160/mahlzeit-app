@@ -420,18 +420,36 @@
    abgeleiteten Zeilen ab, ohne sie farblich hervorzuheben — sie sind gleichwertige
    Eintraege, nur anderer Herkunft.
 
-   Das Padding wandert auf .shop-item__surface: die Oberflaeche verschiebt sich
-   beim Wischen und muss den darunterliegenden Loeschen-Button vollstaendig
-   abdecken, auch im Randbereich.
+   Bewusst getrennt von --swipe: eine Rezept-Zeile mit eigenem Anteil ist
+   wischbar, bleibt aber optisch eine Rezept-Zeile (durchgezogene Kontur). */
+.shop-item--custom {
+  border-style: dashed;
+}
+
+/* Wisch-Mechanik. Das Padding wandert auf .shop-item__surface: die Oberflaeche
+   verschiebt sich beim Wischen und muss den darunterliegenden Loeschen-Button
+   vollstaendig abdecken, auch im Randbereich.
 
    touch-action: pan-y ist funktional, nicht kosmetisch: vertikales Scrollen
    bleibt beim Browser, horizontale Bewegung bekommt custom-gestures.js. */
-.shop-item--custom {
-  border-style: dashed;
+.shop-item--swipe {
   touch-action: pan-y;
   position: relative;
   overflow: hidden;
   padding: 0;
+}
+
+/* Eigener Anteil an einer Rezept-Zeile ("+ 2 Stück eigene"). Noch eine Stufe
+   zurueckhaltender als die Menge darueber — es ist ein Zusatz, keine zweite
+   gleichrangige Angabe. */
+.shop-item__extra {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--md-sys-color-on-surface-variant) 80%, transparent);
+  font-variant-numeric: tabular-nums;
+}
+
+.shop-item--checked .shop-item__extra {
+  text-decoration: line-through;
 }
 
 .shop-item__surface {
