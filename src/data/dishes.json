@@ -3461,6 +3461,143 @@
       ],
       "cuisineGroup": "americas",
       "proteinCategory": "shellfish"
+    },
+    {
+      "id": 44,
+      "name": "Bún Thịt Nướng — Zitronengras-Schweinefilet mit Emmer-Nudeln",
+      "cuisine": "Vietnamesisch",
+      "cooktime": 45,
+      "kcal": 1097,
+      "p": 101,
+      "kh": 110,
+      "f": 30,
+      "tags": [
+        "contains-meat",
+        "contains-fish",
+        "contains-gluten",
+        "contains-lactose",
+        "high-protein"
+      ],
+      "ingredients": [
+        {
+          "key": "schweinefilet",
+          "grams": 250,
+          "note": "in ca. 1 cm dicke Medaillons geschnitten"
+        },
+        {
+          "key": "gurke",
+          "grams": 150,
+          "note": "in feine Streifen"
+        },
+        {
+          "key": "skyr",
+          "grams": 150,
+          "note": "für den Kräuter-Dip"
+        },
+        {
+          "key": "edamame",
+          "grams": 100
+        },
+        {
+          "key": "karotte",
+          "grams": 100,
+          "note": "in feine Streifen"
+        },
+        {
+          "key": "mungbohnensprossen",
+          "grams": 80,
+          "note": "gewaschen"
+        },
+        {
+          "key": "vollkornpasta",
+          "grams": 70,
+          "note": "Emmer-Vollkorn, Risoni-Form, Rohgewicht"
+        },
+        {
+          "key": "kopfsalat",
+          "grams": 60,
+          "note": "Romana, in Streifen"
+        },
+        {
+          "key": "limette",
+          "grams": 30,
+          "note": "Saft, für das Nuoc Cham"
+        },
+        {
+          "key": "fischsauce",
+          "grams": 20,
+          "note": "8 g Marinade, 12 g Nuoc Cham"
+        },
+        {
+          "key": "schalotte",
+          "grams": 20,
+          "note": "sehr fein gehackt, für die Marinade"
+        },
+        {
+          "key": "zitrone",
+          "grams": 15,
+          "note": "Saft, für den Dip"
+        },
+        {
+          "key": "zitronengras",
+          "grams": 15,
+          "note": "sehr fein gehackt, nur der zarte Kern"
+        },
+        {
+          "key": "mandeln",
+          "grams": 15,
+          "note": "gehobelt, trocken geröstet"
+        },
+        {
+          "key": "knoblauch",
+          "grams": 13,
+          "note": "10 g Marinade, 3 g Dip"
+        },
+        {
+          "key": "minze",
+          "grams": 12,
+          "note": "8 g in die Bowl, 4 g in den Dip"
+        },
+        {
+          "key": "thai_basilikum",
+          "grams": 10,
+          "note": "7 g in die Bowl, 3 g in den Dip"
+        },
+        {
+          "key": "chili_frisch",
+          "grams": 10,
+          "note": "mit Kernen, für das Nuoc Cham"
+        },
+        {
+          "key": "oel_neutral",
+          "grams": 8,
+          "note": "zum Braten"
+        },
+        {
+          "key": "zucker",
+          "grams": 7,
+          "note": "für das Nuoc Cham"
+        },
+        {
+          "key": "honig",
+          "grams": 5,
+          "note": "für die Marinade"
+        }
+      ],
+      "steps": [
+        "Marinade: Zitronengras, Knoblauch und Schalotte sehr fein hacken, mit Honig und Fischsauce mischen. Schweinefilet in ca. 1 cm dicke Medaillons schneiden und mindestens 30 Min. marinieren — alles Weitere passt in diese Zeit.",
+        "Nuoc Cham: Zucker in etwas warmem Wasser auflösen, Fischsauce, Limettensaft und Chili mit Kernen dazu. Mit Wasser abschmecken, bis es salzig-sauer-süß-scharf balanciert ist.",
+        "Kräuter-Dip: Skyr mit fein gehackter Minze, Thai-Basilikum, gepresstem Knoblauch und Zitronensaft verrühren, salzen.",
+        "Nudeln kochen — die Emmer-Risoni brauchen nur 3–4 Min. Kalt abspülen und mit ein paar Tropfen Öl durchmischen, sonst verkleben sie.",
+        "Edamame direkt aus dem TK in kochendes Salzwasser, 4–5 Min., dann kalt abschrecken.",
+        "Gurke und Karotte in feine Streifen schneiden, Romana in Streifen, Sprossen waschen.",
+        "Mandeln trocken in der Pfanne goldbraun rösten und beiseitestellen.",
+        "Schüssel schichten: Romana und Sprossen nach unten, Nudeln darauf, dann Gurke, Karotte und Edamame.",
+        "Öl stark erhitzen und die Medaillons scharf anbraten. In den letzten ca. 30 Sek. die Hitze runterdrehen, damit der Honig karamellisiert statt bitter zu werden. Kurz ruhen lassen, in Streifen schneiden.",
+        "Das warme Fleisch auf die kalte Bowl geben, Kräuter grob darüberzupfen, geröstete Mandeln obendrauf. Nuoc Cham angießen, Kräuter-Dip daneben, alles durchmischen."
+      ],
+      "cuisineGroup": "asian",
+      "proteinCategory": "pork"
     }
   ]
 }

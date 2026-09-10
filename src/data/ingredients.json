@@ -681,6 +681,19 @@
         "f": 0
       }
     },
+    "zucker": {
+      "label": "Zucker",
+      "cat": "sonstig",
+      "unit": "vorrat",
+      "displayUnit": "tl",
+      "gramsPerUnit": 4,
+      "per100g": {
+        "kcal": 400,
+        "p": 0,
+        "kh": 100,
+        "f": 0
+      }
+    },
     "honig": {
       "label": "Honig",
       "cat": "sonstig",
@@ -1486,6 +1499,17 @@
         "p": 3.2,
         "kh": 2.7,
         "f": 0.6
+      }
+    },
+    "mungbohnensprossen": {
+      "label": "Mungbohnensprossen",
+      "cat": "frisch",
+      "unit": "g",
+      "per100g": {
+        "kcal": 30,
+        "p": 3.2,
+        "kh": 4.1,
+        "f": 0.2
       }
     },
     "rosmarin_thymian": {

@@ -3,7 +3,7 @@
 **Auto-generiert aus `src/data/ingredients.json` — nicht manuell editieren.**
 Neu erzeugen: `node scripts/zutaten-katalog.js`
 
-**159 Zutaten** gesamt, sortiert nach Kategorie.
+**161 Zutaten** gesamt, sortiert nach Kategorie.
 
 ## Vor dem Anlegen einer neuen Zutat
 
@@ -52,7 +52,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `tempeh` | Soja-Tempeh | g | 193 | 19 | 9 | 11 |
 | `tofu_fest` | Tofu, fest | g | 144 | 15.8 | 2.8 | 8.7 |
 
-## Frisch (Gemüse, Kräuter, Obst) (52)
+## Frisch (Gemüse, Kräuter, Obst) (53)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -86,6 +86,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `mais_kolben` | Maiskolben | stueck × 200 g | 108 | 3.3 | 21 | 1.5 |
 | `mango` | Mango | stueck × 300 g | 60 | 0.8 | 15 | 0.4 |
 | `minze` | Minze, frisch | g | 44 | 3.3 | 8.4 | 0.7 |
+| `mungbohnensprossen` | Mungbohnensprossen | g | 30 | 3.2 | 4.1 | 0.2 |
 | `orange` | Orange | stueck × 200 g | 47 | 0.9 | 8.3 | 0.1 |
 | `orangensaft` | Orangensaft | ml | 45 | 0.7 | 10.4 | 0.2 |
 | `pak_choi` | Pak Choi / Bok Choy | stueck × 200 g | 13 | 1.5 | 2.2 | 0.2 |
@@ -178,7 +179,7 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `sesamoel` | Sesamöl | vorrat (tl) | 884 | 0 | 0 | 100 |
 | `tahini` | Tahini | g (el) | 595 | 17 | 21.2 | 53.8 |
 
-## Sonstige (23)
+## Sonstige (24)
 
 | Key | Label | Einheit | kcal/100g | P | KH | F |
 |---|---|---|---:|---:|---:|---:|
@@ -205,3 +206,4 @@ Neu erzeugen: `node scripts/zutaten-katalog.js`
 | `tomaten_stueckig` | Tomaten, stückig (Dose) | g | 27 | 1.5 | 5 | 0.3 |
 | `weisswein_trocken` | Weißwein, trocken (zum Kochen) | ml | 83 | 0.1 | 2.6 | 0 |
 | `zhacai` | Zhacai (eingelegter Senfkohl, in Öl) | g | 220 | 4 | 8 | 20.6 |
+| `zucker` | Zucker | vorrat (tl) | 400 | 0 | 100 | 0 |
